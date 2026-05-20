@@ -18,6 +18,8 @@ RUN mvn clean package -DskipTests -B
 # Stage 2: Run
 FROM eclipse-temurin:21-jre-alpine
 
+# wget already ships with alpine; install nothing else.
+
 # Create non-root user
 RUN addgroup -S spring && adduser -S spring -G spring
 
@@ -29,9 +31,18 @@ RUN chown -R spring:spring /app
 
 USER spring:spring
 
+# Force the app to listen on 8080 so it matches EXPOSE and the healthcheck below,
+# regardless of the SERVER_PORT default in application.yaml.
+ENV SERVER_PORT=8080
+
+# JVM container ergonomics: cap heap at 75% of cgroup memory, lower idle CPU usage.
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom"
+
 EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+# Spring Boot + Flyway can take 30-60s on a cold container; give it 90s grace before
+# the healthcheck starts counting failures.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
   CMD wget -qO- http://localhost:8080/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

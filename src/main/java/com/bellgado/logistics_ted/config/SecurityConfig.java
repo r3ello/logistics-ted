@@ -41,6 +41,7 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers("/", "/index.html", "/map-picker.html",
                                  "/*.css", "/*.js", "/*.png", "/favicon.ico").permitAll()
                 .requestMatchers("/api/**").authenticated()

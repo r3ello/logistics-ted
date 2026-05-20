@@ -45,6 +45,19 @@ routing:
     ttl-seconds: 86400
     max-size: 50000
 
+management:
+  endpoints:
+    web:
+      exposure:
+        # Only expose /actuator/health — nothing else (avoids leaking env, beans, mappings, etc.)
+        include: health
+  endpoint:
+    health:
+      # Container healthcheck only needs liveness; don't gate it on DB readiness or Flyway state.
+      show-details: never
+      probes:
+        enabled: true
+
 server:
   port: ${SERVER_PORT:3002}
   servlet:
