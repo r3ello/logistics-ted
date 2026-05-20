@@ -1,0 +1,1387 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< com.bellgado:logistics-ted >---------------------
+[INFO] Building logistics-ted 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.14:run (default-cli) > test-compile @ logistics-ted >>>
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-devtools/3.5.14/spring-boot-devtools-3.5.14.jar
+Progress (1): 0.9/205 kB
+Progress (1): 2.3/205 kB
+Progress (1): 3.6/205 kB
+Progress (1): 5.0/205 kB
+Progress (1): 6.4/205 kB
+Progress (1): 7.7/205 kB
+Progress (1): 9.1/205 kB
+Progress (1): 10/205 kB 
+Progress (1): 12/205 kB
+Progress (1): 13/205 kB
+Progress (1): 15/205 kB
+Progress (1): 16/205 kB
+Progress (1): 17/205 kB
+Progress (1): 19/205 kB
+Progress (1): 20/205 kB
+Progress (1): 21/205 kB
+Progress (1): 23/205 kB
+Progress (1): 24/205 kB
+Progress (1): 26/205 kB
+Progress (1): 27/205 kB
+Progress (1): 28/205 kB
+Progress (1): 30/205 kB
+Progress (1): 31/205 kB
+Progress (1): 32/205 kB
+Progress (1): 34/205 kB
+Progress (1): 35/205 kB
+Progress (1): 36/205 kB
+Progress (1): 38/205 kB
+Progress (1): 39/205 kB
+Progress (1): 41/205 kB
+Progress (1): 42/205 kB
+Progress (1): 43/205 kB
+Progress (1): 45/205 kB
+Progress (1): 46/205 kB
+Progress (1): 47/205 kB
+Progress (1): 49/205 kB
+Progress (1): 50/205 kB
+Progress (1): 52/205 kB
+Progress (1): 53/205 kB
+Progress (1): 54/205 kB
+Progress (1): 56/205 kB
+Progress (1): 60/205 kB
+Progress (1): 64/205 kB
+Progress (1): 68/205 kB
+Progress (1): 73/205 kB
+Progress (1): 77/205 kB
+Progress (1): 81/205 kB
+Progress (1): 85/205 kB
+Progress (1): 89/205 kB
+Progress (1): 94/205 kB
+Progress (1): 98/205 kB
+Progress (1): 102/205 kB
+Progress (1): 106/205 kB
+Progress (1): 111/205 kB
+Progress (1): 115/205 kB
+Progress (1): 119/205 kB
+Progress (1): 122/205 kB
+Progress (1): 127/205 kB
+Progress (1): 131/205 kB
+Progress (1): 135/205 kB
+Progress (1): 139/205 kB
+Progress (1): 144/205 kB
+Progress (1): 148/205 kB
+Progress (1): 152/205 kB
+Progress (1): 156/205 kB
+Progress (1): 160/205 kB
+Progress (1): 165/205 kB
+Progress (1): 169/205 kB
+Progress (1): 173/205 kB
+Progress (1): 177/205 kB
+Progress (1): 182/205 kB
+Progress (1): 186/205 kB
+Progress (1): 190/205 kB
+Progress (1): 194/205 kB
+Progress (1): 199/205 kB
+Progress (1): 203/205 kB
+Progress (1): 205 kB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-devtools/3.5.14/spring-boot-devtools-3.5.14.jar (205 kB at 472 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-test/3.5.14/spring-boot-starter-test-3.5.14.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test/3.5.14/spring-boot-test-3.5.14.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test-autoconfigure/3.5.14/spring-boot-test-autoconfigure-3.5.14.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/6.2.18/spring-test-6.2.18.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/security/spring-security-test/6.5.10/spring-security-test-6.5.10.jar
+Progress (1): 3.8/4.8 kB
+Progress (1): 4.8 kB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-test/3.5.14/spring-boot-starter-test-3.5.14.jar (4.8 kB at 98 kB/s)
+Progress (1): 0.9/230 kB
+Progress (1): 2.3/230 kB
+Progress (1): 3.6/230 kB
+Progress (1): 5.0/230 kB
+Progress (1): 6.4/230 kB
+Progress (1): 7.7/230 kB
+Progress (1): 9.1/230 kB
+Progress (1): 10/230 kB 
+Progress (1): 12/230 kB
+Progress (1): 13/230 kB
+Progress (1): 15/230 kB
+Progress (1): 16/230 kB
+Progress (1): 17/230 kB
+Progress (1): 19/230 kB
+Progress (1): 20/230 kB
+Progress (1): 21/230 kB
+Progress (1): 23/230 kB
+Progress (1): 24/230 kB
+Progress (1): 25/230 kB
+Progress (1): 26/230 kB
+Progress (1): 27/230 kB
+Progress (1): 29/230 kB
+Progress (1): 30/230 kB
+Progress (1): 31/230 kB
+Progress (1): 33/230 kB
+Progress (1): 34/230 kB
+Progress (1): 36/230 kB
+Progress (1): 37/230 kB
+Progress (1): 38/230 kB
+Progress (1): 40/230 kB
+Progress (1): 41/230 kB
+Progress (2): 41/230 kB | 0/1.0 MB
+Progress (2): 42/230 kB | 0/1.0 MB
+Progress (2): 44/230 kB | 0/1.0 MB
+Progress (2): 44/230 kB | 0/1.0 MB
+Progress (2): 45/230 kB | 0/1.0 MB
+Progress (2): 46/230 kB | 0/1.0 MB
+Progress (2): 48/230 kB | 0/1.0 MB
+Progress (2): 49/230 kB | 0/1.0 MB
+Progress (2): 51/230 kB | 0/1.0 MB
+Progress (2): 52/230 kB | 0/1.0 MB
+Progress (2): 53/230 kB | 0/1.0 MB
+Progress (2): 53/230 kB | 0/1.0 MB
+Progress (2): 55/230 kB | 0/1.0 MB
+Progress (2): 55/230 kB | 0/1.0 MB
+Progress (2): 55/230 kB | 0/1.0 MB
+Progress (2): 59/230 kB | 0/1.0 MB
+Progress (2): 59/230 kB | 0/1.0 MB
+Progress (2): 63/230 kB | 0/1.0 MB
+Progress (2): 63/230 kB | 0/1.0 MB
+Progress (2): 63/230 kB | 0/1.0 MB
+Progress (2): 67/230 kB | 0/1.0 MB
+Progress (2): 67/230 kB | 0/1.0 MB
+Progress (2): 67/230 kB | 0/1.0 MB
+Progress (2): 72/230 kB | 0/1.0 MB
+Progress (2): 72/230 kB | 0/1.0 MB
+Progress (2): 72/230 kB | 0/1.0 MB
+Progress (2): 76/230 kB | 0/1.0 MB
+Progress (2): 76/230 kB | 0/1.0 MB
+Progress (2): 80/230 kB | 0/1.0 MB
+Progress (2): 80/230 kB | 0/1.0 MB
+Progress (2): 80/230 kB | 0/1.0 MB
+Progress (2): 84/230 kB | 0/1.0 MB
+Progress (2): 84/230 kB | 0/1.0 MB
+Progress (2): 89/230 kB | 0/1.0 MB
+Progress (2): 89/230 kB | 0/1.0 MB
+Progress (2): 89/230 kB | 0/1.0 MB
+Progress (2): 93/230 kB | 0/1.0 MB
+Progress (2): 93/230 kB | 0/1.0 MB
+Progress (2): 93/230 kB | 0/1.0 MB
+Progress (2): 97/230 kB | 0/1.0 MB
+Progress (2): 97/230 kB | 0/1.0 MB
+Progress (2): 101/230 kB | 0/1.0 MB
+Progress (2): 101/230 kB | 0/1.0 MB
+Progress (2): 101/230 kB | 0/1.0 MB
+Progress (2): 105/230 kB | 0/1.0 MB
+Progress (2): 105/230 kB | 0/1.0 MB
+Progress (2): 110/230 kB | 0/1.0 MB
+Progress (2): 110/230 kB | 0/1.0 MB
+Progress (2): 110/230 kB | 0/1.0 MB
+Progress (2): 110/230 kB | 0/1.0 MB
+Progress (2): 110/230 kB | 0/1.0 MB
+Progress (2): 110/230 kB | 0/1.0 MB
+Progress (2): 110/230 kB | 0/1.0 MB
+Progress (2): 114/230 kB | 0/1.0 MB
+Progress (2): 114/230 kB | 0/1.0 MB
+Progress (2): 114/230 kB | 0/1.0 MB
+Progress (2): 118/230 kB | 0/1.0 MB
+Progress (2): 118/230 kB | 0/1.0 MB
+Progress (2): 122/230 kB | 0/1.0 MB
+Progress (2): 122/230 kB | 0/1.0 MB
+Progress (2): 122/230 kB | 0/1.0 MB
+Progress (2): 127/230 kB | 0/1.0 MB
+Progress (2): 127/230 kB | 0/1.0 MB
+Progress (2): 127/230 kB | 0/1.0 MB
+Progress (2): 131/230 kB | 0/1.0 MB
+Progress (2): 131/230 kB | 0.1/1.0 MB
+Progress (2): 131/230 kB | 0.1/1.0 MB
+Progress (2): 131/230 kB | 0.1/1.0 MB
+Progress (2): 131/230 kB | 0.1/1.0 MB
+Progress (2): 131/230 kB | 0.1/1.0 MB
+Progress (2): 131/230 kB | 0.1/1.0 MB
+Progress (2): 135/230 kB | 0.1/1.0 MB
+Progress (2): 139/230 kB | 0.1/1.0 MB
+Progress (2): 139/230 kB | 0.1/1.0 MB
+Progress (2): 144/230 kB | 0.1/1.0 MB
+Progress (2): 144/230 kB | 0.1/1.0 MB
+Progress (2): 148/230 kB | 0.1/1.0 MB
+Progress (2): 148/230 kB | 0.1/1.0 MB
+Progress (2): 152/230 kB | 0.1/1.0 MB
+Progress (2): 152/230 kB | 0.1/1.0 MB
+Progress (3): 152/230 kB | 0.1/1.0 MB | 0.9/258 kB
+Progress (3): 156/230 kB | 0.1/1.0 MB | 0.9/258 kB
+Progress (3): 156/230 kB | 0.1/1.0 MB | 0.9/258 kB
+Progress (3): 160/230 kB | 0.1/1.0 MB | 0.9/258 kB
+Progress (3): 160/230 kB | 0.1/1.0 MB | 0.9/258 kB
+Progress (3): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB
+Progress (3): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB
+Progress (3): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB
+Progress (3): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB
+Progress (3): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 1.4/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 1.4/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 2.7/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 2.7/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 4.1/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 5.5/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 5.5/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 6.8/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 6.8/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 0.9/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 2.3/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 2.3/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 3.6/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 3.6/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 5.0/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 6.4/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 6.4/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 7.7/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 7.7/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 9.1/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 10/258 kB | 8.2/136 kB 
+Progress (4): 164/230 kB | 0.1/1.0 MB | 10/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.1/1.0 MB | 12/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 12/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 13/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 15/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 15/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 16/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 16/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 17/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 17/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 19/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 19/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 20/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 21/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 21/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 23/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 23/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 24/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 24/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 25/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 26/258 kB | 8.2/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 26/258 kB | 9.6/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 26/258 kB | 9.6/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 27/258 kB | 9.6/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 27/258 kB | 11/136 kB 
+Progress (4): 164/230 kB | 0.2/1.0 MB | 29/258 kB | 11/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 29/258 kB | 11/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 29/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 30/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 30/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 31/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 31/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 33/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 33/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 34/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 36/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 36/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 37/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 37/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 38/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 40/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 40/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 41/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 41/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 42/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 44/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 44/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 45/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 46/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 48/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 49/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 49/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 51/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 52/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 53/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 55/258 kB | 12/136 kB
+Progress (4): 164/230 kB | 0.2/1.0 MB | 55/258 kB | 14/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 55/258 kB | 14/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 55/258 kB | 15/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 59/258 kB | 15/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 59/258 kB | 16/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 59/258 kB | 18/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 63/258 kB | 18/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 63/258 kB | 19/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 63/258 kB | 19/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 67/258 kB | 19/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 67/258 kB | 21/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 67/258 kB | 22/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 72/258 kB | 22/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 72/258 kB | 23/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 72/258 kB | 23/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 72/258 kB | 25/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 76/258 kB | 25/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 76/258 kB | 26/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 76/258 kB | 26/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 80/258 kB | 26/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 80/258 kB | 27/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 80/258 kB | 29/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 84/258 kB | 29/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 84/258 kB | 30/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 84/258 kB | 31/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 89/258 kB | 31/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 89/258 kB | 33/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 93/258 kB | 33/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 93/258 kB | 33/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 93/258 kB | 34/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 93/258 kB | 36/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 97/258 kB | 36/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 97/258 kB | 37/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 101/258 kB | 37/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 101/258 kB | 38/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 101/258 kB | 38/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 105/258 kB | 38/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 105/258 kB | 40/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 110/258 kB | 40/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 110/258 kB | 41/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 110/258 kB | 42/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 110/258 kB | 42/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 114/258 kB | 42/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 114/258 kB | 44/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 114/258 kB | 45/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 118/258 kB | 45/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 118/258 kB | 47/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 118/258 kB | 48/136 kB
+Progress (4): 164/230 kB | 0.3/1.0 MB | 122/258 kB | 48/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 122/258 kB | 48/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 123/258 kB | 48/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 123/258 kB | 49/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 123/258 kB | 51/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 127/258 kB | 51/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 127/258 kB | 52/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 131/258 kB | 52/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 131/258 kB | 52/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 131/258 kB | 53/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 131/258 kB | 55/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 131/258 kB | 59/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 136/258 kB | 59/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 136/258 kB | 59/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 136/258 kB | 63/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 140/258 kB | 63/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 140/258 kB | 67/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 144/258 kB | 67/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 144/258 kB | 67/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 144/258 kB | 72/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 148/258 kB | 72/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 148/258 kB | 76/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 152/258 kB | 76/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 152/258 kB | 80/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 152/258 kB | 80/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 157/258 kB | 80/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 157/258 kB | 84/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 161/258 kB | 84/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 161/258 kB | 89/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 165/258 kB | 89/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 165/258 kB | 89/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 165/258 kB | 93/136 kB
+Progress (4): 164/230 kB | 0.4/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.5/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.5/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.5/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.5/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.5/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.5/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.6/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.6/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.6/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.6/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.6/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.6/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.7/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.7/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.7/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.7/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.7/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.7/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.7/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 97/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 101/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 105/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 110/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 114/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 118/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 122/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 127/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 131/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 135/136 kB
+Progress (4): 164/230 kB | 0.8/1.0 MB | 165/258 kB | 136 kB    
+                                                           
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/security/spring-security-test/6.5.10/spring-security-test-6.5.10.jar (136 kB at 810 kB/s)
+Progress (3): 164/230 kB | 0.8/1.0 MB | 169/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 174/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 178/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 182/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 186/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 191/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 195/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 199/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 203/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 207/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 212/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 216/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 220/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 237/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 253/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 254/258 kB
+Progress (3): 164/230 kB | 0.8/1.0 MB | 258 kB    
+                                              
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test/3.5.14/spring-boot-test-3.5.14.jar (258 kB at 1.4 MB/s)
+Progress (2): 168/230 kB | 0.8/1.0 MB
+Progress (2): 173/230 kB | 0.8/1.0 MB
+Progress (2): 177/230 kB | 0.8/1.0 MB
+Progress (2): 181/230 kB | 0.8/1.0 MB
+Progress (2): 185/230 kB | 0.8/1.0 MB
+Progress (2): 189/230 kB | 0.8/1.0 MB
+Progress (2): 194/230 kB | 0.8/1.0 MB
+Progress (2): 198/230 kB | 0.8/1.0 MB
+Progress (2): 202/230 kB | 0.8/1.0 MB
+Progress (2): 206/230 kB | 0.8/1.0 MB
+Progress (2): 211/230 kB | 0.8/1.0 MB
+Progress (2): 215/230 kB | 0.8/1.0 MB
+Progress (2): 219/230 kB | 0.8/1.0 MB
+Progress (2): 223/230 kB | 0.8/1.0 MB
+Progress (2): 230 kB | 0.8/1.0 MB    
+                                 
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test-autoconfigure/3.5.14/spring-boot-test-autoconfigure-3.5.14.jar (230 kB at 1.2 MB/s)
+Progress (1): 0.8/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 0.9/1.0 MB
+Progress (1): 1.0/1.0 MB
+Progress (1): 1.0/1.0 MB
+Progress (1): 1.0/1.0 MB
+Progress (1): 1.0/1.0 MB
+Progress (1): 1.0/1.0 MB
+Progress (1): 1.0 MB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/6.2.18/spring-test-6.2.18.jar (1.0 MB at 3.1 MB/s)
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ logistics-ted ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 9 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ logistics-ted ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ logistics-ted ---
+[INFO] skip non existing resourceDirectory D:\Work\tedhouse\logistics-ted\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ logistics-ted ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target\test-classes
+[INFO] 
+[INFO] <<< spring-boot:3.5.14:run (default-cli) < test-compile @ logistics-ted <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.14:run (default-cli) @ logistics-ted ---
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/3.5.14/spring-boot-buildpack-platform-3.5.14.pom
+Progress (1): 971 B
+Progress (1): 3.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/3.5.14/spring-boot-buildpack-platform-3.5.14.pom (3.2 kB at 75 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/3.5.14/spring-boot-loader-tools-3.5.14.pom
+Progress (1): 1.0 kB
+Progress (1): 2.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/3.5.14/spring-boot-loader-tools-3.5.14.pom (2.2 kB at 52 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/3.5.14/spring-boot-buildpack-platform-3.5.14.jar
+Progress (1): 7.7/324 kB
+Progress (1): 16/324 kB 
+Progress (1): 25/324 kB
+Progress (1): 41/324 kB
+Progress (1): 57/324 kB
+Progress (1): 74/324 kB
+Progress (1): 90/324 kB
+Progress (1): 106/324 kB
+Progress (1): 123/324 kB
+Progress (1): 139/324 kB
+Progress (1): 156/324 kB
+Progress (1): 172/324 kB
+Progress (1): 188/324 kB
+Progress (1): 205/324 kB
+Progress (1): 221/324 kB
+Progress (1): 238/324 kB
+Progress (1): 254/324 kB
+Progress (1): 270/324 kB
+Progress (1): 287/324 kB
+Progress (1): 303/324 kB
+Progress (1): 319/324 kB
+Progress (1): 324 kB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/3.5.14/spring-boot-buildpack-platform-3.5.14.jar (324 kB at 2.5 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/3.5.14/spring-boot-loader-tools-3.5.14.jar
+Progress (1): 7.7/466 kB
+Progress (1): 16/466 kB 
+Progress (1): 24/466 kB
+Progress (1): 40/466 kB
+Progress (1): 57/466 kB
+Progress (1): 73/466 kB
+Progress (1): 90/466 kB
+Progress (1): 106/466 kB
+Progress (1): 122/466 kB
+Progress (1): 139/466 kB
+Progress (1): 155/466 kB
+Progress (1): 172/466 kB
+Progress (1): 188/466 kB
+Progress (1): 204/466 kB
+Progress (1): 221/466 kB
+Progress (1): 233/466 kB
+Progress (1): 250/466 kB
+Progress (1): 266/466 kB
+Progress (1): 282/466 kB
+Progress (1): 299/466 kB
+Progress (1): 315/466 kB
+Progress (1): 331/466 kB
+Progress (1): 348/466 kB
+Progress (1): 364/466 kB
+Progress (1): 381/466 kB
+Progress (1): 397/466 kB
+Progress (1): 413/466 kB
+Progress (1): 430/466 kB
+Progress (1): 446/466 kB
+Progress (1): 452/466 kB
+Progress (1): 466 kB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/3.5.14/spring-boot-loader-tools-3.5.14.jar (466 kB at 3.3 MB/s)
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-05-19T17:57:46.311Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Starting LogisticsTedApplication using Java 21.0.9 with PID 13436 (D:\Work\tedhouse\logistics-ted\target\classes started by ralph in D:\Work\tedhouse\logistics-ted)
+2026-05-19T17:57:46.313Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-05-19T17:57:46.360Z  INFO 13436 --- [logistics-ted] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-05-19T17:57:46.360Z  INFO 13436 --- [logistics-ted] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-05-19T17:57:47.046Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-19T17:57:47.116Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 59 ms. Found 6 JPA repository interfaces.
+2026-05-19T17:57:47.715Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-05-19T17:57:47.726Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-19T17:57:47.726Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-05-19T17:57:47.774Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-19T17:57:47.774Z  INFO 13436 --- [logistics-ted] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1413 ms
+2026-05-19T17:57:48.018Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-19T17:57:48.537Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@256aa92a
+2026-05-19T17:57:48.539Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-19T17:57:48.598Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://panel.bellgado.com:3295/ted_logistic (PostgreSQL 17.10)
+2026-05-19T17:57:49.225Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+2026-05-19T17:57:49.266Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.231s)
+2026-05-19T17:57:49.559Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.Flyway                 : All configured schemas are empty; baseline operation skipped. A baseline or migration script with a lower version than the baseline version may execute if available. Check the Schemas parameter if this is not intended.
+2026-05-19T17:57:49.660Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+2026-05-19T17:57:50.296Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2026-05-19T17:57:50.403Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - schema"
+2026-05-19T17:57:51.422Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "2 - seed"
+2026-05-19T17:57:51.520Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.c.i.s.DefaultSqlScriptExecutor       : +--------+
+| setval |
++--------+
+| 4      |
++--------+
+
+2026-05-19T17:57:51.586Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.c.i.s.DefaultSqlScriptExecutor       : +--------+
+| setval |
++--------+
+| 17     |
++--------+
+
+2026-05-19T17:57:51.655Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.c.i.s.DefaultSqlScriptExecutor       : +--------+
+| setval |
++--------+
+| 17     |
++--------+
+
+2026-05-19T17:57:51.727Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.c.i.s.DefaultSqlScriptExecutor       : +--------+
+| setval |
++--------+
+| 44     |
++--------+
+
+2026-05-19T17:57:51.799Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.c.i.s.DefaultSqlScriptExecutor       : +--------+
+| setval |
++--------+
+| 6      |
++--------+
+
+2026-05-19T17:57:51.878Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.c.i.s.DefaultSqlScriptExecutor       : +--------+
+| setval |
++--------+
+| 2      |
++--------+
+
+2026-05-19T17:57:52.327Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Successfully applied 2 migrations to schema "public", now at version v2 (execution time 00:01.043s)
+2026-05-19T17:57:52.639Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-19T17:57:52.685Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-05-19T17:57:52.714Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-19T17:57:52.958Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-19T17:57:53.053Z  WARN 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-19T17:57:53.128Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.10
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-19T17:57:53.931Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-19T17:57:54.367Z  INFO 13436 --- [logistics-ted] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T17:57:54.733Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-19T17:57:55.258Z  INFO 13436 --- [logistics-ted] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name appUserDetailsService
+2026-05-19T17:57:55.391Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-05-19T17:57:55.793Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-05-19T17:57:55.823Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 3000 (http) with context path '/'
+2026-05-19T17:57:55.831Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Started LogisticsTedApplication in 10.02 seconds (process running for 10.457)
+2026-05-19T17:59:02.088Z  INFO 13436 --- [logistics-ted] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 2 class path changes (0 additions, 1 deletion, 1 modification)
+2026-05-19T17:59:02.092Z  INFO 13436 --- [logistics-ted] [       Thread-5] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-19T17:59:02.099Z  INFO 13436 --- [logistics-ted] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-05-19T17:59:02.104Z  INFO 13436 --- [logistics-ted] [       Thread-5] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T17:59:02.109Z  INFO 13436 --- [logistics-ted] [       Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-05-19T17:59:02.114Z  INFO 13436 --- [logistics-ted] [       Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-05-19T17:59:02.218Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Starting LogisticsTedApplication using Java 21.0.9 with PID 13436 (D:\Work\tedhouse\logistics-ted\target\classes started by ralph in D:\Work\tedhouse\logistics-ted)
+2026-05-19T17:59:02.219Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-05-19T17:59:02.592Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-19T17:59:02.636Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42 ms. Found 6 JPA repository interfaces.
+2026-05-19T17:59:02.902Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-05-19T17:59:02.903Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-19T17:59:02.904Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-05-19T17:59:02.943Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-19T17:59:02.944Z  INFO 13436 --- [logistics-ted] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 722 ms
+2026-05-19T17:59:03.060Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-05-19T17:59:03.522Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@479147ab
+2026-05-19T17:59:03.523Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-05-19T17:59:03.563Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://panel.bellgado.com:3295/ted_logistic (PostgreSQL 17.10)
+2026-05-19T17:59:04.352Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.161s)
+2026-05-19T17:59:04.827Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 2
+2026-05-19T17:59:04.860Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-05-19T17:59:05.124Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-19T17:59:05.129Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-19T17:59:05.178Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-19T17:59:05.222Z  WARN 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-19T17:59:05.287Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-2)']
+	Database driver: undefined/unknown
+	Database version: 17.10
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-19T17:59:05.729Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-19T17:59:05.896Z  INFO 13436 --- [logistics-ted] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T17:59:06.247Z  INFO 13436 --- [logistics-ted] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name appUserDetailsService
+2026-05-19T17:59:06.313Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-05-19T17:59:06.558Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-05-19T17:59:06.571Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 3000 (http) with context path '/'
+2026-05-19T17:59:06.575Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Started LogisticsTedApplication in 4.4 seconds (process running for 81.202)
+2026-05-19T17:59:06.577Z  INFO 13436 --- [logistics-ted] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-05-19T17:59:08.022Z  INFO 13436 --- [logistics-ted] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (1 addition, 0 deletions, 0 modifications)
+2026-05-19T17:59:08.026Z  INFO 13436 --- [logistics-ted] [       Thread-7] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-19T17:59:08.037Z  INFO 13436 --- [logistics-ted] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-05-19T17:59:08.041Z  INFO 13436 --- [logistics-ted] [       Thread-7] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T17:59:08.042Z  INFO 13436 --- [logistics-ted] [       Thread-7] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown initiated...
+2026-05-19T17:59:08.044Z  INFO 13436 --- [logistics-ted] [       Thread-7] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-05-19T17:59:08.212Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Starting LogisticsTedApplication using Java 21.0.9 with PID 13436 (D:\Work\tedhouse\logistics-ted\target\classes started by ralph in D:\Work\tedhouse\logistics-ted)
+2026-05-19T17:59:08.213Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-05-19T17:59:08.704Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-19T17:59:08.742Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 37 ms. Found 6 JPA repository interfaces.
+2026-05-19T17:59:09.050Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-05-19T17:59:09.051Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-19T17:59:09.052Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-05-19T17:59:09.144Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-19T17:59:09.144Z  INFO 13436 --- [logistics-ted] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 928 ms
+2026-05-19T17:59:09.309Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-05-19T17:59:09.695Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection org.postgresql.jdbc.PgConnection@a83a272
+2026-05-19T17:59:09.695Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-05-19T17:59:09.731Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://panel.bellgado.com:3295/ted_logistic (PostgreSQL 17.10)
+2026-05-19T17:59:10.285Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.174s)
+2026-05-19T17:59:11.087Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 2
+2026-05-19T17:59:11.119Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-05-19T17:59:11.425Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-19T17:59:11.428Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-19T17:59:11.444Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-19T17:59:11.489Z  WARN 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-19T17:59:11.553Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-3)']
+	Database driver: undefined/unknown
+	Database version: 17.10
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-19T17:59:11.772Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-19T17:59:11.908Z  INFO 13436 --- [logistics-ted] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T17:59:12.256Z  INFO 13436 --- [logistics-ted] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name appUserDetailsService
+2026-05-19T17:59:12.317Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-05-19T17:59:12.546Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-05-19T17:59:12.557Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 3000 (http) with context path '/'
+2026-05-19T17:59:12.560Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Started LogisticsTedApplication in 4.405 seconds (process running for 87.187)
+2026-05-19T17:59:12.561Z  INFO 13436 --- [logistics-ted] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-05-19T18:07:45.134Z  INFO 13436 --- [logistics-ted] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 46 class path changes (0 additions, 45 deletions, 1 modification)
+2026-05-19T18:07:45.136Z  INFO 13436 --- [logistics-ted] [      Thread-11] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-19T18:07:45.143Z  INFO 13436 --- [logistics-ted] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-05-19T18:07:45.146Z  INFO 13436 --- [logistics-ted] [      Thread-11] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:07:45.147Z  INFO 13436 --- [logistics-ted] [      Thread-11] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown initiated...
+2026-05-19T18:07:45.150Z  INFO 13436 --- [logistics-ted] [      Thread-11] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-05-19T18:07:45.269Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Starting LogisticsTedApplication using Java 21.0.9 with PID 13436 (D:\Work\tedhouse\logistics-ted\target\classes started by ralph in D:\Work\tedhouse\logistics-ted)
+2026-05-19T18:07:45.270Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-05-19T18:07:45.446Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-19T18:07:45.447Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-05-19T18:07:45.566Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-05-19T18:07:45.568Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-19T18:07:45.568Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-05-19T18:07:45.592Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-19T18:07:45.593Z  INFO 13436 --- [logistics-ted] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 320 ms
+2026-05-19T18:07:45.636Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2026-05-19T18:07:46.010Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@5aac7bc8
+2026-05-19T18:07:46.010Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2026-05-19T18:07:46.043Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://panel.bellgado.com:3295/ted_logistic (PostgreSQL 17.10)
+2026-05-19T18:07:46.771Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.274s)
+2026-05-19T18:07:47.355Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 2
+2026-05-19T18:07:47.386Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-05-19T18:07:47.601Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-19T18:07:47.603Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-19T18:07:47.608Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-19T18:07:47.645Z  WARN 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-19T18:07:47.750Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-4)']
+	Database driver: undefined/unknown
+	Database version: 17.10
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-19T18:07:47.764Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-19T18:07:47.764Z  INFO 13436 --- [logistics-ted] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:07:47.788Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-05-19T18:07:47.874Z  WARN 13436 --- [logistics-ted] [  restartedMain] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: aad0bbfe-60b7-4630-843d-78e77c2b2531
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-05-19T18:07:47.876Z  INFO 13436 --- [logistics-ted] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-05-19T18:07:47.903Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-05-19T18:07:47.910Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 3000 (http) with context path '/'
+2026-05-19T18:07:47.913Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Started LogisticsTedApplication in 2.676 seconds (process running for 602.539)
+2026-05-19T18:07:47.915Z  INFO 13436 --- [logistics-ted] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration.SecurityFilterChainConfiguration matched:
+      - AllNestedConditions 2 matched 0 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) did not find any beans; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   UserDetailsServiceAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - AnyNestedCondition 1 matched 2 did not; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'spring.security.user.password'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'spring.security.user.name'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured)
+      - @ConditionalOnBean (types: org.springframework.security.config.ObjectPostProcessor; SearchStrategy: all) found beans 'objectPostProcessor', 'webAuthorizationManagerPostProcessor', 'filterChainDecoratorPostProcessor', 'authenticationManagerPostProcessor'; @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.authentication.AuthenticationManagerResolver,org.springframework.security.oauth2.jwt.JwtDecoder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+
+Negative matches:
+-----------------
+
+    None
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-05-19T18:07:49.362Z  INFO 13436 --- [logistics-ted] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 45 class path changes (45 additions, 0 deletions, 0 modifications)
+2026-05-19T18:07:49.363Z  INFO 13436 --- [logistics-ted] [      Thread-15] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-19T18:07:49.368Z  INFO 13436 --- [logistics-ted] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-05-19T18:07:49.369Z  INFO 13436 --- [logistics-ted] [      Thread-15] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:07:49.370Z  INFO 13436 --- [logistics-ted] [      Thread-15] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown initiated...
+2026-05-19T18:07:49.372Z  INFO 13436 --- [logistics-ted] [      Thread-15] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-05-19T18:07:49.443Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Starting LogisticsTedApplication using Java 21.0.9 with PID 13436 (D:\Work\tedhouse\logistics-ted\target\classes started by ralph in D:\Work\tedhouse\logistics-ted)
+2026-05-19T18:07:49.443Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-05-19T18:07:49.824Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-19T18:07:49.842Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 18 ms. Found 6 JPA repository interfaces.
+2026-05-19T18:07:49.934Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-05-19T18:07:49.935Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-19T18:07:49.935Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-05-19T18:07:49.957Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-19T18:07:49.957Z  INFO 13436 --- [logistics-ted] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 513 ms
+2026-05-19T18:07:50.006Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Starting...
+2026-05-19T18:07:50.358Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-5 - Added connection org.postgresql.jdbc.PgConnection@4854424d
+2026-05-19T18:07:50.358Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Start completed.
+2026-05-19T18:07:50.394Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://panel.bellgado.com:3295/ted_logistic (PostgreSQL 17.10)
+2026-05-19T18:07:51.115Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.157s)
+2026-05-19T18:07:51.835Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 2
+2026-05-19T18:07:51.872Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-05-19T18:07:52.574Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-19T18:07:52.576Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-19T18:07:52.583Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-19T18:07:52.761Z  WARN 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-19T18:07:52.978Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-5)']
+	Database driver: undefined/unknown
+	Database version: 17.10
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-19T18:07:53.041Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-19T18:07:53.532Z  INFO 13436 --- [logistics-ted] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:07:53.671Z  INFO 13436 --- [logistics-ted] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name appUserDetailsService
+2026-05-19T18:07:53.712Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-05-19T18:07:53.890Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-05-19T18:07:53.898Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 3000 (http) with context path '/'
+2026-05-19T18:07:53.900Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Started LogisticsTedApplication in 4.474 seconds (process running for 608.527)
+2026-05-19T18:07:53.901Z  INFO 13436 --- [logistics-ted] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+    None
+
+
+Negative matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration.SecurityFilterChainConfiguration:
+      Did not match:
+         - AllNestedConditions 1 matched 1 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) found beans of type 'org.springframework.security.web.SecurityFilterChain' securityFilterChain; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   UserDetailsServiceAutoConfiguration:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.authentication.AuthenticationManagerResolver,org.springframework.security.oauth2.jwt.JwtDecoder; SearchStrategy: all) found beans of type 'org.springframework.security.authentication.AuthenticationManager' authenticationManager and found beans of type 'org.springframework.security.core.userdetails.UserDetailsService' appUserDetailsService (OnBeanCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+         - found 'session' scope (OnWebApplicationCondition)
+         - AnyNestedCondition 1 matched 2 did not; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'spring.security.user.password'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'spring.security.user.name'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-05-19T18:08:31.359Z  INFO 13436 --- [logistics-ted] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 46 class path changes (0 additions, 45 deletions, 1 modification)
+2026-05-19T18:08:31.360Z  INFO 13436 --- [logistics-ted] [      Thread-19] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-19T18:08:31.365Z  INFO 13436 --- [logistics-ted] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-05-19T18:08:31.366Z  INFO 13436 --- [logistics-ted] [      Thread-19] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:08:31.367Z  INFO 13436 --- [logistics-ted] [      Thread-19] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown initiated...
+2026-05-19T18:08:31.369Z  INFO 13436 --- [logistics-ted] [      Thread-19] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-05-19T18:08:31.447Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Starting LogisticsTedApplication using Java 21.0.9 with PID 13436 (D:\Work\tedhouse\logistics-ted\target\classes started by ralph in D:\Work\tedhouse\logistics-ted)
+2026-05-19T18:08:31.447Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-05-19T18:08:31.567Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-19T18:08:31.568Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-05-19T18:08:31.632Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-05-19T18:08:31.633Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-19T18:08:31.633Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-05-19T18:08:31.656Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-19T18:08:31.656Z  INFO 13436 --- [logistics-ted] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 207 ms
+2026-05-19T18:08:31.683Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Starting...
+2026-05-19T18:08:32.027Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-6 - Added connection org.postgresql.jdbc.PgConnection@59d81f45
+2026-05-19T18:08:32.028Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Start completed.
+2026-05-19T18:08:32.062Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://panel.bellgado.com:3295/ted_logistic (PostgreSQL 17.10)
+2026-05-19T18:08:32.581Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.139s)
+2026-05-19T18:08:33.037Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 2
+2026-05-19T18:08:33.081Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-05-19T18:08:33.292Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-19T18:08:33.295Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-19T18:08:33.305Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-19T18:08:33.345Z  WARN 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-19T18:08:33.410Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-6)']
+	Database driver: undefined/unknown
+	Database version: 17.10
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-19T18:08:33.430Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-19T18:08:33.431Z  INFO 13436 --- [logistics-ted] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:08:33.460Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-05-19T18:08:33.544Z  WARN 13436 --- [logistics-ted] [  restartedMain] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 98c0fd33-0731-45a8-bea2-72bb772f127b
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-05-19T18:08:33.545Z  INFO 13436 --- [logistics-ted] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-05-19T18:08:33.570Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-05-19T18:08:33.582Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 3000 (http) with context path '/'
+2026-05-19T18:08:33.587Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Started LogisticsTedApplication in 2.162 seconds (process running for 648.214)
+2026-05-19T18:08:33.589Z  INFO 13436 --- [logistics-ted] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration.SecurityFilterChainConfiguration matched:
+      - AllNestedConditions 2 matched 0 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) did not find any beans; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   UserDetailsServiceAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - AnyNestedCondition 1 matched 2 did not; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'spring.security.user.password'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'spring.security.user.name'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured)
+      - @ConditionalOnBean (types: org.springframework.security.config.ObjectPostProcessor; SearchStrategy: all) found beans 'objectPostProcessor', 'webAuthorizationManagerPostProcessor', 'filterChainDecoratorPostProcessor', 'authenticationManagerPostProcessor'; @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.authentication.AuthenticationManagerResolver,org.springframework.security.oauth2.jwt.JwtDecoder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+
+Negative matches:
+-----------------
+
+    None
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-05-19T18:08:35.011Z  INFO 13436 --- [logistics-ted] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 45 class path changes (45 additions, 0 deletions, 0 modifications)
+2026-05-19T18:08:35.012Z  INFO 13436 --- [logistics-ted] [      Thread-23] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-19T18:08:35.017Z  INFO 13436 --- [logistics-ted] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-05-19T18:08:35.019Z  INFO 13436 --- [logistics-ted] [      Thread-23] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:08:35.019Z  INFO 13436 --- [logistics-ted] [      Thread-23] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown initiated...
+2026-05-19T18:08:35.021Z  INFO 13436 --- [logistics-ted] [      Thread-23] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-05-19T18:08:35.093Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Starting LogisticsTedApplication using Java 21.0.9 with PID 13436 (D:\Work\tedhouse\logistics-ted\target\classes started by ralph in D:\Work\tedhouse\logistics-ted)
+2026-05-19T18:08:35.093Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-05-19T18:08:35.247Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-19T18:08:35.267Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 18 ms. Found 6 JPA repository interfaces.
+2026-05-19T18:08:35.367Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-05-19T18:08:35.368Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-19T18:08:35.368Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-05-19T18:08:35.391Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-19T18:08:35.391Z  INFO 13436 --- [logistics-ted] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 297 ms
+2026-05-19T18:08:35.446Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Starting...
+2026-05-19T18:08:35.912Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-7 - Added connection org.postgresql.jdbc.PgConnection@461eb3ce
+2026-05-19T18:08:35.913Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Start completed.
+2026-05-19T18:08:35.945Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://panel.bellgado.com:3295/ted_logistic (PostgreSQL 17.10)
+2026-05-19T18:08:36.537Z  WARN 13436 --- [logistics-ted] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Failed to initialize dependency 'flywayInitializer' of LoadTimeWeaverAware bean 'entityManagerFactory': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain inputstream for resource: db/migration/V2__seed.sql
+2026-05-19T18:08:36.537Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Shutdown initiated...
+2026-05-19T18:08:36.669Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Shutdown completed.
+2026-05-19T18:08:36.669Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-05-19T18:08:36.673Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-19T18:08:36.689Z ERROR 13436 --- [logistics-ted] [  restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Failed to initialize dependency 'flywayInitializer' of LoadTimeWeaverAware bean 'entityManagerFactory': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain inputstream for resource: db/migration/V2__seed.sql
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:328) ~[spring-beans-6.2.18.jar:6.2.18]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:207) ~[spring-beans-6.2.18.jar:6.2.18]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:974) ~[spring-context-6.2.18.jar:6.2.18]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:628) ~[spring-context-6.2.18.jar:6.2.18]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.5.14.jar:3.5.14]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.5.14.jar:3.5.14]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.5.14.jar:3.5.14]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.5.14.jar:3.5.14]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.5.14.jar:3.5.14]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.5.14.jar:3.5.14]
+	at com.bellgado.logistics_ted.LogisticsTedApplication.main(LogisticsTedApplication.java:15) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.5.14.jar:3.5.14]
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain inputstream for resource: db/migration/V2__seed.sql
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1826) ~[spring-beans-6.2.18.jar:6.2.18]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607) ~[spring-beans-6.2.18.jar:6.2.18]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.18.jar:6.2.18]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.18.jar:6.2.18]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.18.jar:6.2.18]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.18.jar:6.2.18]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.18.jar:6.2.18]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:315) ~[spring-beans-6.2.18.jar:6.2.18]
+	... 13 common frames omitted
+Caused by: org.flywaydb.core.api.FlywayException: Unable to obtain inputstream for resource: db/migration/V2__seed.sql
+	at org.flywaydb.core.internal.resource.classpath.ClassPathResource.read(ClassPathResource.java:123) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.ChecksumCalculator.calculateChecksumForResource(ChecksumCalculator.java:68) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.ChecksumCalculator.calculate(ChecksumCalculator.java:47) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.sql.SqlMigrationResolver.getChecksumForLoadableResource(SqlMigrationResolver.java:97) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.sql.SqlMigrationResolver.addMigrations(SqlMigrationResolver.java:136) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.sql.SqlMigrationResolver.resolveMigrations(SqlMigrationResolver.java:75) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.sql.SqlMigrationResolver.resolveMigrations(SqlMigrationResolver.java:53) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.CompositeMigrationResolver.lambda$collectMigrations$0(CompositeMigrationResolver.java:132) ~[flyway-core-11.7.2.jar:na]
+	at java.base/java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:273) ~[na:na]
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499) ~[na:na]
+	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:682) ~[na:na]
+	at org.flywaydb.core.internal.resolver.CompositeMigrationResolver.collectMigrations(CompositeMigrationResolver.java:133) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.CompositeMigrationResolver.doFindAvailableMigrations(CompositeMigrationResolver.java:122) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.CompositeMigrationResolver.resolveMigrations(CompositeMigrationResolver.java:112) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.CompositeMigrationResolver.resolveMigrations(CompositeMigrationResolver.java:118) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.info.MigrationInfoServiceImpl.refresh(MigrationInfoServiceImpl.java:86) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.command.DbValidate.lambda$validate$0(DbValidate.java:112) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.jdbc.TransactionalExecutionTemplate.execute(TransactionalExecutionTemplate.java:59) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.command.DbValidate.validate(DbValidate.java:105) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.Flyway.doValidate(Flyway.java:529) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.Flyway.lambda$migrate$1(Flyway.java:199) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.FlywayExecutor.execute(FlywayExecutor.java:210) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.Flyway.migrate(Flyway.java:188) ~[flyway-core-11.7.2.jar:na]
+	at org.springframework.boot.autoconfigure.flyway.FlywayMigrationInitializer.afterPropertiesSet(FlywayMigrationInitializer.java:66) ~[spring-boot-autoconfigure-3.5.14.jar:3.5.14]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1873) ~[spring-beans-6.2.18.jar:6.2.18]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1822) ~[spring-beans-6.2.18.jar:6.2.18]
+	... 20 common frames omitted
+
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-05-19T18:08:38.136Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Starting LogisticsTedApplication using Java 21.0.9 with PID 13436 (D:\Work\tedhouse\logistics-ted\target\classes started by ralph in D:\Work\tedhouse\logistics-ted)
+2026-05-19T18:08:38.136Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-05-19T18:08:38.256Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-19T18:08:38.257Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-05-19T18:08:38.326Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-05-19T18:08:38.327Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-19T18:08:38.327Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-05-19T18:08:38.351Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2026-05-19T18:08:38.351Z  INFO 13436 --- [logistics-ted] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 214 ms
+2026-05-19T18:08:38.386Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Starting...
+2026-05-19T18:08:38.703Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-8 - Added connection org.postgresql.jdbc.PgConnection@3461747e
+2026-05-19T18:08:38.703Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Start completed.
+2026-05-19T18:08:38.736Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://panel.bellgado.com:3295/ted_logistic (PostgreSQL 17.10)
+2026-05-19T18:08:39.249Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.139s)
+2026-05-19T18:08:39.729Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 2
+2026-05-19T18:08:39.763Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-05-19T18:08:40.081Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-19T18:08:40.084Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-19T18:08:40.093Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-19T18:08:40.131Z  WARN 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-19T18:08:40.283Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-8)']
+	Database driver: undefined/unknown
+	Database version: 17.10
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-19T18:08:40.310Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-19T18:08:40.311Z  INFO 13436 --- [logistics-ted] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:08:40.352Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-05-19T18:08:40.457Z  WARN 13436 --- [logistics-ted] [  restartedMain] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 53de6ee5-7a8b-477d-a549-5a5ca9875f68
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-05-19T18:08:40.458Z  INFO 13436 --- [logistics-ted] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-05-19T18:08:40.481Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-05-19T18:08:40.502Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 3000 (http) with context path '/'
+2026-05-19T18:08:40.505Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Started LogisticsTedApplication in 2.385 seconds (process running for 655.132)
+2026-05-19T18:08:40.507Z  INFO 13436 --- [logistics-ted] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-05-19T18:08:41.934Z  INFO 13436 --- [logistics-ted] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 45 class path changes (45 additions, 0 deletions, 0 modifications)
+2026-05-19T18:08:41.936Z  INFO 13436 --- [logistics-ted] [      Thread-27] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-19T18:08:41.941Z  INFO 13436 --- [logistics-ted] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-05-19T18:08:41.943Z  INFO 13436 --- [logistics-ted] [      Thread-27] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:08:41.943Z  INFO 13436 --- [logistics-ted] [      Thread-27] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Shutdown initiated...
+2026-05-19T18:08:41.992Z  INFO 13436 --- [logistics-ted] [      Thread-27] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-05-19T18:08:42.108Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Starting LogisticsTedApplication using Java 21.0.9 with PID 13436 (D:\Work\tedhouse\logistics-ted\target\classes started by ralph in D:\Work\tedhouse\logistics-ted)
+2026-05-19T18:08:42.108Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-05-19T18:08:42.634Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-19T18:08:42.657Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 22 ms. Found 6 JPA repository interfaces.
+2026-05-19T18:08:42.807Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-05-19T18:08:42.808Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-19T18:08:42.808Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-05-19T18:08:42.834Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2026-05-19T18:08:42.834Z  INFO 13436 --- [logistics-ted] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 724 ms
+2026-05-19T18:08:42.914Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Starting...
+2026-05-19T18:08:43.190Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-9 - Added connection org.postgresql.jdbc.PgConnection@25c6800a
+2026-05-19T18:08:43.190Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Start completed.
+2026-05-19T18:08:43.224Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://panel.bellgado.com:3295/ted_logistic (PostgreSQL 17.10)
+2026-05-19T18:08:43.779Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.204s)
+2026-05-19T18:08:44.241Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 2
+2026-05-19T18:08:44.273Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-05-19T18:08:44.519Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-19T18:08:44.521Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-19T18:08:44.528Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-19T18:08:44.565Z  WARN 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-19T18:08:44.632Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-9)']
+	Database driver: undefined/unknown
+	Database version: 17.10
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-19T18:08:44.721Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-19T18:08:44.892Z  INFO 13436 --- [logistics-ted] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:08:45.055Z  INFO 13436 --- [logistics-ted] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name appUserDetailsService
+2026-05-19T18:08:45.103Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-05-19T18:08:45.363Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-05-19T18:08:45.375Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 3000 (http) with context path '/'
+2026-05-19T18:08:45.378Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Started LogisticsTedApplication in 3.298 seconds (process running for 660.004)
+2026-05-19T18:08:45.381Z  INFO 13436 --- [logistics-ted] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+    None
+
+
+Negative matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration.SecurityFilterChainConfiguration:
+      Did not match:
+         - AllNestedConditions 1 matched 1 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) found beans of type 'org.springframework.security.web.SecurityFilterChain' securityFilterChain; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   UserDetailsServiceAutoConfiguration:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.authentication.AuthenticationManagerResolver,org.springframework.security.oauth2.jwt.JwtDecoder; SearchStrategy: all) found beans of type 'org.springframework.security.authentication.AuthenticationManager' authenticationManager and found beans of type 'org.springframework.security.core.userdetails.UserDetailsService' appUserDetailsService (OnBeanCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+         - found 'session' scope (OnWebApplicationCondition)
+         - AnyNestedCondition 1 matched 2 did not; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'spring.security.user.password'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'spring.security.user.name'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-05-19T18:12:41.224Z  INFO 13436 --- [logistics-ted] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 45 class path changes (0 additions, 45 deletions, 0 modifications)
+2026-05-19T18:12:41.226Z  INFO 13436 --- [logistics-ted] [      Thread-34] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-19T18:12:41.231Z  INFO 13436 --- [logistics-ted] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-05-19T18:12:41.234Z  INFO 13436 --- [logistics-ted] [      Thread-34] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:12:41.234Z  INFO 13436 --- [logistics-ted] [      Thread-34] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Shutdown initiated...
+2026-05-19T18:12:41.237Z  INFO 13436 --- [logistics-ted] [      Thread-34] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.14)
+
+2026-05-19T18:12:41.299Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Starting LogisticsTedApplication using Java 21.0.9 with PID 13436 (D:\Work\tedhouse\logistics-ted\target\classes started by ralph in D:\Work\tedhouse\logistics-ted)
+2026-05-19T18:12:41.300Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-05-19T18:12:41.445Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-19T18:12:41.450Z  INFO 13436 --- [logistics-ted] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 3 ms. Found 0 JPA repository interfaces.
+2026-05-19T18:12:41.556Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 3000 (http)
+2026-05-19T18:12:41.556Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-19T18:12:41.557Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-05-19T18:12:41.581Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2026-05-19T18:12:41.581Z  INFO 13436 --- [logistics-ted] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 280 ms
+2026-05-19T18:12:41.619Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Starting...
+2026-05-19T18:12:41.969Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-10 - Added connection org.postgresql.jdbc.PgConnection@7bd673
+2026-05-19T18:12:41.969Z  INFO 13436 --- [logistics-ted] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Start completed.
+2026-05-19T18:12:42.166Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://panel.bellgado.com:3295/ted_logistic (PostgreSQL 17.10)
+2026-05-19T18:12:42.934Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.354s)
+2026-05-19T18:12:43.585Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 2
+2026-05-19T18:12:43.711Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-05-19T18:12:44.218Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-19T18:12:44.220Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-19T18:12:44.225Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-19T18:12:44.300Z  WARN 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-19T18:12:44.367Z  INFO 13436 --- [logistics-ted] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-10)']
+	Database driver: undefined/unknown
+	Database version: 17.10
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-19T18:12:44.442Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-19T18:12:44.554Z  INFO 13436 --- [logistics-ted] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-19T18:12:44.571Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-05-19T18:12:44.640Z  WARN 13436 --- [logistics-ted] [  restartedMain] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: a37c71b7-1831-414b-9198-84b8bdc86ce3
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-05-19T18:12:44.640Z  INFO 13436 --- [logistics-ted] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-05-19T18:12:44.658Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-05-19T18:12:44.664Z  INFO 13436 --- [logistics-ted] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 3000 (http) with context path '/'
+2026-05-19T18:12:44.667Z  INFO 13436 --- [logistics-ted] [  restartedMain] c.b.l.LogisticsTedApplication            : Started LogisticsTedApplication in 3.386 seconds (process running for 899.293)
+2026-05-19T18:12:44.668Z  INFO 13436 --- [logistics-ted] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration.SecurityFilterChainConfiguration matched:
+      - AllNestedConditions 2 matched 0 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) did not find any beans; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   UserDetailsServiceAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - AnyNestedCondition 1 matched 2 did not; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'spring.security.user.password'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'spring.security.user.name'; NestedCondition on UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (UserDetailsServiceAutoConfiguration.MissingAlternativeOrUserPropertiesConfigured)
+      - @ConditionalOnBean (types: org.springframework.security.config.ObjectPostProcessor; SearchStrategy: all) found beans 'objectPostProcessor', 'webAuthorizationManagerPostProcessor', 'filterChainDecoratorPostProcessor', 'authenticationManagerPostProcessor'; @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.authentication.AuthenticationManagerResolver,org.springframework.security.oauth2.jwt.JwtDecoder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+
+Negative matches:
+-----------------
+
+    None
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  16:04 min
+[INFO] Finished at: 2026-05-19T21:13:42+03:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.5.14:run (default-cli) on project logistics-ted: Process terminated with exit code: -1073741510 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
