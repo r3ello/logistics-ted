@@ -67,7 +67,7 @@ class RouteOptimizationServiceTest {
             new RoutingProperties.Google("", "https://example.com", "DRIVE", "TRAFFIC_AWARE", 5),
             new RoutingProperties.Haversine(40),
             new RoutingProperties.Balanced(1.0, 1.0),
-            new RoutingProperties.Cache(86400, 50000));
+            new RoutingProperties.Cache(86400, 50000), new RoutingProperties.Fuel(0.8,8));
         service = new RouteOptimizationService(houses, inventories, materials,
             new ServerMessages(), matrix, supplierFallback, new HeuristicRouteSolver(), props);
     }

@@ -20,7 +20,8 @@ public record RoutingProperties(
     @DefaultValue Google google,
     @DefaultValue Haversine haversine,
     @DefaultValue Balanced balanced,
-    @DefaultValue Cache cache
+    @DefaultValue Cache cache,
+    @DefaultValue Fuel fuel
 ) {
 
     public record Google(
@@ -43,5 +44,10 @@ public record RoutingProperties(
     public record Cache(
         @DefaultValue("86400") int ttlSeconds,
         @DefaultValue("50000") int maxSize
+    ) {}
+
+    public record Fuel(
+        @DefaultValue("8.0") double consumptionLPer100km,
+        @DefaultValue("1.80") double pricePerLitreEur
     ) {}
 }

@@ -62,11 +62,6 @@ routing:
   cache:
     ttl-seconds: 86400
     max-size: 50000
-  fuel:
-    # Tunable assumptions for the fuel-estimate line in the Telegram agent reply.
-    # Defaults: 8 L / 100 km truck consumption at €1.80 / L.
-    consumption-l-per-100km: ${ROUTING_FUEL_LPER100KM:8.0}
-    price-per-litre-eur: ${ROUTING_FUEL_EUR_PER_L:1.80}
 
 management:
   endpoints:
@@ -119,7 +114,7 @@ agent:
     # Whitelist of Telegram chat ids allowed to talk to the bot. Empty list = everyone allowed.
     # Override per-environment by setting AGENT_TELEGRAM_ALLOWED-CHAT-IDS_0=123, _1=456 (Spring
     # relaxed-binding env-var → indexed-list form) or by editing this list directly.
-    allowed-chat-ids: [5562684684]
+    allowed-chat-ids: []
   system-prompt: |
     You are the Tedhouse Logistics dispatcher assistant. You help the operations team plan
     material deliveries between construction houses by calling the available tools.
@@ -167,53 +162,13 @@ agent:
        does not need to match the user's wording exactly.
     7. If a tool returns `Error: ...`, do not retry blindly; explain the failure to the user
        and ask for whichever piece of information is missing.
-    8. After `calculateOrder` succeeds, also call `getHouseInventory(destinationHouseId)` and,
-       for every material that was requested in the order, list the quantity already present
-       at the destination warehouse in the "Already at destination" section. Omit the section
-       entirely if no requested material is in stock there.
 
     ## Response style
-    Reply in English, plain text (no Markdown — Telegram renders it raw). Use the emoji
-    template below verbatim so dispatchers get a consistent scannable layout. Skip any
-    section whose data is empty (e.g. no supplier stops, no deficit, no on-site stock).
-
-    🚛 TEDHOUSE LOGISTICS — Route Proposal
-
-    📍 Origin: <origin name>
-    🏁 Destination: <destination name>
-
-    Pickup stops:
-    1. <House name> — <location>
-       • <Material>: <qty> <unit>
-       • <Material>: <qty> <unit>
-    2. <House name> — <location>
-       • <Material>: <qty> <unit>
-
-    🏭 Supplier stops:
-    1. <Supplier name> — <location>
-       • <Material>: <qty> <unit>
-
-    Already at destination:
-    ✅ <Material>: <qty> <unit>
-
-    🛣️ Total distance: ~<km> km
-    ⏱️ Total time: ~<min> min
-    ⛽ Fuel estimate: ~€<eur> (<litres> L)
-
-    ✅ Order fully covered
-    (or, if there is a deficit:
-    ⚠️ Still missing:
-       • <Material>: <qty> <unit>)
-
-    🗺️ Open route in Google Maps: <mapsUrl>
-
-    Notes on filling the template:
-    * Use the `Fuel estimate` line exactly as the tool emits it — do not recompute the numbers.
-    * Drop the "🏭 Supplier stops" block if the tool reports none.
-    * Drop the "Already at destination" block if `getHouseInventory` returns no requested material.
-    * If multiple `alternatives` are returned by `calculateOrder`, render the shortest-distance
-      one in the template and add a short one-line note listing the other objectives and their
-      km / min so the dispatcher knows they exist.
+    * Reply in English.
+    * Be concise and operational — the user is a dispatcher who wants the answer fast.
+    * When listing route stops, use a numbered list with house id, name, and per-material
+      contribution. Always include the totals (km and minutes) and the Google Maps link
+      at the end of an order summary.
 
     ## Time reference
     Today is {current_date}.

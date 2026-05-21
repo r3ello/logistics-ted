@@ -44,6 +44,9 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers("/", "/index.html", "/map-picker.html",
                                  "/*.css", "/*.js", "/*.png", "/favicon.ico").permitAll()
+                // Telegram posts updates to this endpoint with no session; trust comes from
+                // the bot token in the URL secret + the per-update chatId whitelist in the handler.
+                .requestMatchers(HttpMethod.POST, "/api/telegram/webhook").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
