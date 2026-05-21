@@ -69,6 +69,32 @@ public final class HeuristicRouteSolver implements RouteSolver {
             log.debug("solver: exhaustive done — {} covering subset(s), bestCost={}, picked {} stop(s)",
                 coveringSubsets, bestDist == Double.POSITIVE_INFINITY ? "n/a" : String.format("%.2f", bestDist),
                 orderedStops.size());
+
+            // Partial-coverage fallback: no subset fully covers demand (total stock < order).
+            // Re-run the greedy selection to collect as much as possible and report the deficit.
+            if (orderedStops.isEmpty()) {
+                log.debug("solver: exhaustive found no full-cover subset — falling back to greedy partial selection");
+                Set<Integer> pickedIds = new HashSet<>();
+                for (Map.Entry<Integer, Double> e : needed.entrySet()) {
+                    int mid = e.getKey();
+                    double rem = e.getValue();
+                    List<CandidateStop> sorted = candidates.stream()
+                        .filter(h -> h.qtyOf(mid) > 0)
+                        .sorted(Comparator.comparingDouble((CandidateStop h) ->
+                            -(h.qtyOf(mid) / Math.max(cost.of(originIdx, h.index()), MIN_COST))))
+                        .toList();
+                    for (CandidateStop h : sorted) {
+                        if (rem <= 0) break;
+                        pickedIds.add(h.id());
+                        rem -= h.qtyOf(mid);
+                    }
+                }
+                List<CandidateStop> selected = candidates.stream()
+                    .filter(h -> pickedIds.contains(h.id()))
+                    .toList();
+                orderedStops = twoOpt(nearestNeighborFrom(originIdx, selected, cost), originIdx, cost);
+                log.debug("solver: greedy partial fallback selected {} stop(s)", orderedStops.size());
+            }
         } else {
             log.debug("solver: greedy mode for n={} candidates (> {} exhaustive limit)", n, EXHAUSTIVE_LIMIT);
             Set<Integer> pickedIds = new HashSet<>();
