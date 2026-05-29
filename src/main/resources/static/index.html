@@ -1104,14 +1104,41 @@
     if (active === 'view-order')     loadMaterialFields();
   }
 
+  // ── AUTH FETCH HELPER ────────────────────────────────────────────────────────
+  // All /api/** calls except /api/login go through apiFetch so the Bearer token is attached
+  // automatically. A 401 from any call clears the token and bounces the user to the login screen,
+  // matching what session expiry used to do.
+  const TOKEN_KEY = 'tedhouse_auth_token';
+  function getToken()    { return localStorage.getItem(TOKEN_KEY); }
+  function setToken(tok) { if (tok) localStorage.setItem(TOKEN_KEY, tok); else localStorage.removeItem(TOKEN_KEY); }
+
+  async function apiFetch(url, opts = {}) {
+    const headers = new Headers(opts.headers || {});
+    const tok = getToken();
+    if (tok) headers.set('Authorization', 'Bearer ' + tok);
+    const res = await fetch(url, { ...opts, headers });
+    if (res.status === 401) {
+      setToken(null);
+      showLoginScreen();
+    }
+    return res;
+  }
+
+  function showLoginScreen() {
+    currentUser = null;
+    document.getElementById('userBadge').style.display  = 'none';
+    document.getElementById('logoutBtn').style.display  = 'none';
+    document.getElementById('loginScreen').classList.remove('hidden');
+  }
+
   // ── DASHBOARD ────────────────────────────────────────────────────────────────
   async function loadDashboard() {
     document.getElementById('grid').innerHTML =
       `<div class="state-msg"><div class="spinner"></div><br>${t('loading')}</div>`;
     try {
       const [houses, totals] = await Promise.all([
-        fetch('/api/houses').then(r => r.json()),
-        fetch('/api/totals').then(r => r.json()),
+        apiFetch('/api/houses').then(r => r.json()),
+        apiFetch('/api/totals').then(r => r.json()),
       ]);
       dashHouses = houses;
       dashTotals = totals;
@@ -1235,8 +1262,8 @@
 
     try {
       const [mats, houses] = await Promise.all([
-        fetch('/api/materials').then(r => r.json()),
-        fetch('/api/houses').then(r => r.json()),
+        apiFetch('/api/materials').then(r => r.json()),
+        apiFetch('/api/houses').then(r => r.json()),
       ]);
       materials = mats;
 
@@ -1296,7 +1323,7 @@
     const body = { startLat: driverCoords.lat, startLng: driverCoords.lng, startName: t('locFound'), destinationHouseId: destHouseId, materials: mats, lang: currentLang };
 
     try {
-      const data = await fetch('/api/calculate-order', {
+      const data = await apiFetch('/api/calculate-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -1589,7 +1616,7 @@
     const method = _editingHouseId ? 'PUT' : 'POST';
 
     try {
-      const res  = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const res  = await apiFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server returned unexpected response (${res.status}). Is the server running?`); }
@@ -1612,7 +1639,7 @@
 
   async function confirmDelete(id) {
     try {
-      const res  = await fetch(`/api/houses/${id}`, { method: 'DELETE' });
+      const res  = await apiFetch(`/api/houses/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       loadDashboard();
@@ -1937,7 +1964,7 @@
       body[m.id] = val;
     }
     try {
-      const res  = await fetch(`/api/houses/${_invHouseId}/inventory`, {
+      const res  = await apiFetch(`/api/houses/${_invHouseId}/inventory`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
@@ -1973,10 +2000,13 @@
     btn.disabled = true; btn.textContent = t('signingIn');
     errEl.textContent = '';
     try {
+      // /api/login is the only call that does NOT carry a Bearer header (we are obtaining one).
       const res  = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      applyRole(data);
+      if (!data.token || !data.user) throw new Error('Unexpected login response');
+      setToken(data.token);
+      applyRole(data.user);
       document.getElementById('loginScreen').classList.add('hidden');
       initApp();
     } catch (e) {
@@ -1987,7 +2017,9 @@
   }
 
   async function doLogout() {
-    await fetch('/api/logout', { method: 'POST' });
+    // Logout is client-side: drop the token. The server call is a courtesy / future hook.
+    try { await apiFetch('/api/logout', { method: 'POST' }); } catch (_) { /* ignore */ }
+    setToken(null);
     currentUser = null;
     document.getElementById('userBadge').style.display  = 'none';
     document.getElementById('logoutBtn').style.display  = 'none';
@@ -2034,15 +2066,20 @@
 
   // ── INIT ─────────────────────────────────────────────────────────────────────
   (async () => {
+    if (!getToken()) {
+      // No token at all — go straight to login without bothering the server.
+      document.getElementById('loginUser').focus();
+      return;
+    }
     try {
-      const res  = await fetch('/api/me');
+      const res  = await apiFetch('/api/me');
       const data = await res.json();
       if (data.error) throw new Error();
       applyRole(data);
       document.getElementById('loginScreen').classList.add('hidden');
       initApp();
     } catch {
-      // not authenticated — login screen stays visible
+      // Token rejected or stale — apiFetch already cleared it on 401.
       document.getElementById('loginUser').focus();
     }
   })();

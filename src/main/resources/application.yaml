@@ -83,20 +83,23 @@ management:
 
 server:
   port: ${SERVER_PORT:3002}
-  servlet:
-    session:
-      timeout: 8h
-      cookie:
-        http-only: true
-        same-site: lax
-        name: TEDHOUSE_SESSION
+
+# Bearer token (JWT HS256) auth — replaces the old session/cookie scheme. POST /api/login
+# returns { token, tokenType, expiresIn, user } and clients send Authorization: Bearer <token>
+# on every /api/** request. TEDHOUSE_JWT_SECRET MUST be set to a strong random value (>= 32
+# bytes UTF-8) in production; the JwtService pads short dev secrets and logs a warning.
+auth:
+  jwt:
+    secret: ${TEDHOUSE_JWT_SECRET:}
+    ttl-minutes: ${TEDHOUSE_JWT_TTL_MINUTES:480}
+    issuer: logistics-ted
 
 logging:
   level:
     org.springframework.security: INFO
     org.hibernate.SQL: INFO
     com.bellgado.logistics_ted: INFO
-    # Flip to DEBUG to see per-objective stop IDs, exhaustive vs greedy mode picks,
+    # Flip to DEBUG to see per-objective stop IDs, exhaustive vs greedy mode pick
     # and cache hit/miss detail. Useful when investigating why N alternatives didn't appear.
     # com.bellgado.logistics_ted.service.RouteOptimizationService: DEBUG
     # com.bellgado.logistics_ted.service.solver.HeuristicRouteSolver: DEBUG

@@ -1,20 +1,20 @@
 package com.bellgado.logistics_ted.web;
 
 import com.bellgado.logistics_ted.security.AppUserDetailsService.AuthenticatedUser;
+import com.bellgado.logistics_ted.security.JwtService;
+import com.bellgado.logistics_ted.security.JwtService.IssuedToken;
 import com.bellgado.logistics_ted.web.dto.LoginRequest;
+import com.bellgado.logistics_ted.web.dto.LoginResponse;
 import com.bellgado.logistics_ted.web.dto.UserResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,19 +26,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthenticationManager authManager;
-    private final SecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
+    private final JwtService jwtService;
 
-    public AuthController(AuthenticationManager authManager) {
+    public AuthController(AuthenticationManager authManager, JwtService jwtService) {
         this.authManager = authManager;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest body,
-                                   HttpServletRequest request,
-                                   jakarta.servlet.http.HttpServletResponse response) {
-        if (body == null
-                || body.username() == null || body.username().isBlank()
-                || body.password() == null || body.password().isBlank()) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest body) {
+        if (isNotValid(body)) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username and password required."));
         }
 
@@ -51,19 +48,16 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials."));
         }
 
-        SecurityContext ctx = SecurityContextHolder.createEmptyContext();
-        ctx.setAuthentication(auth);
-        SecurityContextHolder.setContext(ctx);
-        contextRepository.saveContext(ctx, request, response);
-
         AuthenticatedUser user = (AuthenticatedUser) auth.getPrincipal();
-        return ResponseEntity.ok(new UserResponse(user.getUserId(), user.getUsername(), user.getRoleLabel()));
+        IssuedToken issued = jwtService.issue(user.getUserId(), user.getUsername(), user.getRoleLabel());
+        UserResponse userPayload = new UserResponse(user.getUserId(), user.getUsername(), user.getRoleLabel());
+        return ResponseEntity.ok(LoginResponse.bearer(issued.token(), issued.expiresInSeconds(), userPayload));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) session.invalidate();
+    public ResponseEntity<?> logout() {
+        // Stateless tokens — client is expected to drop the token. We clear the in-flight context
+        // defensively but there is no server-side revocation list.
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(Map.of("ok", true));
     }
@@ -75,5 +69,11 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
         }
         return ResponseEntity.ok(new UserResponse(user.getUserId(), user.getUsername(), user.getRoleLabel()));
+    }
+
+    private boolean isNotValid(LoginRequest body) {
+        return (body == null
+                || StringUtils.isBlank(body.username())
+                || StringUtils.isBlank(body.password()));
     }
 }
