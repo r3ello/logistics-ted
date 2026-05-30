@@ -9,6 +9,9 @@ import com.bellgado.logistics_ted.repository.InventoryRepository;
 import com.bellgado.logistics_ted.repository.MaterialRepository;
 import com.bellgado.logistics_ted.config.RoutingProperties;
 import com.bellgado.logistics_ted.repository.WarehouseRepository;
+import com.bellgado.logistics_ted.service.OrderHistoryService;
+import com.bellgado.logistics_ted.service.OrderHistoryService.RecordResult;
+import com.bellgado.logistics_ted.service.OrderHistoryService.Source;
 import com.bellgado.logistics_ted.service.RouteOptimizationService;
 import com.bellgado.logistics_ted.web.dto.OrderRequest;
 import com.bellgado.logistics_ted.web.dto.OrderResponse;
@@ -26,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
@@ -45,6 +49,7 @@ public class LogisticsAgentTools {
     private final RouteOptimizationService routeOptimization;
     private final RoutingProperties routingProperties;
     private final ObjectMapper objectMapper;
+    private final OrderHistoryService orderHistory;
 
     // ========================================================================
     // LOOKUP TOOLS
@@ -234,9 +239,12 @@ public class LogisticsAgentTools {
 
             OrderRequest req = new OrderRequest(
                 startLat, startLng, startName, destId, materialsMap, "en");
+            long t0 = System.currentTimeMillis();
             OrderResponse resp = routeOptimization.calculate(req);
+            long elapsed = System.currentTimeMillis() - t0;
 
-            return formatOrderResponse(resp);
+            OrderResponse decorated = persistFromAgent(req, resp, elapsed);
+            return formatOrderResponse(decorated);
         } catch (RouteOptimizationService.OrderValidationException e) {
             return "Error: " + e.getMessage();
         } catch (Exception e) {
@@ -245,9 +253,54 @@ public class LogisticsAgentTools {
         }
     }
 
+    @Tool(description = "Record the user's final route choice for a previously calculated order. " +
+            "Use this after the user explicitly picks one of the alternatives presented earlier " +
+            "(e.g. 'use the balanced one', 'go with route 2'). Pass the orderId surfaced by " +
+            "calculateOrder and the objective label of the chosen alternative " +
+            "(shortest_distance, fastest_time, or balanced).")
+    public String chooseOrderRoute(
+            @ToolParam(description = "Order public id (UUID string) printed by calculateOrder")
+            String orderId,
+            @ToolParam(description = "Objective label of the chosen alternative: " +
+                    "shortest_distance, fastest_time, or balanced")
+            String objective) {
+        try {
+            UUID id = UUID.fromString(orderId.trim());
+            orderHistory.recordChoice(id, objective.trim(), null);
+            return "Recorded choice: order " + id + " → " + objective + ".";
+        } catch (IllegalArgumentException e) {
+            return "Error: orderId must be a UUID string (got: " + orderId + ").";
+        } catch (Exception e) {
+            log.warn("chooseOrderRoute failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
     // ========================================================================
     // HELPERS
     // ========================================================================
+
+    /**
+     * Persist the calculation as a Telegram-sourced order and decorate the response with the
+     * resulting orderId / optionIds so {@link #formatOrderResponse} can surface them. History
+     * failures degrade gracefully — the user still gets a valid route summary.
+     */
+    private OrderResponse persistFromAgent(OrderRequest req, OrderResponse resp, long elapsedMs) {
+        try {
+            Long chatId = AgentContext.getTelegramChatId();
+            Source source = chatId != null ? Source.TELEGRAM : Source.API;
+            RecordResult rec = orderHistory.recordCalculation(req, resp, source, null, chatId, elapsedMs);
+            List<RouteOptionDto> withIds = new ArrayList<>();
+            for (RouteOptionDto alt : resp.alternatives()) {
+                UUID optId = rec.optionPublicIds().get(alt.objective());
+                withIds.add(optId == null ? alt : alt.withOptionId(optId));
+            }
+            return resp.withIds(rec.orderPublicId(), withIds);
+        } catch (RuntimeException ex) {
+            log.warn("agent: history persist failed — returning result without IDs", ex);
+            return resp;
+        }
+    }
 
     /**
      * Compact, LLM-friendly text rendering of the order response. We avoid dumping the full JSON because
@@ -258,6 +311,10 @@ public class LogisticsAgentTools {
     private String formatOrderResponse(OrderResponse resp) {
         StringBuilder sb = new StringBuilder();
         sb.append("ROUTE RESULT\n");
+        if (resp.orderId() != null) {
+            sb.append("OrderId: ").append(resp.orderId())
+                .append("  (pass this to chooseOrderRoute when the user picks an alternative)\n");
+        }
         sb.append("Origin: ").append(resp.origin().name()).append(" (")
             .append(resp.origin().location()).append(")\n");
         sb.append("Destination: ").append(resp.destination().name()).append(" (")

@@ -142,6 +142,136 @@
       border: none;
     }
     .house-map-label::before { display: none; }
+
+    /* ── HISTORY VIEW ── */
+    .history-layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 38%) 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+    @media (max-width: 1024px) { .history-layout { grid-template-columns: 1fr; } }
+
+    .history-list-card, .history-detail-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .history-filter-bar {
+      display: flex; flex-wrap: wrap; gap: 0.6rem;
+      align-items: center; margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
+    }
+    .history-filter {
+      display: flex; flex-direction: column; gap: 0.2rem;
+      font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .history-filter select {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 0.35rem 0.5rem; font-size: 0.85rem;
+    }
+    .history-checkbox {
+      flex-direction: row; align-items: center; gap: 0.4rem;
+      text-transform: none; letter-spacing: 0; font-size: 0.85rem; color: var(--text);
+    }
+    .history-checkbox input { accent-color: var(--accent); }
+    .history-refresh-btn { margin-left: auto; padding: 0.4rem 0.7rem; font-size: 0.95rem; }
+
+    .history-row {
+      padding: 0.75rem 0.85rem; border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 0.5rem; cursor: pointer; transition: background .15s, border-color .15s;
+      background: var(--surface);
+    }
+    .history-row:hover { background: rgba(79,142,247,0.07); border-color: var(--accent); }
+    .history-row.active { background: rgba(79,142,247,0.12); border-color: var(--accent); }
+    .history-row-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+      font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem;
+    }
+    .history-row-when { color: var(--muted); font-weight: 500; font-size: 0.75rem; }
+    .history-row-meta {
+      font-size: 0.78rem; color: var(--muted); display: flex; gap: 0.6rem; flex-wrap: wrap;
+    }
+    .history-row-meta strong { color: var(--text); font-weight: 600; }
+    .history-row-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.4rem; }
+    .history-tag {
+      font-size: 0.7rem; padding: 0.15rem 0.45rem; border-radius: 999px;
+      background: var(--border); color: var(--text);
+    }
+    .history-tag.chosen   { background: rgba(62,207,110,0.15); color: var(--green); border: 1px solid var(--green); }
+    .history-tag.deficit  { background: rgba(247,111,111,0.15); color: var(--red);   border: 1px solid var(--red); }
+    .history-tag.tg       { background: rgba(79,142,247,0.15); color: var(--accent); border: 1px solid var(--accent); }
+
+    .history-pager {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--border);
+      font-size: 0.8rem; color: var(--muted);
+    }
+    .history-pager button {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      padding: 0.3rem 0.7rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem;
+    }
+    .history-pager button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Detail */
+    .history-detail-header { margin-bottom: 1rem; }
+    .history-detail-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.6rem 1.2rem; font-size: 0.85rem; margin-bottom: 0.75rem;
+    }
+    .history-detail-grid div { line-height: 1.45; }
+    .history-detail-grid label {
+      display: block; font-size: 0.7rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.1rem;
+    }
+    .history-immutable-banner {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(122, 133, 163, 0.15); color: var(--muted);
+      padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem;
+      margin-bottom: 0.5rem; border: 1px dashed var(--border);
+    }
+
+    .history-alt-card {
+      flex: 1 1 200px; padding: 0.75rem 0.85rem; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface);
+      display: flex; flex-direction: column; gap: 0.25rem; cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .history-alt-card:hover { border-color: var(--accent); }
+    .history-alt-card.selected { border-color: var(--accent); background: rgba(79,142,247,0.08); }
+    .history-alt-card.chosen   { border-color: var(--green); background: rgba(62,207,110,0.07); }
+    .history-alt-title { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+    .history-alt-row { font-size: 0.78rem; color: var(--muted); }
+    .history-alt-pill {
+      align-self: flex-start; font-size: 0.68rem; padding: 0.1rem 0.45rem;
+      border-radius: 999px; background: var(--border); color: var(--text); margin-top: 0.2rem;
+    }
+    .history-alt-cards-row {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;
+    }
+
+    .history-timeline {
+      border-left: 2px solid var(--border); padding: 0.25rem 0 0.25rem 0.85rem;
+      margin: 0.75rem 0 1rem; font-size: 0.82rem;
+    }
+    .history-timeline div { margin-bottom: 0.35rem; position: relative; }
+    .history-timeline div::before {
+      content: ''; position: absolute; left: -1.05rem; top: 0.45rem;
+      width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    }
+    .history-timeline .ev-chosen::before   { background: var(--green); }
+    .history-timeline .ev-unchosen::before { background: var(--red); }
+    .history-timeline .ev-viewed::before   { background: var(--muted); }
+    .history-timeline .ev-when { color: var(--muted); margin-right: 0.5rem; font-variant-numeric: tabular-nums; }
+    .history-timeline .ev-text { color: var(--text); }
+
+    .history-section-title {
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted); margin: 0.75rem 0 0.4rem;
+    }
     .house-map-label--green { background: #1a6b38; border: 1px solid #3ecf6e; }
     .house-map-label--red   { background: #1a1d27; border: 1px solid #2e3250; }
     .house-map-popup .leaflet-popup-content-wrapper {
@@ -624,6 +754,9 @@
     <div class="nav-item" id="navMap" onclick="showView('map')">
       <span class="nav-icon">🗺</span> <span>Map View</span>
     </div>
+    <div class="nav-item" id="navHistory" onclick="showView('history')">
+      <span class="nav-icon">📜</span> <span id="navHistoryLabel">History</span>
+    </div>
   </div>
 </nav>
 
@@ -728,6 +861,49 @@
     </div>
   </div>
 
+  <!-- VIEW: HISTORY -->
+  <div class="view" id="view-history">
+    <div class="history-layout">
+
+      <!-- LEFT: filters + list -->
+      <div class="history-list-card">
+        <div class="history-filter-bar">
+          <label class="history-filter">
+            <span id="historyFiltersSourceLbl">Source</span>
+            <select id="historyFilterSource">
+              <option value="">— all —</option>
+              <option value="dashboard">dashboard</option>
+              <option value="telegram">telegram</option>
+              <option value="api">api</option>
+            </select>
+          </label>
+          <label class="history-filter history-checkbox">
+            <input type="checkbox" id="historyFilterChosen">
+            <span id="historyFiltersChosenLbl">Only chosen</span>
+          </label>
+          <label class="history-filter history-checkbox" id="historyFilterAllUsersWrap" style="display:none">
+            <input type="checkbox" id="historyFilterAllUsers">
+            <span id="historyFiltersAllUsersLbl">All users (admin)</span>
+          </label>
+          <button class="btn btn-ghost history-refresh-btn" id="historyRefreshBtn" title="Refresh">⟳</button>
+        </div>
+        <div id="historyList">
+          <div class="state-msg" style="padding:2rem"><div class="spinner"></div></div>
+        </div>
+        <div class="history-pager" id="historyPager"></div>
+      </div>
+
+      <!-- RIGHT: detail -->
+      <div class="history-detail-card" id="historyDetail">
+        <div class="state-msg" style="padding:4rem 2rem;color:var(--muted)">
+          <div style="font-size:2rem;margin-bottom:0.75rem">📜</div>
+          <span id="historyPickHint">Pick an order from the list to see its details</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div><!-- /main -->
 
 <script>
@@ -739,6 +915,22 @@
       pageTitle_dashboard:'Dashboard', pageSub_dashboard:'Surplus materials inventory',
       pageTitle_order:'New Order', pageSub_order:'Calculate optimal pickup route',
       pageTitle_map:'Map View', pageSub_map:'Houses on map',
+      pageTitle_history:'Order History', pageSub_history:'Past calculations — immutable record',
+      navHistory:'History',
+      historyFiltersSource:'Source', historyFiltersChosen:'Only chosen', historyFiltersAllUsers:'All users (admin)',
+      historyPickHint:'Pick an order from the list to see its details',
+      historyNoResults:'No orders yet for this filter.',
+      historyEvCreated:'Order created', historyEvViewed:'Viewed alternative',
+      historyEvChosen:'Chose alternative', historyEvUnchosen:'Switched away from',
+      historyEvAnonymous:'(anonymous)',
+      historyStatusChosen:'Chosen', historyStatusUnchosen:'Not chosen', historyStatusPrimary:'Primary',
+      historyAltsCount:'alts', historyChosenLabel:'Chosen:',
+      historyHeaderWhen:'When', historyHeaderWho:'Who', historyHeaderSrc:'Source',
+      historyHeaderDest:'Destination', historyHeaderMats:'Materials', historyHeaderStatus:'Status',
+      historyTimeline:'Event timeline', historyAlternatives:'Alternatives generated',
+      historySelectedRoute:'Selected route',
+      historyImmutableNote:'Historical record — read-only.',
+      historyViews:'views',
       refresh:'⟳ Refresh', langBtn:'🌐 BG', pdfBtn:'⬇ PDF',
       searchPlaceholder:'Search house...', searchClear:'Clear',
       sectionLabel:'Houses — warehouse detail',
@@ -794,6 +986,8 @@
       // alternatives (phase 7)
       obj_shortest_distance:'Shortest distance', obj_fastest_time:'Fastest time', obj_balanced:'Balanced',
       objSelected:'Selected', objView:'View', minLabel:'min',
+      // order history (this feature)
+      useThisRoute:'Use this route', routeChosen:'Route chosen', chooseFailed:'Could not save your choice',
       // supplier fallback (phase 5)
       supplierLabel:'Supplier', supplierStops:'supplier stops',
       reasonSupplierFallback:'Supplier — picked up to cover deficit, ~{dist} km from previous stop',
@@ -806,6 +1000,22 @@
       pageTitle_dashboard:'Табло', pageSub_dashboard:'Инвентар на излишни материали',
       pageTitle_order:'Нова поръчка', pageSub_order:'Изчисли оптимален маршрут',
       pageTitle_map:'Карта', pageSub_map:'Къщи на картата',
+      pageTitle_history:'История на поръчките', pageSub_history:'Минали изчисления — неизменен запис',
+      navHistory:'История',
+      historyFiltersSource:'Източник', historyFiltersChosen:'Само избрани', historyFiltersAllUsers:'Всички (админ)',
+      historyPickHint:'Изберете поръчка от списъка',
+      historyNoResults:'Няма поръчки за този филтър.',
+      historyEvCreated:'Поръчката е създадена', historyEvViewed:'Преглед на алтернатива',
+      historyEvChosen:'Избрана алтернатива', historyEvUnchosen:'Превключване от',
+      historyEvAnonymous:'(анонимен)',
+      historyStatusChosen:'Избрана', historyStatusUnchosen:'Неизбрана', historyStatusPrimary:'Основна',
+      historyAltsCount:'алт.', historyChosenLabel:'Избран:',
+      historyHeaderWhen:'Кога', historyHeaderWho:'Кой', historyHeaderSrc:'Източник',
+      historyHeaderDest:'Дестинация', historyHeaderMats:'Материали', historyHeaderStatus:'Статус',
+      historyTimeline:'Хронология', historyAlternatives:'Генерирани алтернативи',
+      historySelectedRoute:'Избран маршрут',
+      historyImmutableNote:'Исторически запис — само за четене.',
+      historyViews:'прегл.',
       refresh:'⟳ Опресни', langBtn:'🌐 EN', pdfBtn:'⬇ PDF',
       searchPlaceholder:'Търси къща...', searchClear:'Изчисти',
       sectionLabel:'Къщи — детайли на склад',
@@ -861,6 +1071,8 @@
       // alternatives (phase 7)
       obj_shortest_distance:'Най-късо разстояние', obj_fastest_time:'Най-бързо време', obj_balanced:'Балансиран',
       objSelected:'Избран', objView:'Виж', minLabel:'мин',
+      // история на поръчките
+      useThisRoute:'Избери този маршрут', routeChosen:'Маршрутът е избран', chooseFailed:'Изборът не можа да бъде запазен',
       // supplier fallback (phase 5)
       supplierLabel:'Доставчик', supplierStops:'доставчици',
       reasonSupplierFallback:'Доставчик — взето за покриване на недостиг, ~{dist} км от предишна спирка',
@@ -890,6 +1102,11 @@
     document.getElementById('navDashboard').querySelector('span:last-child').textContent = t('navDashboard');
     document.getElementById('navOrder').querySelector('span:last-child').textContent     = t('navOrder');
     document.getElementById('navMap').querySelector('span:last-child').textContent       = t('navMap');
+    document.getElementById('navHistoryLabel').textContent = t('navHistory');
+    const hsl = document.getElementById('historyFiltersSourceLbl');     if (hsl) hsl.textContent = t('historyFiltersSource');
+    const hcl = document.getElementById('historyFiltersChosenLbl');     if (hcl) hcl.textContent = t('historyFiltersChosen');
+    const hal = document.getElementById('historyFiltersAllUsersLbl');   if (hal) hal.textContent = t('historyFiltersAllUsers');
+    const hph = document.getElementById('historyPickHint');             if (hph) hph.textContent = t('historyPickHint');
     document.getElementById('pdfBtn').querySelector('.btn-label').textContent     = 'PDF';
     document.getElementById('langBtn').querySelector('.btn-label').textContent     = currentLang === 'en' ? 'BG' : 'EN';
     document.getElementById('logoutBtn').querySelector('.btn-label').textContent  = t('logout');
@@ -981,7 +1198,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'map'];
+  const VALID_VIEWS = ['dashboard', 'order', 'map', 'history'];
 
   function showView(name) {
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
@@ -996,6 +1213,7 @@
     closeNav();
 
     if (name === 'map') initHousesMap();
+    if (name === 'history') loadHistory();
   }
 
   // ── HOUSES MAP ───────────────────────────────────────────────────────────────
@@ -1337,7 +1555,7 @@
     }
   }
 
-  let currentResult = null;     // { data, order, alts }
+  let currentResult = null;     // { data, order, alts, orderId, chosenObjective }
   let selectedAltLabel = null;  // matches RouteOptionDto.objective
 
   function renderResults(data, order) {
@@ -1353,8 +1571,10 @@
           totalDistance: data.totalDistance, totalMinutes: data.totalMinutes || 0,
         }];
     selectedAltLabel = alts[0].objective;
-    currentResult = { data, order, alts };
+    currentResult = { data, order, alts, orderId: data.orderId || null, chosenObjective: null };
     renderResultPanel();
+    // First render counts as a view on the default-selected alternative.
+    if (currentResult.orderId) trackView(currentResult.orderId, selectedAltLabel);
   }
 
   function renderResultPanel() {
@@ -1365,10 +1585,56 @@
     document.getElementById('results').innerHTML = cardsHtml + detailsHtml;
     document.querySelectorAll('.alt-card').forEach(card => {
       card.addEventListener('click', () => {
-        selectedAltLabel = card.dataset.objective;
-        renderResultPanel();
+        const objective = card.dataset.objective;
+        if (objective !== selectedAltLabel) {
+          selectedAltLabel = objective;
+          renderResultPanel();
+          if (currentResult.orderId) trackView(currentResult.orderId, objective);
+        }
       });
     });
+    const chooseBtn = document.getElementById('chooseRouteBtn');
+    if (chooseBtn) chooseBtn.addEventListener('click', onChooseRoute);
+  }
+
+  function trackView(orderId, objective) {
+    apiFetch(`/api/orders/${orderId}/options/${encodeURIComponent(objective)}/view`,
+      { method: 'POST' }).catch(() => { /* best-effort */ });
+  }
+
+  async function onChooseRoute() {
+    const { orderId } = currentResult || {};
+    if (!orderId) return;
+    const objective = selectedAltLabel;
+    const btn = document.getElementById('chooseRouteBtn');
+    if (btn) { btn.disabled = true; btn.dataset.oldText = btn.textContent; btn.textContent = '…'; }
+    try {
+      const res = await apiFetch(`/api/orders/${orderId}/choose`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ objective }),
+      });
+      if (!res.ok) throw new Error('choose failed');
+      currentResult.chosenObjective = objective;
+      renderResultPanel();
+    } catch (e) {
+      if (btn) { btn.disabled = false; btn.textContent = btn.dataset.oldText || t('useThisRoute'); }
+      alert(t('chooseFailed'));
+    }
+  }
+
+  function renderChooseButton(option) {
+    if (!currentResult || !currentResult.orderId) return '';
+    const isChosen = currentResult.chosenObjective === option.objective;
+    if (isChosen) {
+      return `<div class="meta-chip" style="background:rgba(62,207,110,0.15);border-color:var(--green);color:var(--green);font-weight:600">
+        ✓ ${t('routeChosen')}
+      </div>`;
+    }
+    return `<button id="chooseRouteBtn" class="btn btn-primary"
+      style="border-radius:8px;padding:0.5rem 0.9rem;font-size:0.8rem;font-weight:600">
+      ⭐ ${t('useThisRoute')}
+    </button>`;
   }
 
   function fuelEstimate(km) {
@@ -1429,6 +1695,7 @@
         ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" class="btn btn-green" style="text-decoration:none;border-radius:8px;padding:0.5rem 0.9rem;font-size:0.8rem">
           ${t('openMaps')}
         </a>` : ''}
+        ${renderChooseButton(option)}
       </div>`;
 
     const hasStops = route.length + supplierStops.length > 0;
@@ -1989,6 +2256,8 @@
     document.getElementById('userBadge').style.display  = '';
     document.getElementById('logoutBtn').style.display  = '';
     document.getElementById('addHouseBtn').style.display = user.role === 'admin' ? '' : 'none';
+    const histAllWrap = document.getElementById('historyFilterAllUsersWrap');
+    if (histAllWrap) histAllWrap.style.display = user.role === 'admin' ? '' : 'none';
   }
 
   async function doLogin() {
@@ -2083,6 +2352,296 @@
       document.getElementById('loginUser').focus();
     }
   })();
+
+  // ── HISTORY VIEW ─────────────────────────────────────────────────────────────
+  // Read-only view of the persisted customer_order rows. Per the immutability rule,
+  // this surface NEVER posts to /options/.../view or /choose — historical view counts
+  // and chosen-option transitions stay frozen as they were at decision time.
+  const HISTORY_PAGE_SIZE = 20;
+  let _hState = { page: 0, total: 0, totalPages: 0, items: [], selectedOrderId: null };
+
+  function fmtWhen(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function fmtMaterials(mats) {
+    if (!mats || typeof mats !== 'object') return '—';
+    const parts = [];
+    for (const [mid, qty] of Object.entries(mats)) {
+      const name = MAT_INDEX[mid]?.name || `#${mid}`;
+      const unit = MAT_INDEX[mid]?.unit || '';
+      parts.push(`${qty} ${unit} ${name}`.trim());
+    }
+    return parts.join(', ');
+  }
+
+  // Lightweight material lookup built from /api/materials — needed because the
+  // persisted materials_json only carries ids.
+  let MAT_INDEX = {};
+  async function ensureMaterialIndex() {
+    if (Object.keys(MAT_INDEX).length > 0) return;
+    try {
+      const res = await apiFetch('/api/materials');
+      const list = await res.json();
+      list.forEach(m => { MAT_INDEX[m.id] = m; });
+    } catch (_) { /* leave empty; fmtMaterials falls back to ids */ }
+  }
+
+  async function loadHistory(page = 0) {
+    await ensureMaterialIndex();
+    const src = document.getElementById('historyFilterSource').value;
+    const onlyChosen = document.getElementById('historyFilterChosen').checked;
+    const all = currentUser?.role === 'admin'
+      && document.getElementById('historyFilterAllUsers').checked;
+
+    document.getElementById('historyList').innerHTML =
+      `<div class="state-msg" style="padding:2rem"><div class="spinner"></div></div>`;
+
+    try {
+      const params = new URLSearchParams({ page, size: HISTORY_PAGE_SIZE });
+      if (all) params.set('all', 'true');
+      const res = await apiFetch(`/api/orders?${params.toString()}`);
+      const data = await res.json();
+      // Client-side filter for source / onlyChosen — the page-level filtering keeps the
+      // BE contract small; counts shown reflect the server page, then filtered locally.
+      let items = data.items || [];
+      if (src) items = items.filter(o => o.source === src);
+      if (onlyChosen) items = items.filter(o => o.chosenObjective);
+      _hState = { page: data.page, total: data.total, totalPages: data.totalPages,
+                  items, selectedOrderId: _hState.selectedOrderId };
+      renderHistoryList();
+    } catch (e) {
+      document.getElementById('historyList').innerHTML =
+        `<div class="state-msg" style="padding:2rem;color:var(--red)">${t('errorPrefix')} ${e.message}</div>`;
+    }
+  }
+
+  function renderHistoryList() {
+    const { items, page, totalPages, total, selectedOrderId } = _hState;
+    const list = document.getElementById('historyList');
+    if (items.length === 0) {
+      list.innerHTML = `<div class="state-msg" style="padding:2rem;color:var(--muted)">${t('historyNoResults')}</div>`;
+    } else {
+      list.innerHTML = items.map(o => renderHistoryRow(o, o.orderId === selectedOrderId)).join('');
+      list.querySelectorAll('.history-row').forEach(row => {
+        row.addEventListener('click', () => {
+          const id = row.dataset.orderId;
+          _hState.selectedOrderId = id;
+          renderHistoryList();
+          loadOrderDetail(id);
+        });
+      });
+    }
+    const pager = document.getElementById('historyPager');
+    pager.innerHTML = `
+      <button id="histPrev" ${page === 0 ? 'disabled' : ''}>← prev</button>
+      <span>page ${page + 1} / ${Math.max(totalPages, 1)} · ${total} total</span>
+      <button id="histNext" ${page + 1 >= totalPages ? 'disabled' : ''}>next →</button>`;
+    pager.querySelector('#histPrev').addEventListener('click', () => loadHistory(_hState.page - 1));
+    pager.querySelector('#histNext').addEventListener('click', () => loadHistory(_hState.page + 1));
+  }
+
+  function renderHistoryRow(o, isActive) {
+    const tags = [];
+    if (o.chosenObjective) {
+      tags.push(`<span class="history-tag chosen">✓ ${t('obj_' + o.chosenObjective)}</span>`);
+    }
+    if (!o.fullyFulfilled) {
+      tags.push(`<span class="history-tag deficit">⚠ ${t('orderWarn').split('{deficit}')[0].trim() || 'deficit'}</span>`);
+    }
+    if (o.source === 'telegram') {
+      tags.push(`<span class="history-tag tg">tg</span>`);
+    }
+    const who = o.username
+      ? o.username
+      : (o.telegramChatId ? `tg-${o.telegramChatId}` : t('historyEvAnonymous'));
+    const dest = o.destinationHouseName
+      ? `→ ${escapeHtml(o.destinationHouseName)}`
+      : (o.destinationHouseId ? `→ #${o.destinationHouseId}` : '');
+    return `
+      <div class="history-row ${isActive ? 'active' : ''}" data-order-id="${o.orderId}">
+        <div class="history-row-top">
+          <span>${escapeHtml(who)} ${dest}</span>
+          <span class="history-row-when">${fmtWhen(o.createdAt)}</span>
+        </div>
+        <div class="history-row-meta">
+          <span><strong>${o.alternativesCount}</strong> ${t('historyAltsCount')}</span>
+          <span>${escapeHtml(fmtMaterials(o.materials))}</span>
+        </div>
+        <div class="history-row-tags">${tags.join('')}</div>
+      </div>`;
+  }
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function loadOrderDetail(orderId) {
+    const panel = document.getElementById('historyDetail');
+    panel.innerHTML = `<div class="state-msg" style="padding:2rem"><div class="spinner"></div></div>`;
+    try {
+      const res = await apiFetch(`/api/orders/${orderId}`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      renderOrderDetail(data);
+    } catch (e) {
+      panel.innerHTML = `<div class="state-msg" style="padding:2rem;color:var(--red)">${t('errorPrefix')} ${e.message}</div>`;
+    }
+  }
+
+  // Selected-alternative state is per-detail-render; clicking another alt card swaps the
+  // route panel below without any server roundtrip (and crucially without firing /view).
+  let _hSelectedObjective = null;
+
+  function renderOrderDetail(data) {
+    const { summary, options, events } = data;
+    const chosen = options.find(o => o.isChosen);
+    _hSelectedObjective = (chosen || options[0])?.objective || null;
+
+    const headerHtml = `
+      <div class="history-detail-header">
+        <div class="history-immutable-banner">🔒 ${t('historyImmutableNote')}</div>
+        <div class="history-detail-grid">
+          <div><label>${t('historyHeaderWhen')}</label>${fmtWhen(summary.createdAt)}</div>
+          <div><label>${t('historyHeaderWho')}</label>${escapeHtml(summary.username || (summary.telegramChatId ? 'tg-' + summary.telegramChatId : t('historyEvAnonymous')))}</div>
+          <div><label>${t('historyHeaderSrc')}</label>${escapeHtml(summary.source)}</div>
+          <div><label>${t('historyHeaderDest')}</label>${escapeHtml(summary.destinationHouseName || ('#' + (summary.destinationHouseId ?? '?')))}</div>
+          <div><label>${t('historyHeaderMats')}</label>${escapeHtml(fmtMaterials(summary.materials))}</div>
+          <div><label>${t('historyHeaderStatus')}</label>${summary.fullyFulfilled
+            ? `<span style="color:var(--green)">✓ ${t('orderOk')}</span>`
+            : `<span style="color:var(--red)">⚠ deficit</span>`}
+            ${summary.chosenObjective
+              ? ` · <strong style="color:var(--green)">${t('historyChosenLabel')} ${t('obj_' + summary.chosenObjective)}</strong>`
+              : ''}</div>
+        </div>
+      </div>`;
+
+    const altCardsHtml = `
+      <div class="history-section-title">${t('historyAlternatives')}</div>
+      <div class="history-alt-cards-row">
+        ${options.map(opt => renderHistoryAltCard(opt)).join('')}
+      </div>`;
+
+    const timelineHtml = `
+      <div class="history-section-title">${t('historyTimeline')}</div>
+      <div class="history-timeline">
+        ${events.map(renderTimelineRow).join('') || `<div><span class="ev-text" style="color:var(--muted)">—</span></div>`}
+      </div>`;
+
+    const routeHtml = `
+      <div class="history-section-title">${t('historySelectedRoute')}</div>
+      <div id="historyRouteSlot"></div>`;
+
+    document.getElementById('historyDetail').innerHTML =
+      headerHtml + altCardsHtml + timelineHtml + routeHtml;
+
+    document.querySelectorAll('#historyDetail .history-alt-card').forEach(card => {
+      card.addEventListener('click', () => {
+        _hSelectedObjective = card.dataset.objective;
+        // Re-mark selection without re-fetching anything.
+        document.querySelectorAll('#historyDetail .history-alt-card').forEach(c =>
+          c.classList.toggle('selected', c.dataset.objective === _hSelectedObjective));
+        renderHistoryRouteSlot(data);
+      });
+    });
+
+    renderHistoryRouteSlot(data);
+  }
+
+  function renderHistoryAltCard(opt) {
+    const isSel = opt.objective === _hSelectedObjective;
+    const cls = ['history-alt-card'];
+    if (isSel) cls.push('selected');
+    if (opt.isChosen) cls.push('chosen');
+    const { cost } = fuelEstimate(opt.totalDistanceKm);
+    const pill = opt.isChosen
+      ? `<span class="history-alt-pill" style="background:rgba(62,207,110,0.18);color:var(--green)">★ ${t('historyStatusChosen')}</span>`
+      : (opt.isPrimary
+          ? `<span class="history-alt-pill">${t('historyStatusPrimary')}</span>`
+          : '');
+    return `
+      <div class="${cls.join(' ')}" data-objective="${opt.objective}">
+        <div class="history-alt-title">${t('obj_' + opt.objective)}</div>
+        <div class="history-alt-row">📏 <strong>${opt.totalDistanceKm}</strong> km · ⏱ <strong>${opt.totalMinutes}</strong> ${t('minLabel')}</div>
+        <div class="history-alt-row">⛽ ${euro(cost)} · 🏠 ${opt.totalStops}${opt.supplierStopsCount > 0 ? ` · 🏭 ${opt.supplierStopsCount}` : ''}</div>
+        <div class="history-alt-row">👁 <strong>${opt.viewCount}</strong> ${t('historyViews')}</div>
+        ${pill}
+      </div>`;
+  }
+
+  function renderTimelineRow(ev) {
+    const cls = 'ev-' + ev.eventType;
+    const label = {
+      created:  t('historyEvCreated'),
+      viewed:   `${t('historyEvViewed')}: ${ev.objective ? t('obj_' + ev.objective) : '?'}`,
+      chosen:   `${t('historyEvChosen')}: ${ev.objective ? t('obj_' + ev.objective) : '?'}`,
+      unchosen: `${t('historyEvUnchosen')}: ${ev.objective ? t('obj_' + ev.objective) : '?'}`,
+    }[ev.eventType] || ev.eventType;
+    const who = ev.username ? ` · ${escapeHtml(ev.username)}` : '';
+    return `<div class="${cls}">
+      <span class="ev-when">${fmtWhen(ev.at)}</span>
+      <span class="ev-text">${label}${who}</span>
+    </div>`;
+  }
+
+  // Renders the full route panel for the selected alternative using the persisted
+  // payload_json. Critically: this passes through a READ-ONLY rendering path that
+  // does NOT call /view or /choose. We adapt the persisted payload to the same
+  // shape renderOptionDetails expects.
+  function renderHistoryRouteSlot(data) {
+    const { summary, options } = data;
+    const opt = options.find(o => o.objective === _hSelectedObjective) || options[0];
+    if (!opt || !opt.payload) {
+      document.getElementById('historyRouteSlot').innerHTML =
+        `<div class="state-msg" style="padding:1rem;color:var(--muted)">—</div>`;
+      return;
+    }
+    // The payload IS a RouteOptionDto. Synthesise the minimal OrderResponse-ish object
+    // that renderOptionDetails reads (origin + destination + route + supplierStops).
+    const fakeData = {
+      origin:      { name: summary.startName || 'origin', location: `${summary.startLat ?? ''}, ${summary.startLng ?? ''}` },
+      destination: { name: summary.destinationHouseName || ('#' + summary.destinationHouseId), location: '' },
+    };
+    const order = summary.materials || {};
+    // renderOptionDetails wires no event listeners we'd need to suppress — the alt-card
+    // listeners live on the row above it, and the choose button is guarded by
+    // currentResult.orderId (which we deliberately do NOT set here).
+    const previousResult = currentResult;
+    currentResult = null;          // disables renderChooseButton + trackView
+    const html = renderOptionDetails(fakeData, normaliseHistoryOption(opt.payload), order);
+    currentResult = previousResult; // restore for the live New Order flow
+    document.getElementById('historyRouteSlot').innerHTML = html;
+  }
+
+  // Persisted payload uses camelCase that already matches the live RouteOptionDto.
+  // The shapes line up 1:1; this helper is here only to defend against any past
+  // payloads that may have used a slightly different field name.
+  function normaliseHistoryOption(payload) {
+    return {
+      objective:      payload.objective,
+      route:          payload.route || [],
+      supplierStops:  payload.supplierStops || [],
+      deficit:        payload.deficit || [],
+      mapsUrl:        payload.mapsUrl,
+      fullyFulfilled: !!payload.fullyFulfilled,
+      totalStops:     payload.totalStops || 0,
+      totalDistance:  payload.totalDistance || 0,
+      totalMinutes:   payload.totalMinutes || 0,
+    };
+  }
+
+  // Re-load history when filters change.
+  ['historyFilterSource', 'historyFilterChosen', 'historyFilterAllUsers'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', () => loadHistory(0));
+  });
+  const histRefresh = document.getElementById('historyRefreshBtn');
+  if (histRefresh) histRefresh.addEventListener('click', () => loadHistory(_hState.page));
 
 </script>
 </body>

@@ -1,5 +1,6 @@
 package com.bellgado.logistics_ted.agent.telegram;
 
+import com.bellgado.logistics_ted.agent.AgentContext;
 import com.bellgado.logistics_ted.agent.AgentProperties;
 import com.bellgado.logistics_ted.agent.AgentService;
 import com.bellgado.logistics_ted.agent.VoiceTranscriptionService;
@@ -73,7 +74,13 @@ public class TelegramUpdateHandler {
                 .build());
 
             String conversationId = "tg-" + chatId;
-            String response = agentService.chat(conversationId, userText);
+            String response;
+            AgentContext.setTelegramChatId(chatId);
+            try {
+                response = agentService.chat(conversationId, userText);
+            } finally {
+                AgentContext.clear();
+            }
 
             sendLongMessage(telegramClient, chatId, response);
 

@@ -150,7 +150,12 @@ agent:
     * `calculateOrder(destinationHouseId, materialsJson, originHouseId, originLat, originLng,
       originName)` — the main flow. `materialsJson` is `{materialId: quantity}` with the id as
       a STRING key. Provide either `originHouseId` OR (`originLat` AND `originLng`); pass empty
-      strings for the unused alternative.
+      strings for the unused alternative. The result includes an `OrderId:` line near the top —
+      remember it for any follow-up `chooseOrderRoute` call.
+    * `chooseOrderRoute(orderId, objective)` — call when the user explicitly picks one of the
+      alternatives presented in a previous reply (e.g. "go with the balanced one", "use route 2").
+      `orderId` is the UUID from the `OrderId:` line; `objective` is one of `shortest_distance`,
+      `fastest_time`, `balanced`. Do NOT call this without an explicit user choice.
 
     ## Behavioural rules
     1. Never invent house ids or material ids. Always look them up with `listHouses` /
