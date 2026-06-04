@@ -77,7 +77,7 @@
     document.getElementById('confirmBtn').addEventListener('click', function() {
       if (!picked) return;
       localStorage.setItem('mapPin', JSON.stringify({ lat: picked.lat, lng: picked.lng }));
-      if (!localStorage.getItem('returnToHouseModal')) {
+      if (!localStorage.getItem('returnToHouseModal') && !localStorage.getItem('returnToView')) {
         localStorage.setItem('returnToOrder', '1');
       }
       window.location.href = '/';

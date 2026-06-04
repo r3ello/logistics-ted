@@ -272,8 +272,12 @@
       font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em;
       color: var(--muted); margin: 0.75rem 0 0.4rem;
     }
-    .house-map-label--green { background: #1a6b38; border: 1px solid #3ecf6e; }
-    .house-map-label--red   { background: #1a1d27; border: 1px solid #2e3250; }
+    .house-map-label--green     { background: #1a6b38; border: 1px solid #3ecf6e; }
+    .house-map-label--red       { background: #1a1d27; border: 1px solid #2e3250; }
+    .house-map-label--worker    { background: #2a1f0e; border: 1px solid #f5a623; color: #f5a623; }
+    .house-map-label--available { background: #1a7a3f; border: 1px solid #1a7a3f; color: #fff; }
+    .house-map-label--inuse     { background: #f5a623; border: 1px solid #f5a623; color: #fff; }
+    .house-map-label--none      { background: #4a5068; border: 1px solid #4a5068; color: #fff; }
     .house-map-popup .leaflet-popup-content-wrapper {
       background: transparent; border: none; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
       border-radius: 10px; padding: 0;
@@ -651,6 +655,17 @@
 
   <!-- VIEW: MAP -->
   <div class="view" id="view-map">
+    <div id="mapToggleBar" style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1000;background:#1a1d27;border:1px solid #2e3250;border-radius:10px;padding:4px;display:flex;gap:4px;box-shadow:0 2px 12px rgba(0,0,0,0.4)">
+      <button onclick="setMapMode('houses')" id="mapModeHouses" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:#4f8ef7;color:#fff">🏠 Houses</button>
+      <button onclick="setMapMode('scaffold')" id="mapModeScaffold" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#7a85a3">🏗️ Scaffold</button>
+      <button onclick="setMapMode('workers')" id="mapModeWorkers" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#7a85a3">👷 Workers</button>
+      <button onclick="setMapMode('all')" id="mapModeAll" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#7a85a3">🏠👷 Houses & Workers</button>
+    </div>
+    <div id="mapScaffoldLegend" style="display:none;position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:1000;background:#1a1d27;border:1px solid #2e3250;border-radius:8px;padding:0.5rem 1rem;display:none;gap:1.2rem;font-size:0.78rem;box-shadow:0 2px 8px rgba(0,0,0,0.4)">
+      <span style="display:flex;align-items:center;gap:0.35rem"><span style="width:10px;height:10px;border-radius:50%;background:#1a7a3f;display:inline-block"></span> Available</span>
+      <span style="display:flex;align-items:center;gap:0.35rem"><span style="width:10px;height:10px;border-radius:50%;background:#f5a623;display:inline-block"></span> In Use</span>
+      <span style="display:flex;align-items:center;gap:0.35rem"><span style="width:10px;height:10px;border-radius:50%;background:#7a85a3;display:inline-block"></span> None</span>
+    </div>
     <div id="housesMap"></div>
   </div>
 
@@ -751,6 +766,9 @@
     <div class="nav-item" id="navOrder" onclick="showView('order')">
       <span class="nav-icon">📦</span> <span>New Order</span>
     </div>
+    <div class="nav-item" id="navScaffold" onclick="showView('scaffold')">
+      <span class="nav-icon">🏗️</span> <span id="navScaffoldLabel">Scaffold</span>
+    </div>
     <div class="nav-item" id="navMap" onclick="showView('map')">
       <span class="nav-icon">🗺</span> <span>Map View</span>
     </div>
@@ -814,7 +832,7 @@
         <!-- location rows — static, never wiped by innerHTML -->
         <div class="field" style="margin-bottom:1.1rem">
           <label id="startingPointLbl" style="color:var(--accent);font-size:0.85rem">📍 Driver starting location</label>
-          <a id="mapPickBtn" href="/map-picker.html" style="display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%">
+          <a id="mapPickBtn" href="/map-picker.html" onclick="localStorage.removeItem('returnToView');localStorage.removeItem('mapPinSource')" style="display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%">
             🗺 Pick on map
           </a>
           <div id="locStatus" style="display:none;margin-top:0.5rem;font-size:0.8rem;color:var(--green);align-items:center;gap:0.4rem"></div>
@@ -858,6 +876,38 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- VIEW: SCAFFOLD TRANSPORT -->
+  <div class="view" id="view-scaffold">
+    <div class="order-layout">
+      <div class="form-card">
+        <h2 id="scaffoldFormTitle">🏗️ Scaffold Transport</h2>
+        <p id="scaffoldFormDesc">Select the destination house that needs a scaffold. We'll find the closest available scaffold and show you where to pick it up.</p>
+        <div class="field" style="margin-bottom:1.1rem">
+          <label id="scaffoldStartLbl" style="color:var(--accent);font-size:0.85rem">📍 Driver starting location</label>
+          <a id="scaffoldMapPickBtn" href="/map-picker.html" onclick="localStorage.setItem('mapPinSource','scaffold');localStorage.setItem('returnToView','scaffold')" style="display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%">
+            🗺 Pick on map
+          </a>
+          <div id="scaffoldLocStatus" style="display:none;margin-top:0.5rem;font-size:0.8rem;color:var(--green);align-items:center;gap:0.4rem"></div>
+        </div>
+        <div class="field" style="margin-bottom:1.4rem">
+          <label id="scaffoldDestLbl" style="color:var(--accent);font-size:0.85rem">🏠 Destination house</label>
+          <select id="scaffoldDestHouse" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--accent);border-radius:8px;color:var(--text);font-size:0.92rem;outline:none;">
+            <option value="">— Select destination —</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem" id="scaffoldBtn" onclick="calculateScaffold()">
+          Find closest scaffold
+        </button>
+      </div>
+      <div id="scaffoldResults">
+        <div class="state-msg" style="padding:4rem 2rem">
+          <div style="font-size:2rem;margin-bottom:0.75rem">🏗️</div>
+          <span id="scaffoldHint">Select a destination house and click</span><br><strong id="scaffoldHintStrong">Find closest scaffold</strong>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -916,6 +966,7 @@
       pageTitle_order:'New Order', pageSub_order:'Calculate optimal pickup route',
       pageTitle_map:'Map View', pageSub_map:'Houses on map',
       pageTitle_history:'Order History', pageSub_history:'Past calculations — immutable record',
+      pageTitle_scaffold:'Scaffold Transport', pageSub_scaffold:'Find closest available scaffold for a destination house',
       navHistory:'History',
       historyFiltersSource:'Source', historyFiltersChosen:'Only chosen', historyFiltersAllUsers:'All users (admin)',
       historyPickHint:'Pick an order from the list to see its details',
@@ -991,6 +1042,18 @@
       // supplier fallback (phase 5)
       supplierLabel:'Supplier', supplierStops:'supplier stops',
       reasonSupplierFallback:'Supplier — picked up to cover deficit, ~{dist} km from previous stop',
+      // scaffold transport view
+      navScaffold:'Scaffold',
+      scaffoldFormTitle:'🏗️ Scaffold Transport',
+      scaffoldFormDesc:'Select the destination house that needs a scaffold. We\'ll find the closest available scaffold and show you where to pick it up.',
+      scaffoldDestLbl:'🏠 Destination house',
+      scaffoldBtn:'Find closest scaffold',
+      scaffoldHint:'Select a destination house and click',
+      scaffoldHintStrong:'Find closest scaffold',
+      scaffoldResultTitle:'Scaffold pickup point',
+      scaffoldNotFound:'No available scaffold found for this destination.',
+      scaffoldAlreadyAvailable:'This house already has an available scaffold in place.',
+      scaffoldStopReason:'Closest available scaffold to destination',
       Lumber:'Lumber', Screws:'Screws', Boards:'Boards', Tiles:'Tiles',
       unidades:'units', 'm²':'m²',
     },
@@ -1001,6 +1064,7 @@
       pageTitle_order:'Нова поръчка', pageSub_order:'Изчисли оптимален маршрут',
       pageTitle_map:'Карта', pageSub_map:'Къщи на картата',
       pageTitle_history:'История на поръчките', pageSub_history:'Минали изчисления — неизменен запис',
+      pageTitle_scaffold:'Транспорт на скеле', pageSub_scaffold:'Намери най-близко налично скеле за дестинация',
       navHistory:'История',
       historyFiltersSource:'Източник', historyFiltersChosen:'Само избрани', historyFiltersAllUsers:'Всички (админ)',
       historyPickHint:'Изберете поръчка от списъка',
@@ -1076,6 +1140,18 @@
       // supplier fallback (phase 5)
       supplierLabel:'Доставчик', supplierStops:'доставчици',
       reasonSupplierFallback:'Доставчик — взето за покриване на недостиг, ~{dist} км от предишна спирка',
+      // scaffold transport view
+      navScaffold:'Скеле',
+      scaffoldFormTitle:'🏗️ Транспорт на скеле',
+      scaffoldFormDesc:'Изберете дестинацията, която се нуждае от скеле. Ще намерим най-близкото налично скеле и ще покажем откъде да бъде взето.',
+      scaffoldDestLbl:'🏠 Дестинация',
+      scaffoldBtn:'Намери най-близко скеле',
+      scaffoldHint:'Изберете дестинация и натиснете',
+      scaffoldHintStrong:'Намери най-близко скеле',
+      scaffoldResultTitle:'Точка за вземане на скеле',
+      scaffoldNotFound:'Няма налично скеле за тази дестинация.',
+      scaffoldAlreadyAvailable:'Тази къща вече има налично скеле на място.',
+      scaffoldStopReason:'Най-близко налично скеле до дестинацията',
       Lumber:'Дървен материал', Screws:'Винтове', Boards:'Дъски', Tiles:'Керемиди',
       unidades:'бр.', 'm²':'m²',
     },
@@ -1123,6 +1199,13 @@
     document.getElementById('fuelSectionLabel').textContent = t('fuelSectionLabel');
     document.getElementById('fuelConsLbl').textContent      = t('fuelConsLbl');
     document.getElementById('fuelPriceLbl').textContent     = t('fuelPriceLbl');
+    document.getElementById('navScaffoldLabel').textContent  = t('navScaffold');
+    const sft = document.getElementById('scaffoldFormTitle');   if (sft) sft.textContent = t('scaffoldFormTitle');
+    const sfd = document.getElementById('scaffoldFormDesc');    if (sfd) sfd.textContent = t('scaffoldFormDesc');
+    const sdl = document.getElementById('scaffoldDestLbl');     if (sdl) sdl.textContent = t('scaffoldDestLbl');
+    const sb  = document.getElementById('scaffoldBtn');         if (sb)  sb.textContent  = t('scaffoldBtn');
+    const sh  = document.getElementById('scaffoldHint');        if (sh)  sh.textContent  = t('scaffoldHint');
+    const shs = document.getElementById('scaffoldHintStrong');  if (shs) shs.textContent = t('scaffoldHintStrong');
 
     // login screen
     document.getElementById('loginSubtitle').textContent  = t('loginSubtitle');
@@ -1183,7 +1266,8 @@
   let materials   = [];
   let dashHouses  = [];
   let dashTotals  = [];
-  let driverCoords = null; // { lat, lng } when GPS is active
+  let driverCoords = null;         // { lat, lng } for order form
+  let scaffoldDriverCoords = null; // { lat, lng } for scaffold form (independent driver)
 
   // ── NAV ─────────────────────────────────────────────────────────────────────
   function toggleNav() {
@@ -1198,7 +1282,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'map', 'history'];
+  const VALID_VIEWS = ['dashboard', 'order', 'map', 'history', 'scaffold'];
 
   function showView(name) {
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
@@ -1214,11 +1298,33 @@
 
     if (name === 'map') initHousesMap();
     if (name === 'history') loadHistory();
+    if (name === 'scaffold') loadScaffoldHouses();
   }
 
   // ── HOUSES MAP ───────────────────────────────────────────────────────────────
   let _hMap = null;
   let _hMapMarkers = [];
+  let _mapMode = 'houses'; // 'houses' | 'scaffold'
+
+  const SCAFFOLD_COLORS = { AVAILABLE: '#1a7a3f', IN_USE: '#f5a623', NONE: '#7a85a3' };
+  const SCAFFOLD_ICONS  = { AVAILABLE: '🏗️', IN_USE: '🔧', NONE: '' };
+
+  function setMapMode(mode) {
+    _mapMode = mode;
+    const hBtn = document.getElementById('mapModeHouses');
+    const sBtn = document.getElementById('mapModeScaffold');
+    const wBtn = document.getElementById('mapModeWorkers');
+    const legend = document.getElementById('mapScaffoldLegend');
+    if (hBtn) { hBtn.style.background = mode === 'houses'  ? '#4f8ef7' : 'transparent'; hBtn.style.color = mode === 'houses'  ? '#fff'    : '#7a85a3'; }
+    if (sBtn) { sBtn.style.background = mode === 'scaffold'? '#3ecf6e' : 'transparent'; sBtn.style.color = mode === 'scaffold'? '#0f1117' : '#7a85a3'; }
+    if (wBtn) { wBtn.style.background = mode === 'workers' ? '#f5a623' : 'transparent'; wBtn.style.color = mode === 'workers' ? '#0f1117' : '#7a85a3'; }
+    const aBtn = document.getElementById('mapModeAll');
+    if (aBtn) { aBtn.style.background = mode === 'all' ? '#a78bfa' : 'transparent'; aBtn.style.color = mode === 'all' ? '#0f1117' : '#7a85a3'; }
+    if (legend) legend.style.display = mode === 'scaffold' ? 'flex' : 'none';
+    if (mode === 'workers') initWorkersMap();
+    else if (mode === 'all') initAllMap();
+    else initHousesMap();
+  }
 
   function initHousesMap() {
     const houses = (dashHouses || []).filter(h => h.lat && h.lng);
@@ -1272,37 +1378,71 @@
           </div>`;
       }).join('');
 
-      const popup = `
-        <div style="font-family:'Segoe UI',sans-serif;width:260px;background:#21253a;color:#e2e8f0;border-radius:10px;overflow:hidden;margin:-13px -19px">
-          <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
-            <div style="font-size:0.97rem;font-weight:700">${h.name}</div>
-            <div style="font-size:0.75rem;color:#7a85a3;margin-top:0.15rem">📍 ${h.location}</div>
+      const ss       = h.scaffold_status || 'NONE';
+      const ssColor  = SCAFFOLD_COLORS[ss] || SCAFFOLD_COLORS.NONE;
+      const ssLabel  = { AVAILABLE: 'Available', IN_USE: 'In Use', NONE: 'None' }[ss] || ss;
+      const ssIcon   = SCAFFOLD_ICONS[ss] || '';
+
+      const popupHeader = `
+        <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
+          <div style="font-size:0.97rem;font-weight:700">${h.name}</div>
+          <div style="font-size:0.75rem;color:#7a85a3;margin-top:0.15rem">📍 ${h.location}</div>
+        </div>`;
+
+      const popupContent = _mapMode === 'scaffold' ? `
+        <div style="padding:0.75rem 1rem">
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.9rem">
+            <span style="font-size:1.3rem">${ssIcon || '🏗️'}</span>
+            <span style="font-size:0.92rem;font-weight:700;color:${ssColor}">${ssLabel}</span>
           </div>
-          <div style="padding:0.75rem 1rem">
-            <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.75rem">
-              <div style="display:flex;align-items:center;gap:0.3rem;background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.2);border-radius:6px;padding:0.2rem 0.5rem">
-                <span style="font-size:0.65rem;color:#7a85a3;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${t('chipStart')}</span>
-                <span style="font-size:0.78rem;color:${h.start_date ? '#e2e8f0' : '#7a85a3'};font-weight:600">📅 ${h.start_date || '—'}</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:0.3rem;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);border-radius:6px;padding:0.2rem 0.5rem">
-                <span style="font-size:0.65rem;color:#7a85a3;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${t('chipPhase')}</span>
-                <span style="font-size:0.78rem;color:${h.current_phase ? '#a78bfa' : '#7a85a3'};font-weight:600">${h.current_phase ? '🔧 ' + t(h.current_phase) : '—'}</span>
-              </div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem">
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem">
+              <span style="color:#7a85a3;text-transform:uppercase;font-size:0.68rem;font-weight:700;letter-spacing:0.06em">Scaffold start</span>
+              <span style="color:${h.scaffold_start_date ? '#e2e8f0' : '#7a85a3'};font-weight:600">📅 ${h.scaffold_start_date || '—'}</span>
             </div>
-            ${materialsHTML}
-            <div style="border-top:1px solid #2e3250;margin-top:0.5rem;padding-top:0.6rem;display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:0.72rem;color:#7a85a3">${t('totalWarehouse')}</span>
-              <span style="font-size:0.92rem;font-weight:700;color:#3ecf6e">${euro(h.totalValue)}</span>
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem">
+              <span style="color:#7a85a3;text-transform:uppercase;font-size:0.68rem;font-weight:700;letter-spacing:0.06em">Scaffold end</span>
+              <span style="color:${h.scaffold_end_date ? '#e2e8f0' : '#7a85a3'};font-weight:600">📅 ${h.scaffold_end_date || '—'}</span>
             </div>
+          </div>
+        </div>` : `
+        <div style="padding:0.75rem 1rem">
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.75rem">
+            <div style="display:flex;align-items:center;gap:0.3rem;background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.2);border-radius:6px;padding:0.2rem 0.5rem">
+              <span style="font-size:0.65rem;color:#7a85a3;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${t('chipStart')}</span>
+              <span style="font-size:0.78rem;color:${h.start_date ? '#e2e8f0' : '#7a85a3'};font-weight:600">📅 ${h.start_date || '—'}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.3rem;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);border-radius:6px;padding:0.2rem 0.5rem">
+              <span style="font-size:0.65rem;color:#7a85a3;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${t('chipPhase')}</span>
+              <span style="font-size:0.78rem;color:${h.current_phase ? '#a78bfa' : '#7a85a3'};font-weight:600">${h.current_phase ? '🔧 ' + t(h.current_phase) : '—'}</span>
+            </div>
+          </div>
+          ${materialsHTML}
+          <div style="border-top:1px solid #2e3250;margin-top:0.5rem;padding-top:0.6rem;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.72rem;color:#7a85a3">${t('totalWarehouse')}</span>
+            <span style="font-size:0.92rem;font-weight:700;color:#3ecf6e">${euro(h.totalValue)}</span>
           </div>
         </div>`;
 
+      const popup = `<div style="font-family:'Segoe UI',sans-serif;width:260px;background:#21253a;color:#e2e8f0;border-radius:10px;overflow:hidden;margin:-13px -19px">${popupHeader}${popupContent}</div>`;
+
       const hasStock = h.materials.some(m => m.quantity > 0);
+      let tooltipClass, tooltipText;
+      if (_mapMode === 'scaffold') {
+        const ss = (h.scaffold_status || 'NONE');
+        const ssIcon  = SCAFFOLD_ICONS[ss] || '';
+        const ssLabelClass = { AVAILABLE: 'house-map-label--available', IN_USE: 'house-map-label--inuse', NONE: 'house-map-label--none' }[ss] || 'house-map-label--none';
+        tooltipClass = 'house-map-label ' + ssLabelClass;
+        tooltipText  = `${ssIcon} ${h.name}`;
+      } else {
+        tooltipClass = 'house-map-label ' + (hasStock ? 'house-map-label--green' : 'house-map-label--red');
+        tooltipText  = h.name;
+      }
       const marker = L.marker([h.lat, h.lng])
         .addTo(_hMap)
         .bindPopup(popup, { maxWidth: 300, minWidth: 280, className: 'house-map-popup' })
-        .bindTooltip(h.name, { permanent: true, direction: 'top', offset: [0, -10],
-          className: 'house-map-label ' + (hasStock ? 'house-map-label--green' : 'house-map-label--red') });
+        .bindTooltip(tooltipText, { permanent: true, direction: 'top', offset: [0, -10],
+          className: tooltipClass });
       _hMapMarkers.push(marker);
     });
 
@@ -1312,6 +1452,102 @@
     }
 
     // invalidateSize twice: once immediately, once after layout settles
+    _hMap.invalidateSize();
+    setTimeout(() => { _hMap.invalidateSize(); }, 120);
+  }
+
+  async function initWorkersMap() {
+    if (!_hMap) { setMapMode('houses'); return; }
+
+    _hMapMarkers.forEach(m => m.remove());
+    _hMapMarkers = [];
+
+    let workerList = [];
+    try { workerList = await apiFetch('/api/workers').then(r => r.json()); } catch(e) {}
+
+    const workerIcon = L.divIcon({
+      html: '<div style="font-size:1.4rem;line-height:1">👷</div>',
+      className: '', iconAnchor: [12, 12], popupAnchor: [0, -14]
+    });
+
+    workerList.filter(w => w.lat && w.lng).forEach(w => {
+      const popup = `
+        <div style="font-family:'Segoe UI',sans-serif;width:200px;background:#21253a;color:#e2e8f0;border-radius:10px;overflow:hidden;margin:-13px -19px">
+          <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
+            <div style="font-size:0.97rem;font-weight:700">👷 ${w.name}</div>
+            <div style="font-size:0.75rem;color:#7a85a3;margin-top:0.15rem">📍 ${w.location || '—'}</div>
+          </div>
+          <div style="padding:0.6rem 1rem">
+            <div style="font-size:0.75rem;color:#7a85a3;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;margin-bottom:0.2rem">Crew</div>
+            <div style="font-size:0.85rem;color:${w.crew ? '#f5a623' : '#7a85a3'};font-weight:600">${w.crew || '—'}</div>
+          </div>
+        </div>`;
+      const marker = L.marker([w.lat, w.lng], { icon: workerIcon })
+        .addTo(_hMap)
+        .bindPopup(popup, { maxWidth: 220, minWidth: 200, className: 'house-map-popup' })
+        .bindTooltip(w.name, { permanent: true, direction: 'top', offset: [0, -10], className: 'house-map-label house-map-label--worker' });
+      _hMapMarkers.push(marker);
+    });
+
+    const withCoords = workerList.filter(w => w.lat && w.lng);
+    if (withCoords.length) _hMap.fitBounds(L.latLngBounds(withCoords.map(w => [w.lat, w.lng])), { padding: [40, 40] });
+    _hMap.invalidateSize();
+    setTimeout(() => { _hMap.invalidateSize(); }, 120);
+  }
+
+  async function initAllMap() {
+    if (!_hMap) { setMapMode('houses'); return; }
+
+    _hMapMarkers.forEach(m => m.remove());
+    _hMapMarkers = [];
+
+    // render houses (reuse existing logic)
+    const houses = (dashHouses || []).filter(h => h.lat && h.lng);
+    const allHouses = dashHouses || [];
+    const houseMax = {};
+    allHouses.forEach(h => h.materials.forEach(m => {
+      houseMax[m.name] = Math.max(houseMax[m.name] || 0, m.quantity);
+    }));
+    houses.forEach(h => {
+      const marker = L.marker([h.lat, h.lng])
+        .addTo(_hMap)
+        .bindTooltip(h.name, { permanent: true, direction: 'top', offset: [0, -10],
+          className: 'house-map-label house-map-label--green' });
+      _hMapMarkers.push(marker);
+    });
+
+    // render workers
+    let workerList = [];
+    try { workerList = await apiFetch('/api/workers').then(r => r.json()); } catch(e) {}
+
+    const workerIcon = L.divIcon({
+      html: '<div style="font-size:1.4rem;line-height:1">👷</div>',
+      className: '', iconAnchor: [12, 12], popupAnchor: [0, -14]
+    });
+    workerList.filter(w => w.lat && w.lng).forEach(w => {
+      const popup = `
+        <div style="font-family:'Segoe UI',sans-serif;width:200px;background:#21253a;color:#e2e8f0;border-radius:10px;overflow:hidden;margin:-13px -19px">
+          <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
+            <div style="font-size:0.97rem;font-weight:700">👷 ${w.name}</div>
+            <div style="font-size:0.75rem;color:#7a85a3;margin-top:0.15rem">📍 ${w.location || '—'}</div>
+          </div>
+          <div style="padding:0.6rem 1rem">
+            <div style="font-size:0.75rem;color:#7a85a3;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;margin-bottom:0.2rem">Crew</div>
+            <div style="font-size:0.85rem;color:${w.crew ? '#f5a623' : '#7a85a3'};font-weight:600">${w.crew || '—'}</div>
+          </div>
+        </div>`;
+      const marker = L.marker([w.lat, w.lng], { icon: workerIcon })
+        .addTo(_hMap)
+        .bindPopup(popup, { maxWidth: 220, minWidth: 200, className: 'house-map-popup' })
+        .bindTooltip(w.name, { permanent: true, direction: 'top', offset: [0, -10], className: 'house-map-label house-map-label--worker' });
+      _hMapMarkers.push(marker);
+    });
+
+    const allCoords = [
+      ...houses.map(h => [h.lat, h.lng]),
+      ...workerList.filter(w => w.lat && w.lng).map(w => [w.lat, w.lng])
+    ];
+    if (allCoords.length) _hMap.fitBounds(L.latLngBounds(allCoords), { padding: [40, 40] });
     _hMap.invalidateSize();
     setTimeout(() => { _hMap.invalidateSize(); }, 120);
   }
@@ -1431,6 +1667,18 @@
             <span style="font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">${t('chipPhase')}</span>
             <span style="font-size:0.82rem;color:${h.current_phase ? 'var(--purple)' : 'var(--muted)'};font-weight:600">${h.current_phase ? '🔧 ' + t(h.current_phase) : '—'}</span>
           </div>
+          ${(() => {
+            const ss = h.scaffold_status || 'NONE';
+            const cfg = {
+              AVAILABLE: { bg:'rgba(26,122,63,0.12)',  border:'rgba(26,122,63,0.35)',  color:'#1a7a3f', label:'Available' },
+              IN_USE:    { bg:'rgba(245,166,35,0.12)', border:'rgba(245,166,35,0.35)', color:'#f5a623', label:'In Use'    },
+              NONE:      { bg:'rgba(122,133,163,0.08)',border:'rgba(122,133,163,0.2)', color:'#7a85a3', label:'No Scaffold'},
+            }[ss];
+            return `<div style="display:flex;align-items:center;gap:0.4rem;background:${cfg.bg};border:1px solid ${cfg.border};border-radius:7px;padding:0.3rem 0.65rem">
+              <span style="font-size:0.85rem">🏗️</span>
+              <span style="font-size:0.78rem;color:${cfg.color};font-weight:700">${cfg.label}</span>
+            </div>`;
+          })()}
         </div>
         <div class="del-confirm" id="del-${h.id}">
           <span>${t('deleteConfirmPrefix')}<strong>${h.name}</strong>?</span>
@@ -1506,6 +1754,78 @@
     } catch (e) {
       document.getElementById('materialFields').innerHTML =
         `<div class="state-msg" style="padding:1rem">${t('errLoadData')}<br><small style="color:var(--muted)">${e.message}</small></div>`;
+    }
+  }
+
+  // ── SCAFFOLD TRANSPORT ───────────────────────────────────────────────────────
+  async function loadScaffoldHouses() {
+    const sel = document.getElementById('scaffoldDestHouse');
+    if (!sel || sel.options.length > 1) return;
+    try {
+      const houses = await apiFetch('/api/houses').then(r => r.json());
+      houses.forEach(h => {
+        const opt = document.createElement('option');
+        opt.value = h.id;
+        opt.textContent = h.name;
+        sel.appendChild(opt);
+      });
+    } catch (e) { /* silently ignore */ }
+  }
+
+  async function calculateScaffold() {
+    const destId = parseInt(document.getElementById('scaffoldDestHouse').value);
+    if (!destId) return;
+
+    document.getElementById('scaffoldResults').innerHTML =
+      `<div class="state-msg"><div class="spinner"></div></div>`;
+
+    try {
+      const coordsParam = scaffoldDriverCoords ? `&startLat=${scaffoldDriverCoords.lat}&startLng=${scaffoldDriverCoords.lng}` : '';
+      const data = await apiFetch(`/api/scaffold-transport?destinationHouseId=${destId}${coordsParam}`).then(r => r.json());
+
+      if (data.error) throw new Error(data.error);
+
+      if (data.alreadyAvailable) {
+        document.getElementById('scaffoldResults').innerHTML =
+          `<div class="state-msg" style="padding:3rem 2rem;color:var(--green)">✅ ${t('scaffoldAlreadyAvailable')}</div>`;
+        return;
+      }
+
+      if (!data.scaffoldHouse) {
+        document.getElementById('scaffoldResults').innerHTML =
+          `<div class="state-msg" style="padding:3rem 2rem;color:#f5a623">⚠️ ${t('scaffoldNotFound')}</div>`;
+        return;
+      }
+
+      const s = data.scaffoldHouse;
+      const dest = data.destinationHouse;
+      document.getElementById('scaffoldResults').innerHTML = `
+        <div style="padding:1.5rem">
+          <p class="section-label" style="margin-bottom:1rem">🏗️ ${t('scaffoldResultTitle')}</p>
+          <div class="route-stops">
+            <div class="stop-card" style="border-color:var(--green);background:rgba(62,207,110,0.06)">
+              <div class="stop-num" style="background:var(--green);color:#0f1117">🏁</div>
+              <div class="stop-info">
+                <p class="stop-name">${dest.name}</p>
+                <p class="stop-loc">📍 ${dest.location}</p>
+                <p class="stop-reason" style="color:var(--muted)">Destination</p>
+              </div>
+            </div>
+            <div class="stop-arrow">↑</div>
+            <div class="stop-card" style="border-color:#f5a623;background:rgba(245,166,35,0.07)">
+              <div class="stop-num" style="background:#f5a623;color:#0f1117">🏗️</div>
+              <div class="stop-info">
+                <p class="stop-name">${s.name}</p>
+                <p class="stop-loc">📍 ${s.location}</p>
+                <p class="stop-reason">${t('scaffoldStopReason')} · ~${data.distanceKm} km</p>
+              </div>
+            </div>
+          </div>
+          ${data.mapsUrl ? `<a href="${data.mapsUrl}" target="_blank" class="btn btn-green" style="display:inline-flex;margin-top:1rem;text-decoration:none;border-radius:8px;padding:0.5rem 0.9rem;font-size:0.85rem">🗺 Open in Google Maps</a>` : ''}
+        </div>`;
+    } catch (e) {
+      document.getElementById('scaffoldResults').innerHTML =
+        `<div class="state-msg">${t('errorPrefix')} ${e.message}</div>`;
     }
   }
 
@@ -1954,25 +2274,37 @@
     try {
       const coords = JSON.parse(raw);
       driverCoords = { lat: coords.lat, lng: coords.lng };
-      const status = document.getElementById('locStatus');
-      if (status) {
-        status.style.display = 'flex';
-        status.textContent = '📍 ' + driverCoords.lat.toFixed(5) + ', ' + driverCoords.lng.toFixed(5);
+      const source = localStorage.getItem('mapPinSource') || 'order';
+      localStorage.removeItem('mapPinSource');
+      const isScaffold = source === 'scaffold';
+
+      if (isScaffold) {
+        scaffoldDriverCoords = { lat: coords.lat, lng: coords.lng };
+      } else {
+        driverCoords = { lat: coords.lat, lng: coords.lng };
       }
-      const btn = document.getElementById('mapPickBtn');
+
+      const btnId    = isScaffold ? 'scaffoldMapPickBtn' : 'mapPickBtn';
+      const statusId = isScaffold ? 'scaffoldLocStatus'  : 'locStatus';
+      const btnStyle = 'display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%';
+
+      const status = document.getElementById(statusId);
+      if (status) { status.style.display = 'flex'; status.textContent = '📍 ' + coords.lat.toFixed(5) + ', ' + coords.lng.toFixed(5); }
+      const btn = document.getElementById(btnId);
       if (btn) {
         btn.style.background  = 'rgba(62,207,110,0.08)';
         btn.style.borderColor = '#3ecf6e';
         btn.style.color       = '#3ecf6e';
-        btn.textContent       = '🗺 ✓ ' + driverCoords.lat.toFixed(5) + ', ' + driverCoords.lng.toFixed(5);  // coords shown as-is intentionally
+        btn.textContent       = '🗺 ✓ ' + coords.lat.toFixed(5) + ', ' + coords.lng.toFixed(5);
         btn.href              = '#';
         btn.onclick = function(e) {
           e.preventDefault();
-          driverCoords = null;
-          btn.style.cssText = 'display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%';
+          if (isScaffold) scaffoldDriverCoords = null; else driverCoords = null;
+          btn.style.cssText = btnStyle;
           btn.textContent = '🗺 Pick on map';
-          btn.href  = '/map-picker.html';
+          btn.href = '/map-picker.html';
           btn.onclick = null;
+          if (isScaffold) btn.setAttribute('onclick', "localStorage.setItem('mapPinSource','scaffold');localStorage.setItem('returnToView','scaffold')");
           if (status) status.style.display = 'none';
         };
       }
@@ -2321,6 +2653,14 @@
       document.getElementById('mLocBtn').style.color   = '';
       document.getElementById('mLocBtn').style.borderColor = '';
       document.getElementById('houseModal').classList.add('open');
+    }
+
+    const returnToView = localStorage.getItem('returnToView');
+    if (returnToView && VALID_VIEWS.includes(returnToView)) {
+      localStorage.removeItem('returnToView');
+      localStorage.removeItem('returnToOrder');
+      showView(returnToView);
+      return;
     }
 
     if (localStorage.getItem('returnToOrder')) {

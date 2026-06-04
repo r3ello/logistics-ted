@@ -146,6 +146,38 @@ The response shape:
 }
 ```
 
+## Scaffold Transport
+
+Each house can hold a scaffold with one of three statuses: `NONE`, `AVAILABLE`, or `IN_USE`.
+The status and planned dates are stored on the `house` table (added by `V5__scaffold.sql` and
+`V6__scaffold_dates.sql`).
+
+### Separate menu — 🏗️ Scaffold
+
+`GET /api/scaffold-transport?destinationHouseId={id}&startLat={lat}&startLng={lng}`
+
+Finds the closest house with `scaffold_status = AVAILABLE` to the **destination** house
+(not the driver). Driver coordinates are optional; when supplied, the Google Maps URL routes
+driver → scaffold pickup → destination instead of just pickup → destination.
+
+Special cases:
+- Destination house already has `AVAILABLE` scaffold → returns `alreadyAvailable: true` and
+  the frontend shows a green "already in place" message instead of a pickup card.
+- No available scaffold anywhere → returns `scaffoldHouse: null`.
+
+The scaffold form has its own independent driver-location picker (separate from the order
+form) so different drivers can be assigned without interference.
+
+### Map View — Scaffold mode
+
+The Map View toggle bar adds a **Scaffold** mode alongside the default **Houses** mode.
+In scaffold mode:
+- House labels are coloured by scaffold status: dark green = Available, orange = In Use,
+  grey = None.
+- Clicking a marker shows a scaffold popup with status, planned start date, and planned end
+  date instead of the materials inventory popup.
+- A colour legend is displayed at the bottom of the map.
+
 ## Logging
 
 The route pipeline emits an INFO-level breadcrumb at every stage so you can see what
