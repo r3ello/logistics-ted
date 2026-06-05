@@ -65,7 +65,7 @@ src/main/java/com/bellgado/logistics_ted/
 ├── LogisticsTedApplication.java
 ├── config/             SecurityConfig, RoutingConfig, RoutingProperties
 ├── security/           Session-auth helpers (UserDetailsService, JSON 401/403 handlers)
-├── domain/             JPA entities: House, Warehouse, Inventory, Material, Supplier, AppUser, SupplierInventory
+├── domain/             JPA entities: House, Warehouse, Inventory, Material, Supplier, AppUser, SupplierInventory, Worker, Scaffold, ScaffoldStatus
 ├── repository/         Spring Data JPA repositories
 ├── service/
 │   ├── HouseService, InventoryService, ServerMessages
@@ -76,7 +76,7 @@ src/main/java/com/bellgado/logistics_ted/
 
 src/main/resources/
 ├── application.yaml
-├── db/migration/       Flyway: V1__schema.sql, V2__seed.sql, V3__supplier_material.sql
+├── db/migration/       Flyway: V1–V10 (schema, seed, supplier, order history, scaffold columns, scaffold dates, workers, worker crew, worker-house FK, scaffold entity)
 └── static/             index.html, map-picker.html, leaflet + marker assets (unchanged from Node)
 ```
 
@@ -146,37 +146,78 @@ The response shape:
 }
 ```
 
+## Workers
+
+Workers are a first-class entity (`worker` table, added by `V7__workers.sql` and `V8__worker_crew.sql`).
+
+| Field    | Notes |
+|----------|-------|
+| `name`   | Required |
+| `location` | Auto-filled via OpenStreetMap reverse geocoding when a map pin is placed |
+| `lat/lng` | Validated: latitude −90..90, longitude −180..180 |
+| `crew`   | Trade speciality (Roofing, Plumbing, Electricity, Framing, Finishing, …) |
+| `house_id` | Optional FK — which site the worker is currently assigned to (added by `V9__worker_house.sql`) |
+
+**API:** `GET/POST /api/workers`, `PUT/DELETE /api/workers/{id}`
+
+Workers are visible on the dashboard (Workers tab) and on the Map View (Workers / Houses & Workers modes). The worker map popup shows name, location, crew, and assigned house.
+
 ## Scaffold Transport
 
-Each house can hold a scaffold with one of three statuses: `NONE`, `AVAILABLE`, or `IN_USE`.
-The status and planned dates are stored on the `house` table (added by `V5__scaffold.sql` and
-`V6__scaffold_dates.sql`).
+Scaffolds are a first-class entity (`scaffold` table, added by `V10__scaffold_entity.sql`).
+Each scaffold has a `status` (`NONE` / `AVAILABLE` / `IN_USE`), optional `start_date` / `end_date`,
+and an optional `house_id` FK. One house can have at most one scaffold assigned.
 
-### Separate menu — 🏗️ Scaffold
+**API:** `GET/POST /api/scaffolds`, `PUT/DELETE /api/scaffolds/{id}`
+
+Validations:
+- Duplicate house assignment is rejected (409-style 400).
+- End date must be on or after start date.
+
+### Scaffold Transport menu — 🏗️
 
 `GET /api/scaffold-transport?destinationHouseId={id}&startLat={lat}&startLng={lng}`
 
-Finds the closest house with `scaffold_status = AVAILABLE` to the **destination** house
-(not the driver). Driver coordinates are optional; when supplied, the Google Maps URL routes
-driver → scaffold pickup → destination instead of just pickup → destination.
+Finds the closest scaffold with `status = AVAILABLE` to the **destination** house (not the
+driver). Driver coordinates are optional; when supplied, the Google Maps URL routes
+driver → scaffold pickup → destination.
 
 Special cases:
-- Destination house already has `AVAILABLE` scaffold → returns `alreadyAvailable: true` and
-  the frontend shows a green "already in place" message instead of a pickup card.
-- No available scaffold anywhere → returns `scaffoldHouse: null`.
+- Destination house already has an `AVAILABLE` scaffold → returns `alreadyAvailable: true`.
+- No available scaffold found → returns `scaffoldHouse: null`.
 
-The scaffold form has its own independent driver-location picker (separate from the order
-form) so different drivers can be assigned without interference.
+The scaffold form has its own independent driver-location picker separate from the order form.
 
-### Map View — Scaffold mode
+## Dashboard — three-mode toggle
 
-The Map View toggle bar adds a **Scaffold** mode alongside the default **Houses** mode.
-In scaffold mode:
-- House labels are coloured by scaffold status: dark green = Available, orange = In Use,
-  grey = None.
-- Clicking a marker shows a scaffold popup with status, planned start date, and planned end
-  date instead of the materials inventory popup.
-- A colour legend is displayed at the bottom of the map.
+The dashboard has a toggle at the top: **Houses | Workers | Scaffold**.
+
+| Mode | Content |
+|------|---------|
+| Houses | Original house cards with materials, stock, phase chips + scaffold status chip |
+| Workers | Worker cards with crew, assigned house; Add/Edit/Delete; search bar |
+| Scaffold | Scaffold cards with status, assigned house, dates; Add/Edit/Delete; search bar |
+
+## Map View — four-mode toggle
+
+| Mode | Description |
+|------|-------------|
+| 🏠 Houses | Standard house markers with materials popup |
+| 🏗️ Scaffold | Markers coloured by scaffold status; popup shows scaffold info; legend at bottom |
+| 👷 Workers | Worker emoji markers with crew and assigned house popup |
+| 🏠👷 Houses & Workers | Both layers — houses (green labels + full popup), workers (orange labels + popup) |
+
+## Reverse geocoding
+
+When a map pin is placed in the house modal or the worker modal, the app calls the
+OpenStreetMap Nominatim API (`/reverse`) to auto-fill the Location field with a human-readable
+city/country name. No API key required.
+
+## Internationalisation
+
+All UI strings are in the `i18n` object (`en` / `bg`). The language toggle re-renders
+material field labels, static form labels, modal options, map toggle buttons, dashboard
+chips, and map popup rows without losing entered values.
 
 ## Logging
 
