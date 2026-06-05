@@ -3,6 +3,7 @@ package com.bellgado.logistics_ted.service;
 import com.bellgado.logistics_ted.domain.House;
 import com.bellgado.logistics_ted.domain.Inventory;
 import com.bellgado.logistics_ted.domain.Material;
+import com.bellgado.logistics_ted.domain.ScaffoldStatus;
 import com.bellgado.logistics_ted.domain.Warehouse;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.InventoryRepository;
@@ -96,6 +97,17 @@ public class HouseService {
         return toResponse(houses.save(h));
     }
 
+    public void updateScaffold(Integer id, Map<String, Object> body) {
+        House h = houses.findById(id).orElseThrow(() -> new IllegalArgumentException("House not found"));
+        if (body.containsKey("scaffoldStatus") && body.get("scaffoldStatus") != null)
+            h.setScaffoldStatus(ScaffoldStatus.valueOf(body.get("scaffoldStatus").toString()));
+        String start = body.containsKey("scaffoldStartDate") ? (String) body.get("scaffoldStartDate") : null;
+        String end   = body.containsKey("scaffoldEndDate")   ? (String) body.get("scaffoldEndDate")   : null;
+        if (body.containsKey("scaffoldStartDate")) h.setScaffoldStartDate(parseDate(start));
+        if (body.containsKey("scaffoldEndDate"))   h.setScaffoldEndDate(parseDate(end));
+        houses.save(h);
+    }
+
     public void delete(Integer id) {
         // FK cascades take care of warehouse + inventory rows.
         if (!houses.existsById(id)) throw new EntityNotFoundException("House not found");
@@ -111,12 +123,19 @@ public class HouseService {
     }
 
     private static void applyFields(House h, HouseUpsertRequest req) {
-        h.setName(req.name().trim());
-        h.setLocation(req.location().trim());
-        h.setLat(req.lat());
-        h.setLng(req.lng());
-        h.setStartDate(parseDate(req.startDate()));
-        h.setCurrentPhase(req.currentPhase() == null || req.currentPhase().isBlank() ? null : req.currentPhase().trim());
+        if (req.name()     != null) h.setName(req.name().trim());
+        if (req.location() != null) h.setLocation(req.location().trim());
+        if (req.lat()      != null) h.setLat(req.lat());
+        if (req.lng()      != null) h.setLng(req.lng());
+        if (req.startDate()    != null || req.name() != null) h.setStartDate(parseDate(req.startDate()));
+        if (req.currentPhase() != null || req.name() != null)
+            h.setCurrentPhase(req.currentPhase() == null || req.currentPhase().isBlank() ? null : req.currentPhase().trim());
+        if (req.scaffoldStatus()    != null) h.setScaffoldStatus(req.scaffoldStatus());
+        if (req.scaffoldStartDate() != null) h.setScaffoldStartDate(parseDate(req.scaffoldStartDate()));
+        if (req.scaffoldEndDate()   != null) h.setScaffoldEndDate(parseDate(req.scaffoldEndDate()));
+        // allow clearing dates
+        if ("".equals(req.scaffoldStartDate())) h.setScaffoldStartDate(null);
+        if ("".equals(req.scaffoldEndDate()))   h.setScaffoldEndDate(null);
     }
 
     private static LocalDate parseDate(String s) {
