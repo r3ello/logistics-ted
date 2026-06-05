@@ -65,19 +65,43 @@ src/main/java/com/bellgado/logistics_ted/
 ├── LogisticsTedApplication.java
 ├── config/             SecurityConfig, RoutingConfig, RoutingProperties
 ├── security/           Session-auth helpers (UserDetailsService, JSON 401/403 handlers)
-├── domain/             JPA entities: House, Warehouse, Inventory, Material, Supplier, AppUser, SupplierInventory, Worker, Scaffold, ScaffoldStatus
-├── repository/         Spring Data JPA repositories
+├── domain/             JPA entities:
+│                         House, Warehouse, Inventory, Material,
+│                         Supplier, SupplierInventory, AppUser,
+│                         Worker, Scaffold, ScaffoldStatus
+├── repository/         Spring Data JPA repositories (one per entity)
 ├── service/
 │   ├── HouseService, InventoryService, ServerMessages
 │   ├── RouteOptimizationService, SupplierFallbackService
-│   ├── distance/       Matrix services: Haversine, GoogleRoutes, Caching decorator, RouteCost types
-│   └── solver/         RouteSolver interface + HeuristicRouteSolver + ObjectiveSpec
-└── web/                REST controllers + DTOs (mirrors the Node /api/* endpoints 1:1)
+│   ├── OrderHistoryService
+│   ├── distance/       RouteMatrixService, HaversineMatrixService,
+│   │                   GoogleRoutesMatrixService, CachingRouteMatrixService
+│   └── solver/         RouteSolver, HeuristicRouteSolver, ObjectiveSpec
+└── web/
+    ├── AuthController, HouseController, InventoryController
+    ├── MaterialController, OrderController, OrderHistoryController
+    ├── WorkerController          — CRUD for workers
+    ├── ScaffoldController        — CRUD for scaffold entities (/api/scaffolds)
+    ├── ScaffoldTransportController — transport lookup (/api/scaffold-transport)
+    └── dto/                      OrderRequest, OrderResponse, HouseDto,
+                                  HouseUpsertRequest, …
 
 src/main/resources/
 ├── application.yaml
-├── db/migration/       Flyway: V1–V10 (schema, seed, supplier, order history, scaffold columns, scaffold dates, workers, worker crew, worker-house FK, scaffold entity)
-└── static/             index.html, map-picker.html, leaflet + marker assets (unchanged from Node)
+├── db/migration/
+│   ├── V1__schema.sql            Base schema (houses, warehouses, inventory, materials, users)
+│   ├── V2__seed.sql              Seed data (materials, default accounts)
+│   ├── V3__supplier_material.sql Supplier + supplier_inventory tables
+│   ├── V4__order_history.sql     customer_order, order_route_option, order_event tables
+│   ├── V5__scaffold.sql          scaffold_status column on house
+│   ├── V6__scaffold_dates.sql    scaffold_start_date / scaffold_end_date on house
+│   ├── V7__workers.sql           worker table (name, location, lat, lng)
+│   ├── V8__worker_crew.sql       crew column on worker
+│   ├── V9__worker_house.sql      house_id FK on worker
+│   └── V10__scaffold_entity.sql  scaffold table (first-class entity, migrates V5/V6 data)
+└── static/
+    ├── index.html                SPA frontend (vanilla JS + Leaflet, EN/BG i18n)
+    └── map-picker.html           Standalone map pin picker (localStorage round-trip)
 ```
 
 ## Database notes
