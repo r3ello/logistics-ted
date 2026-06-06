@@ -84,7 +84,14 @@ public class WorkerController {
         if (body.containsKey("location")) w.setLocation(body.getOrDefault("location", "").toString());
         if (body.get("lat")      != null) w.setLat(new java.math.BigDecimal(body.get("lat").toString()));
         if (body.get("lng")      != null) w.setLng(new java.math.BigDecimal(body.get("lng").toString()));
-        if (body.containsKey("crew"))     w.setCrew(body.get("crew") != null ? body.get("crew").toString() : null);
+        if (body.get("role") != null)
+            w.setRole(com.bellgado.logistics_ted.domain.WorkerRole.valueOf(body.get("role").toString()));
+        // managers have no trade; members and leaders do
+        if (w.getRole() == com.bellgado.logistics_ted.domain.WorkerRole.CREW_MANAGER) {
+            w.setTrade(null);
+        } else if (body.containsKey("trade")) {
+            w.setTrade(body.get("trade") != null ? body.get("trade").toString() : null);
+        }
         if (body.containsKey("houseId")) {
             if (body.get("houseId") == null) {
                 w.setHouse(null);
@@ -104,7 +111,30 @@ public class WorkerController {
         m.put("location", w.getLocation());
         m.put("lat",      w.getLat());
         m.put("lng",      w.getLng());
-        m.put("crew",     w.getCrew());
+        m.put("trade",    w.getTrade());
+        m.put("role",     w.getRole());
+        if (w.getCrew() != null) {
+            m.put("crewId",   w.getCrew().getId());
+            m.put("crewName", w.getCrew().getName());
+            House crewHouse = w.getCrew().getHouse();
+            m.put("crewHouseId",   crewHouse != null ? crewHouse.getId()   : null);
+            m.put("crewHouseName", crewHouse != null ? crewHouse.getName() : null);
+            Worker mgr = w.getCrew().getManager();
+            m.put("managerId",   mgr != null ? mgr.getId()   : null);
+            m.put("managerName", mgr != null ? mgr.getName() : null);
+            workers.findByCrewIdAndRole(w.getCrew().getId(), com.bellgado.logistics_ted.domain.WorkerRole.CREW_LEADER)
+                .stream().findFirst().ifPresentOrElse(
+                    ldr -> { m.put("leaderId", ldr.getId()); m.put("leaderName", ldr.getName()); },
+                    ()  -> { m.put("leaderId", null);        m.put("leaderName", null); }
+                );
+        } else {
+            m.put("crewId",      null);
+            m.put("crewName",    null);
+            m.put("managerId",   null);
+            m.put("managerName", null);
+            m.put("leaderId",    null);
+            m.put("leaderName",  null);
+        }
         if (w.getHouse() != null) {
             m.put("houseId",   w.getHouse().getId());
             m.put("houseName", w.getHouse().getName());

@@ -59,7 +59,13 @@ public class ScaffoldController {
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<?> delete(@PathVariable Integer id) {
-        if (!scaffolds.existsById(id)) return ResponseEntity.notFound().build();
+        Scaffold s = scaffolds.findById(id).orElse(null);
+        if (s == null) return ResponseEntity.notFound().build();
+        if (s.getHouse() != null) {
+            House h = s.getHouse();
+            h.setScaffoldStatus(ScaffoldStatus.NONE);
+            houses.save(h);
+        }
         scaffolds.deleteById(id);
         return ResponseEntity.noContent().build();
     }
