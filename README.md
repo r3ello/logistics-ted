@@ -68,7 +68,7 @@ src/main/java/com/bellgado/logistics_ted/
 ├── domain/             JPA entities:
 │                         House, Warehouse, Inventory, Material,
 │                         Supplier, SupplierInventory, AppUser,
-│                         Worker, Scaffold, ScaffoldStatus
+│                         Worker, WorkerRole, Crew, Scaffold, ScaffoldStatus
 ├── repository/         Spring Data JPA repositories (one per entity)
 ├── service/
 │   ├── HouseService, InventoryService, ServerMessages
@@ -80,7 +80,8 @@ src/main/java/com/bellgado/logistics_ted/
 └── web/
     ├── AuthController, HouseController, InventoryController
     ├── MaterialController, OrderController, OrderHistoryController
-    ├── WorkerController          — CRUD for workers
+    ├── WorkerController          — CRUD for workers (/api/workers)
+    ├── CrewController            — CRUD for crews (/api/crews)
     ├── ScaffoldController        — CRUD for scaffold entities (/api/scaffolds)
     ├── ScaffoldTransportController — transport lookup (/api/scaffold-transport)
     └── dto/                      OrderRequest, OrderResponse, HouseDto,
@@ -98,7 +99,14 @@ src/main/resources/
 │   ├── V7__workers.sql           worker table (name, location, lat, lng)
 │   ├── V8__worker_crew.sql       crew column on worker
 │   ├── V9__worker_house.sql      house_id FK on worker
-│   └── V10__scaffold_entity.sql  scaffold table (first-class entity, migrates V5/V6 data)
+│   ├── V10__scaffold_entity.sql  scaffold table (first-class entity, migrates V5/V6 data)
+│   ├── V11__worker_role.sql      worker role enum (CREW_MANAGER / CREW_LEADER / CREW_MEMBER)
+│   ├── V12__crew_entity.sql      crew table with manager_id FK
+│   ├── V13__manager_no_trade.sql strip trade from all CREW_MANAGER rows
+│   ├── V14__crew_members_seed.sql seed 5+ CREW_MEMBERs per crew
+│   ├── V15__crew_house.sql       house_id FK on crew (which house the crew works on)
+│   ├── V16__crew_worker_coords.sql assign lat/lng to all crew workers near their house city
+│   └── V17__fix_crew_members.sql fix Beta leader assignment, add Delta/Zeta missing members
 └── static/
     ├── index.html                SPA frontend (vanilla JS + Leaflet, EN/BG i18n)
     └── map-picker.html           Standalone map pin picker (localStorage round-trip)
@@ -170,21 +178,45 @@ The response shape:
 }
 ```
 
-## Workers
+## Workers & Crews
 
-Workers are a first-class entity (`worker` table, added by `V7__workers.sql` and `V8__worker_crew.sql`).
+### Workers
 
-| Field    | Notes |
-|----------|-------|
-| `name`   | Required |
+Workers are a first-class entity (`worker` table, `V7–V9`).
+
+| Field      | Notes |
+|------------|-------|
+| `name`     | Required |
+| `role`     | `CREW_MANAGER`, `CREW_LEADER`, or `CREW_MEMBER` (added by `V11`) |
+| `trade`    | Speciality (Roofing, Plumbing, Electricity, Framing, Finishing, …) — CREW_MANAGERs have no trade |
 | `location` | Auto-filled via OpenStreetMap reverse geocoding when a map pin is placed |
-| `lat/lng` | Validated: latitude −90..90, longitude −180..180 |
-| `crew`   | Trade speciality (Roofing, Plumbing, Electricity, Framing, Finishing, …) |
-| `house_id` | Optional FK — which site the worker is currently assigned to (added by `V9__worker_house.sql`) |
+| `lat/lng`  | Validated: latitude −90..90, longitude −180..180 |
+| `crew_id`  | FK to the crew the worker belongs to |
+| `house_id` | Optional FK — worker's personally assigned house (added by `V9`) |
 
 **API:** `GET/POST /api/workers`, `PUT/DELETE /api/workers/{id}`
 
-Workers are visible on the dashboard (Workers tab) and on the Map View (Workers / Houses & Workers modes). The worker map popup shows name, location, crew, and assigned house.
+The worker DTO includes resolved fields: `crewName`, `crewHouseId/crewHouseName` (house the crew works on), `managerId/managerName`, `leaderId/leaderName`.
+
+Worker cards on the dashboard show: Role, Trade, Crew, Working On (crew's house), Manager, Crew Leader.
+
+### Crews
+
+Crews are a first-class entity (`crew` table, `V12`).
+
+| Field        | Notes |
+|--------------|-------|
+| `name`       | Required |
+| `manager_id` | FK to the CREW_MANAGER responsible for this crew |
+| `house_id`   | FK to the House the crew is currently working on (added by `V15`) |
+
+**API:** `GET/POST /api/crews`, `PUT/DELETE /api/crews/{id}`, `GET /api/crews/org-chart`
+
+Crew cards on the dashboard show: Manager, Leader, assigned House, and a collapsible Members list.
+
+Business rules:
+- A worker can be CREW_LEADER of only one crew at a time; the frontend warns and auto-removes from the old crew when reassigning.
+- Each crew has at least 5 CREW_MEMBERs plus one CREW_LEADER (seeded by `V14` and `V17`).
 
 ## Scaffold Transport
 
@@ -212,24 +244,29 @@ Special cases:
 
 The scaffold form has its own independent driver-location picker separate from the order form.
 
-## Dashboard — three-mode toggle
+Deleting a scaffold automatically resets the associated house's `scaffold_status` back to `NONE`.
 
-The dashboard has a toggle at the top: **Houses | Workers | Scaffold**.
+## Dashboard — four-mode toggle
+
+The dashboard has a toggle at the top: **Houses | Workers | Crews | Scaffold**.
 
 | Mode | Content |
 |------|---------|
-| Houses | Original house cards with materials, stock, phase chips + scaffold status chip |
-| Workers | Worker cards with crew, assigned house; Add/Edit/Delete; search bar |
+| Houses | House cards with materials (name + quantity), phase chip, scaffold status chip |
+| Workers | Worker cards showing Role, Trade, Crew, Working On, Manager, Crew Leader; Add/Edit/Delete; search bar (filters by all attributes) |
+| Crews | Crew cards showing Manager, Leader, assigned House, collapsible Members list; org-chart view; Add/Edit/Delete |
 | Scaffold | Scaffold cards with status, assigned house, dates; Add/Edit/Delete; search bar |
 
-## Map View — four-mode toggle
+## Map View — six-mode toggle
 
 | Mode | Description |
 |------|-------------|
 | 🏠 Houses | Standard house markers with materials popup |
 | 🏗️ Scaffold | Markers coloured by scaffold status; popup shows scaffold info; legend at bottom |
-| 👷 Workers | Worker emoji markers with crew and assigned house popup |
-| 🏠👷 Houses & Workers | Both layers — houses (green labels + full popup), workers (orange labels + popup) |
+| 👷 Workers | Worker emoji markers (👔/🦺/👷 by role) with crew, manager, leader, trade popup; filterable by manager |
+| 🏠👷 Houses & Workers | Both layers — house markers + worker markers |
+| 👥 Crews | Select a crew from the dropdown; all members with coordinates appear as markers |
+| 🏠👥 House & Crew | Select a house; its assigned crew auto-loads and all members appear on the map. A status label shows the crew name (clickable to re-render) or indicates no crew is assigned. The crew dropdown can also be set independently. |
 
 ## Reverse geocoding
 
