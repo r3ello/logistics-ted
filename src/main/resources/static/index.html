@@ -3331,7 +3331,7 @@
     const CREW_Y      = mgrY + 150;
     const CREW_SPACING = Math.min(160, Math.max(100, (W - 80) / mgr.crews.length));
     const totalW      = (mgr.crews.length - 1) * CREW_SPACING;
-    const startX      = mgrX - totalW / 2;
+    const startX      = Math.max(70, mgrX - totalW / 2);
 
     mgr.crews.forEach((crew, ci) => {
       const cx    = startX + ci * CREW_SPACING;
@@ -3399,7 +3399,7 @@
 
     const MEMBER_Y    = entry.crewY + 155;
     const MEM_SPACING = Math.min(110, Math.max(80, (W - 80) / members.length));
-    const startX      = entry.crewX - ((members.length - 1) * MEM_SPACING) / 2;
+    const startX      = Math.max(70, entry.crewX - ((members.length - 1) * MEM_SPACING) / 2);
 
     members.forEach((m, mi) => {
       const mx    = startX + mi * MEM_SPACING;
@@ -3424,7 +3424,7 @@
     let maxY = 540, maxX = 0;
     _graphMemberNodes.forEach(n => {
       const top  = parseInt(n.style.top  || 0) + 90;
-      const left = parseInt(n.style.left || 0) + 80;
+      const left = parseInt(n.style.left || 0) + 100; // +100 covers node half-width + right margin
       if (top  > maxY) maxY = top;
       if (left > maxX) maxX = left;
     });
