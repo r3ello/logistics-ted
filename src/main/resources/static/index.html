@@ -3267,7 +3267,7 @@
       node.dataset.mgrid = String(mgr.managerId);
       node.style.cursor = 'pointer';
       node.title = `${mgr.crews.length} crew${mgr.crews.length !== 1 ? 's' : ''}`;
-      node.onclick = () => _toggleGraphManager(mgr, x, MGR_Y, W);
+      node.onclick = () => _toggleGraphManager(mgr, x, MGR_Y, document.getElementById('orgGraphView').offsetWidth || W);
       container.appendChild(node);
     });
 
@@ -3316,7 +3316,13 @@
       _graphExpandedCrews.clear();
       _graphCrewNodes = [];
       container.querySelectorAll('[data-mgrid]').forEach(n => n.style.boxShadow = '0 2px 14px rgba(0,0,0,0.45)');
-      document.getElementById('orgGraphView').style.minHeight = '540px';
+      // Reset container to natural width so next expansion reads a clean W
+      const gEl = document.getElementById('orgGraphView');
+      const nEl = document.getElementById('orgGraphNodes');
+      const sEl = document.getElementById('orgGraphSvg');
+      gEl.style.minHeight = '540px';
+      nEl.style.minWidth = '100%'; nEl.style.height = '';
+      sEl.style.minWidth = '100%'; sEl.style.height = '';
       return;
     }
 
@@ -3329,9 +3335,16 @@
 
     const CREW_COLORS = ['#3ecf6e','#4f8ef7','#f5a623','#a78bfa','#f76f6f','#38bdf8','#fb923c'];
     const CREW_Y      = mgrY + 150;
-    const CREW_SPACING = Math.min(160, Math.max(100, (W - 80) / mgr.crews.length));
-    const totalW      = (mgr.crews.length - 1) * CREW_SPACING;
-    const startX      = Math.max(70, mgrX - totalW / 2);
+    const C_LEFT_PAD = 70, C_RIGHT_PAD = 70;
+    const cAvailW     = W - C_LEFT_PAD - C_RIGHT_PAD;
+    const CREW_SPACING = mgr.crews.length <= 1
+      ? 0
+      : Math.min(160, Math.max(90, cAvailW / (mgr.crews.length - 1)));
+    const totalW  = (mgr.crews.length - 1) * CREW_SPACING;
+    // Center under manager, clamped within bounds
+    let startX = mgrX - totalW / 2;
+    if (startX < C_LEFT_PAD)            startX = C_LEFT_PAD;
+    if (startX + totalW > W - C_RIGHT_PAD) startX = Math.max(C_LEFT_PAD, W - C_RIGHT_PAD - totalW);
 
     mgr.crews.forEach((crew, ci) => {
       const cx    = startX + ci * CREW_SPACING;
@@ -3354,7 +3367,7 @@
       const crewEntry = { crewId: crew.id, crew, color, node: crewNode, edgeToMgr: edge, memberNodes: [], memberEdges: [], crewX: cx, crewY: CREW_Y };
       _graphCrewNodes.push(crewEntry);
 
-      crewNode.onclick = (e) => { e.stopPropagation(); _toggleGraphCrew(crewEntry, W); };
+      crewNode.onclick = (e) => { e.stopPropagation(); _toggleGraphCrew(crewEntry, document.getElementById('orgGraphView').offsetWidth || W); };
     });
     setTimeout(_updateGraphHeight, 200);
   }
@@ -3398,8 +3411,17 @@
     if (!members.length) return;
 
     const MEMBER_Y    = entry.crewY + 155;
-    const MEM_SPACING = Math.min(110, Math.max(80, (W - 80) / members.length));
-    const startX      = Math.max(70, entry.crewX - ((members.length - 1) * MEM_SPACING) / 2);
+    const LEFT_PAD = 70, RIGHT_PAD = 70;
+    const availW  = W - LEFT_PAD - RIGHT_PAD;
+    // Reduce spacing to fit all members within available width before scrolling
+    const MEM_SPACING = members.length <= 1
+      ? 0
+      : Math.min(110, Math.max(70, availW / (members.length - 1)));
+    const totalMW  = (members.length - 1) * MEM_SPACING;
+    // Center under crew node, then clamp so the group stays within [LEFT_PAD, W-RIGHT_PAD]
+    let startX = entry.crewX - totalMW / 2;
+    if (startX < LEFT_PAD)          startX = LEFT_PAD;
+    if (startX + totalMW > W - RIGHT_PAD) startX = Math.max(LEFT_PAD, W - RIGHT_PAD - totalMW);
 
     members.forEach((m, mi) => {
       const mx    = startX + mi * MEM_SPACING;
