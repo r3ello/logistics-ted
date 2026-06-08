@@ -657,9 +657,55 @@
       .loc-row select, .loc-row button { width: 100%; }
     }
 
-    /* ── MAP RESPONSIVE ── */
+    /* ── GLOBAL MOBILE OVERFLOW GUARD ── */
+    .main { overflow-x: hidden; }
+
+    /* ── DASHBOARD TAB BAR ── */
+    /* desktop: shrink-wrap; mobile: fill width with equal buttons */
+    #dashTabBar { width: fit-content; }
+    @media (max-width: 600px) {
+      #dashTabBar { width: 100%; }
+      #dashTabBar > button {
+        flex: 1;
+        padding: 0.35rem 0.3rem !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap;
+        min-width: 0;
+      }
+    }
+
+    /* ── HEADER ── */
+    @media (max-width: 600px) {
+      /* Hide text labels in header buttons; keep icons only */
+      #pdfBtn .btn-label,
+      #langBtn .btn-label { display: none; }
+      #userBadge .role-tag { display: none; }
+      /* Prevent user badge from pushing layout */
+      .user-badge { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    }
+
+    /* ── TOTALS GRID ── */
+    @media (max-width: 400px) {
+      .totals { grid-template-columns: 1fr; }
+    }
+
+    /* ── HISTORY ── */
     @media (max-width: 640px) {
-      /* Toggle bar: clamp width + horizontal scroll so it never overflows screen */
+      .history-layout { gap: 0.75rem; }
+      .history-filter-bar { gap: 0.4rem; }
+      .history-filter select { font-size: 0.78rem; }
+      .history-alt-cards-row { flex-direction: column; }
+      .history-detail-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ── ORG CHART CARDS ── */
+    @media (max-width: 640px) {
+      .org-crews-grid { grid-template-columns: 1fr !important; }
+      .org-mgr-node   { min-width: 110px; padding: 0.55rem 0.7rem; }
+    }
+
+    /* ── MAP TOGGLE BAR ── */
+    @media (max-width: 640px) {
       #mapToggleBar {
         max-width: calc(100vw - 24px) !important;
         overflow-x: auto !important;
@@ -668,7 +714,7 @@
       }
       #mapToggleBar::-webkit-scrollbar { display: none; }
 
-      /* Search bar drops below the toggle bar so they don't collide */
+      /* Search bar drops below the toggle bar on mobile */
       #mapSearchBar {
         top: 60px !important;
         right: auto !important;
@@ -676,55 +722,30 @@
         transform: translateX(-50%) !important;
         max-width: calc(100vw - 24px) !important;
         width: calc(100vw - 24px) !important;
-        box-sizing: border-box;
       }
-      #mapSearchBar input {
-        width: 100% !important;
-        flex: 1 !important;
-      }
+      #mapSearchBar input { flex: 1 !important; }
 
-      /* Crew / house-crew selector: fit viewport */
+      /* Crew/house selectors */
       #mapCrewSelector,
       #mapCrewHouseSelector {
         max-width: calc(100vw - 24px) !important;
         min-width: 0 !important;
         width: calc(100vw - 24px) !important;
-        top: 112px !important;
+        top: 108px !important;
       }
     }
 
-    /* ── DASHBOARD TAB BAR RESPONSIVE ── */
-    @media (max-width: 520px) {
-      #dashTabBar {
-        width: 100% !important;
-      }
-      #dashTabBar > button {
-        flex: 1 !important;
-        padding: 0.35rem 0.4rem !important;
-        font-size: 0.78rem !important;
-        text-align: center;
-        justify-content: center;
-        white-space: nowrap;
-      }
+    /* ── MODAL ── */
+    @media (max-width: 480px) {
+      .modal { padding: 1.25rem; }
+      .modal-coords { grid-template-columns: 1fr; }
     }
 
-    /* ── HISTORY FILTER BAR RESPONSIVE ── */
-    @media (max-width: 640px) {
-      .history-layout { gap: 0.75rem; }
-      .history-filter-bar { gap: 0.4rem; }
-      .history-filter select { font-size: 0.78rem; }
-      .history-alt-cards-row { flex-direction: column; }
-    }
-
-    /* ── ORG CHART RESPONSIVE ── */
-    @media (max-width: 640px) {
-      .org-crews-grid {
-        grid-template-columns: 1fr !important;
-      }
-      .org-mgr-node {
-        min-width: 120px;
-        padding: 0.6rem 0.75rem;
-      }
+    /* ── SCAFFOLD / ORDER RESULTS ── */
+    @media (max-width: 480px) {
+      .stop-card { flex-direction: column; gap: 0.5rem; }
+      .result-meta { flex-direction: column; gap: 0.4rem; }
+      .alt-cards   { grid-template-columns: 1fr; }
     }
 
     /* ── ORG CHART GRAPH ── */
@@ -1083,7 +1104,7 @@
 
   <!-- VIEW: DASHBOARD -->
   <div class="view active" id="view-dashboard">
-    <div id="dashTabBar" style="display:flex;gap:4px;margin-bottom:1.2rem;background:#1a1d27;border:1px solid #2e3250;border-radius:10px;padding:4px;width:fit-content">
+    <div id="dashTabBar" style="display:flex;gap:4px;margin-bottom:1.2rem;background:#1a1d27;border:1px solid #2e3250;border-radius:10px;padding:4px">
       <button onclick="setDashMode('houses')"  id="dashModeHouses"  style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:#4f8ef7;color:#fff">🏠 Houses</button>
       <button onclick="setDashMode('workers')" id="dashModeWorkers" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👷 Workers</button>
       <button onclick="setDashMode('scaffold')" id="dashModeScaffold" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏗️ Scaffold</button>
@@ -1237,7 +1258,7 @@
     <div id="orgGraphView" style="display:none;position:relative;width:100%;min-height:540px;background:#161927;border-radius:14px;overflow:auto;border:1px solid #2e3250;overflow-x:auto;overflow-y:auto">
       <svg id="orgGraphSvg" style="position:absolute;top:0;left:0;min-width:100%;height:100%;pointer-events:none"></svg>
       <div id="orgGraphNodes" style="position:absolute;top:0;left:0;min-width:100%;height:100%"></div>
-      <div id="orgGraphEmpty" style="display:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9aa3be;font-size:0.9rem">No crews found</div>
+      <div id="orgGraphEmpty" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;color:#9aa3be;font-size:0.9rem">No crews found</div>
     </div>
   </div>
 
