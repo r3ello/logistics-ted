@@ -676,12 +676,15 @@
 
     /* ── HEADER ── */
     @media (max-width: 600px) {
-      /* Hide text labels in header buttons; keep icons only */
+      /* Hide text labels; keep icons only */
       #pdfBtn .btn-label,
       #langBtn .btn-label { display: none; }
       #userBadge .role-tag { display: none; }
-      /* Prevent user badge from pushing layout */
       .user-badge { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+      /* Hide PDF button — frees space for the hamburger */
+      #pdfBtn { display: none !important; }
+      /* Move hamburger to the front so it's always visible */
+      .hamburger { order: -1; }
     }
 
     /* ── TOTALS GRID ── */
