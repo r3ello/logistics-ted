@@ -312,7 +312,7 @@
     .house-map-popup .leaflet-popup-tip-container { display: none; }
 
     /* ── TOTALS ── */
-    .totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px,1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 1rem; margin-bottom: 2rem; }
     .total-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: 1rem; }
     .total-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
     .total-card:nth-child(1) .total-icon { background: rgba(62,207,110,0.15); }
@@ -685,9 +685,7 @@
     }
 
     /* ── TOTALS GRID ── */
-    @media (max-width: 400px) {
-      .totals { grid-template-columns: 1fr; }
-    }
+    /* keep 2-col grid even on small phones — cards are wide enough */
 
     /* ── HISTORY ── */
     @media (max-width: 640px) {
