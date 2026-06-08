@@ -9,6 +9,14 @@ spring:
       - org.telegram.telegrambots.longpolling.starter.TelegramBotStarterConfiguration
       - org.telegram.telegrambots.webhook.starter.TelegramBotStarterConfiguration
 
+  web:
+    resources:
+      cache:
+        period: 0
+        cachecontrol:
+          no-cache: true
+          no-store: true
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
@@ -37,7 +45,7 @@ spring:
   # ============================================================================
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY:}
+      api-key: ${OPENAI_API_KEY:placeholder-key}
       chat:
         options:
           model: gpt-4o

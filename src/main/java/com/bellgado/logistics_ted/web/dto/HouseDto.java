@@ -1,6 +1,7 @@
 package com.bellgado.logistics_ted.web.dto;
 
 import com.bellgado.logistics_ted.domain.House;
+import com.bellgado.logistics_ted.domain.ScaffoldStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,7 +16,10 @@ public record HouseDto(
     @JsonProperty("start_date") String startDate,
     @JsonProperty("current_phase") String currentPhase,
     List<MaterialLineDto> materials,
-    BigDecimal totalValue
+    BigDecimal totalValue,
+    @JsonProperty("scaffold_status") ScaffoldStatus scaffoldStatus,
+    @JsonProperty("scaffold_start_date") String scaffoldStartDate,
+    @JsonProperty("scaffold_end_date") String scaffoldEndDate
 ) {
 
     /** Accumulator used while joining a house with its inventory rows. */
@@ -38,7 +42,10 @@ public record HouseDto(
                 source.getStartDate() == null ? null : source.getStartDate().toString(),
                 source.getCurrentPhase(),
                 materials,
-                totalValue
+                totalValue,
+                source.getScaffoldStatus(),
+                source.getScaffoldStartDate() == null ? null : source.getScaffoldStartDate().toString(),
+                source.getScaffoldEndDate()   == null ? null : source.getScaffoldEndDate().toString()
             );
         }
     }

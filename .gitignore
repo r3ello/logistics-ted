@@ -34,3 +34,4 @@ build/
 /src/main/resources/application-dev.yaml
 /CLAUDE.md
 /.claude/
+!/.claude/skills/

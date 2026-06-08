@@ -60,6 +60,18 @@ public class HouseController {
         }
     }
 
+    @org.springframework.web.bind.annotation.PatchMapping("/houses/{id}/scaffold")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateScaffold(@PathVariable Integer id,
+                                            @RequestBody Map<String, Object> body) {
+        try {
+            service.updateScaffold(id, body);
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
+    }
+
     @DeleteMapping("/houses/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
