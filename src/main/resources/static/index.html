@@ -706,6 +706,13 @@
     }
 
     /* ── MAP TOGGLE BAR ── */
+
+    /* Icon-only buttons on small screens — hide text labels */
+    @media (max-width: 480px) {
+      .map-btn-lbl { display: none; }
+      #mapToggleBar button { padding: 0.35rem 0.65rem !important; font-size: 1.05rem !important; }
+    }
+
     @media (max-width: 640px) {
       #mapToggleBar {
         max-width: calc(100vw - 24px) !important;
@@ -715,7 +722,7 @@
       }
       #mapToggleBar::-webkit-scrollbar { display: none; }
 
-      /* Search bar drops below the toggle bar on mobile */
+      /* Search bar: below toggle bar on tablet */
       #mapSearchBar {
         top: 60px !important;
         right: auto !important;
@@ -732,7 +739,39 @@
         max-width: calc(100vw - 24px) !important;
         min-width: 0 !important;
         width: calc(100vw - 24px) !important;
-        top: 108px !important;
+        top: 62px !important;
+      }
+    }
+
+    /* On small phones: icon-only toggle bar, move search to bottom to avoid collisions */
+    @media (max-width: 480px) {
+      #mapSearchBar {
+        top: auto !important;
+        bottom: 70px !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        max-width: calc(100vw - 24px) !important;
+        width: calc(100vw - 24px) !important;
+      }
+      /* Crew/house selectors sit just below the compact icon toggle bar */
+      #mapCrewSelector,
+      #mapCrewHouseSelector {
+        top: 62px !important;
+        max-width: calc(100vw - 24px) !important;
+        min-width: 0 !important;
+        width: calc(100vw - 24px) !important;
+      }
+      /* Scaffold legend moves up to avoid search bar */
+      #mapScaffoldLegend {
+        bottom: 120px !important;
+      }
+    }
+
+    /* iOS safe area — prevent map from hiding behind home bar */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      #view-map.active {
+        bottom: env(safe-area-inset-bottom, 0px);
       }
     }
 
@@ -927,12 +966,12 @@
   <!-- VIEW: MAP -->
   <div class="view" id="view-map">
     <div id="mapToggleBar" style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1000;background:#1a1d27;border:1px solid #2e3250;border-radius:10px;padding:4px;display:flex;gap:4px;box-shadow:0 2px 12px rgba(0,0,0,0.4)">
-      <button onclick="setMapMode('houses')" id="mapModeHouses" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:#4f8ef7;color:#fff">🏠 Houses</button>
-      <button onclick="setMapMode('scaffold')" id="mapModeScaffold" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏗️ Scaffold</button>
-      <button onclick="setMapMode('workers')" id="mapModeWorkers" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👷 Workers</button>
-      <button onclick="setMapMode('all')" id="mapModeAll" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏠👷 Houses & Workers</button>
-      <button onclick="setMapMode('crews')" id="mapModeCrews" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👥 Crews</button>
-      <button onclick="setMapMode('crewhouse')" id="mapModeCrewHouse" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏠👥 House & Crew</button>
+      <button onclick="setMapMode('houses')" id="mapModeHouses" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:#4f8ef7;color:#fff">🏠 <span class="map-btn-lbl">Houses</span></button>
+      <button onclick="setMapMode('scaffold')" id="mapModeScaffold" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏗️ <span class="map-btn-lbl">Scaffold</span></button>
+      <button onclick="setMapMode('workers')" id="mapModeWorkers" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👷 <span class="map-btn-lbl">Workers</span></button>
+      <button onclick="setMapMode('all')" id="mapModeAll" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏠👷 <span class="map-btn-lbl">Houses & Workers</span></button>
+      <button onclick="setMapMode('crews')" id="mapModeCrews" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👥 <span class="map-btn-lbl">Crews</span></button>
+      <button onclick="setMapMode('crewhouse')" id="mapModeCrewHouse" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏠👥 <span class="map-btn-lbl">House & Crew</span></button>
     </div>
     <!-- Crew selector (crews mode only) -->
     <div id="mapCrewSelector" style="display:none;position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:1000;background:#1a1d27;border:1px solid #3ecf6e;border-radius:10px;padding:6px 10px;box-shadow:0 2px 16px rgba(0,0,0,0.5);min-width:260px">
