@@ -5657,6 +5657,7 @@
     try {
       const r    = await apiFetch(`/api/attendance/crew/${crewId}?date=${date}`);
       const list = await r.json();
+      if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; return; }
       if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions recorded for this date.</p>'; return; }
       box.innerHTML = `
         <table class="att-table">
@@ -5686,6 +5687,7 @@
     try {
       const r    = await apiFetch(`/api/attendance/worker/${workerId}?from=${from}&to=${to}`);
       const list = await r.json();
+      if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; return; }
       if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions in this date range.</p>'; return; }
       // Group by date
       const byDate = {};
