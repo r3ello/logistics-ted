@@ -96,6 +96,9 @@ app:
   # Public base URL used to generate check-in QR codes.
   # Override in production: APP_BASE_URL=https://yourdomain.com
   base-url: ${APP_BASE_URL:http://localhost:3002}
+  # Timezone used to determine the current work day (e.g. for check-in date).
+  # Override in production: APP_TIMEZONE=Europe/Sofia
+  timezone: ${APP_TIMEZONE:Europe/Sofia}
 
 # Bearer token (JWT HS256) auth — replaces the old session/cookie scheme. POST /api/login
 # returns { token, tokenType, expiresIn, user } and clients send Authorization: Bearer <token>

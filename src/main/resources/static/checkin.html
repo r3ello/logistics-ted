@@ -20,10 +20,15 @@
       padding:1.5rem;width:100%;max-width:420px}
     label{display:block;font-size:.75rem;font-weight:700;text-transform:uppercase;
       letter-spacing:.07em;color:var(--gray);margin-bottom:.5rem}
-    select{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;
-      color:var(--text);font-size:1rem;padding:.75rem 1rem;outline:none;appearance:none;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239aa3be' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-      background-repeat:no-repeat;background-position:right 1rem center}
+    .ss-wrap{position:relative;width:100%}
+    .ss-inp{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;
+      color:var(--text);font-size:1rem;padding:.75rem 1rem;outline:none;cursor:pointer;text-overflow:ellipsis}
+    .ss-inp.ss-open{border-color:var(--accent);border-radius:8px 8px 0 0}
+    .ss-drop{position:absolute;z-index:200;width:100%;background:var(--card);border:1px solid var(--accent);
+      border-top:none;border-radius:0 0 10px 10px;max-height:240px;overflow-y:auto;display:none}
+    .ss-drop.open{display:block}
+    .ss-item{padding:.7rem 1rem;cursor:pointer;font-size:.95rem;color:var(--text)}
+    .ss-item:hover,.ss-item.ss-sel{background:rgba(79,142,247,.12);color:var(--accent)}
     .btn{width:100%;padding:1rem;border:none;border-radius:10px;font-size:1rem;font-weight:700;
       cursor:pointer;margin-top:1rem;transition:opacity .15s}
     .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -59,10 +64,12 @@
 
   <!-- Step 1: worker selector (hidden once worker selected) -->
   <div id="stepSelect">
-    <label for="workerSelect">Who are you?</label>
-    <select id="workerSelect" onchange="onWorkerSelect()">
-      <option value="">— Select your name —</option>
-    </select>
+    <label>Who are you?</label>
+    <div class="ss-wrap">
+      <input class="ss-inp" id="ss-worker-inp" type="text" placeholder="— Select your name —" autocomplete="off" readonly>
+      <div class="ss-drop" id="ss-worker-drop"></div>
+      <input type="hidden" id="workerSelect" value="">
+    </div>
   </div>
 
   <hr class="divider" id="divider" style="display:none"/>
@@ -77,6 +84,44 @@
 const token    = location.pathname.split('/').filter(Boolean).pop();
 let   houseData = null;
 let   deviceId  = null;
+
+// ── Searchable select ─────────────────────────────────────────────────────────
+function ssSetup(inpId, dropId, hiddenId, items, onChange) {
+  const inp    = document.getElementById(inpId);
+  const drop   = document.getElementById(dropId);
+  const hidden = document.getElementById(hiddenId);
+  const _items = items;
+  function render(q) {
+    const lq = q.toLowerCase();
+    drop.innerHTML = '';
+    (lq ? _items.filter(i => i.label.toLowerCase().includes(lq)) : _items).forEach(item => {
+      const d = document.createElement('div');
+      d.className = 'ss-item' + (String(hidden.value) === String(item.value) ? ' ss-sel' : '');
+      d.textContent = item.label;
+      d.onmousedown = e => {
+        e.preventDefault();
+        hidden.value = item.value;
+        inp.value    = item.label;
+        inp.readOnly = true;
+        inp.classList.remove('ss-open');
+        drop.classList.remove('open');
+        if (onChange) onChange();
+      };
+      drop.appendChild(d);
+    });
+  }
+  inp.addEventListener('click', () => {
+    inp.readOnly = false; inp.select();
+    inp.classList.add('ss-open'); drop.classList.add('open'); render('');
+  });
+  inp.addEventListener('input', () => render(inp.value));
+  inp.addEventListener('blur', () => setTimeout(() => {
+    inp.readOnly = true;
+    inp.classList.remove('ss-open'); drop.classList.remove('open');
+    const cur = _items.find(i => String(i.value) === String(hidden.value));
+    inp.value = cur ? cur.label : '';
+  }, 160));
+}
 
 // ── device fingerprint ───────────────────────────────────────────────────────
 function getDeviceId() {
@@ -93,11 +138,9 @@ async function init() {
     if (!res.ok) throw new Error(res.status === 404 ? 'Check-in point not found.' : 'Server error.');
     houseData = await res.json();
     document.getElementById('houseName').textContent = '📍 ' + houseData.houseName;
-    const sel = document.getElementById('workerSelect');
-    houseData.workers.forEach(w => {
-      const opt = document.createElement('option');
-      opt.value = w.id; opt.textContent = w.name; sel.appendChild(opt);
-    });
+    ssSetup('ss-worker-inp', 'ss-worker-drop', 'workerSelect',
+      houseData.workers.map(w => ({ value: w.id, label: w.name })),
+      onWorkerSelect);
     document.getElementById('loading').style.display = 'none';
     document.getElementById('mainCard').style.display = 'block';
   } catch(e) {
