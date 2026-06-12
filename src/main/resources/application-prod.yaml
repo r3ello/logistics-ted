@@ -81,6 +81,9 @@ server:
   servlet:
     session:
       timeout: 8h
+
+app:
+  base-url: ${APP_BASE_URL:https://changeme.example.com}
       cookie:
         http-only: true
         same-site: lax

@@ -92,6 +92,11 @@ management:
 server:
   port: ${SERVER_PORT:3002}
 
+app:
+  # Public base URL used to generate check-in QR codes.
+  # Override in production: APP_BASE_URL=https://yourdomain.com
+  base-url: ${APP_BASE_URL:http://localhost:3002}
+
 # Bearer token (JWT HS256) auth — replaces the old session/cookie scheme. POST /api/login
 # returns { token, tokenType, expiresIn, user } and clients send Authorization: Bearer <token>
 # on every /api/** request. TEDHOUSE_JWT_SECRET MUST be set to a strong random value (>= 32
