@@ -805,10 +805,18 @@
 
     /* ── MAP TOGGLE BAR ── */
 
+    /* Map toggle bar: scrollable on narrow screens */
+    #mapToggleBar {
+      max-width: calc(100vw - 16px);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
     /* Icon-only buttons on small screens — hide text labels */
-    @media (max-width: 480px) {
+    @media (max-width: 600px) {
       .map-btn-lbl { display: none; }
-      #mapToggleBar button { padding: 0.35rem 0.65rem !important; font-size: 1.05rem !important; }
+      #mapToggleBar button { padding: 0.35rem 0.6rem !important; font-size: 1.1rem !important; }
     }
 
     @media (max-width: 640px) {
@@ -3225,7 +3233,7 @@
         <div class="house-header">
           <div>
             <p class="house-name">${roleCfg.icon} ${w.name}</p>
-            <p class="house-loc">📍 ${w.location || '—'}</p>
+            <p class="house-loc">📍 ${w.location || (w.lat && w.lng ? `${parseFloat(w.lat).toFixed(4)}, ${parseFloat(w.lng).toFixed(4)}` : '—')}</p>
           </div>
           <div style="display:flex;align-items:center;gap:0.4rem">
             <span class="house-id">#${w.id}</span>
