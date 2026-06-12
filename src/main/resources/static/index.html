@@ -5524,13 +5524,17 @@
     const grid = document.getElementById('qrGrid');
     grid.innerHTML = '<p style="color:var(--muted);padding:2rem">Loading…</p>';
     try {
+      // Fetch configured base URL so QR codes work on production domain, not localhost
+      const cfg     = await fetch('/api/public/config').then(r => r.json());
+      const baseUrl = (cfg.baseUrl || location.origin).replace(/\/$/, '');
+
       const houses = await apiFetch('/api/houses').then(r => r.json());
       grid.innerHTML = '';
       houses
         .filter(h => h.checkin_token)
         .sort((a, b) => a.name.localeCompare(b.name))
         .forEach(h => {
-          const url = `${location.origin}/checkin/${h.checkin_token}`;
+          const url = `${baseUrl}/checkin/${h.checkin_token}`;
 
           const card = document.createElement('div');
           card.className = 'qr-card';
