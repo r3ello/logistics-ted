@@ -84,10 +84,6 @@ server:
 
 app:
   base-url: ${APP_BASE_URL:https://changeme.example.com}
-      cookie:
-        http-only: true
-        same-site: lax
-        name: TEDHOUSE_SESSION
 
 logging:
   level:
