@@ -5072,6 +5072,7 @@
       current_phase: document.getElementById('mPhase').value,
     }));
     localStorage.setItem('returnToHouseModal', '1');
+    localStorage.setItem('mapPinSource', 'house');
     window.location.href = '/map-picker.html';
   }
 
@@ -5080,12 +5081,17 @@
     if (!navigator.geolocation) return;
     btn.textContent = t('locating');
     navigator.geolocation.getCurrentPosition(
-      pos => {
-        document.getElementById('mLat').value = pos.coords.latitude.toFixed(6);
-        document.getElementById('mLng').value = pos.coords.longitude.toFixed(6);
+      async pos => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        document.getElementById('mLat').value = lat.toFixed(6);
+        document.getElementById('mLng').value = lng.toFixed(6);
         btn.textContent = t('locationFilled');
         btn.style.color = 'var(--green)';
         btn.style.borderColor = 'var(--green)';
+        // auto-fill location text via reverse geocode (same as worker modal)
+        const area = await reverseGeocode(lat, lng);
+        document.getElementById('mLocation').value = area || `${lat.toFixed(6)},${lng.toFixed(6)}`;
       },
       () => { btn.textContent = t('locationError'); },
       { enableHighAccuracy: false, timeout: 8000 }
@@ -5482,7 +5488,7 @@
       if (pin) {
         document.getElementById('mLocation').value = pending.location || '';
         reverseGeocode(pin.lat, pin.lng).then(area => {
-          if (area) document.getElementById('mLocation').value = area;
+          document.getElementById('mLocation').value = area || `${pin.lat.toFixed(6)},${pin.lng.toFixed(6)}`;
         });
       } else {
         document.getElementById('mLocation').value = pending.location || '';
@@ -5657,6 +5663,7 @@
     try {
       const r    = await apiFetch(`/api/attendance/crew/${crewId}?date=${date}`);
       const list = await r.json();
+      if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; return; }
       if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions recorded for this date.</p>'; return; }
       box.innerHTML = `
         <table class="att-table">
@@ -5686,6 +5693,7 @@
     try {
       const r    = await apiFetch(`/api/attendance/worker/${workerId}?from=${from}&to=${to}`);
       const list = await r.json();
+      if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; return; }
       if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions in this date range.</p>'; return; }
       // Group by date
       const byDate = {};

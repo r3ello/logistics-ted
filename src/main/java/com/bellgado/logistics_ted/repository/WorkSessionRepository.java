@@ -49,6 +49,7 @@ public interface WorkSessionRepository extends JpaRepository<WorkSession, Intege
     /** All sessions for a worker between two dates. */
     @Query("""
         SELECT s FROM WorkSession s
+        JOIN FETCH s.worker w
         JOIN FETCH s.house h
         WHERE s.worker.id = :workerId
           AND s.sessionDate BETWEEN :from AND :to
