@@ -1264,7 +1264,6 @@
     </div>
     <div class="field"><label>Status</label>
       <select id="seStatus" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
-        <option value="NONE">None</option>
         <option value="AVAILABLE">Available</option>
         <option value="IN_USE">In Use</option>
       </select>
@@ -3318,7 +3317,6 @@
       IN_USE:    { bg:'rgba(245,166,35,0.12)', border:'rgba(245,166,35,0.35)', color:'#f5a623', label:t('chipScaffoldInUse'),      icon:'🔧' },
       NONE:      { bg:'rgba(122,133,163,0.08)',border:'rgba(122,133,163,0.2)', color:'#9aa3be', label:t('chipScaffoldNone'),       icon:'—'  },
     };
-    sList = sList.filter(s => s.status === 'AVAILABLE' || s.status === 'IN_USE');
     grid.innerHTML = `<div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-bottom:0.5rem">
       <button class="btn btn-primary admin-only" onclick="openScaffoldEditModal()">${t('scaffoldAddBtn')}</button>
     </div>` + (sList.length ? sList.map(s => {
