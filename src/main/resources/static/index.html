@@ -6113,7 +6113,8 @@
     const tokenRow = document.getElementById('ebTokenRow');
     if (_ebCurrent.token) {
       tokenRow.style.display = '';
-      const url = `${await getBaseUrl()}/electric-box/${_ebCurrent.token}`;
+      const ebBase = await getBaseUrl();
+      const url = `${ebBase}/electric-box/${_ebCurrent.token}`;
       document.getElementById('ebTokenLink').value = url;
       const qrContainer = document.getElementById('ebQrCode');
       qrContainer.innerHTML = '';
