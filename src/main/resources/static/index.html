@@ -704,6 +704,34 @@
       border-radius:4px; color:var(--text); padding:.15rem .3rem; width:100%; margin-top:.2rem
     }
 
+    /* ── ELECTRIC BOX RESPONSIVE ── */
+    /* Touch devices: always show the delete (✕) button — hover doesn't exist */
+    @media (hover: none) {
+      .eb-slot-del { display: block !important; opacity: .75; }
+    }
+    /* Tap-selected palette highlight (touch mode) */
+    .eb-palette-item.tap-selected {
+      background: rgba(79,142,247,.18);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    /* ≤900px: single column, one panel visible at a time */
+    @media (max-width: 900px) {
+      .eb-layout { grid-template-columns: 1fr; }
+      /* Back button only visible on mobile */
+      #ebBackBtn { display: inline-flex !important; }
+      /* Mobile editor: full width, no side-by-side */
+      .eb-layout.eb-mobile-editor .eb-list-card { display: none; }
+      .eb-layout.eb-mobile-editor .eb-editor-card { display: block !important; }
+      .eb-layout:not(.eb-mobile-editor) .eb-editor-card { display: none !important; }
+      .eb-layout:not(.eb-mobile-editor) .eb-list-card { display: block; }
+      /* Compact panel grid and palette */
+      .eb-panel-grid { gap: .2rem; }
+      .eb-slot { min-height: 42px; }
+      .eb-palette { gap: .3rem; padding: .4rem; flex-wrap: wrap; }
+      .eb-palette-item { padding: .3rem .6rem; font-size: .78rem; }
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       .hamburger { display: flex; }
@@ -805,10 +833,18 @@
 
     /* ── MAP TOGGLE BAR ── */
 
+    /* Map toggle bar: scrollable on narrow screens */
+    #mapToggleBar {
+      max-width: calc(100vw - 16px);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
     /* Icon-only buttons on small screens — hide text labels */
-    @media (max-width: 480px) {
+    @media (max-width: 600px) {
       .map-btn-lbl { display: none; }
-      #mapToggleBar button { padding: 0.35rem 0.65rem !important; font-size: 1.05rem !important; }
+      #mapToggleBar button { padding: 0.35rem 0.6rem !important; font-size: 1.1rem !important; }
     }
 
     @media (max-width: 640px) {
@@ -1228,7 +1264,6 @@
     </div>
     <div class="field"><label>Status</label>
       <select id="seStatus" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
-        <option value="NONE">None</option>
         <option value="AVAILABLE">Available</option>
         <option value="IN_USE">In Use</option>
       </select>
@@ -1700,7 +1735,10 @@
       <!-- Editor -->
       <div class="eb-editor-card" id="ebEditor" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-          <strong id="ebEditorTitle" style="font-size:1rem">New Electric Box</strong>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <button id="ebBackBtn" class="btn" style="display:none;padding:.3rem .6rem;font-size:.8rem" onclick="ebCloseEditor()">← Back</button>
+            <strong id="ebEditorTitle" style="font-size:1rem">New Electric Box</strong>
+          </div>
           <button class="btn" style="padding:.3rem .7rem;font-size:.8rem" onclick="ebCloseEditor()">✕</button>
         </div>
 
@@ -3225,7 +3263,7 @@
         <div class="house-header">
           <div>
             <p class="house-name">${roleCfg.icon} ${w.name}</p>
-            <p class="house-loc">📍 ${w.location || '—'}</p>
+            <p class="house-loc">📍 ${w.location || (w.lat && w.lng ? `${parseFloat(w.lat).toFixed(4)}, ${parseFloat(w.lng).toFixed(4)}` : '—')}</p>
           </div>
           <div style="display:flex;align-items:center;gap:0.4rem">
             <span class="house-id">#${w.id}</span>
@@ -5692,6 +5730,7 @@
   // Two columns: LEFT slots 0..N, RIGHT slots 0..N — same row index displayed side by side
   let _ebRows = 10; // default rows per side
   let _ebSlots = []; // flat array, index = slotIndex (LEFT then RIGHT stored separately)
+  let _ebTapSelected = null; // palette item selected via tap (touch fallback for drag-drop)
 
   async function ebInit() {
     await Promise.all([ebLoadBoxes(), ebLoadHouses()]);
@@ -5783,11 +5822,13 @@
     ebRenderList();
 
     document.getElementById('ebEditor').style.display = '';
+    document.querySelector('.eb-layout').classList.add('eb-mobile-editor');
   }
 
   function ebCloseEditor() {
     _ebCurrent = null;
     document.getElementById('ebEditor').style.display = 'none';
+    document.querySelector('.eb-layout').classList.remove('eb-mobile-editor');
     ebRenderList();
   }
 
@@ -5860,6 +5901,19 @@
 
     if (c && c.type === 'DOUBLE') el.style.gridRow = 'span 2';
 
+    // Tap-to-place (touch fallback) — capture phase so it fires before edit handler
+    el.addEventListener('click', (e) => {
+      if (!_ebTapSelected) return;
+      if (e.target.classList.contains('eb-slot-del') || e.target.classList.contains('eb-slot-status-btn')) return;
+      if (['INPUT','SELECT','BUTTON','TEXTAREA'].includes(e.target.tagName)) return;
+      e.stopPropagation();
+      _ebDragging = { type: _ebTapSelected.dataset.type, amps: _ebTapSelected.dataset.amps };
+      ebDropOnSlot(side, idx);
+      _ebDragging = null;
+      _ebTapSelected.classList.remove('tap-selected');
+      _ebTapSelected = null;
+    }, true);
+
     // Drop target
     el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
     el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
@@ -5931,6 +5985,13 @@
       item.addEventListener('dragend', () => {
         _ebDragging = null;
         item.classList.remove('dragging');
+      });
+      // Touch fallback: tap to select, then tap a slot to place
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.eb-palette-item').forEach(i => i.classList.remove('tap-selected'));
+        if (_ebTapSelected === item) { _ebTapSelected = null; return; }
+        _ebTapSelected = item;
+        item.classList.add('tap-selected');
       });
     });
   }
