@@ -15,12 +15,16 @@ import com.bellgado.logistics_ted.web.dto.MaterialLineDto;
 import com.bellgado.logistics_ted.web.dto.MaterialTotalDto;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,10 +88,26 @@ public class HouseService {
         House h = new House();
         applyFields(h, req);
         h = houses.save(h);
+        // Auto-assign a unique check-in QR token
+        h.setCheckinToken(generateCheckinToken(h.getId()));
+        houses.save(h);
         Warehouse w = new Warehouse();
         w.setHouse(h);
         warehouses.save(w);
         return toResponse(h);
+    }
+
+    /** Generates a unique 64-char hex token for a house check-in QR code. */
+    private String generateCheckinToken(Integer houseId) {
+        try {
+            String input = houseId + "-checkin-tedhouse-" + UUID.randomUUID();
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(input.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (Exception e) {
+            // Fallback — should never happen
+            return UUID.randomUUID().toString().replace("-", "") + UUID.randomUUID().toString().replace("-", "");
+        }
     }
 
     public HouseResponse update(Integer id, HouseUpsertRequest req) {
