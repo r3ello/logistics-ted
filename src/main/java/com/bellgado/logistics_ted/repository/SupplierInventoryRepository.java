@@ -20,4 +20,13 @@ public interface SupplierInventoryRepository extends JpaRepository<SupplierInven
         ORDER BY s.id, m.id
         """)
     List<SupplierInventory> findStocked(@Param("materialIds") Collection<Integer> materialIds);
+
+    @Query("""
+        SELECT si FROM SupplierInventory si
+        JOIN FETCH si.supplier s
+        JOIN FETCH si.material m
+        WHERE si.quantity > 0
+        ORDER BY s.id, m.id
+        """)
+    List<SupplierInventory> findAllStocked();
 }

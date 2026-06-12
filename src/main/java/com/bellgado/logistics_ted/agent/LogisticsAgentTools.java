@@ -1,18 +1,34 @@
 package com.bellgado.logistics_ted.agent;
 
+import com.bellgado.logistics_ted.domain.Crew;
 import com.bellgado.logistics_ted.domain.House;
 import com.bellgado.logistics_ted.domain.Inventory;
 import com.bellgado.logistics_ted.domain.Material;
+import com.bellgado.logistics_ted.domain.Scaffold;
+import com.bellgado.logistics_ted.domain.ScaffoldStatus;
+import com.bellgado.logistics_ted.domain.Supplier;
+import com.bellgado.logistics_ted.domain.SupplierInventory;
 import com.bellgado.logistics_ted.domain.Warehouse;
+import com.bellgado.logistics_ted.domain.Worker;
+import com.bellgado.logistics_ted.domain.WorkerRole;
+import com.bellgado.logistics_ted.repository.CrewRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.InventoryRepository;
 import com.bellgado.logistics_ted.repository.MaterialRepository;
 import com.bellgado.logistics_ted.config.RoutingProperties;
+import com.bellgado.logistics_ted.repository.ScaffoldRepository;
+import com.bellgado.logistics_ted.repository.SupplierInventoryRepository;
+import com.bellgado.logistics_ted.repository.SupplierRepository;
 import com.bellgado.logistics_ted.repository.WarehouseRepository;
+import com.bellgado.logistics_ted.repository.WorkerRepository;
 import com.bellgado.logistics_ted.service.OrderHistoryService;
 import com.bellgado.logistics_ted.service.OrderHistoryService.RecordResult;
 import com.bellgado.logistics_ted.service.OrderHistoryService.Source;
 import com.bellgado.logistics_ted.service.RouteOptimizationService;
+import com.bellgado.logistics_ted.web.dto.OrderHistoryDtos.OrderDetailDto;
+import com.bellgado.logistics_ted.web.dto.OrderHistoryDtos.OrderEventDto;
+import com.bellgado.logistics_ted.web.dto.OrderHistoryDtos.OrderOptionDto;
+import com.bellgado.logistics_ted.web.dto.OrderHistoryDtos.OrderSummaryDto;
 import com.bellgado.logistics_ted.web.dto.OrderRequest;
 import com.bellgado.logistics_ted.web.dto.OrderResponse;
 import com.bellgado.logistics_ted.web.dto.OrderResponse.DeficitDto;
@@ -21,8 +37,10 @@ import com.bellgado.logistics_ted.web.dto.OrderResponse.RouteStopDto;
 import com.bellgado.logistics_ted.web.dto.OrderResponse.StopContributionDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,6 +52,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +65,11 @@ public class LogisticsAgentTools {
     private final MaterialRepository materials;
     private final InventoryRepository inventories;
     private final WarehouseRepository warehouses;
+    private final CrewRepository crews;
+    private final WorkerRepository workers;
+    private final ScaffoldRepository scaffolds;
+    private final SupplierRepository suppliers;
+    private final SupplierInventoryRepository supplierInventories;
     private final RouteOptimizationService routeOptimization;
     private final RoutingProperties routingProperties;
     private final ObjectMapper objectMapper;
@@ -277,6 +301,279 @@ public class LogisticsAgentTools {
     }
 
     // ========================================================================
+    // ORDER HISTORY (read-only — never bumps view counters or chosen state)
+    // ========================================================================
+
+    @Tool(description = "List previously calculated orders (route calculations), newest first. " +
+            "By default returns only orders created from this chat; pass scope='all' to also see " +
+            "orders created from the web dashboard. Read-only — browsing history never modifies it. " +
+            "Use getOrderDetails for the full route of a specific order.")
+    public String listOrders(
+            @ToolParam(description = "'mine' (default) for this chat's orders, 'all' for every order " +
+                    "including dashboard ones. Empty string for default.")
+            String scope,
+            @ToolParam(description = "Max number of orders to return, 1-50. Empty string for default 10.")
+            String limit) {
+        try {
+            int lim = 10;
+            if (limit != null && !limit.isBlank()) {
+                lim = Math.min(50, Math.max(1, Integer.parseInt(limit.trim())));
+            }
+            boolean allSources = "all".equalsIgnoreCase(scope == null ? "" : scope.trim());
+            Long chatId = AgentContext.getTelegramChatId();
+            List<OrderSummaryDto> page = orderHistory
+                .historyForAgent(chatId, allSources, PageRequest.of(0, lim))
+                .getContent();
+            if (page.isEmpty()) {
+                return allSources ? "No orders recorded yet."
+                    : "No orders from this chat yet. Try scope='all' to include dashboard orders.";
+            }
+            Map<Integer, Material> matIdx = materialIndex();
+            List<Map<String, Object>> out = new ArrayList<>();
+            for (OrderSummaryDto s : page) {
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("orderId", s.orderId());
+                row.put("createdAt", s.createdAt());
+                row.put("source", s.source());
+                row.put("origin", s.startName());
+                row.put("destinationHouseId", s.destinationHouseId());
+                row.put("destinationHouse", s.destinationHouseName());
+                row.put("materials", resolveMaterials(s.materials(), matIdx));
+                row.put("alternativesCount", s.alternativesCount());
+                row.put("fullyFulfilled", s.fullyFulfilled());
+                row.put("chosenObjective", s.chosenObjective());
+                out.add(row);
+            }
+            return objectMapper.writeValueAsString(out);
+        } catch (Exception e) {
+            log.warn("listOrders failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    @Tool(description = "Get the full detail of a previously calculated order: request snapshot, all " +
+            "route alternatives with km/min, which one was chosen, the stops of the chosen (or primary) " +
+            "route, and the event timeline. Read-only — it never recalculates the route or alters the " +
+            "order. Use this when the user asks to see a past order or route again.")
+    public String getOrderDetails(
+            @ToolParam(description = "Order public id (UUID string) from listOrders or calculateOrder")
+            String orderId) {
+        try {
+            UUID id = UUID.fromString(orderId.trim());
+            OrderDetailDto d = orderHistory.detailForAgent(id);
+            return formatOrderDetail(d);
+        } catch (IllegalArgumentException e) {
+            return "Error: orderId must be a UUID string (got: " + orderId + ").";
+        } catch (EntityNotFoundException e) {
+            return "Error: order not found: " + orderId;
+        } catch (Exception e) {
+            log.warn("getOrderDetails failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    // ========================================================================
+    // SUPPLIERS
+    // ========================================================================
+
+    @Tool(description = "List external suppliers and what they stock. Pass a material id to get only " +
+            "the suppliers stocking that material (with quantity and unit price); empty string lists " +
+            "every supplier with their full stock. Useful for 'who sells X?' questions before planning " +
+            "a route — the route optimizer falls back to these suppliers automatically when houses " +
+            "cannot cover the demand.")
+    @Transactional(readOnly = true)
+    public String listSuppliers(
+            @ToolParam(description = "Material numeric id to filter by, or empty string for all suppliers")
+            String materialId) {
+        try {
+            Map<Integer, Map<String, Object>> bySupplier = new LinkedHashMap<>();
+            List<SupplierInventory> rows;
+            if (materialId == null || materialId.isBlank()) {
+                for (Supplier s : suppliers.findAll()) {
+                    bySupplier.put(s.getId(), supplierJson(s));
+                }
+                rows = supplierInventories.findAllStocked();
+            } else {
+                int mid = Integer.parseInt(materialId.trim());
+                rows = supplierInventories.findStocked(List.of(mid));
+            }
+            for (SupplierInventory si : rows) {
+                Map<String, Object> sup = bySupplier.computeIfAbsent(
+                    si.getSupplier().getId(), k -> supplierJson(si.getSupplier()));
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> mats = (List<Map<String, Object>>) sup.get("materials");
+                Map<String, Object> mat = new LinkedHashMap<>();
+                mat.put("materialId", si.getMaterial().getId());
+                mat.put("name", si.getMaterial().getName());
+                mat.put("unit", si.getMaterial().getUnit());
+                mat.put("quantity", si.getQuantity());
+                mat.put("unitPrice", si.getUnitPrice());
+                mats.add(mat);
+            }
+            if (bySupplier.isEmpty()) {
+                return "No supplier stocks material id " + materialId.trim() + ".";
+            }
+            return objectMapper.writeValueAsString(new ArrayList<>(bySupplier.values()));
+        } catch (Exception e) {
+            log.warn("listSuppliers failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    // ========================================================================
+    // CREWS / WORKERS
+    // ========================================================================
+
+    @Tool(description = "List all work crews with id, name, manager, leader, member count and the house " +
+            "they are currently assigned to. Use getCrewDetails for the full member roster of one crew.")
+    @Transactional(readOnly = true)
+    public String listCrews() {
+        try {
+            List<Map<String, Object>> out = new ArrayList<>();
+            for (Crew c : crews.findAll()) {
+                out.add(crewJson(c, false));
+            }
+            return objectMapper.writeValueAsString(out);
+        } catch (Exception e) {
+            log.warn("listCrews failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    @Tool(description = "Get one crew's full roster: manager, leader, and every member with their trade, " +
+            "plus the house the crew is assigned to.")
+    @Transactional(readOnly = true)
+    public String getCrewDetails(
+            @ToolParam(description = "Crew numeric id") String crewId) {
+        try {
+            int cid = Integer.parseInt(crewId.trim());
+            Optional<Crew> c = crews.findById(cid);
+            if (c.isEmpty()) {
+                return "Error: crew not found: " + cid;
+            }
+            return objectMapper.writeValueAsString(crewJson(c.get(), true));
+        } catch (NumberFormatException e) {
+            return "Error: crewId must be a number (got: " + crewId + ").";
+        } catch (Exception e) {
+            log.warn("getCrewDetails failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    @Tool(description = "List workers with their role (CREW_MANAGER, CREW_LEADER, CREW_MEMBER), trade, " +
+            "crew assignment and house. Pass a name fragment to filter (case-insensitive), or empty " +
+            "string for everyone. Answers questions like 'which crew is Ivan in?'.")
+    @Transactional(readOnly = true)
+    public String listWorkers(
+            @ToolParam(description = "Name fragment to filter by, or empty string for all workers")
+            String nameFilter) {
+        try {
+            String needle = nameFilter == null ? "" : nameFilter.trim().toLowerCase(Locale.ROOT);
+            List<Map<String, Object>> out = new ArrayList<>();
+            for (Worker w : workers.findAll()) {
+                if (!needle.isEmpty()
+                        && (w.getName() == null || !w.getName().toLowerCase(Locale.ROOT).contains(needle))) {
+                    continue;
+                }
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("id", w.getId());
+                row.put("name", w.getName());
+                row.put("role", w.getRole());
+                row.put("trade", w.getTrade());
+                row.put("crewId", w.getCrew() != null ? w.getCrew().getId() : null);
+                row.put("crewName", w.getCrew() != null ? w.getCrew().getName() : null);
+                row.put("houseId", w.getHouse() != null ? w.getHouse().getId() : null);
+                row.put("houseName", w.getHouse() != null ? w.getHouse().getName() : null);
+                out.add(row);
+            }
+            if (out.isEmpty() && !needle.isEmpty()) {
+                return "No worker matches '" + nameFilter.trim() + "'.";
+            }
+            return objectMapper.writeValueAsString(out);
+        } catch (Exception e) {
+            log.warn("listWorkers failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    // ========================================================================
+    // SCAFFOLDS
+    // ========================================================================
+
+    @Tool(description = "List all scaffolds with status (e.g. AVAILABLE, IN_USE), rental start/end dates " +
+            "and the house each one is assigned to.")
+    @Transactional(readOnly = true)
+    public String listScaffolds() {
+        try {
+            List<Map<String, Object>> out = new ArrayList<>();
+            for (Scaffold s : scaffolds.findAll()) {
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("id", s.getId());
+                row.put("status", s.getStatus());
+                row.put("startDate", s.getStartDate() != null ? s.getStartDate().toString() : null);
+                row.put("endDate", s.getEndDate() != null ? s.getEndDate().toString() : null);
+                row.put("houseId", s.getHouse() != null ? s.getHouse().getId() : null);
+                row.put("houseName", s.getHouse() != null ? s.getHouse().getName() : null);
+                out.add(row);
+            }
+            return objectMapper.writeValueAsString(out);
+        } catch (Exception e) {
+            log.warn("listScaffolds failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    @Tool(description = "Find the closest house with an AVAILABLE scaffold that could be moved to a " +
+            "destination house. Reports the source house, the distance in km and a Google Maps link, " +
+            "or that the destination already has a scaffold on site. Read-only — it only suggests the " +
+            "move, it does not reassign the scaffold.")
+    @Transactional(readOnly = true)
+    public String findClosestScaffold(
+            @ToolParam(description = "Destination house numeric id (where the scaffold is needed)")
+            String destinationHouseId) {
+        try {
+            int destId = Integer.parseInt(destinationHouseId.trim());
+            House dest = houses.findById(destId).orElse(null);
+            if (dest == null) {
+                return "Error: house not found: " + destId;
+            }
+            if (dest.getLat() == null || dest.getLng() == null) {
+                return "Error: house '" + dest.getName() + "' has no GPS coordinates set.";
+            }
+            if (dest.getScaffoldStatus() == ScaffoldStatus.AVAILABLE) {
+                return "House '" + dest.getName() + "' already has an available scaffold on site — no transport needed.";
+            }
+            List<House> available = houses
+                .findByScaffoldStatusAndLatIsNotNullAndLngIsNotNull(ScaffoldStatus.AVAILABLE)
+                .stream()
+                .filter(h -> !h.getId().equals(dest.getId()))
+                .toList();
+            if (available.isEmpty()) {
+                return "No house currently has an available scaffold to move.";
+            }
+            double destLat = dest.getLat().doubleValue();
+            double destLng = dest.getLng().doubleValue();
+            House closest = available.stream()
+                .min(Comparator.comparingDouble(h -> haversineKm(
+                    destLat, destLng, h.getLat().doubleValue(), h.getLng().doubleValue())))
+                .orElseThrow();
+            long distKm = Math.round(haversineKm(
+                destLat, destLng, closest.getLat().doubleValue(), closest.getLng().doubleValue()));
+            String mapsUrl = "https://www.google.com/maps/dir/"
+                + closest.getLat() + "," + closest.getLng() + "/"
+                + dest.getLat() + "," + dest.getLng();
+            return "Closest available scaffold: house '" + closest.getName() + "' [house " + closest.getId()
+                + "] — " + closest.getLocation() + ", ~" + distKm + " km from '" + dest.getName() + "'.\n"
+                + "Google Maps: " + mapsUrl;
+        } catch (NumberFormatException e) {
+            return "Error: destinationHouseId must be a number (got: " + destinationHouseId + ").";
+        } catch (Exception e) {
+            log.warn("findClosestScaffold failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    // ========================================================================
     // HELPERS
     // ========================================================================
 
@@ -383,6 +680,174 @@ public class LogisticsAgentTools {
             sb.append("\nGoogle Maps: ").append(resp.mapsUrl()).append("\n");
         }
         return sb.toString();
+    }
+
+    private Map<Integer, Material> materialIndex() {
+        Map<Integer, Material> idx = new HashMap<>();
+        for (Material m : materials.findAllByOrderByIdAsc()) {
+            idx.put(m.getId(), m);
+        }
+        return idx;
+    }
+
+    /** Turns the persisted {materialId: quantity} request map into LLM-readable entries with names. */
+    private List<Map<String, Object>> resolveMaterials(Map<String, Object> raw, Map<Integer, Material> matIdx) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        if (raw == null) return out;
+        for (Map.Entry<String, Object> e : raw.entrySet()) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("materialId", e.getKey());
+            try {
+                Material m = matIdx.get(Integer.parseInt(e.getKey()));
+                if (m != null) {
+                    row.put("name", m.getName());
+                    row.put("unit", m.getUnit());
+                }
+            } catch (NumberFormatException ignored) {
+                // non-numeric key in persisted JSON — surface it as-is
+            }
+            row.put("quantity", e.getValue());
+            out.add(row);
+        }
+        return out;
+    }
+
+    private static Map<String, Object> supplierJson(Supplier s) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("id", s.getId());
+        row.put("name", s.getName());
+        row.put("location", s.getLocation());
+        row.put("materials", new ArrayList<Map<String, Object>>());
+        return row;
+    }
+
+    private Map<String, Object> crewJson(Crew c, boolean includeMembers) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("id", c.getId());
+        row.put("name", c.getName());
+        row.put("managerId", c.getManager() != null ? c.getManager().getId() : null);
+        row.put("managerName", c.getManager() != null ? c.getManager().getName() : null);
+        List<Worker> all = workers.findByCrewId(c.getId());
+        Worker leader = all.stream().filter(w -> w.getRole() == WorkerRole.CREW_LEADER).findFirst().orElse(null);
+        row.put("leaderId", leader != null ? leader.getId() : null);
+        row.put("leaderName", leader != null ? leader.getName() : null);
+        List<Worker> members = all.stream().filter(w -> w.getRole() == WorkerRole.CREW_MEMBER).toList();
+        row.put("memberCount", members.size());
+        if (includeMembers) {
+            List<Map<String, Object>> memberRows = new ArrayList<>();
+            for (Worker w : members) {
+                Map<String, Object> mm = new LinkedHashMap<>();
+                mm.put("id", w.getId());
+                mm.put("name", w.getName());
+                mm.put("trade", w.getTrade());
+                memberRows.add(mm);
+            }
+            row.put("members", memberRows);
+        }
+        row.put("houseId", c.getHouse() != null ? c.getHouse().getId() : null);
+        row.put("houseName", c.getHouse() != null ? c.getHouse().getName() : null);
+        return row;
+    }
+
+    /**
+     * Compact text rendering of a historical order. Mirrors the spirit of {@link #formatOrderResponse}:
+     * header facts, the alternatives table, the chosen (or primary) option's stops re-read from the
+     * persisted payload JSON, and the event timeline. Payload traversal is defensive because the
+     * persisted shape is a generic Map, not the live DTO.
+     */
+    private String formatOrderDetail(OrderDetailDto d) {
+        OrderSummaryDto s = d.summary();
+        StringBuilder sb = new StringBuilder();
+        sb.append("ORDER ").append(s.orderId()).append("\n");
+        sb.append("Created: ").append(s.createdAt()).append("  Source: ").append(s.source());
+        if (s.username() != null) sb.append("  User: ").append(s.username());
+        sb.append("\n");
+        sb.append("Origin: ").append(s.startName() != null ? s.startName()
+            : s.startLat() + "," + s.startLng()).append("\n");
+        sb.append("Destination: ").append(s.destinationHouseName())
+            .append(" [house ").append(s.destinationHouseId()).append("]\n");
+
+        Map<Integer, Material> matIdx = materialIndex();
+        sb.append("Requested:\n");
+        for (Map<String, Object> m : resolveMaterials(s.materials(), matIdx)) {
+            sb.append("  - ").append(m.get("quantity"));
+            if (m.get("unit") != null) sb.append(" ").append(m.get("unit"));
+            sb.append(" of ").append(m.get("name") != null ? m.get("name") : "material id " + m.get("materialId"))
+                .append("\n");
+        }
+        sb.append("Fully fulfilled: ").append(s.fullyFulfilled()).append("\n");
+        sb.append("Chosen: ").append(s.chosenObjective() != null
+            ? s.chosenObjective() + " (at " + s.chosenAt() + ")" : "none yet").append("\n");
+
+        OrderOptionDto render = null;
+        if (d.options() != null && !d.options().isEmpty()) {
+            sb.append("\nAlternatives:\n");
+            for (OrderOptionDto o : d.options()) {
+                sb.append("  - ").append(o.objective())
+                    .append(": ").append(o.totalDistanceKm()).append(" km, ")
+                    .append(o.totalMinutes()).append(" min, ")
+                    .append(o.totalStops()).append(" house stop(s)");
+                if (o.supplierStopsCount() > 0) {
+                    sb.append(", ").append(o.supplierStopsCount()).append(" supplier stop(s)");
+                }
+                if (o.isChosen()) sb.append("  [CHOSEN]");
+                else if (o.isPrimary()) sb.append("  [primary]");
+                if (o.viewCount() > 0) sb.append("  (viewed ").append(o.viewCount()).append("x)");
+                sb.append("\n");
+                if (o.isChosen() || (render == null && o.isPrimary())) render = o;
+            }
+            if (render == null) render = d.options().get(0);
+        }
+
+        if (render != null) {
+            sb.append("\nRoute of the ").append(render.objective()).append(" option:\n");
+            appendPayloadStops(sb, render.payload(), "route", "house");
+            appendPayloadStops(sb, render.payload(), "supplierStops", "supplier");
+            if (render.mapsUrl() != null) {
+                sb.append("Google Maps: ").append(render.mapsUrl()).append("\n");
+            }
+        }
+
+        if (d.events() != null && !d.events().isEmpty()) {
+            sb.append("\nEvents:\n");
+            for (OrderEventDto e : d.events()) {
+                sb.append("  - ").append(e.eventType());
+                if (e.objective() != null) sb.append(" (").append(e.objective()).append(")");
+                sb.append(" at ").append(e.at());
+                if (e.username() != null) sb.append(" by ").append(e.username());
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    /** Renders one stop list ("route" or "supplierStops") out of the persisted option payload map. */
+    private static void appendPayloadStops(StringBuilder sb, Map<String, Object> payload,
+                                           String key, String kind) {
+        if (payload == null || !(payload.get(key) instanceof List<?> stops) || stops.isEmpty()) return;
+        int i = 1;
+        for (Object stopObj : stops) {
+            if (!(stopObj instanceof Map<?, ?> stop)) continue;
+            sb.append("  ").append(i++).append(". [").append(kind).append(" ").append(stop.get("id"))
+                .append("] ").append(stop.get("name")).append(" — ").append(stop.get("location")).append("\n");
+            if (stop.get("contribution") instanceof Map<?, ?> contrib) {
+                for (Object cObj : contrib.values()) {
+                    if (!(cObj instanceof Map<?, ?> c)) continue;
+                    sb.append("       - ").append(c.get("quantity")).append(" ").append(c.get("unit"))
+                        .append(" of ").append(c.get("name")).append("\n");
+                }
+            }
+        }
+    }
+
+    private static double haversineKm(double lat1, double lng1, double lat2, double lng2) {
+        double r = 6371.0;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLng = Math.toRadians(lng2 - lng1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+            * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        return r * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
     private static String formatQty(double qty) {

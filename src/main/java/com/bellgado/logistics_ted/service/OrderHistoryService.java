@@ -192,6 +192,36 @@ public class OrderHistoryService {
                 throw new AccessDeniedSimple();
             }
         }
+        return buildDetail(summaryRow);
+    }
+
+    /**
+     * Read-only order list for the chat agent. Trust comes from the Telegram chat-id
+     * whitelist in TelegramUpdateHandler, so a whitelisted dispatcher may also browse
+     * orders created from the dashboard ({@code allSources=true}); the default scope is
+     * the orders created from their own chat.
+     */
+    @Transactional(readOnly = true)
+    public Page<OrderSummaryDto> historyForAgent(Long telegramChatId, boolean allSources, Pageable pageable) {
+        Page<OrderSummaryRow> page = allSources || telegramChatId == null
+            ? orders.findAllSummaries(pageable)
+            : orders.findSummariesByTelegramChat(telegramChatId, pageable);
+        return page.map(this::summaryFromRow);
+    }
+
+    /**
+     * Read-only order detail for the chat agent — no per-user ownership check, for the
+     * same whitelist-trust reason as {@link #historyForAgent}.
+     */
+    @Transactional(readOnly = true)
+    public OrderDetailDto detailForAgent(UUID orderPublicId) {
+        OrderSummaryRow summaryRow = orders.findSummaryByPublicId(orderPublicId)
+            .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+        return buildDetail(summaryRow);
+    }
+
+    private OrderDetailDto buildDetail(OrderSummaryRow summaryRow) {
+        UUID orderPublicId = summaryRow.getPublicId();
         OrderSummaryDto summary = summaryFromRow(summaryRow);
         List<OrderOptionDto> opts = orders.findOptionRowsByOrderPublicId(orderPublicId).stream()
             .map(this::optionFromRow)
