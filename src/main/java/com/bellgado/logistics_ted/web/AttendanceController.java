@@ -24,12 +24,20 @@ public class AttendanceController {
     private final WorkerRepository      workers;
     private final WorkSessionRepository sessions;
 
+    @org.springframework.beans.factory.annotation.Value("${app.timezone:Europe/Sofia}")
+    private String appTimezone;
+
     public AttendanceController(HouseRepository houses,
                                 WorkerRepository workers,
                                 WorkSessionRepository sessions) {
         this.houses   = houses;
         this.workers  = workers;
         this.sessions = sessions;
+    }
+
+    /** Returns today's date in the configured app timezone. */
+    private LocalDate today() {
+        return LocalDate.now(java.time.ZoneId.of(appTimezone));
     }
 
     // ── PUBLIC: checkin page data ────────────────────────────────────────────
@@ -67,7 +75,7 @@ public class AttendanceController {
         House house = houses.findByCheckinToken(token).orElse(null);
         if (house == null) return ResponseEntity.notFound().build();
 
-        Optional<WorkSession> session = sessions.findTodaySession(workerId, house.getId(), LocalDate.now());
+        Optional<WorkSession> session = sessions.findTodaySession(workerId, house.getId(), today());
         Map<String, Object> res = new LinkedHashMap<>();
         if (session.isEmpty()) {
             res.put("status", "NONE");
@@ -104,7 +112,7 @@ public class AttendanceController {
         Worker worker = workers.findById(workerId).orElse(null);
         if (worker == null) return error("Worker not found");
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = today();
 
         // Validation 1: worker not already checked in today
         if (sessions.findTodaySession(workerId, house.getId(), today).isPresent())

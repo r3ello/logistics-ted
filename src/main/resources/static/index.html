@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Golos+Text:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link rel="stylesheet" href="/leaflet.css" />
   <script src="/leaflet.js"></script>
@@ -185,6 +186,15 @@
     }
     .nav-sub { padding-left:2rem !important; font-size:.85rem; }
     .att-tab.active { background: rgba(79,142,247,.18); color: var(--accent); border-color: var(--accent); }
+    /* ── Searchable select (ss) ── */
+    .ss-wrap{position:relative;width:100%}
+    .ss-inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none;cursor:pointer;text-overflow:ellipsis}
+    .ss-inp.ss-open{border-color:var(--accent);border-radius:8px 8px 0 0}
+    .ss-drop{position:absolute;z-index:300;width:100%;background:var(--surface);border:1px solid var(--accent);border-top:none;border-radius:0 0 8px 8px;max-height:220px;overflow-y:auto;display:none}
+    .ss-drop.open{display:block}
+    .ss-item{padding:.5rem .9rem;cursor:pointer;font-size:.88rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ss-item:hover,.ss-item.ss-hi{background:var(--card)}
+    .ss-item.ss-sel{color:var(--accent);font-weight:600}
     .att-table { width:100%; border-collapse:collapse; font-size:.88rem; }
     .att-table th { text-align:left; padding:.5rem .75rem; color:var(--muted); font-weight:600; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); }
     .att-table td { padding:.6rem .75rem; border-bottom:1px solid rgba(255,255,255,.04); }
@@ -1890,14 +1900,19 @@
       <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:flex-end">
         <div class="field" style="margin:0;flex:1;min-width:160px">
           <label>Crew</label>
-          <select id="attCrewSelect" onchange="attLoadCrew()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none">
-            <option value="">— select crew —</option>
-          </select>
+          <div class="ss-wrap" id="ss-crew">
+            <input class="ss-inp" id="ss-crew-inp" type="text" placeholder="— select crew —" autocomplete="off" readonly>
+            <div class="ss-drop" id="ss-crew-drop"></div>
+            <input type="hidden" id="attCrewSelect" value="">
+          </div>
         </div>
         <div class="field" style="margin:0">
           <label>Date</label>
           <input type="date" id="attCrewDate" onchange="attLoadCrew()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
         </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
+        <button id="attCrewExportBtn" class="btn btn-ghost" style="font-size:.82rem;padding:.4rem .9rem;display:none" onclick="attExportCrewPdf()">📄 Export PDF</button>
       </div>
       <div id="attCrewResults"></div>
     </div>
@@ -1907,9 +1922,11 @@
       <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:flex-end">
         <div class="field" style="margin:0;flex:1;min-width:160px">
           <label>Worker</label>
-          <select id="attWorkerSelect" onchange="attLoadWorker()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none">
-            <option value="">— select worker —</option>
-          </select>
+          <div class="ss-wrap" id="ss-worker">
+            <input class="ss-inp" id="ss-worker-inp" type="text" placeholder="— select worker —" autocomplete="off" readonly>
+            <div class="ss-drop" id="ss-worker-drop"></div>
+            <input type="hidden" id="attWorkerSelect" value="">
+          </div>
         </div>
         <div class="field" style="margin:0">
           <label>From</label>
@@ -1919,6 +1936,9 @@
           <label>To</label>
           <input type="date" id="attWorkerTo" onchange="attLoadWorker()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
         </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
+        <button id="attWorkerExportBtn" class="btn btn-ghost" style="font-size:.82rem;padding:.4rem .9rem;display:none" onclick="attExportWorkerPdf()">📄 Export PDF</button>
       </div>
       <div id="attWorkerResults"></div>
     </div>
@@ -5609,6 +5629,60 @@
   }
 
   // ── ATTENDANCE ───────────────────────────────────────────────────────────────
+  // ── Searchable select helper ─────────────────────────────────────────────────
+  function ssSetup(inpId, dropId, hiddenId, items, onChange) {
+    const inp    = document.getElementById(inpId);
+    const drop   = document.getElementById(dropId);
+    const hidden = document.getElementById(hiddenId);
+    let _items = items; // [{value, label}]
+
+    function render(q) {
+      const lq = q.toLowerCase();
+      drop.innerHTML = '';
+      const filtered = lq ? _items.filter(i => i.label.toLowerCase().includes(lq)) : _items;
+      filtered.forEach(item => {
+        const d = document.createElement('div');
+        d.className = 'ss-item' + (String(hidden.value) === String(item.value) ? ' ss-sel' : '');
+        d.textContent = item.label;
+        d.onmousedown = e => {
+          e.preventDefault();
+          hidden.value = item.value;
+          inp.value    = item.label;
+          inp.readOnly = true;
+          inp.classList.remove('ss-open');
+          drop.classList.remove('open');
+          if (onChange) onChange();
+        };
+        drop.appendChild(d);
+      });
+    }
+
+    inp.addEventListener('click', () => {
+      inp.readOnly = false;
+      inp.select();
+      inp.classList.add('ss-open');
+      drop.classList.add('open');
+      render('');
+    });
+    inp.addEventListener('input', () => render(inp.value));
+    inp.addEventListener('blur', () => {
+      setTimeout(() => {
+        inp.readOnly = true;
+        inp.classList.remove('ss-open');
+        drop.classList.remove('open');
+        const cur = _items.find(i => String(i.value) === String(hidden.value));
+        inp.value = cur ? cur.label : '';
+      }, 160);
+    });
+
+    // allow updating options later
+    inp._ssUpdate = newItems => {
+      _items = newItems;
+      const cur = _items.find(i => String(i.value) === String(hidden.value));
+      inp.value = cur ? cur.label : '';
+    };
+  }
+
   let _attInitDone = false;
   let _attCrews    = [];
   let _attWorkers  = [];
@@ -5627,22 +5701,19 @@
     try {
       const r = await apiFetch('/api/crews');
       _attCrews = await r.json();
-      const sel = document.getElementById('attCrewSelect');
-      _attCrews.forEach(c => {
-        const o = document.createElement('option');
-        o.value = c.id; o.textContent = c.name; sel.appendChild(o);
-      });
+      ssSetup('ss-crew-inp', 'ss-crew-drop', 'attCrewSelect',
+        _attCrews.map(c => ({ value: c.id, label: c.name })),
+        attLoadCrew);
     } catch(e) { console.error('attInit crews', e); }
 
     // Load workers
     try {
       const r = await apiFetch('/api/workers');
       _attWorkers = await r.json();
-      const sel = document.getElementById('attWorkerSelect');
-      _attWorkers.sort((a,b) => a.name.localeCompare(b.name)).forEach(w => {
-        const o = document.createElement('option');
-        o.value = w.id; o.textContent = w.name; sel.appendChild(o);
-      });
+      _attWorkers.sort((a, b) => a.name.localeCompare(b.name));
+      ssSetup('ss-worker-inp', 'ss-worker-drop', 'attWorkerSelect',
+        _attWorkers.map(w => ({ value: w.id, label: w.name })),
+        attLoadWorker);
     } catch(e) { console.error('attInit workers', e); }
   }
 
@@ -5653,18 +5724,24 @@
     document.getElementById('attTabWorker').classList.toggle('active', tab === 'worker');
   }
 
+  let _attCrewLastData   = null; // {crewName, date, list}
+  let _attWorkerLastData = null; // {workerName, from, to, list}
+
   async function attLoadCrew() {
     const crewId = document.getElementById('attCrewSelect').value;
     const date   = document.getElementById('attCrewDate').value;
     const box    = document.getElementById('attCrewResults');
-    if (!crewId || !date) { box.innerHTML = ''; return; }
+    if (!crewId || !date) { box.innerHTML = ''; _attCrewLastData = null; document.getElementById('attCrewExportBtn').style.display = 'none'; return; }
 
     box.innerHTML = '<p class="att-empty">Loading…</p>';
     try {
       const r    = await apiFetch(`/api/attendance/crew/${crewId}?date=${date}`);
       const list = await r.json();
-      if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; return; }
-      if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions recorded for this date.</p>'; return; }
+      if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; _attCrewLastData = null; return; }
+      if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions recorded for this date.</p>'; _attCrewLastData = null; document.getElementById('attCrewExportBtn').style.display = 'none'; return; }
+      const crewName = document.getElementById('ss-crew-inp').value || crewId;
+      _attCrewLastData = { crewName, date, list };
+      document.getElementById('attCrewExportBtn').style.display = '';
       box.innerHTML = `
         <table class="att-table">
           <thead><tr><th>Worker</th><th>In</th><th>Out</th><th>Duration</th><th>Status</th></tr></thead>
@@ -5687,14 +5764,17 @@
     const from     = document.getElementById('attWorkerFrom').value;
     const to       = document.getElementById('attWorkerTo').value;
     const box      = document.getElementById('attWorkerResults');
-    if (!workerId || !from || !to) { box.innerHTML = ''; return; }
+    if (!workerId || !from || !to) { box.innerHTML = ''; _attWorkerLastData = null; document.getElementById('attWorkerExportBtn').style.display = 'none'; return; }
 
     box.innerHTML = '<p class="att-empty">Loading…</p>';
     try {
       const r    = await apiFetch(`/api/attendance/worker/${workerId}?from=${from}&to=${to}`);
       const list = await r.json();
-      if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; return; }
-      if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions in this date range.</p>'; return; }
+      if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; _attWorkerLastData = null; return; }
+      if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions in this date range.</p>'; _attWorkerLastData = null; document.getElementById('attWorkerExportBtn').style.display = 'none'; return; }
+      const workerName = document.getElementById('ss-worker-inp').value || workerId;
+      _attWorkerLastData = { workerName, from, to, list };
+      document.getElementById('attWorkerExportBtn').style.display = '';
       // Group by date
       const byDate = {};
       list.forEach(s => {
@@ -5702,7 +5782,8 @@
         if (!byDate[d]) byDate[d] = [];
         byDate[d].push(s);
       });
-      box.innerHTML = Object.keys(byDate).sort().reverse().map(d => `
+      box.innerHTML =
+        Object.keys(byDate).sort().reverse().map(d => `
         <div style="margin-bottom:1.25rem">
           <p style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.5rem">${d}</p>
           <table class="att-table">
@@ -5719,6 +5800,97 @@
           </table>
         </div>`).join('');
     } catch(e) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${e.message}</p>`; }
+  }
+
+  function attExportCrewPdf() {
+    if (!_attCrewLastData) return;
+    const { crewName, date, list } = _attCrewLastData;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    // Header
+    doc.setFontSize(18); doc.setTextColor(40, 60, 120);
+    doc.text('TEDHOUSE — Attendance Report', 14, 18);
+    doc.setFontSize(11); doc.setTextColor(80, 80, 80);
+    doc.text(`Crew: ${crewName}`, 14, 27);
+    doc.text(`Date: ${date}`, 14, 33);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 39);
+    doc.setDrawColor(200, 200, 200); doc.line(14, 43, 196, 43);
+
+    // Table
+    const totalMins = list.reduce((s, r) => s + (r.durationMinutes || 0), 0);
+    doc.autoTable({
+      startY: 47,
+      head: [['Worker', 'Check In', 'Check Out', 'Duration', 'Status']],
+      body: list.map(s => [
+        s.workerName,
+        attFmtTime(s.checkedInAt),
+        s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—',
+        s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—',
+        s.checkedOutAt ? 'Done' : 'Working'
+      ]),
+      foot: [['', '', 'Total', attFmtDur(totalMins), '']],
+      styles: { fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [30, 50, 100], textColor: 255, fontStyle: 'bold' },
+      footStyles: { fillColor: [230, 235, 245], textColor: [40, 60, 120], fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 247, 252] },
+    });
+
+    doc.save(`attendance-crew-${crewName.replace(/\s+/g,'-')}-${date}.pdf`);
+  }
+
+  function attExportWorkerPdf() {
+    if (!_attWorkerLastData) return;
+    const { workerName, from, to, list } = _attWorkerLastData;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    // Header
+    doc.setFontSize(18); doc.setTextColor(40, 60, 120);
+    doc.text('TEDHOUSE — Attendance Report', 14, 18);
+    doc.setFontSize(11); doc.setTextColor(80, 80, 80);
+    doc.text(`Worker: ${workerName}`, 14, 27);
+    doc.text(`Period: ${from}${from !== to ? ' → ' + to : ''}`, 14, 33);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 39);
+    doc.setDrawColor(200, 200, 200); doc.line(14, 43, 196, 43);
+
+    // Group by date and render one table per date
+    const byDate = {};
+    list.forEach(s => {
+      const d = s.checkedInAt.slice(0,10);
+      if (!byDate[d]) byDate[d] = [];
+      byDate[d].push(s);
+    });
+
+    let y = 47;
+    const totalMins = list.reduce((s, r) => s + (r.durationMinutes || 0), 0);
+    Object.keys(byDate).sort().reverse().forEach(d => {
+      const rows = byDate[d];
+      const dayMins = rows.reduce((s, r) => s + (r.durationMinutes || 0), 0);
+      doc.autoTable({
+        startY: y,
+        head: [[{ content: d, colSpan: 4, styles: { fillColor: [50, 80, 150], textColor: 255, fontStyle: 'bold' } }],
+               ['House', 'Check In', 'Check Out', 'Duration']],
+        body: rows.map(s => [
+          s.houseName,
+          attFmtTime(s.checkedInAt),
+          s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—',
+          s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'
+        ]),
+        foot: [['', '', 'Day total', attFmtDur(dayMins)]],
+        styles: { fontSize: 10, cellPadding: 3 },
+        headStyles: { fillColor: [30, 50, 100], textColor: 255, fontStyle: 'bold' },
+        footStyles: { fillColor: [230, 235, 245], textColor: [40, 60, 120], fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 247, 252] },
+      });
+      y = doc.lastAutoTable.finalY + 6;
+    });
+
+    // Grand total
+    doc.setFontSize(11); doc.setTextColor(40, 60, 120);
+    doc.text(`Total hours: ${attFmtDur(totalMins)}`, 14, y + 4);
+
+    doc.save(`attendance-worker-${workerName.replace(/\s+/g,'-')}-${from}${from !== to ? '_'+to : ''}.pdf`);
   }
 
   function attFmtTime(iso) {

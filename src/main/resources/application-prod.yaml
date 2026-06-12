@@ -84,6 +84,7 @@ server:
 
 app:
   base-url: ${APP_BASE_URL:https://changeme.example.com}
+  timezone: ${APP_TIMEZONE:Europe/Sofia}
 
 logging:
   level:
