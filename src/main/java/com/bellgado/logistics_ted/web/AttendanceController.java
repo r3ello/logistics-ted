@@ -183,6 +183,7 @@ public class AttendanceController {
 
     /** All sessions for a crew on a given date. */
     @GetMapping("/api/attendance/crew/{crewId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getCrewAttendance(@PathVariable Integer crewId,
                                                 @RequestParam String date) {
         LocalDate d = LocalDate.parse(date);
@@ -192,6 +193,7 @@ public class AttendanceController {
 
     /** All sessions for a worker between two dates. */
     @GetMapping("/api/attendance/worker/{workerId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getWorkerAttendance(@PathVariable Integer workerId,
                                                   @RequestParam String from,
                                                   @RequestParam String to) {
