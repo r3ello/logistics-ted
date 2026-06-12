@@ -54,6 +54,12 @@ pkill -f "logistics-ted"   2>/dev/null
 echo "stopped"
 ```
 
+### Ensure PostgreSQL is running (always do this first)
+```bash
+pg_ctl start -D "/c/Users/itqpl/scoop/apps/postgresql/current/data"
+```
+The "another server might be running" warning is safe to ignore — if it starts, you're good.
+
 ### Start
 ```bash
 cd "C:/Users/itqpl/Claude cowork/logistics-ted" && \

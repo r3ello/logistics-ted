@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TEDHOUSE – Electric Panel</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f1117;--surface:#1a1d27;--card:#21253a;--border:#2e3250;
+      --accent:#4f8ef7;--green:#3ecf6e;--red:#f76f6f;--yellow:#f5c842;
+      --gray:#9aa3be;--text:#e2e8f0;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem}
+    .header{text-align:center;margin-bottom:2rem}
+    .header h1{font-size:1.4rem;font-weight:700;color:var(--accent);letter-spacing:.05em}
+    .header p{font-size:.85rem;color:var(--gray);margin-top:.3rem}
+    .panel-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;width:100%;max-width:560px}
+    .main-breaker{background:var(--card);border:2px solid var(--accent);border-radius:10px;text-align:center;padding:.75rem 1rem;margin-bottom:1.5rem;font-weight:700;font-size:1rem;color:var(--accent)}
+    .columns{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+    .col-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray);text-align:center;margin-bottom:.4rem}
+    .circuit{
+      background:var(--card);border:1px solid var(--border);border-radius:8px;
+      padding:.55rem .7rem;display:flex;flex-direction:column;gap:.15rem;
+      position:relative;transition:border-color .2s;
+    }
+    .circuit.status-on    {border-left:3px solid var(--green)}
+    .circuit.status-off   {border-left:3px solid var(--gray);opacity:.6}
+    .circuit.status-tripped{border-left:3px solid var(--red)}
+    .circuit.type-double  {grid-row:span 2;justify-content:center}
+    .circuit.type-empty   {opacity:.25;border-style:dashed}
+    .circuit-label{font-size:.8rem;font-weight:600;color:var(--text);word-break:break-word}
+    .circuit-meta{font-size:.7rem;color:var(--gray);display:flex;gap:.5rem;align-items:center}
+    .status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .status-dot.on     {background:var(--green)}
+    .status-dot.off    {background:var(--gray)}
+    .status-dot.tripped{background:var(--red)}
+    .slot-num{position:absolute;top:4px;right:6px;font-size:.6rem;color:var(--gray);opacity:.5}
+    #loading,#error{text-align:center;padding:3rem;color:var(--gray)}
+    #error{color:var(--red)}
+    .legend{display:flex;gap:1rem;justify-content:center;margin-top:1.2rem;flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:.35rem;font-size:.72rem;color:var(--gray)}
+    .legend-dot{width:9px;height:9px;border-radius:50%}
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>⚡ TEDHOUSE Electric Panel</h1>
+  <p id="subtitle">Loading your home's electrical panel…</p>
+</div>
+
+<div id="loading">Loading…</div>
+<div id="error" style="display:none"></div>
+
+<div id="panelWrap" class="panel-wrap" style="display:none">
+  <div class="main-breaker" id="mainBreaker">MAIN BREAKER — 200 A</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem">
+    <div class="col-label">◀ Left</div>
+    <div class="col-label">Right ▶</div>
+  </div>
+  <div class="columns" id="leftCol"></div>
+  <div class="columns" id="rightColWrap" style="display:none">
+    <div></div>
+    <div id="rightCol"></div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>On</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--gray)"></div>Off</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Tripped</div>
+  </div>
+</div>
+
+<script>
+const token = location.pathname.split('/').filter(Boolean).pop();
+
+async function load() {
+  try {
+    const res = await fetch(`/api/public/electric-box/${token}`);
+    if (!res.ok) throw new Error(res.status === 404 ? 'Panel not found.' : 'Server error.');
+    const data = await res.json();
+    render(data);
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    const err = document.getElementById('error');
+    err.style.display = 'block';
+    err.textContent = e.message || 'Could not load panel.';
+  }
+}
+
+function render(data) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('subtitle').textContent = data.houseName || 'Your Home';
+  document.getElementById('mainBreaker').textContent = `MAIN BREAKER — ${data.mainAmps} A`;
+
+  const left  = (data.circuits || []).filter(c => c.side === 'LEFT').sort((a,b) => a.slotIndex - b.slotIndex);
+  const right = (data.circuits || []).filter(c => c.side === 'RIGHT').sort((a,b) => a.slotIndex - b.slotIndex);
+
+  const leftCol = document.getElementById('leftCol');
+  const rightCol = document.getElementById('rightCol');
+
+  renderColumn(leftCol, left);
+  if (right.length) {
+    renderColumn(rightCol, right);
+    document.getElementById('rightColWrap').style.display = '';
+    // rebuild as proper 2-col grid
+    const wrap = document.querySelector('.columns');
+    wrap.style.gridTemplateColumns = '1fr 1fr';
+    leftCol.style.display = 'contents';
+    rightCol.style.display = 'contents';
+    // simpler: just replace the layout
+    rebuildTwoCol(leftCol.parentElement, left, right);
+  }
+
+  document.getElementById('panelWrap').style.display = 'block';
+}
+
+function rebuildTwoCol(container, left, right) {
+  container.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:.5rem';
+  const max = Math.max(left.length, right.length);
+  for (let i = 0; i < max; i++) {
+    grid.appendChild(left[i]  ? circuitEl(left[i])  : emptyEl());
+    grid.appendChild(right[i] ? circuitEl(right[i]) : emptyEl());
+  }
+  container.appendChild(grid);
+}
+
+function renderColumn(col, circuits) {
+  col.innerHTML = '';
+  circuits.forEach(c => col.appendChild(circuitEl(c)));
+}
+
+function circuitEl(c) {
+  const el = document.createElement('div');
+  const st = (c.status || 'ON').toLowerCase();
+  el.className = `circuit status-${st} type-${(c.type||'SINGLE').toLowerCase()}`;
+  if (c.type === 'DOUBLE') el.style.gridRow = 'span 2';
+  el.innerHTML = `
+    <span class="slot-num">${c.slotIndex + 1}</span>
+    <div class="circuit-label">${c.label || '—'}</div>
+    <div class="circuit-meta">
+      <span class="status-dot ${st}"></span>
+      <span>${c.amps ? c.amps + ' A' : ''}</span>
+      <span>${c.type !== 'SINGLE' ? c.type : ''}</span>
+    </div>`;
+  return el;
+}
+
+function emptyEl() {
+  const el = document.createElement('div');
+  el.className = 'circuit type-empty';
+  el.innerHTML = '<div class="circuit-label" style="font-size:.7rem">empty</div>';
+  return el;
+}
+
+load();
+</script>
+</body>
+</html>
