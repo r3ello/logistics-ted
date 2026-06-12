@@ -705,10 +705,6 @@
     }
 
     /* ── ELECTRIC BOX RESPONSIVE ── */
-    /* Stack list + editor vertically on tablet/mobile */
-    @media (max-width: 900px) {
-      .eb-layout { grid-template-columns: 1fr; }
-    }
     /* Touch devices: always show the delete (✕) button — hover doesn't exist */
     @media (hover: none) {
       .eb-slot-del { display: block !important; opacity: .75; }
@@ -719,12 +715,21 @@
       border-color: var(--accent);
       box-shadow: 0 0 0 2px var(--accent);
     }
-    /* Small phone tweaks */
-    @media (max-width: 480px) {
+    /* ≤900px: single column, one panel visible at a time */
+    @media (max-width: 900px) {
+      .eb-layout { grid-template-columns: 1fr; }
+      /* Back button only visible on mobile */
+      #ebBackBtn { display: inline-flex !important; }
+      /* Mobile editor: full width, no side-by-side */
+      .eb-layout.eb-mobile-editor .eb-list-card { display: none; }
+      .eb-layout.eb-mobile-editor .eb-editor-card { display: block !important; }
+      .eb-layout:not(.eb-mobile-editor) .eb-editor-card { display: none !important; }
+      .eb-layout:not(.eb-mobile-editor) .eb-list-card { display: block; }
+      /* Compact panel grid and palette */
       .eb-panel-grid { gap: .2rem; }
       .eb-slot { min-height: 42px; }
-      .eb-palette { gap: .3rem; padding: .4rem; }
-      .eb-palette-item { padding: .3rem .55rem; font-size: .75rem; }
+      .eb-palette { gap: .3rem; padding: .4rem; flex-wrap: wrap; }
+      .eb-palette-item { padding: .3rem .6rem; font-size: .78rem; }
     }
 
     /* ── RESPONSIVE ── */
@@ -1731,7 +1736,10 @@
       <!-- Editor -->
       <div class="eb-editor-card" id="ebEditor" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-          <strong id="ebEditorTitle" style="font-size:1rem">New Electric Box</strong>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <button id="ebBackBtn" class="btn" style="display:none;padding:.3rem .6rem;font-size:.8rem" onclick="ebCloseEditor()">← Back</button>
+            <strong id="ebEditorTitle" style="font-size:1rem">New Electric Box</strong>
+          </div>
           <button class="btn" style="padding:.3rem .7rem;font-size:.8rem" onclick="ebCloseEditor()">✕</button>
         </div>
 
@@ -5815,11 +5823,13 @@
     ebRenderList();
 
     document.getElementById('ebEditor').style.display = '';
+    document.querySelector('.eb-layout').classList.add('eb-mobile-editor');
   }
 
   function ebCloseEditor() {
     _ebCurrent = null;
     document.getElementById('ebEditor').style.display = 'none';
+    document.querySelector('.eb-layout').classList.remove('eb-mobile-editor');
     ebRenderList();
   }
 
