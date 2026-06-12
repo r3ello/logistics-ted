@@ -11,4 +11,9 @@ public class ClientPanelController {
     public String electricBoxPage(@PathVariable String token) {
         return "forward:/electric-box.html";
     }
+
+    @GetMapping("/checkin/{token}")
+    public String checkinPage(@PathVariable String token) {
+        return "forward:/checkin.html";
+    }
 }

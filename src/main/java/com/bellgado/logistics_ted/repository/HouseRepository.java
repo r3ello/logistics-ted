@@ -10,4 +10,6 @@ public interface HouseRepository extends JpaRepository<House, Integer> {
     List<House> findAllByOrderByIdAsc();
 
     List<House> findByScaffoldStatusAndLatIsNotNullAndLngIsNotNull(ScaffoldStatus status);
+
+    java.util.Optional<House> findByCheckinToken(String checkinToken);
 }

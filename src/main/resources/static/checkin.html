@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TEDHOUSE – Check In/Out</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f1117;--surface:#1a1d27;--card:#21253a;--border:#2e3250;
+      --accent:#4f8ef7;--green:#3ecf6e;--red:#f76f6f;--yellow:#f5c842;
+      --gray:#9aa3be;--text:#e2e8f0;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem}
+    .header{text-align:center;margin-bottom:1.5rem}
+    .header h1{font-size:1.3rem;font-weight:700;color:var(--accent)}
+    .header p{font-size:.85rem;color:var(--gray);margin-top:.3rem}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+      padding:1.5rem;width:100%;max-width:420px}
+    label{display:block;font-size:.75rem;font-weight:700;text-transform:uppercase;
+      letter-spacing:.07em;color:var(--gray);margin-bottom:.5rem}
+    select{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;
+      color:var(--text);font-size:1rem;padding:.75rem 1rem;outline:none;appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239aa3be' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 1rem center}
+    .btn{width:100%;padding:1rem;border:none;border-radius:10px;font-size:1rem;font-weight:700;
+      cursor:pointer;margin-top:1rem;transition:opacity .15s}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .btn-in {background:var(--green);color:#0f1117}
+    .btn-out{background:var(--yellow);color:#0f1117}
+    .status-box{background:var(--card);border:1px solid var(--border);border-radius:10px;
+      padding:1rem;margin:1rem 0;text-align:center}
+    .status-box .time{font-size:1.4rem;font-weight:700;color:var(--accent);margin:.3rem 0}
+    .status-box .label{font-size:.78rem;color:var(--gray);text-transform:uppercase;letter-spacing:.07em}
+    .msg{text-align:center;padding:.75rem 1rem;border-radius:8px;margin-top:1rem;font-size:.88rem;font-weight:600}
+    .msg-ok {background:rgba(62,207,110,.12);color:var(--green);border:1px solid rgba(62,207,110,.3)}
+    .msg-err{background:rgba(247,111,111,.12);color:var(--red); border:1px solid rgba(247,111,111,.3)}
+    .msg-info{background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.25)}
+    #loading,#error-page{text-align:center;padding:3rem;color:var(--gray)}
+    #error-page{color:var(--red)}
+    .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+    .session-done{text-align:center}
+    .session-done .hours{font-size:2rem;font-weight:700;color:var(--green);margin:.5rem 0}
+    .session-done .sub{font-size:.82rem;color:var(--gray)}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚡ TEDHOUSE</h1>
+  <p id="houseName">Loading…</p>
+</div>
+
+<div id="loading" style="color:var(--gray);text-align:center;padding:2rem">Loading…</div>
+<div id="error-page" style="display:none"></div>
+
+<div id="mainCard" class="card" style="display:none">
+
+  <!-- Step 1: worker selector (hidden once worker selected) -->
+  <div id="stepSelect">
+    <label for="workerSelect">Who are you?</label>
+    <select id="workerSelect" onchange="onWorkerSelect()">
+      <option value="">— Select your name —</option>
+    </select>
+  </div>
+
+  <hr class="divider" id="divider" style="display:none"/>
+
+  <!-- Step 2: action area -->
+  <div id="stepAction" style="display:none"></div>
+
+  <div id="msgBox" style="display:none" class="msg"></div>
+</div>
+
+<script>
+const token    = location.pathname.split('/').filter(Boolean).pop();
+let   houseData = null;
+let   deviceId  = null;
+
+// ── device fingerprint ───────────────────────────────────────────────────────
+function getDeviceId() {
+  let id = localStorage.getItem('tdhDeviceId');
+  if (!id) { id = crypto.randomUUID(); localStorage.setItem('tdhDeviceId', id); }
+  return id;
+}
+
+// ── init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  deviceId = getDeviceId();
+  try {
+    const res = await fetch(`/api/public/checkin/${token}`);
+    if (!res.ok) throw new Error(res.status === 404 ? 'Check-in point not found.' : 'Server error.');
+    houseData = await res.json();
+    document.getElementById('houseName').textContent = '📍 ' + houseData.houseName;
+    const sel = document.getElementById('workerSelect');
+    houseData.workers.forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w.id; opt.textContent = w.name; sel.appendChild(opt);
+    });
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('mainCard').style.display = 'block';
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    const ep = document.getElementById('error-page');
+    ep.style.display = 'block';
+    ep.textContent = e.message;
+  }
+}
+
+// ── worker selected ───────────────────────────────────────────────────────────
+async function onWorkerSelect() {
+  const workerId = parseInt(document.getElementById('workerSelect').value);
+  if (!workerId) { hideAction(); return; }
+  const res  = await fetch(`/api/public/checkin/${token}/worker/${workerId}/today`);
+  const data = await res.json();
+  showAction(workerId, data);
+}
+
+function hideAction() {
+  document.getElementById('divider').style.display    = 'none';
+  document.getElementById('stepAction').style.display = 'none';
+  hideMsg();
+}
+
+function showAction(workerId, data) {
+  document.getElementById('divider').style.display    = '';
+  const area = document.getElementById('stepAction');
+  area.style.display = 'block';
+  hideMsg();
+
+  if (data.status === 'NONE') {
+    area.innerHTML = `
+      <div class="status-box">
+        <div class="label">Not checked in today</div>
+      </div>
+      <button class="btn btn-in" onclick="doCheckIn(${workerId})">✅ Check In</button>`;
+
+  } else if (data.status === 'CHECKED_IN') {
+    const t = fmtTime(data.checkedInAt);
+    area.innerHTML = `
+      <div class="status-box">
+        <div class="label">Checked in at</div>
+        <div class="time">${t}</div>
+      </div>
+      <button class="btn btn-out" onclick="doCheckOut(${workerId}, ${data.sessionId})">🚪 Check Out</button>`;
+
+  } else { // CHECKED_OUT
+    const mins = data.durationMinutes;
+    area.innerHTML = `
+      <div class="session-done">
+        <div class="label" style="color:var(--green);font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem">Session complete</div>
+        <div class="hours">${fmtDuration(mins)}</div>
+        <div class="sub">${fmtTime(data.checkedInAt)} → ${fmtTime(data.checkedOutAt)}</div>
+      </div>`;
+  }
+}
+
+// ── check in ─────────────────────────────────────────────────────────────────
+async function doCheckIn(workerId) {
+  showMsg('📍 Getting your location…', 'info');
+  let lat = null, lng = null;
+  try {
+    const pos = await getPosition();
+    lat = pos.coords.latitude; lng = pos.coords.longitude;
+  } catch(e) {
+    showMsg('❌ Location access is required to check in. Please allow location and try again.', 'err');
+    return;
+  }
+  showMsg('Checking in…', 'info');
+  try {
+    const res  = await fetch(`/api/public/checkin/${token}/session`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ workerId, deviceId, lat, lng })
+    });
+    const data = await res.json();
+    if (!res.ok) { showMsg('❌ ' + data.error, 'err'); return; }
+    showMsg('✅ Checked in at ' + fmtTime(data.checkedInAt), 'ok');
+    await onWorkerSelect();
+  } catch(e) { showMsg('❌ ' + e.message, 'err'); }
+}
+
+// ── check out ─────────────────────────────────────────────────────────────────
+async function doCheckOut(workerId, sessionId) {
+  showMsg('📍 Getting your location…', 'info');
+  let lat = null, lng = null;
+  try {
+    const pos = await getPosition();
+    lat = pos.coords.latitude; lng = pos.coords.longitude;
+  } catch(e) {
+    showMsg('❌ Location access is required to check out. Please allow location and try again.', 'err');
+    return;
+  }
+  showMsg('Checking out…', 'info');
+  try {
+    const res  = await fetch(`/api/public/checkin/${token}/session/${sessionId}/checkout`, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ deviceId, lat, lng })
+    });
+    const data = await res.json();
+    if (!res.ok) { showMsg('❌ ' + data.error, 'err'); return; }
+    showMsg('✅ Checked out — ' + fmtDuration(data.durationMinutes) + ' today', 'ok');
+    await onWorkerSelect();
+  } catch(e) { showMsg('❌ ' + e.message, 'err'); }
+}
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+function getPosition() {
+  return new Promise((resolve, reject) =>
+    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, maximumAge: 0 }));
+}
+
+function fmtTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+}
+
+function fmtDuration(mins) {
+  if (mins == null) return '—';
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return h > 0 ? `${h}h ${m.toString().padStart(2,'0')}m` : `${m}m`;
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById('msgBox');
+  el.textContent = text;
+  el.className = 'msg msg-' + type;
+  el.style.display = 'block';
+}
+function hideMsg() { document.getElementById('msgBox').style.display = 'none'; }
+
+init();
+</script>
+</body>
+</html>

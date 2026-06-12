@@ -52,4 +52,7 @@ public class House {
 
     @Column(name = "scaffold_end_date")
     private LocalDate scaffoldEndDate;
+
+    @Column(name = "checkin_token", length = 64, unique = true)
+    private String checkinToken;
 }

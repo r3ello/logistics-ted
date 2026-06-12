@@ -168,6 +168,15 @@
     .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
     .btn-ghost { background: rgba(255,255,255,0.07); color: var(--text); border: 1px solid var(--border); }
     .btn-ghost:hover { background: rgba(255,255,255,0.12); }
+    .att-tab.active { background: rgba(79,142,247,.18); color: var(--accent); border-color: var(--accent); }
+    .att-table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    .att-table th { text-align:left; padding:.5rem .75rem; color:var(--muted); font-weight:600; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); }
+    .att-table td { padding:.6rem .75rem; border-bottom:1px solid rgba(255,255,255,.04); }
+    .att-table tr:last-child td { border-bottom:none; }
+    .att-badge-in  { display:inline-block; padding:.2rem .55rem; border-radius:5px; font-size:.75rem; font-weight:700; background:rgba(62,207,110,.15); color:#3ecf6e; }
+    .att-badge-out { display:inline-block; padding:.2rem .55rem; border-radius:5px; font-size:.75rem; font-weight:700; background:rgba(79,142,247,.15); color:#4f8ef7; }
+    .att-badge-abs { display:inline-block; padding:.2rem .55rem; border-radius:5px; font-size:.75rem; font-weight:700; background:rgba(255,255,255,.06); color:var(--muted); }
+    .att-empty { text-align:center; padding:3rem 1rem; color:var(--muted); font-size:.9rem; }
     .btn-green { background: var(--green); color: #0f1117; }
     .btn-green:hover { opacity: 0.85; }
 
@@ -1439,6 +1448,9 @@
     <div class="nav-item" id="navElectric" onclick="showView('electric')">
       <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
     </div>
+    <div class="nav-item" id="navAttendance" onclick="showView('attendance')">
+      <span class="nav-icon">🕐</span> <span id="navAttendanceLabel">Attendance</span>
+    </div>
   </div>
 </nav>
 
@@ -1832,6 +1844,55 @@
     </div>
   </div>
 
+  <!-- ── ATTENDANCE VIEW ─────────────────────────────────────────────────── -->
+  <div class="view" id="view-attendance">
+
+    <!-- Tab bar: By Crew / By Worker -->
+    <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:1rem">
+      <button class="btn btn-ghost att-tab active" id="attTabCrew"   onclick="attSwitchTab('crew')">👥 By Crew</button>
+      <button class="btn btn-ghost att-tab"        id="attTabWorker" onclick="attSwitchTab('worker')">👤 By Worker</button>
+    </div>
+
+    <!-- BY CREW panel -->
+    <div id="attPanelCrew">
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:flex-end">
+        <div class="field" style="margin:0;flex:1;min-width:160px">
+          <label>Crew</label>
+          <select id="attCrewSelect" onchange="attLoadCrew()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none">
+            <option value="">— select crew —</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Date</label>
+          <input type="date" id="attCrewDate" onchange="attLoadCrew()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
+        </div>
+      </div>
+      <div id="attCrewResults"></div>
+    </div>
+
+    <!-- BY WORKER panel -->
+    <div id="attPanelWorker" style="display:none">
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:flex-end">
+        <div class="field" style="margin:0;flex:1;min-width:160px">
+          <label>Worker</label>
+          <select id="attWorkerSelect" onchange="attLoadWorker()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none">
+            <option value="">— select worker —</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0">
+          <label>From</label>
+          <input type="date" id="attWorkerFrom" onchange="attLoadWorker()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label>To</label>
+          <input type="date" id="attWorkerTo" onchange="attLoadWorker()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
+        </div>
+      </div>
+      <div id="attWorkerResults"></div>
+    </div>
+
+  </div><!-- /view-attendance -->
+
 </div><!-- /main -->
 
 <script>
@@ -1846,6 +1907,8 @@
       pageTitle_history:'Order History', pageSub_history:'Past calculations — immutable record',
       pageTitle_scaffold:'Scaffold Transport', pageSub_scaffold:'Find closest available scaffold for a destination house',
       pageTitle_electric:'Electric Boxes', pageSub_electric:'Manage electrical panel layouts per house',
+      pageTitle_attendance:'Attendance', pageSub_attendance:'Worker check-in / check-out times per day',
+      navAttendance:'Attendance',
       ebManagerTitle:'⚡ Electric Box Manager',
       ebNewBox:'+ New Box', ebEditorTitleNew:'New Electric Box',
       ebLblHouse:'House', ebHouseSelectDefault:'— select —',
@@ -2017,6 +2080,8 @@
       pageTitle_history:'История на поръчките', pageSub_history:'Минали изчисления — неизменен запис',
       pageTitle_scaffold:'Транспорт на скеле', pageSub_scaffold:'Намери най-близко налично скеле за дестинация',
       pageTitle_electric:'Електрически табла', pageSub_electric:'Управление на електрически инсталации по къщи',
+      pageTitle_attendance:'Присъствие', pageSub_attendance:'Влизане и излизане на работници по дни',
+      navAttendance:'Присъствие',
       ebManagerTitle:'⚡ Мениджър на табла',
       ebNewBox:'+ Ново табло', ebEditorTitleNew:'Ново електрическо табло',
       ebLblHouse:'Къща', ebHouseSelectDefault:'— избери —',
@@ -2231,7 +2296,8 @@
     document.getElementById('navOrder').querySelector('span:last-child').textContent     = t('navOrder');
     document.getElementById('navMap').querySelector('span:last-child').textContent       = t('navMap');
     document.getElementById('navHistoryLabel').textContent  = t('navHistory');
-    document.getElementById('navElectricLabel').textContent = t('navElectric');
+    document.getElementById('navElectricLabel').textContent    = t('navElectric');
+    document.getElementById('navAttendanceLabel').textContent  = t('navAttendance');
     const eb = id => document.getElementById(id);
     const ebt = (id, key) => { const el = eb(id); if (el) el.textContent = t(key); };
     ebt('ebManagerTitle','ebManagerTitle');
@@ -2456,7 +2522,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'crews', 'history', 'electric'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'crews', 'history', 'electric', 'attendance'];
 
   function showView(name) {
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
@@ -2475,6 +2541,7 @@
     if (name === 'scaffold') loadScaffoldHouses();
     if (name === 'crews') loadOrgChart();
     if (name === 'electric') ebInit();
+    if (name === 'attendance') attInit();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -5408,6 +5475,126 @@
     const hashView = location.hash.replace('#', '');
     showView(VALID_VIEWS.includes(hashView) ? hashView : 'dashboard');
     translateStatic();
+  }
+
+  // ── ATTENDANCE ───────────────────────────────────────────────────────────────
+  let _attInitDone = false;
+  let _attCrews    = [];
+  let _attWorkers  = [];
+
+  async function attInit() {
+    if (_attInitDone) return;
+    _attInitDone = true;
+
+    // Set default dates
+    const today = new Date().toISOString().slice(0,10);
+    document.getElementById('attCrewDate').value  = today;
+    document.getElementById('attWorkerFrom').value = today;
+    document.getElementById('attWorkerTo').value   = today;
+
+    // Load crews
+    try {
+      const r = await apiFetch('/api/crews');
+      _attCrews = await r.json();
+      const sel = document.getElementById('attCrewSelect');
+      _attCrews.forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.id; o.textContent = c.name; sel.appendChild(o);
+      });
+    } catch(e) { console.error('attInit crews', e); }
+
+    // Load workers
+    try {
+      const r = await apiFetch('/api/workers');
+      _attWorkers = await r.json();
+      const sel = document.getElementById('attWorkerSelect');
+      _attWorkers.sort((a,b) => a.name.localeCompare(b.name)).forEach(w => {
+        const o = document.createElement('option');
+        o.value = w.id; o.textContent = w.name; sel.appendChild(o);
+      });
+    } catch(e) { console.error('attInit workers', e); }
+  }
+
+  function attSwitchTab(tab) {
+    document.getElementById('attPanelCrew').style.display   = tab === 'crew'   ? '' : 'none';
+    document.getElementById('attPanelWorker').style.display = tab === 'worker' ? '' : 'none';
+    document.getElementById('attTabCrew').classList.toggle('active',   tab === 'crew');
+    document.getElementById('attTabWorker').classList.toggle('active', tab === 'worker');
+  }
+
+  async function attLoadCrew() {
+    const crewId = document.getElementById('attCrewSelect').value;
+    const date   = document.getElementById('attCrewDate').value;
+    const box    = document.getElementById('attCrewResults');
+    if (!crewId || !date) { box.innerHTML = ''; return; }
+
+    box.innerHTML = '<p class="att-empty">Loading…</p>';
+    try {
+      const r    = await apiFetch(`/api/attendance/crew/${crewId}?date=${date}`);
+      const list = await r.json();
+      if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions recorded for this date.</p>'; return; }
+      box.innerHTML = `
+        <table class="att-table">
+          <thead><tr><th>Worker</th><th>In</th><th>Out</th><th>Duration</th><th>Status</th></tr></thead>
+          <tbody>
+            ${list.map(s => `
+              <tr>
+                <td>${s.workerName}</td>
+                <td>${attFmtTime(s.checkedInAt)}</td>
+                <td>${s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—'}</td>
+                <td>${s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'}</td>
+                <td>${s.checkedOutAt ? '<span class="att-badge-out">Done</span>' : '<span class="att-badge-in">Working</span>'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+    } catch(e) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${e.message}</p>`; }
+  }
+
+  async function attLoadWorker() {
+    const workerId = document.getElementById('attWorkerSelect').value;
+    const from     = document.getElementById('attWorkerFrom').value;
+    const to       = document.getElementById('attWorkerTo').value;
+    const box      = document.getElementById('attWorkerResults');
+    if (!workerId || !from || !to) { box.innerHTML = ''; return; }
+
+    box.innerHTML = '<p class="att-empty">Loading…</p>';
+    try {
+      const r    = await apiFetch(`/api/attendance/worker/${workerId}?from=${from}&to=${to}`);
+      const list = await r.json();
+      if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions in this date range.</p>'; return; }
+      // Group by date
+      const byDate = {};
+      list.forEach(s => {
+        const d = s.checkedInAt.slice(0,10);
+        if (!byDate[d]) byDate[d] = [];
+        byDate[d].push(s);
+      });
+      box.innerHTML = Object.keys(byDate).sort().reverse().map(d => `
+        <div style="margin-bottom:1.25rem">
+          <p style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.5rem">${d}</p>
+          <table class="att-table">
+            <thead><tr><th>House</th><th>In</th><th>Out</th><th>Duration</th></tr></thead>
+            <tbody>
+              ${byDate[d].map(s => `
+                <tr>
+                  <td>${s.houseName}</td>
+                  <td>${attFmtTime(s.checkedInAt)}</td>
+                  <td>${s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—'}</td>
+                  <td>${s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`).join('');
+    } catch(e) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${e.message}</p>`; }
+  }
+
+  function attFmtTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  }
+  function attFmtDur(mins) {
+    const h = Math.floor(mins / 60), m = mins % 60;
+    return h > 0 ? `${h}h ${String(m).padStart(2,'0')}m` : `${m}m`;
   }
 
   // ── INIT ─────────────────────────────────────────────────────────────────────
