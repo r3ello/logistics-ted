@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Golos+Text:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link rel="stylesheet" href="/leaflet.css" />
   <script src="/leaflet.js"></script>
   <style>
@@ -633,6 +634,74 @@
       background: rgba(255,255,255,0.07); border: 1px solid var(--border);
       color: var(--text); font-size: 1.25rem; cursor: pointer;
       flex-shrink: 0;
+    }
+
+    /* ── ELECTRIC BOX ── */
+    .field-label { display:block; font-size:.78rem; font-weight:600; color:var(--muted); margin-bottom:.3rem }
+    .eb-layout { display:grid; grid-template-columns:260px 1fr; gap:1.25rem; align-items:start }
+    .eb-list-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1rem }
+    .eb-editor-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.25rem }
+    .eb-box-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:.55rem .75rem; border-radius:8px; cursor:pointer;
+      border:1px solid transparent; transition:background .15s;
+    }
+    .eb-box-row:hover { background:var(--card) }
+    .eb-box-row.active { background:rgba(79,142,247,.12); border-color:var(--accent) }
+    .eb-box-row-info strong { font-size:.85rem }
+    .eb-box-row-info span  { font-size:.72rem; color:var(--muted) }
+    .eb-palette-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; margin-bottom:.6rem; user-select:none }
+    .eb-palette-header:hover .section-label { color:var(--accent) }
+    .eb-palette-info { margin-bottom:.6rem }
+    .eb-ref-table { width:100%; border-collapse:collapse; font-size:.75rem }
+    .eb-ref-table th { text-align:left; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); padding:.3rem .5rem; border-bottom:1px solid var(--border) }
+    .eb-ref-table td { padding:.3rem .5rem; border-bottom:1px solid var(--border); color:var(--text) }
+    .eb-ref-table td:first-child { font-weight:700; color:var(--accent) }
+    .eb-ref-table tr:last-child td { border-bottom:none }
+    .eb-palette {
+      display:flex; flex-wrap:wrap; gap:.4rem; padding:.6rem;
+      background:var(--card); border:1px solid var(--border); border-radius:8px;
+    }
+    .eb-palette-item {
+      padding:.35rem .65rem; border-radius:6px; font-size:.78rem; font-weight:700;
+      background:var(--surface); border:1px solid var(--border); cursor:grab; user-select:none;
+      transition:border-color .15s, background .15s;
+    }
+    .eb-palette-item:hover { border-color:var(--accent); background:rgba(79,142,247,.08) }
+    .eb-palette-item.dragging { opacity:.4 }
+    .eb-panel-wrap {
+      background:var(--card); border:2px solid var(--border); border-radius:10px; padding:.75rem;
+    }
+    .eb-main-breaker {
+      background:var(--surface); border:2px solid var(--accent); border-radius:8px;
+      text-align:center; padding:.5rem; font-size:.9rem; font-weight:700; color:var(--accent);
+      margin-bottom:.6rem;
+    }
+    .eb-col-headers { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin-bottom:.35rem }
+    .eb-col-headers span { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); text-align:center }
+    .eb-panel-grid { display:grid; grid-template-columns:1fr 1fr; gap:.35rem }
+    .eb-slot {
+      min-height:48px; border:1.5px dashed var(--border); border-radius:7px;
+      display:flex; flex-direction:column; justify-content:center; padding:.35rem .45rem;
+      position:relative; cursor:pointer; transition:border-color .15s, background .15s;
+    }
+    .eb-slot.drag-over { border-color:var(--accent); background:rgba(79,142,247,.08) }
+    .eb-slot.filled { border-style:solid; border-color:var(--border) }
+    .eb-slot.filled.status-on     { border-left:3px solid var(--green) }
+    .eb-slot.filled.status-off    { border-left:3px solid var(--muted); opacity:.65 }
+    .eb-slot.filled.status-tripped{ border-left:3px solid var(--red) }
+    .eb-slot.type-double { grid-row:span 2 }
+    .eb-slot.type-empty  { opacity:.3 }
+    .eb-slot-label { font-size:.78rem; font-weight:600; color:var(--text) }
+    .eb-slot-meta  { font-size:.65rem; color:var(--muted); display:flex; gap:.4rem }
+    .eb-slot-num   { position:absolute; top:3px; right:5px; font-size:.58rem; color:var(--muted); opacity:.5 }
+    .eb-slot-del   { position:absolute; top:3px; left:5px; font-size:.65rem; color:var(--red); cursor:pointer; display:none }
+    .eb-slot:hover .eb-slot-del { display:block }
+    .eb-slot-status-btn { position:absolute; bottom:3px; right:5px; font-size:.6rem; cursor:pointer; color:var(--muted) }
+    /* Slot edit inline */
+    .eb-slot input[type=text], .eb-slot input[type=number], .eb-slot select {
+      font-size:.72rem; background:var(--surface); border:1px solid var(--border);
+      border-radius:4px; color:var(--text); padding:.15rem .3rem; width:100%; margin-top:.2rem
     }
 
     /* ── RESPONSIVE ── */
@@ -1332,6 +1401,9 @@
     <div class="nav-item" id="navHistory" onclick="showView('history')">
       <span class="nav-icon">📜</span> <span id="navHistoryLabel">History</span>
     </div>
+    <div class="nav-item" id="navElectric" onclick="showView('electric')">
+      <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
+    </div>
   </div>
 </nav>
 
@@ -1611,6 +1683,117 @@
     </div>
   </div>
 
+  <!-- VIEW: ELECTRIC BOXES -->
+  <div class="view" id="view-electric">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+      <p class="section-label" style="margin:0" id="ebManagerTitle">⚡ Electric Box Manager</p>
+      <button class="btn btn-primary" onclick="ebOpenNew()" id="ebBtnNewBox">+ New Box</button>
+    </div>
+
+    <!-- House list (left) + Panel builder (right) -->
+    <div class="eb-layout">
+      <!-- Box list -->
+      <div class="eb-list-card">
+        <div id="ebList"><p style="color:var(--muted);font-size:.85rem">Loading…</p></div>
+      </div>
+
+      <!-- Editor -->
+      <div class="eb-editor-card" id="ebEditor" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <strong id="ebEditorTitle" style="font-size:1rem">New Electric Box</strong>
+          <button class="btn" style="padding:.3rem .7rem;font-size:.8rem" onclick="ebCloseEditor()">✕</button>
+        </div>
+
+        <!-- Meta row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+          <div>
+            <label class="field-label" id="ebLblHouse">House</label>
+            <select id="ebHouseSelect" style="width:100%" onchange="ebHouseChanged()">
+              <option value="" id="ebHouseSelectDefault">— select —</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" id="ebLblMainAmps">Main Breaker (A)</label>
+            <input type="number" id="ebMainAmps" value="200" min="60" step="20" style="width:100%"/>
+          </div>
+        </div>
+        <div style="margin-bottom:1rem">
+          <label class="field-label" id="ebLblBoxLabel">Box Label (optional)</label>
+          <input type="text" id="ebLabel" placeholder="e.g. Ground Floor Panel" style="width:100%"/>
+        </div>
+
+        <!-- Palette -->
+        <div class="eb-palette-header" onclick="ebTogglePaletteInfo()" title="Click for reference guide">
+          <p class="section-label" style="margin:0" id="ebLblPalette">Breaker Palette — drag onto panel</p>
+          <span id="ebPaletteChevron" style="font-size:.75rem;color:var(--muted);transition:transform .2s">▼</span>
+        </div>
+        <div id="ebPaletteInfo" class="eb-palette-info" style="display:none">
+          <table class="eb-ref-table">
+            <thead><tr><th id="ebRefThBreaker">Breaker</th><th id="ebRefThType">Type</th><th id="ebRefThUse">Typical use</th></tr></thead>
+            <tbody>
+              <tr><td>15A</td><td id="ebRef15type">Single-pole</td><td id="ebRef15use">Lights, bedroom outlets</td></tr>
+              <tr><td>20A</td><td id="ebRef20type">Single-pole</td><td id="ebRef20use">Kitchen outlets, bathrooms, garage</td></tr>
+              <tr><td>30A</td><td id="ebRef30type">Single-pole</td><td id="ebRef30use">Water heater, dryer (120V)</td></tr>
+              <tr><td>30A 2P</td><td id="ebRef30dtype">Double-pole 240V</td><td id="ebRef30duse">Dryer, small A/C</td></tr>
+              <tr><td>40A 2P</td><td id="ebRef40dtype">Double-pole 240V</td><td id="ebRef40duse">Central A/C, heat pump</td></tr>
+              <tr><td>50A 2P</td><td id="ebRef50dtype">Double-pole 240V</td><td id="ebRef50duse">Electric range, EV charger</td></tr>
+              <tr><td id="ebRefEmptyLabel">Empty</td><td>—</td><td id="ebRefEmptyUse">Unused / reserved slot</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="eb-palette" id="ebPalette">
+          <div class="eb-palette-item" draggable="true" data-type="SINGLE" data-amps="15">15A</div>
+          <div class="eb-palette-item" draggable="true" data-type="SINGLE" data-amps="20">20A</div>
+          <div class="eb-palette-item" draggable="true" data-type="SINGLE" data-amps="30">30A</div>
+          <div class="eb-palette-item" draggable="true" data-type="DOUBLE" data-amps="30">30A 2P</div>
+          <div class="eb-palette-item" draggable="true" data-type="DOUBLE" data-amps="40">40A 2P</div>
+          <div class="eb-palette-item" draggable="true" data-type="DOUBLE" data-amps="50">50A 2P</div>
+          <div class="eb-palette-item" draggable="true" data-type="EMPTY"  data-amps="" id="ebPaletteEmpty">Empty</div>
+        </div>
+
+        <!-- Panel canvas -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:.75rem 0 .4rem">
+          <p class="section-label" style="margin:0" id="ebLblPanelLayout">Panel Layout</p>
+          <div style="display:flex;gap:.4rem">
+            <button class="btn" style="font-size:.75rem;padding:.25rem .6rem" onclick="ebAddRow()" id="ebBtnAddRow">+ Row</button>
+            <button class="btn" style="font-size:.75rem;padding:.25rem .6rem" onclick="ebRemoveRow()" id="ebBtnRemRow">− Row</button>
+          </div>
+        </div>
+        <div class="eb-panel-wrap">
+          <div class="eb-main-breaker" id="ebMainBreakerLabel">MAIN — 200 A</div><!-- updated by JS -->
+          <div class="eb-col-headers">
+            <span id="ebColLeft">◀ LEFT</span><span id="ebColRight">RIGHT ▶</span>
+          </div>
+          <div id="ebPanelGrid" class="eb-panel-grid"></div>
+        </div>
+
+        <!-- Client link -->
+        <div id="ebTokenRow" style="display:none;margin:.75rem 0;padding:.75rem;background:var(--card);border-radius:8px;border:1px solid var(--border)">
+          <p style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em" id="ebLblClientAccess">⚡ Client Access</p>
+          <div style="display:flex;gap:.75rem;align-items:flex-start">
+            <!-- QR code canvas -->
+            <div style="flex-shrink:0">
+              <div id="ebQrCode" style="width:110px;height:110px;border-radius:6px;overflow:hidden;background:#fff"></div>
+              <button class="btn" style="font-size:.68rem;padding:.2rem .5rem;margin-top:.35rem;width:110px" onclick="ebDownloadQr()" id="ebBtnDownloadQr">⬇ Download QR</button>
+            </div>
+            <!-- Link + copy -->
+            <div style="flex:1;min-width:0">
+              <p style="font-size:.68rem;color:var(--muted);margin-bottom:.3rem" id="ebLblScanShare">Scan QR or share link:</p>
+              <input id="ebTokenLink" readonly style="width:100%;font-size:.72rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--accent);outline:none;padding:.35rem .5rem;cursor:pointer;word-break:break-all" onclick="this.select()"/>
+              <button class="btn btn-primary" style="font-size:.72rem;padding:.3rem .7rem;margin-top:.4rem;width:100%" onclick="ebCopyLink()" id="ebBtnCopyLink">Copy Link</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:.75rem;margin-top:.75rem">
+          <button class="btn btn-primary" style="flex:1" onclick="ebSave()" id="ebBtnSave">Save Panel</button>
+          <button class="btn" style="color:var(--red);border-color:var(--red)" id="ebDeleteBtn" onclick="ebDelete()">Delete</button>
+        </div>
+        <p id="ebSaveErr" style="color:var(--red);font-size:.8rem;min-height:1.1rem;margin-top:.4rem"></p>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /main -->
 
 <script>
@@ -1624,7 +1807,35 @@
       pageTitle_map:'Map View', pageSub_map:'Houses on map',
       pageTitle_history:'Order History', pageSub_history:'Past calculations — immutable record',
       pageTitle_scaffold:'Scaffold Transport', pageSub_scaffold:'Find closest available scaffold for a destination house',
-      navHistory:'History',
+      pageTitle_electric:'Electric Boxes', pageSub_electric:'Manage electrical panel layouts per house',
+      ebManagerTitle:'⚡ Electric Box Manager',
+      ebNewBox:'+ New Box', ebEditorTitleNew:'New Electric Box',
+      ebLblHouse:'House', ebHouseSelectDefault:'— select —',
+      ebLblMainAmps:'Main Breaker (A)', ebLblBoxLabel:'Box Label (optional)',
+      ebLblBoxPlaceholder:'e.g. Ground Floor Panel',
+      ebLblPalette:'Breaker Palette — drag onto panel',
+      ebRefThBreaker:'Breaker', ebRefThType:'Type', ebRefThUse:'Typical use',
+      ebRef15type:'Single-pole', ebRef15use:'Lights, bedroom outlets',
+      ebRef20type:'Single-pole', ebRef20use:'Kitchen outlets, bathrooms, garage',
+      ebRef30type:'Single-pole', ebRef30use:'Water heater, dryer (120V)',
+      ebRef30dtype:'Double-pole 240V', ebRef30duse:'Dryer, small A/C',
+      ebRef40dtype:'Double-pole 240V', ebRef40duse:'Central A/C, heat pump',
+      ebRef50dtype:'Double-pole 240V', ebRef50duse:'Electric range, EV charger',
+      ebRefEmptyLabel:'Empty', ebRefEmptyUse:'Unused / reserved slot',
+      ebLblPanelLayout:'Panel Layout',
+      ebBtnAddRow:'+ Row', ebBtnRemRow:'− Row',
+      ebColLeft:'◀ LEFT', ebColRight:'RIGHT ▶',
+      ebLblClientAccess:'⚡ Client Access',
+      ebBtnDownloadQr:'⬇ Download QR',
+      ebLblScanShare:'Scan QR or share link:',
+      ebBtnCopyLink:'Copy Link', ebBtnSave:'Save Panel', ebBtnDelete:'Delete',
+      ebNoBoxes:'No electric boxes yet.\nClick + New Box to create one.',
+      ebEditPrefix:'Edit: ', ebSlotDropHere:'drop here', ebSlotEmpty:'empty',
+      ebErrSelectHouse:'Please select a house.',
+      ebSaving:'Saving…', ebSaveOk:'✓ Panel saved successfully.',
+      ebSaveFail:'Save failed', ebDeleteConfirm:'Delete this electric box? This cannot be undone.',
+      ebMainLabel:'MAIN',
+      navHistory:'History', navElectric:'Electric Boxes', ebManagerTitle:'⚡ Electric Box Manager',
       historyFiltersSource:'Source', historyFiltersChosen:'Only chosen', historyFiltersAllUsers:'All users (admin)',
       historyPickHint:'Pick an order from the list to see its details',
       historyNoResults:'No orders yet for this filter.',
@@ -1717,6 +1928,8 @@
       dashHouses:'🏠 Houses', dashWorkers:'👷 Workers', dashScaffold:'🏗️ Scaffold', dashCrews:'👥 Crews',
       // map toggles
       mapHouses:'🏠 Houses', mapScaffold:'🏗️ Scaffold', mapWorkers:'👷 Workers', mapAll:'🏠👷 Houses & Workers',
+      mapCrews:'👥 Crews', mapCrewHouse:'🏠👥 House & Crew',
+      orgCards:'📋 Cards', orgGraph:'🕸 Graph', orgGraphEmpty:'No crews found',
       // worker modal
       workerModalAdd:'Add Worker', workerModalEdit:'Edit Worker',
       workerName:'Name', workerLocation:'Location', workerCrew:'Crew',
@@ -1765,7 +1978,35 @@
       pageTitle_map:'Карта', pageSub_map:'Къщи на картата',
       pageTitle_history:'История на поръчките', pageSub_history:'Минали изчисления — неизменен запис',
       pageTitle_scaffold:'Транспорт на скеле', pageSub_scaffold:'Намери най-близко налично скеле за дестинация',
-      navHistory:'История',
+      pageTitle_electric:'Електрически табла', pageSub_electric:'Управление на електрически инсталации по къщи',
+      ebManagerTitle:'⚡ Мениджър на табла',
+      ebNewBox:'+ Ново табло', ebEditorTitleNew:'Ново електрическо табло',
+      ebLblHouse:'Къща', ebHouseSelectDefault:'— избери —',
+      ebLblMainAmps:'Главен прекъсвач (A)', ebLblBoxLabel:'Етикет на таблото (незадължително)',
+      ebLblBoxPlaceholder:'напр. Табло приземен етаж',
+      ebLblPalette:'Палитра с прекъсвачи — влачи върху таблото',
+      ebRefThBreaker:'Прекъсвач', ebRefThType:'Тип', ebRefThUse:'Типична употреба',
+      ebRef15type:'Еднополюсен', ebRef15use:'Осветление, контакти спалня',
+      ebRef20type:'Еднополюсен', ebRef20use:'Кухненски контакти, баня, гараж',
+      ebRef30type:'Еднополюсен', ebRef30use:'Бойлер, сушилня (120V)',
+      ebRef30dtype:'Двуполюсен 240V', ebRef30duse:'Сушилня, малък климатик',
+      ebRef40dtype:'Двуполюсен 240V', ebRef40duse:'Централен климатик, термопомпа',
+      ebRef50dtype:'Двуполюсен 240V', ebRef50duse:'Ел. готварска печка, зарядна за EV',
+      ebRefEmptyLabel:'Празно', ebRefEmptyUse:'Неизползван / резервен слот',
+      ebLblPanelLayout:'Разпределение на таблото',
+      ebBtnAddRow:'+ Ред', ebBtnRemRow:'− Ред',
+      ebColLeft:'◀ ЛЯВО', ebColRight:'ДЯСНО ▶',
+      ebLblClientAccess:'⚡ Достъп за клиент',
+      ebBtnDownloadQr:'⬇ Изтегли QR',
+      ebLblScanShare:'Сканирай QR или сподели линк:',
+      ebBtnCopyLink:'Копирай линк', ebBtnSave:'Запази таблото', ebBtnDelete:'Изтрий',
+      ebNoBoxes:'Няма електрически табла.\nНатисни + Ново табло за създаване.',
+      ebEditPrefix:'Редакция: ', ebSlotDropHere:'пусни тук', ebSlotEmpty:'празно',
+      ebErrSelectHouse:'Моля избери къща.',
+      ebSaving:'Записва се…', ebSaveOk:'✓ Таблото е записано успешно.',
+      ebSaveFail:'Грешка при запис', ebDeleteConfirm:'Изтриване на електрическото табло? Действието е необратимо.',
+      ebMainLabel:'ГЛАВЕН',
+      navHistory:'История', navElectric:'Електрически табла', ebManagerTitle:'⚡ Мениджър на табла',
       historyFiltersSource:'Източник', historyFiltersChosen:'Само избрани', historyFiltersAllUsers:'Всички (админ)',
       historyPickHint:'Изберете поръчка от списъка',
       historyNoResults:'Няма поръчки за този филтър.',
@@ -1858,6 +2099,8 @@
       dashHouses:'🏠 Къщи', dashWorkers:'👷 Работници', dashScaffold:'🏗️ Скеле', dashCrews:'👥 Екипи',
       // map toggles
       mapHouses:'🏠 Къщи', mapScaffold:'🏗️ Скеле', mapWorkers:'👷 Работници', mapAll:'🏠👷 Къщи и работници',
+      mapCrews:'👥 Екипи', mapCrewHouse:'🏠👥 Къща и екип',
+      orgCards:'📋 Карти', orgGraph:'🕸 Граф', orgGraphEmpty:'Няма намерени екипи',
       // worker modal
       workerModalAdd:'Добави работник', workerModalEdit:'Редактирай работник',
       workerName:'Име', workerLocation:'Локация', workerCrew:'Екип',
@@ -1949,7 +2192,40 @@
     document.getElementById('navDashboard').querySelector('span:last-child').textContent = t('navDashboard');
     document.getElementById('navOrder').querySelector('span:last-child').textContent     = t('navOrder');
     document.getElementById('navMap').querySelector('span:last-child').textContent       = t('navMap');
-    document.getElementById('navHistoryLabel').textContent = t('navHistory');
+    document.getElementById('navHistoryLabel').textContent  = t('navHistory');
+    document.getElementById('navElectricLabel').textContent = t('navElectric');
+    const eb = id => document.getElementById(id);
+    const ebt = (id, key) => { const el = eb(id); if (el) el.textContent = t(key); };
+    ebt('ebManagerTitle','ebManagerTitle');
+    ebt('ebLblHouse','ebLblHouse');
+    ebt('ebHouseSelectDefault','ebHouseSelectDefault');
+    ebt('ebLblMainAmps','ebLblMainAmps');
+    ebt('ebLblBoxLabel','ebLblBoxLabel');
+    const ebLabelInput = eb('ebLabel'); if (ebLabelInput) ebLabelInput.placeholder = t('ebLblBoxPlaceholder');
+    ebt('ebLblPalette','ebLblPalette');
+    ebt('ebRefThBreaker','ebRefThBreaker'); ebt('ebRefThType','ebRefThType'); ebt('ebRefThUse','ebRefThUse');
+    ebt('ebRef15type','ebRef15type'); ebt('ebRef15use','ebRef15use');
+    ebt('ebRef20type','ebRef20type'); ebt('ebRef20use','ebRef20use');
+    ebt('ebRef30type','ebRef30type'); ebt('ebRef30use','ebRef30use');
+    ebt('ebRef30dtype','ebRef30dtype'); ebt('ebRef30duse','ebRef30duse');
+    ebt('ebRef40dtype','ebRef40dtype'); ebt('ebRef40duse','ebRef40duse');
+    ebt('ebRef50dtype','ebRef50dtype'); ebt('ebRef50duse','ebRef50duse');
+    ebt('ebRefEmptyLabel','ebRefEmptyLabel'); ebt('ebRefEmptyUse','ebRefEmptyUse');
+    ebt('ebPaletteEmpty','ebRefEmptyLabel');
+    ebt('ebLblPanelLayout','ebLblPanelLayout');
+    ebt('ebBtnAddRow','ebBtnAddRow'); ebt('ebBtnRemRow','ebBtnRemRow');
+    ebt('ebColLeft','ebColLeft'); ebt('ebColRight','ebColRight');
+    ebt('ebLblClientAccess','ebLblClientAccess');
+    ebt('ebBtnDownloadQr','ebBtnDownloadQr'); ebt('ebLblScanShare','ebLblScanShare');
+    ebt('ebBtnCopyLink','ebBtnCopyLink');
+    ebt('ebBtnSave','ebBtnSave'); ebt('ebDeleteBtn','ebBtnDelete'); ebt('ebBtnNewBox','ebNewBox');
+    // re-render dynamic electric box parts if editor is open
+    if (_ebCurrent) {
+      ebt('ebEditorTitle', _ebCurrent.id ? null : 'ebEditorTitleNew');
+      if (_ebCurrent.id) { const el = eb('ebEditorTitle'); if (el) el.textContent = `${t('ebEditPrefix')}${_ebCurrent.houseName||'Box'}`; }
+      ebRenderPanel();
+    }
+    ebRenderList();
     const hsl = document.getElementById('historyFiltersSourceLbl');     if (hsl) hsl.textContent = t('historyFiltersSource');
     const hcl = document.getElementById('historyFiltersChosenLbl');     if (hcl) hcl.textContent = t('historyFiltersChosen');
     const hal = document.getElementById('historyFiltersAllUsersLbl');   if (hal) hal.textContent = t('historyFiltersAllUsers');
@@ -1993,7 +2269,12 @@
     const mh = document.getElementById('mapModeHouses');   if (mh) mh.textContent = t('mapHouses');
     const ms = document.getElementById('mapModeScaffold'); if (ms) ms.textContent = t('mapScaffold');
     const mw = document.getElementById('mapModeWorkers');  if (mw) mw.textContent = t('mapWorkers');
-    const ma = document.getElementById('mapModeAll');      if (ma) ma.textContent = t('mapAll');
+    const ma  = document.getElementById('mapModeAll');       if (ma)  ma.textContent  = t('mapAll');
+    const mc  = document.getElementById('mapModeCrews');     if (mc)  mc.textContent  = t('mapCrews');
+    const mch = document.getElementById('mapModeCrewHouse'); if (mch) mch.textContent = t('mapCrewHouse');
+    const oc  = document.getElementById('orgToggleCards');   if (oc)  oc.textContent  = t('orgCards');
+    const og  = document.getElementById('orgToggleGraph');   if (og)  og.textContent  = t('orgGraph');
+    const oge = document.getElementById('orgGraphEmpty');    if (oge) oge.textContent = t('orgGraphEmpty');
 
     // map legend
     const leg = document.getElementById('mapScaffoldLegend');
@@ -2137,7 +2418,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'crews', 'history'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'crews', 'history', 'electric'];
 
   function showView(name) {
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
@@ -2155,6 +2436,7 @@
     if (name === 'history') loadHistory();
     if (name === 'scaffold') loadScaffoldHouses();
     if (name === 'crews') loadOrgChart();
+    if (name === 'electric') ebInit();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -5087,6 +5369,7 @@
 
     const hashView = location.hash.replace('#', '');
     showView(VALID_VIEWS.includes(hashView) ? hashView : 'dashboard');
+    translateStatic();
   }
 
   // ── INIT ─────────────────────────────────────────────────────────────────────
@@ -5398,6 +5681,347 @@
   });
   const histRefresh = document.getElementById('historyRefreshBtn');
   if (histRefresh) histRefresh.addEventListener('click', () => loadHistory(_hState.page));
+
+  // ── ELECTRIC BOX ──────────────────────────────────────────────────────────
+  let _ebBoxes   = [];   // all boxes from server
+  let _ebHouses  = [];   // all houses from server
+  let _ebCurrent = null; // box being edited {id, houseId, mainAmps, label, token, circuits:[]}
+  let _ebDragging = null;// palette item being dragged
+
+  // Slot state: array of {side, slotIndex, label, amps, type, status}
+  // Two columns: LEFT slots 0..N, RIGHT slots 0..N — same row index displayed side by side
+  let _ebRows = 10; // default rows per side
+  let _ebSlots = []; // flat array, index = slotIndex (LEFT then RIGHT stored separately)
+
+  async function ebInit() {
+    await Promise.all([ebLoadBoxes(), ebLoadHouses()]);
+  }
+
+  async function ebLoadBoxes() {
+    try {
+      const res = await apiFetch('/api/electric-boxes');
+      _ebBoxes = res.ok ? await res.json() : [];
+    } catch(e) { _ebBoxes = []; }
+    ebRenderList();
+  }
+
+  async function ebLoadHouses() {
+    try {
+      const res = await apiFetch('/api/houses');
+      _ebHouses = res.ok ? await res.json() : [];
+    } catch(e) { _ebHouses = []; }
+  }
+
+  function ebRenderList() {
+    const el = document.getElementById('ebList');
+    if (!_ebBoxes.length) {
+      const [l1, l2] = t('ebNoBoxes').split('\n');
+    el.innerHTML = `<p style="color:var(--muted);font-size:.85rem;padding:.5rem 0">${l1}<br><strong>${l2}</strong></p>`;
+      return;
+    }
+    el.innerHTML = _ebBoxes.map(b => `
+      <div class="eb-box-row${_ebCurrent && _ebCurrent.id === b.id ? ' active' : ''}" onclick="ebSelectBox(${b.id})">
+        <div class="eb-box-row-info">
+          <strong>${b.houseName || 'House #'+b.houseId}</strong><br>
+          <span>${b.label || ''} · ${b.mainAmps}A main · ${(b.circuits||[]).length} circuits</span>
+        </div>
+        <span style="font-size:.7rem;color:var(--muted)">▶</span>
+      </div>`).join('');
+  }
+
+  async function ebSelectBox(id) {
+    const res = await apiFetch(`/api/electric-boxes/${id}`).catch(()=>null);
+    // try house endpoint since list doesn't include circuits
+    const res2 = await apiFetch(`/api/electric-boxes/${id}`).catch(()=>null);
+    // fetch with circuits via house endpoint
+    const box = _ebBoxes.find(b => b.id === id);
+    const fullRes = await apiFetch(`/api/electric-boxes/house/${box.houseId}`);
+    const full = fullRes.ok ? await fullRes.json() : box;
+    ebOpenEditor(full);
+  }
+
+  function ebOpenNew() {
+    ebOpenEditor(null);
+  }
+
+  function ebOpenEditor(box) {
+    _ebCurrent = box ? { ...box } : { id: null, houseId: null, mainAmps: 200, label: '', token: null, circuits: [] };
+
+    // Populate house dropdown
+    const sel = document.getElementById('ebHouseSelect');
+    const usedHouseIds = new Set(_ebBoxes.filter(b => !box || b.id !== box.id).map(b => b.houseId));
+    sel.innerHTML = `<option value="" id="ebHouseSelectDefault">${t('ebHouseSelectDefault')}</option>` +
+      _ebHouses.filter(h => !usedHouseIds.has(h.id)).map(h =>
+        `<option value="${h.id}"${box && box.houseId === h.id ? ' selected' : ''}>${h.name}</option>`
+      ).join('');
+
+    document.getElementById('ebMainAmps').value = _ebCurrent.mainAmps || 200;
+    document.getElementById('ebLabel').value     = _ebCurrent.label   || '';
+
+    // Token link
+    const tokenRow = document.getElementById('ebTokenRow');
+    if (_ebCurrent.token) {
+      tokenRow.style.display = '';
+      const url = `${location.origin}/electric-box/${_ebCurrent.token}`;
+      document.getElementById('ebTokenLink').value = url;
+      const qrContainer = document.getElementById('ebQrCode');
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, { text: url, width: 110, height: 110, correctLevel: QRCode.CorrectLevel.M });
+    } else {
+      tokenRow.style.display = 'none';
+    }
+
+    // Delete button
+    document.getElementById('ebDeleteBtn').style.display = _ebCurrent.id ? '' : 'none';
+    document.getElementById('ebEditorTitle').textContent = box ? `${t('ebEditPrefix')}${box.houseName||'Box'}` : t('ebEditorTitleNew');
+    document.getElementById('ebSaveErr').textContent = '';
+
+    // Build slot state from circuits
+    _ebRows = 10;
+    ebBuildSlotsFromCircuits(_ebCurrent.circuits || []);
+    ebRenderPanel();
+    ebRenderList();
+
+    document.getElementById('ebEditor').style.display = '';
+  }
+
+  function ebCloseEditor() {
+    _ebCurrent = null;
+    document.getElementById('ebEditor').style.display = 'none';
+    ebRenderList();
+  }
+
+  function ebBuildSlotsFromCircuits(circuits) {
+    const left  = circuits.filter(c => c.side === 'LEFT');
+    const right = circuits.filter(c => c.side === 'RIGHT');
+    const maxRow = Math.max(_ebRows, ...left.map(c=>c.slotIndex+1), ...right.map(c=>c.slotIndex+1));
+    _ebRows = maxRow;
+
+    const byKey = {};
+    circuits.forEach(c => { byKey[`${c.side}_${c.slotIndex}`] = c; });
+    _ebSlots = { LEFT: [], RIGHT: [] };
+    for (let i = 0; i < _ebRows; i++) {
+      _ebSlots.LEFT[i]  = byKey[`LEFT_${i}`]  ? { ...byKey[`LEFT_${i}`]  } : null;
+      _ebSlots.RIGHT[i] = byKey[`RIGHT_${i}`] ? { ...byKey[`RIGHT_${i}`] } : null;
+    }
+  }
+
+  function ebAddRow()    { _ebRows++; ebBuildSlotsFromCircuits(ebCollectCircuits()); ebRenderPanel(); }
+  function ebRemoveRow() { if (_ebRows > 2) { _ebRows--; ebBuildSlotsFromCircuits(ebCollectCircuits()); ebRenderPanel(); } }
+
+  function ebHouseChanged() {
+    document.getElementById('ebMainAmps').dispatchEvent(new Event('input'));
+  }
+
+  function ebRenderPanel() {
+    document.getElementById('ebMainBreakerLabel').textContent =
+      `${t('ebMainLabel')} — ${document.getElementById('ebMainAmps').value || 200} A`;
+
+    const grid = document.getElementById('ebPanelGrid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < _ebRows; i++) {
+      ['LEFT','RIGHT'].forEach(side => {
+        const c = _ebSlots[side][i];
+        grid.appendChild(ebSlotEl(side, i, c));
+      });
+    }
+
+    // Wire palette drag-and-drop
+    ebWirePalette();
+  }
+
+  function ebSlotEl(side, idx, c) {
+    const el = document.createElement('div');
+    const type   = c ? c.type   : 'EMPTY';
+    const status = c ? (c.status||'ON').toLowerCase() : 'on';
+    el.className = `eb-slot${c ? ' filled' : ''} type-${type.toLowerCase()} status-${status}`;
+    el.dataset.side = side;
+    el.dataset.idx  = idx;
+
+    if (c && c.type !== 'EMPTY') {
+      el.innerHTML = `
+        <span class="eb-slot-num">${idx+1}</span>
+        <span class="eb-slot-del" onclick="ebClearSlot('${side}',${idx})">✕</span>
+        <div class="eb-slot-label">${c.label||'—'}</div>
+        <div class="eb-slot-meta">
+          <span>${c.amps ? c.amps+'A' : ''}</span>
+          <span>${type !== 'SINGLE' ? type : ''}</span>
+        </div>
+        <span class="eb-slot-status-btn" onclick="ebCycleStatus('${side}',${idx})" title="Toggle status">${statusIcon(status)}</span>`;
+      el.addEventListener('click', (e) => {
+        if (e.target.classList.contains('eb-slot-del') || e.target.classList.contains('eb-slot-status-btn')) return;
+        if (['INPUT','SELECT','BUTTON','TEXTAREA'].includes(e.target.tagName)) return;
+        ebEditSlotInline(el, side, idx, c);
+      });
+    } else {
+      el.innerHTML = `<span class="eb-slot-num">${idx+1}</span><span style="font-size:.65rem;color:var(--muted)">${c ? t('ebSlotEmpty') : t('ebSlotDropHere')}</span>`;
+    }
+
+    if (c && c.type === 'DOUBLE') el.style.gridRow = 'span 2';
+
+    // Drop target
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('drag-over'); ebDropOnSlot(side, idx); });
+
+    return el;
+  }
+
+  function statusIcon(s) {
+    return s === 'on' ? '🟢' : s === 'off' ? '⚫' : '🔴';
+  }
+
+  function ebEditSlotInline(el, side, idx, c) {
+    const prev = el.innerHTML;
+    el.innerHTML = `
+      <input type="text" placeholder="Label" value="${c.label||''}" id="sl_label"/>
+      <input type="number" placeholder="Amps" value="${c.amps||''}" style="margin-top:.2rem" id="sl_amps" min="5" max="200"/>
+      <select id="sl_status" style="margin-top:.2rem">
+        <option value="ON"${c.status==='ON'?' selected':''}>On</option>
+        <option value="OFF"${c.status==='OFF'?' selected':''}>Off</option>
+        <option value="TRIPPED"${c.status==='TRIPPED'?' selected':''}>Tripped</option>
+      </select>
+      <div style="display:flex;gap:.3rem;margin-top:.3rem">
+        <button class="btn btn-primary" style="flex:1;padding:.2rem;font-size:.7rem" id="sl_ok">✓</button>
+        <button class="btn" style="padding:.2rem .4rem;font-size:.7rem" id="sl_cancel">✕</button>
+      </div>`;
+    el.querySelector('#sl_ok').onclick = () => {
+      _ebSlots[side][idx] = {
+        ...c,
+        label:  el.querySelector('#sl_label').value.trim(),
+        amps:   parseInt(el.querySelector('#sl_amps').value)||c.amps,
+        status: el.querySelector('#sl_status').value,
+      };
+      ebRenderPanel();
+    };
+    el.querySelector('#sl_cancel').onclick = () => { el.innerHTML = prev; };
+  }
+
+  function ebClearSlot(side, idx) {
+    _ebSlots[side][idx] = null;
+    ebRenderPanel();
+  }
+
+  function ebCycleStatus(side, idx) {
+    const c = _ebSlots[side][idx];
+    if (!c) return;
+    const order = ['ON','OFF','TRIPPED'];
+    c.status = order[(order.indexOf(c.status||'ON') + 1) % 3];
+    ebRenderPanel();
+  }
+
+  function ebDropOnSlot(side, idx) {
+    if (!_ebDragging) return;
+    const { type, amps } = _ebDragging;
+    _ebSlots[side][idx] = { side, slotIndex: idx, label: '', amps: amps ? parseInt(amps) : null, type, status: 'ON' };
+    // If double-pole, fill next slot too (same side)
+    if (type === 'DOUBLE' && idx + 1 < _ebRows) {
+      _ebSlots[side][idx+1] = { side, slotIndex: idx+1, label: '', amps: amps ? parseInt(amps) : null, type: '_DOUBLE_CONT', status: 'ON' };
+    }
+    ebRenderPanel();
+  }
+
+  function ebWirePalette() {
+    document.querySelectorAll('.eb-palette-item').forEach(item => {
+      item.addEventListener('dragstart', e => {
+        _ebDragging = { type: item.dataset.type, amps: item.dataset.amps };
+        item.classList.add('dragging');
+      });
+      item.addEventListener('dragend', () => {
+        _ebDragging = null;
+        item.classList.remove('dragging');
+      });
+    });
+  }
+
+  function ebCollectCircuits() {
+    const circuits = [];
+    ['LEFT','RIGHT'].forEach(side => {
+      (_ebSlots[side] || []).forEach((c, idx) => {
+        if (c && c.type && c.type !== '_DOUBLE_CONT') {
+          circuits.push({ side, slotIndex: idx, label: c.label||'', amps: c.amps||null, type: c.type, status: c.status||'ON' });
+        }
+      });
+    });
+    return circuits;
+  }
+
+  async function ebSave() {
+    document.getElementById('ebSaveErr').textContent = '';
+    const houseId  = parseInt(document.getElementById('ebHouseSelect').value);
+    const mainAmps = parseInt(document.getElementById('ebMainAmps').value) || 200;
+    const label    = document.getElementById('ebLabel').value.trim();
+
+    if (!houseId) { document.getElementById('ebSaveErr').textContent = t('ebErrSelectHouse'); return; }
+
+    const body = { houseId, mainAmps, label, circuits: ebCollectCircuits() };
+    const url    = _ebCurrent.id ? `/api/electric-boxes/${_ebCurrent.id}` : '/api/electric-boxes';
+    const method = _ebCurrent.id ? 'PUT' : 'POST';
+
+    const saveBtn = document.querySelector('[onclick="ebSave()"]');
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = t('ebSaving'); }
+
+    const res = await apiFetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = t('ebBtnSave'); }
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      document.getElementById('ebSaveErr').textContent = err.error || `${t('ebSaveFail')} (${res.status}).`;
+      return;
+    }
+    const saved = await res.json();
+    _ebCurrent = saved;
+    await ebLoadBoxes();
+    ebOpenEditor(saved);
+
+    const errEl = document.getElementById('ebSaveErr');
+    errEl.style.color = 'var(--green)';
+    errEl.textContent = t('ebSaveOk');
+    setTimeout(() => { errEl.textContent = ''; errEl.style.color = 'var(--red)'; }, 3000);
+  }
+
+  async function ebDelete() {
+    if (!_ebCurrent || !_ebCurrent.id) return;
+    if (!confirm(t('ebDeleteConfirm'))) return;
+    await apiFetch(`/api/electric-boxes/${_ebCurrent.id}`, { method: 'DELETE' });
+    _ebCurrent = null;
+    document.getElementById('ebEditor').style.display = 'none';
+    await ebLoadBoxes();
+  }
+
+  function ebTogglePaletteInfo() {
+    const info = document.getElementById('ebPaletteInfo');
+    const chevron = document.getElementById('ebPaletteChevron');
+    const open = info.style.display === 'none';
+    info.style.display = open ? '' : 'none';
+    chevron.style.transform = open ? 'rotate(180deg)' : '';
+  }
+
+  function ebDownloadQr() {
+    const canvas = document.querySelector('#ebQrCode canvas');
+    if (!canvas) return;
+    const houseName = (_ebCurrent.houseName || 'electric-box').replace(/\s+/g, '-').toLowerCase();
+    const a = document.createElement('a');
+    a.download = `qr-${houseName}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }
+
+  function ebCopyLink() {
+    const val = document.getElementById('ebTokenLink').value;
+    navigator.clipboard.writeText(val).then(() => {
+      const btn = document.querySelector('[onclick="ebCopyLink()"]');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  }
+
+  document.getElementById('ebMainAmps').addEventListener('input', () => {
+    document.getElementById('ebMainBreakerLabel').textContent =
+      `${t('ebMainLabel')} — ${document.getElementById('ebMainAmps').value || 200} A`;
+  });
 
 </script>
 </body>

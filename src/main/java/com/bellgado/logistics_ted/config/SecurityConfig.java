@@ -53,6 +53,8 @@ public class SecurityConfig {
                 // Telegram posts updates to this endpoint with no auth header; trust comes from
                 // the bot token in the URL secret + the per-update chatId whitelist in the handler.
                 .requestMatchers(HttpMethod.POST, "/api/telegram/webhook").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
+                .requestMatchers("/electric-box/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
