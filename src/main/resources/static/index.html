@@ -168,6 +168,22 @@
     .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
     .btn-ghost { background: rgba(255,255,255,0.07); color: var(--text); border: 1px solid var(--border); }
     .btn-ghost:hover { background: rgba(255,255,255,0.12); }
+    .nav-group-label { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); padding:.9rem 1rem .3rem; opacity:.6; }
+    .qr-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.25rem; display:flex; flex-direction:column; align-items:center; gap:.75rem; text-align:center; }
+    .qr-card canvas { border-radius:6px; background:#fff; padding:8px; }
+    .qr-card .qr-name { font-weight:700; font-size:.95rem; color:var(--text); line-height:1.3; }
+    .qr-card .qr-loc  { font-size:.75rem; color:var(--muted); }
+    .qr-card .qr-dl   { font-size:.78rem; color:var(--accent); cursor:pointer; text-decoration:underline; margin-top:.1rem; }
+    @media print {
+      nav, .main > .header, #view-qrcodes .btn { display:none !important; }
+      .main { margin-left:0 !important; }
+      #qrGrid { grid-template-columns: repeat(3,1fr); gap:1rem; }
+      .qr-card { border:1px solid #ccc; background:#fff; color:#000; page-break-inside:avoid; }
+      .qr-card .qr-name { color:#000; }
+      .qr-card .qr-loc  { color:#555; }
+      .qr-card .qr-dl   { display:none; }
+    }
+    .nav-sub { padding-left:2rem !important; font-size:.85rem; }
     .att-tab.active { background: rgba(79,142,247,.18); color: var(--accent); border-color: var(--accent); }
     .att-table { width:100%; border-collapse:collapse; font-size:.88rem; }
     .att-table th { text-align:left; padding:.5rem .75rem; color:var(--muted); font-weight:600; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); }
@@ -1448,8 +1464,12 @@
     <div class="nav-item" id="navElectric" onclick="showView('electric')">
       <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
     </div>
-    <div class="nav-item" id="navAttendance" onclick="showView('attendance')">
-      <span class="nav-icon">🕐</span> <span id="navAttendanceLabel">Attendance</span>
+    <div class="nav-group-label">Attendance</div>
+    <div class="nav-item nav-sub" id="navAttendance" onclick="showView('attendance')">
+      <span class="nav-icon">🕐</span> <span id="navAttendanceLabel">Check-in Log</span>
+    </div>
+    <div class="nav-item nav-sub" id="navQrcodes" onclick="showView('qrcodes')">
+      <span class="nav-icon">🔲</span> <span id="navQrcodesLabel">House QR Codes</span>
     </div>
   </div>
 </nav>
@@ -1844,6 +1864,18 @@
     </div>
   </div>
 
+  <!-- ── QR CODES VIEW ──────────────────────────────────────────────────── -->
+  <div class="view" id="view-qrcodes">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem">
+      <p class="section-label" style="margin:0">🔲 House QR Codes</p>
+      <button class="btn btn-ghost" onclick="window.print()" style="gap:.4rem">🖨️ Print All</button>
+    </div>
+
+    <div id="qrGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem"></div>
+
+  </div><!-- /view-qrcodes -->
+
   <!-- ── ATTENDANCE VIEW ─────────────────────────────────────────────────── -->
   <div class="view" id="view-attendance">
 
@@ -1907,8 +1939,10 @@
       pageTitle_history:'Order History', pageSub_history:'Past calculations — immutable record',
       pageTitle_scaffold:'Scaffold Transport', pageSub_scaffold:'Find closest available scaffold for a destination house',
       pageTitle_electric:'Electric Boxes', pageSub_electric:'Manage electrical panel layouts per house',
-      pageTitle_attendance:'Attendance', pageSub_attendance:'Worker check-in / check-out times per day',
-      navAttendance:'Attendance',
+      pageTitle_attendance:'Check-in Log', pageSub_attendance:'Worker check-in / check-out times per day',
+      navAttendance:'Check-in Log',
+      pageTitle_qrcodes:'House QR Codes', pageSub_qrcodes:'Print and attach QR codes to each house',
+      navQrcodes:'House QR Codes',
       ebManagerTitle:'⚡ Electric Box Manager',
       ebNewBox:'+ New Box', ebEditorTitleNew:'New Electric Box',
       ebLblHouse:'House', ebHouseSelectDefault:'— select —',
@@ -2080,8 +2114,10 @@
       pageTitle_history:'История на поръчките', pageSub_history:'Минали изчисления — неизменен запис',
       pageTitle_scaffold:'Транспорт на скеле', pageSub_scaffold:'Намери най-близко налично скеле за дестинация',
       pageTitle_electric:'Електрически табла', pageSub_electric:'Управление на електрически инсталации по къщи',
-      pageTitle_attendance:'Присъствие', pageSub_attendance:'Влизане и излизане на работници по дни',
-      navAttendance:'Присъствие',
+      pageTitle_attendance:'Дневник присъствия', pageSub_attendance:'Влизане и излизане на работници по дни',
+      navAttendance:'Дневник присъствия',
+      pageTitle_qrcodes:'QR кодове на обекти', pageSub_qrcodes:'Принтирай и залепи QR кодовете по обектите',
+      navQrcodes:'QR кодове',
       ebManagerTitle:'⚡ Мениджър на табла',
       ebNewBox:'+ Ново табло', ebEditorTitleNew:'Ново електрическо табло',
       ebLblHouse:'Къща', ebHouseSelectDefault:'— избери —',
@@ -2298,6 +2334,7 @@
     document.getElementById('navHistoryLabel').textContent  = t('navHistory');
     document.getElementById('navElectricLabel').textContent    = t('navElectric');
     document.getElementById('navAttendanceLabel').textContent  = t('navAttendance');
+    document.getElementById('navQrcodesLabel').textContent     = t('navQrcodes');
     const eb = id => document.getElementById(id);
     const ebt = (id, key) => { const el = eb(id); if (el) el.textContent = t(key); };
     ebt('ebManagerTitle','ebManagerTitle');
@@ -2522,7 +2559,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'crews', 'history', 'electric', 'attendance'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'crews', 'history', 'electric', 'attendance', 'qrcodes'];
 
   function showView(name) {
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
@@ -2542,6 +2579,7 @@
     if (name === 'crews') loadOrgChart();
     if (name === 'electric') ebInit();
     if (name === 'attendance') attInit();
+    if (name === 'qrcodes')   qrInit();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -5475,6 +5513,78 @@
     const hashView = location.hash.replace('#', '');
     showView(VALID_VIEWS.includes(hashView) ? hashView : 'dashboard');
     translateStatic();
+  }
+
+  // ── QR CODES ─────────────────────────────────────────────────────────────────
+  let _qrInitDone = false;
+
+  async function qrInit() {
+    if (_qrInitDone) return;
+    _qrInitDone = true;
+    const grid = document.getElementById('qrGrid');
+    grid.innerHTML = '<p style="color:var(--muted);padding:2rem">Loading…</p>';
+    try {
+      const houses = await apiFetch('/api/houses').then(r => r.json());
+      grid.innerHTML = '';
+      houses
+        .filter(h => h.checkin_token)
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .forEach(h => {
+          const url = `${location.origin}/checkin/${h.checkin_token}`;
+
+          const card = document.createElement('div');
+          card.className = 'qr-card';
+
+          const canvasWrap = document.createElement('div');
+          card.appendChild(canvasWrap);
+
+          // name + location
+          const nameEl = document.createElement('div');
+          nameEl.className = 'qr-name';
+          nameEl.textContent = h.name;
+          card.appendChild(nameEl);
+
+          if (h.location) {
+            const locEl = document.createElement('div');
+            locEl.className = 'qr-loc';
+            locEl.textContent = '📍 ' + h.location;
+            card.appendChild(locEl);
+          }
+
+          // download link
+          const dl = document.createElement('div');
+          dl.className = 'qr-dl';
+          dl.textContent = '⬇ Download PNG';
+          dl.onclick = () => qrDownload(canvasWrap.querySelector('canvas'), h.name);
+          card.appendChild(dl);
+
+          grid.appendChild(card);
+
+          // generate QR into canvasWrap
+          new QRCode(canvasWrap, {
+            text:   url,
+            width:  160,
+            height: 160,
+            colorDark:  '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        });
+
+      if (grid.children.length === 0) {
+        grid.innerHTML = '<p style="color:var(--muted);padding:2rem">No houses with QR tokens found.</p>';
+      }
+    } catch(e) {
+      grid.innerHTML = `<p style="color:var(--red);padding:2rem">${e.message}</p>`;
+    }
+  }
+
+  function qrDownload(canvas, houseName) {
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = `qr-${houseName.replace(/\s+/g, '-').toLowerCase()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   }
 
   // ── ATTENDANCE ───────────────────────────────────────────────────────────────

@@ -19,7 +19,8 @@ public record HouseDto(
     BigDecimal totalValue,
     @JsonProperty("scaffold_status") ScaffoldStatus scaffoldStatus,
     @JsonProperty("scaffold_start_date") String scaffoldStartDate,
-    @JsonProperty("scaffold_end_date") String scaffoldEndDate
+    @JsonProperty("scaffold_end_date") String scaffoldEndDate,
+    @JsonProperty("checkin_token") String checkinToken
 ) {
 
     /** Accumulator used while joining a house with its inventory rows. */
@@ -45,7 +46,8 @@ public record HouseDto(
                 totalValue,
                 source.getScaffoldStatus(),
                 source.getScaffoldStartDate() == null ? null : source.getScaffoldStartDate().toString(),
-                source.getScaffoldEndDate()   == null ? null : source.getScaffoldEndDate().toString()
+                source.getScaffoldEndDate()   == null ? null : source.getScaffoldEndDate().toString(),
+                source.getCheckinToken()
             );
         }
     }
