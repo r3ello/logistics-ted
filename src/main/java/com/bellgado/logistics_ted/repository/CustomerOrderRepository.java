@@ -115,6 +115,36 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
     @Query(
         value = """
             SELECT
+              co.public_id                            AS publicId,
+              co.created_at                           AS createdAt,
+              co.source                               AS source,
+              u.username                              AS username,
+              co.telegram_chat_id                     AS telegramChatId,
+              co.start_lat                            AS startLat,
+              co.start_lng                            AS startLng,
+              co.start_name                           AS startName,
+              co.destination_house_id                 AS destinationHouseId,
+              h.name                                  AS destinationHouseName,
+              co.materials_json::text                 AS materialsJson,
+              co.app_user_id                          AS appUserId,
+              co.alternatives_count                   AS alternativesCount,
+              co.fully_fulfilled                      AS fullyFulfilled,
+              chosen.objective                        AS chosenObjective,
+              co.chosen_at                            AS chosenAt
+            FROM customer_order co
+            LEFT JOIN app_user u           ON u.id = co.app_user_id
+            LEFT JOIN house h              ON h.id = co.destination_house_id
+            LEFT JOIN order_route_option chosen ON chosen.id = co.chosen_option_id
+            WHERE co.telegram_chat_id = :chatId
+            ORDER BY co.created_at DESC
+            """,
+        countQuery = "SELECT COUNT(*) FROM customer_order WHERE telegram_chat_id = :chatId",
+        nativeQuery = true)
+    Page<OrderSummaryRow> findSummariesByTelegramChat(@Param("chatId") Long chatId, Pageable pageable);
+
+    @Query(
+        value = """
+            SELECT
               opt.public_id              AS publicId,
               opt.objective              AS objective,
               opt.is_primary             AS isPrimary,
