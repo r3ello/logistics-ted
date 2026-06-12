@@ -2194,47 +2194,35 @@
     document.getElementById('navMap').querySelector('span:last-child').textContent       = t('navMap');
     document.getElementById('navHistoryLabel').textContent  = t('navHistory');
     document.getElementById('navElectricLabel').textContent = t('navElectric');
-    document.getElementById('ebManagerTitle').textContent   = t('ebManagerTitle');
-    document.getElementById('ebLblHouse').textContent       = t('ebLblHouse');
-    document.getElementById('ebHouseSelectDefault').textContent = t('ebHouseSelectDefault');
-    document.getElementById('ebLblMainAmps').textContent    = t('ebLblMainAmps');
-    document.getElementById('ebLblBoxLabel').textContent    = t('ebLblBoxLabel');
-    document.getElementById('ebLabel').placeholder          = t('ebLblBoxPlaceholder');
-    document.getElementById('ebLblPalette').textContent     = t('ebLblPalette');
-    document.getElementById('ebRefThBreaker').textContent   = t('ebRefThBreaker');
-    document.getElementById('ebRefThType').textContent      = t('ebRefThType');
-    document.getElementById('ebRefThUse').textContent       = t('ebRefThUse');
-    document.getElementById('ebRef15type').textContent      = t('ebRef15type');
-    document.getElementById('ebRef15use').textContent       = t('ebRef15use');
-    document.getElementById('ebRef20type').textContent      = t('ebRef20type');
-    document.getElementById('ebRef20use').textContent       = t('ebRef20use');
-    document.getElementById('ebRef30type').textContent      = t('ebRef30type');
-    document.getElementById('ebRef30use').textContent       = t('ebRef30use');
-    document.getElementById('ebRef30dtype').textContent     = t('ebRef30dtype');
-    document.getElementById('ebRef30duse').textContent      = t('ebRef30duse');
-    document.getElementById('ebRef40dtype').textContent     = t('ebRef40dtype');
-    document.getElementById('ebRef40duse').textContent      = t('ebRef40duse');
-    document.getElementById('ebRef50dtype').textContent     = t('ebRef50dtype');
-    document.getElementById('ebRef50duse').textContent      = t('ebRef50duse');
-    document.getElementById('ebRefEmptyLabel').textContent  = t('ebRefEmptyLabel');
-    document.getElementById('ebRefEmptyUse').textContent    = t('ebRefEmptyUse');
-    document.getElementById('ebPaletteEmpty').textContent   = t('ebRefEmptyLabel');
-    document.getElementById('ebLblPanelLayout').textContent = t('ebLblPanelLayout');
-    document.getElementById('ebBtnAddRow').textContent      = t('ebBtnAddRow');
-    document.getElementById('ebBtnRemRow').textContent      = t('ebBtnRemRow');
-    document.getElementById('ebColLeft').textContent        = t('ebColLeft');
-    document.getElementById('ebColRight').textContent       = t('ebColRight');
-    document.getElementById('ebLblClientAccess').textContent= t('ebLblClientAccess');
-    document.getElementById('ebBtnDownloadQr').textContent  = t('ebBtnDownloadQr');
-    document.getElementById('ebLblScanShare').textContent   = t('ebLblScanShare');
-    document.getElementById('ebBtnCopyLink').textContent    = t('ebBtnCopyLink');
-    document.getElementById('ebBtnSave').textContent        = t('ebBtnSave');
-    document.getElementById('ebDeleteBtn').textContent      = t('ebBtnDelete');
-    document.getElementById('ebBtnNewBox').textContent      = t('ebNewBox');
+    const eb = id => document.getElementById(id);
+    const ebt = (id, key) => { const el = eb(id); if (el) el.textContent = t(key); };
+    ebt('ebManagerTitle','ebManagerTitle');
+    ebt('ebLblHouse','ebLblHouse');
+    ebt('ebHouseSelectDefault','ebHouseSelectDefault');
+    ebt('ebLblMainAmps','ebLblMainAmps');
+    ebt('ebLblBoxLabel','ebLblBoxLabel');
+    const ebLabelInput = eb('ebLabel'); if (ebLabelInput) ebLabelInput.placeholder = t('ebLblBoxPlaceholder');
+    ebt('ebLblPalette','ebLblPalette');
+    ebt('ebRefThBreaker','ebRefThBreaker'); ebt('ebRefThType','ebRefThType'); ebt('ebRefThUse','ebRefThUse');
+    ebt('ebRef15type','ebRef15type'); ebt('ebRef15use','ebRef15use');
+    ebt('ebRef20type','ebRef20type'); ebt('ebRef20use','ebRef20use');
+    ebt('ebRef30type','ebRef30type'); ebt('ebRef30use','ebRef30use');
+    ebt('ebRef30dtype','ebRef30dtype'); ebt('ebRef30duse','ebRef30duse');
+    ebt('ebRef40dtype','ebRef40dtype'); ebt('ebRef40duse','ebRef40duse');
+    ebt('ebRef50dtype','ebRef50dtype'); ebt('ebRef50duse','ebRef50duse');
+    ebt('ebRefEmptyLabel','ebRefEmptyLabel'); ebt('ebRefEmptyUse','ebRefEmptyUse');
+    ebt('ebPaletteEmpty','ebRefEmptyLabel');
+    ebt('ebLblPanelLayout','ebLblPanelLayout');
+    ebt('ebBtnAddRow','ebBtnAddRow'); ebt('ebBtnRemRow','ebBtnRemRow');
+    ebt('ebColLeft','ebColLeft'); ebt('ebColRight','ebColRight');
+    ebt('ebLblClientAccess','ebLblClientAccess');
+    ebt('ebBtnDownloadQr','ebBtnDownloadQr'); ebt('ebLblScanShare','ebLblScanShare');
+    ebt('ebBtnCopyLink','ebBtnCopyLink');
+    ebt('ebBtnSave','ebBtnSave'); ebt('ebDeleteBtn','ebBtnDelete'); ebt('ebBtnNewBox','ebNewBox');
     // re-render dynamic electric box parts if editor is open
     if (_ebCurrent) {
-      document.getElementById('ebEditorTitle').textContent =
-        _ebCurrent.id ? `${t('ebEditPrefix')}${_ebCurrent.houseName||'Box'}` : t('ebEditorTitleNew');
+      ebt('ebEditorTitle', _ebCurrent.id ? null : 'ebEditorTitleNew');
+      if (_ebCurrent.id) { const el = eb('ebEditorTitle'); if (el) el.textContent = `${t('ebEditPrefix')}${_ebCurrent.houseName||'Box'}`; }
       ebRenderPanel();
     }
     ebRenderList();
@@ -5762,7 +5750,7 @@
     // Populate house dropdown
     const sel = document.getElementById('ebHouseSelect');
     const usedHouseIds = new Set(_ebBoxes.filter(b => !box || b.id !== box.id).map(b => b.houseId));
-    sel.innerHTML = '<option value="">— select —</option>' +
+    sel.innerHTML = `<option value="" id="ebHouseSelectDefault">${t('ebHouseSelectDefault')}</option>` +
       _ebHouses.filter(h => !usedHouseIds.has(h.id)).map(h =>
         `<option value="${h.id}"${box && box.houseId === h.id ? ' selected' : ''}>${h.name}</option>`
       ).join('');
