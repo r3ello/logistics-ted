@@ -5515,6 +5515,19 @@
     translateStatic();
   }
 
+  // ── APP BASE URL (fetched once, used for all QR codes) ───────────────────────
+  let _appBaseUrl = null;
+  async function getBaseUrl() {
+    if (_appBaseUrl) return _appBaseUrl;
+    try {
+      const cfg = await fetch('/api/public/config').then(r => r.json());
+      _appBaseUrl = (cfg.baseUrl || location.origin).replace(/\/$/, '');
+    } catch(e) {
+      _appBaseUrl = location.origin;
+    }
+    return _appBaseUrl;
+  }
+
   // ── QR CODES ─────────────────────────────────────────────────────────────────
   let _qrInitDone = false;
 
@@ -5524,9 +5537,7 @@
     const grid = document.getElementById('qrGrid');
     grid.innerHTML = '<p style="color:var(--muted);padding:2rem">Loading…</p>';
     try {
-      // Fetch configured base URL so QR codes work on production domain, not localhost
-      const cfg     = await fetch('/api/public/config').then(r => r.json());
-      const baseUrl = (cfg.baseUrl || location.origin).replace(/\/$/, '');
+      const baseUrl = await getBaseUrl();
 
       const houses = await apiFetch('/api/houses').then(r => r.json());
       grid.innerHTML = '';
@@ -6102,7 +6113,7 @@
     const tokenRow = document.getElementById('ebTokenRow');
     if (_ebCurrent.token) {
       tokenRow.style.display = '';
-      const url = `${location.origin}/electric-box/${_ebCurrent.token}`;
+      const url = `${await getBaseUrl()}/electric-box/${_ebCurrent.token}`;
       document.getElementById('ebTokenLink').value = url;
       const qrContainer = document.getElementById('ebQrCode');
       qrContainer.innerHTML = '';
