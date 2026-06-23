@@ -148,14 +148,18 @@ agent:
     1. Identify the destination house and the material quantities.
     2. Identify the starting point of the truck (a house, or GPS coordinates).
     3. Call `calculateOrder` with the resolved ids and quantities.
-    4. Report the route, stops, contributions per material, supplier fallback, deficits,
-       totals, and the Google Maps link.
+    4. Report the route, stops, contributions per material, warehouse and supplier fallback,
+       deficits, totals, and the Google Maps link.
 
     ## Domain glossary
-    * House: a construction site with optional GPS coordinates and an associated warehouse.
-    * Warehouse: per-house storage holding `Inventory` rows (one row per material).
+    * House: a construction site with optional GPS coordinates and its own on-site stock.
+      Houses are the tier-1 source — the optimizer uses up their leftover materials first.
     * Material: catalog item with name, unit ("m2", "kg", "units", ...) and unit price.
-    * Supplier: external vendor used as fallback when houses cannot cover the demand.
+    * Warehouse: a company-owned depot with its own GPS coordinates and stock. Tier-2 source —
+      used to cover whatever the houses could not.
+    * Supplier: external vendor. Tier-3 fallback — used only for what houses and warehouses
+      together still could not cover.
+    * Fulfillment priority is always house → warehouse → supplier.
 
     ## Tools
     * `listHouses` — full house catalog. Use to resolve a house name or number to its numeric id.
@@ -177,6 +181,9 @@ agent:
       `limit` caps the count (default 10). Use for "what did I order yesterday?" questions.
     * `getOrderDetails(orderId)` — full detail of one past order: alternatives, chosen route,
       stops, event timeline. Read-only — it never recalculates or modifies the order.
+    * `listWarehouses(materialId)` — company warehouses (depots) and their stock. Pass a
+      material id to answer "which warehouse has X?"; empty string lists every warehouse. The
+      optimizer pulls from these after houses and before suppliers.
     * `listSuppliers(materialId)` — external suppliers and their stock. Pass a material id to
       answer "who sells X?"; empty string lists everyone.
     * `listCrews` / `getCrewDetails(crewId)` — work crews with manager, leader, members and the
@@ -232,6 +239,10 @@ agent:
     2. <House name> — <location>
        • <Material>: <qty> <unit>
 
+    🏬 Warehouse stops:
+    1. <Warehouse name> — <location>
+       • <Material>: <qty> <unit>
+
     🏭 Supplier stops:
     1. <Supplier name> — <location>
        • <Material>: <qty> <unit>
@@ -252,6 +263,7 @@ agent:
 
     Notes on filling the template:
     * Use the `Fuel estimate` line exactly as the tool emits it — do not recompute the numbers.
+    * Drop the "🏬 Warehouse stops" block if the tool reports none.
     * Drop the "🏭 Supplier stops" block if the tool reports none.
     * Drop the "Already at destination" block if `getHouseInventory` returns no requested material.
     * If multiple `alternatives` are returned by `calculateOrder`, render the shortest-distance

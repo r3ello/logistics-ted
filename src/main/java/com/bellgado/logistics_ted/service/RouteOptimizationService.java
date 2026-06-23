@@ -7,6 +7,7 @@ import com.bellgado.logistics_ted.domain.Material;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.InventoryRepository;
 import com.bellgado.logistics_ted.repository.MaterialRepository;
+import com.bellgado.logistics_ted.service.DepotFallbackService.DepotFallbackResult;
 import com.bellgado.logistics_ted.service.SupplierFallbackService.RemainingNeed;
 import com.bellgado.logistics_ted.service.SupplierFallbackService.SupplierFallbackResult;
 import com.bellgado.logistics_ted.service.distance.RouteCostMatrix;
@@ -60,6 +61,7 @@ public class RouteOptimizationService {
     private final MaterialRepository materials;
     private final ServerMessages messages;
     private final RouteMatrixService matrixService;
+    private final DepotFallbackService depotFallback;
     private final SupplierFallbackService supplierFallback;
     private final RouteSolver routeSolver;
     private final RoutingProperties properties;
@@ -67,6 +69,7 @@ public class RouteOptimizationService {
     public RouteOptimizationService(HouseRepository houses, InventoryRepository inventories,
                                     MaterialRepository materials, ServerMessages messages,
                                     RouteMatrixService matrixService,
+                                    DepotFallbackService depotFallback,
                                     SupplierFallbackService supplierFallback,
                                     RouteSolver routeSolver,
                                     RoutingProperties properties) {
@@ -75,6 +78,7 @@ public class RouteOptimizationService {
         this.materials = materials;
         this.messages = messages;
         this.matrixService = matrixService;
+        this.depotFallback = depotFallback;
         this.supplierFallback = supplierFallback;
         this.routeSolver = routeSolver;
         this.properties = properties;
@@ -203,7 +207,8 @@ public class RouteOptimizationService {
                     spec.label());
                 winner = new RouteOptionDto(
                     spec.label(),
-                    winner.route(), winner.supplierStops(), winner.deficit(), winner.mapsUrl(),
+                    winner.route(), winner.warehouseStops(), winner.supplierStops(),
+                    winner.deficit(), winner.mapsUrl(),
                     winner.fullyFulfilled(), winner.totalStops(),
                     winner.totalDistance(), winner.totalMinutes()
                 );
@@ -240,6 +245,7 @@ public class RouteOptimizationService {
             originDto,
             destDto,
             primary.route(),
+            primary.warehouseStops(),
             primary.supplierStops(),
             primary.deficit(),
             primary.mapsUrl(),
@@ -304,18 +310,45 @@ public class RouteOptimizationService {
             }
         }
 
-        double anchorLat = orderedStops.isEmpty() ? originLat
+        double destLatD = dest.getLat().doubleValue();
+        double destLngD = dest.getLng().doubleValue();
+
+        // Tier-2: company warehouses (depots) cover what the houses couldn't. Anchored at the
+        // truck's current position (last house, or origin if no houses were picked).
+        double houseAnchorLat = orderedStops.isEmpty() ? originLat
             : orderedStops.get(orderedStops.size() - 1).lat();
-        double anchorLng = orderedStops.isEmpty() ? originLng
+        double houseAnchorLng = orderedStops.isEmpty() ? originLng
             : orderedStops.get(orderedStops.size() - 1).lng();
         if (!remainingNeeds.isEmpty()) {
-            log.info("[{}] house allocation left {} material(s) short — invoking supplier fallback (anchor=({},{}))",
-                spec.label(), remainingNeeds.size(), anchorLat, anchorLng);
+            log.info("[{}] house allocation left {} material(s) short — invoking warehouse fallback (anchor=({},{}))",
+                spec.label(), remainingNeeds.size(), houseAnchorLat, houseAnchorLng);
         }
-        SupplierFallbackResult fallback = supplierFallback.coverDeficits(
-            remainingNeeds, anchorLat, anchorLng,
-            dest.getLat().doubleValue(), dest.getLng().doubleValue(), spec);
+        DepotFallbackResult depotResult = depotFallback.coverDeficits(
+            remainingNeeds, houseAnchorLat, houseAnchorLng, destLatD, destLngD, spec);
         if (!remainingNeeds.isEmpty()) {
+            log.info("[{}] warehouse fallback: {} stops, +{}km +{}s extra, remaining deficits={}",
+                spec.label(), depotResult.stops().size(),
+                Math.round(depotResult.extraKm()), Math.round(depotResult.extraSeconds()),
+                depotResult.remaining().size());
+        }
+
+        // Tier-3: external suppliers cover whatever is still short, anchored after the depot
+        // leg (last depot, else last house, else origin). This anchor chaining is what makes
+        // the per-tier extra-km deltas telescope into one origin→houses→depots→suppliers→dest leg.
+        double supplierAnchorLat;
+        double supplierAnchorLng;
+        if (!depotResult.stops().isEmpty()) {
+            RouteStopDto lastDepot = depotResult.stops().get(depotResult.stops().size() - 1);
+            supplierAnchorLat = lastDepot.lat();
+            supplierAnchorLng = lastDepot.lng();
+        } else {
+            supplierAnchorLat = houseAnchorLat;
+            supplierAnchorLng = houseAnchorLng;
+        }
+        Map<Integer, RemainingNeed> afterDepot = depotResult.remaining();
+        SupplierFallbackResult fallback = supplierFallback.coverDeficits(
+            afterDepot, supplierAnchorLat, supplierAnchorLng, destLatD, destLngD, spec);
+        if (!afterDepot.isEmpty()) {
             log.info("[{}] supplier fallback: {} stops, +{}km +{}s extra, remaining deficits={}",
                 spec.label(), fallback.stops().size(),
                 Math.round(fallback.extraKm()), Math.round(fallback.extraSeconds()),
@@ -334,8 +367,9 @@ public class RouteOptimizationService {
         List<double[]> waypoints = new ArrayList<>();
         waypoints.add(new double[]{originLat, originLng});
         for (CandidateStop s : orderedStops) waypoints.add(new double[]{s.lat(), s.lng()});
+        for (RouteStopDto s : depotResult.stops()) waypoints.add(new double[]{s.lat(), s.lng()});
         for (RouteStopDto s : fallback.stops()) waypoints.add(new double[]{s.lat(), s.lng()});
-        waypoints.add(new double[]{dest.getLat().doubleValue(), dest.getLng().doubleValue()});
+        waypoints.add(new double[]{destLatD, destLngD});
 
         String mapsUrl = waypoints.size() >= 2
             ? "https://www.google.com/maps/dir/" + waypoints.stream()
@@ -354,12 +388,14 @@ public class RouteOptimizationService {
         houseKm += matrix.km(prev, destIdx);
         houseSeconds += matrix.seconds(prev, destIdx);
 
-        long totalDistance = Math.round(houseKm + fallback.extraKm());
-        long totalMinutes = Math.round((houseSeconds + fallback.extraSeconds()) / 60.0);
+        long totalDistance = Math.round(houseKm + depotResult.extraKm() + fallback.extraKm());
+        long totalMinutes = Math.round(
+            (houseSeconds + depotResult.extraSeconds() + fallback.extraSeconds()) / 60.0);
 
         return new RouteOptionDto(
             spec.label(),
             routeDto,
+            depotResult.stops(),
             fallback.stops(),
             deficits,
             mapsUrl,
@@ -391,6 +427,8 @@ public class RouteOptimizationService {
         StringBuilder sb = new StringBuilder();
         sb.append("H[");
         for (RouteStopDto s : opt.route()) sb.append(s.id()).append(',');
+        sb.append("]W[");
+        for (RouteStopDto s : opt.warehouseStops()) sb.append(s.id()).append(',');
         sb.append("]S[");
         for (RouteStopDto s : opt.supplierStops()) sb.append(s.id()).append(',');
         sb.append("]");

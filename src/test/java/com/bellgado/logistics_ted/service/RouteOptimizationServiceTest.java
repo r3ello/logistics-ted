@@ -6,12 +6,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.bellgado.logistics_ted.domain.Depot;
+import com.bellgado.logistics_ted.domain.DepotInventory;
 import com.bellgado.logistics_ted.domain.House;
 import com.bellgado.logistics_ted.domain.Inventory;
 import com.bellgado.logistics_ted.domain.Material;
 import com.bellgado.logistics_ted.domain.Supplier;
 import com.bellgado.logistics_ted.domain.SupplierInventory;
 import com.bellgado.logistics_ted.domain.Warehouse;
+import com.bellgado.logistics_ted.repository.DepotInventoryRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.InventoryRepository;
 import com.bellgado.logistics_ted.repository.MaterialRepository;
@@ -52,6 +55,7 @@ class RouteOptimizationServiceTest {
     private InventoryRepository inventories;
     private MaterialRepository materials;
     private SupplierInventoryRepository supplierInventory;
+    private DepotInventoryRepository depotInventory;
     private RouteOptimizationService service;
 
     @BeforeEach
@@ -61,7 +65,10 @@ class RouteOptimizationServiceTest {
         materials = mock(MaterialRepository.class);
         supplierInventory = mock(SupplierInventoryRepository.class);
         when(supplierInventory.findStocked(any())).thenReturn(List.of());
+        depotInventory = mock(DepotInventoryRepository.class);
+        when(depotInventory.findStocked(any())).thenReturn(List.of());
         var matrix = new HaversineMatrixService(new HaversineDistanceService());
+        var depotFallback = new DepotFallbackService(depotInventory, matrix);
         var supplierFallback = new SupplierFallbackService(supplierInventory, matrix);
         var props = new RoutingProperties("haversine",
             new RoutingProperties.Google("", "https://example.com", "DRIVE", "TRAFFIC_AWARE", 5),
@@ -69,7 +76,8 @@ class RouteOptimizationServiceTest {
             new RoutingProperties.Balanced(1.0, 1.0),
             new RoutingProperties.Cache(86400, 50000), new RoutingProperties.Fuel(0.8,8));
         service = new RouteOptimizationService(houses, inventories, materials,
-            new ServerMessages(), matrix, supplierFallback, new HeuristicRouteSolver(), props);
+            new ServerMessages(), matrix, depotFallback, supplierFallback,
+            new HeuristicRouteSolver(), props);
     }
 
     // ── golden behavior ─────────────────────────────────────────────────────────
@@ -288,6 +296,122 @@ class RouteOptimizationServiceTest {
         assertThat(r.totalDistance()).isEqualTo(Math.round(anchorToDest + extra));
     }
 
+    // ── warehouse (depot) tier ───────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("warehouse fallback: covers full demand when no house subset can")
+    void warehouseFallbackCoversWhenHousesCannot() {
+        Material m1 = material(1, "Brick", "pcs");
+        House dest = house(DEST_ID, "Dest", "addr-d", 0.3, 0.3);
+
+        // No house stocks the needed material, so the full 20 falls to the company warehouse
+        // (depot) tier before suppliers are ever consulted.
+        mockRepos(dest, List.of(m1), List.of());
+
+        Depot d1 = depot(1, "WH1", "addr-w1", 0.2, 0.1);
+        when(depotInventory.findStocked(any()))
+            .thenReturn(List.of(depotInv(d1, m1, 30.0)));
+
+        OrderResponse r = service.calculate(new OrderRequest(0.0, 0.0, "Origin", DEST_ID,
+            Map.<String, Object>of("1", "20"), "en"));
+
+        assertThat(r.route()).isEmpty();
+        assertThat(r.totalStops()).isZero();
+        assertThat(r.supplierStops()).isEmpty();
+
+        assertThat(r.warehouseStops()).hasSize(1);
+        var whStop = r.warehouseStops().get(0);
+        assertThat(whStop.id()).isEqualTo(1);
+        assertThat(whStop.name()).isEqualTo("WH1");
+        assertThat(whStop.contribution()).containsOnlyKeys(1);
+        assertThat(whStop.contribution().get(1).quantity()).isEqualTo(20.0);
+        assertThat(whStop.contribution().get(1).selectionReason()).isEqualTo("warehouse_fallback");
+
+        assertThat(r.deficit()).isEmpty();
+        assertThat(r.fullyFulfilled()).isTrue();
+        assertThat(r.mapsUrl()).isEqualTo(
+            "https://www.google.com/maps/dir/0.0,0.0/0.2,0.1/0.3,0.3");
+
+        double anchorToDest = hv(0, 0, 0.3, 0.3);
+        double whLeg = hv(0, 0, 0.2, 0.1) + hv(0.2, 0.1, 0.3, 0.3);
+        double extra = Math.max(0, whLeg - anchorToDest);
+        assertThat(r.totalDistance()).isEqualTo(Math.round(anchorToDest + extra));
+    }
+
+    @Test
+    @DisplayName("tiered priority: house, then warehouse, then supplier each cover a slice")
+    void houseThenWarehouseThenSupplier() {
+        Material m1 = material(1, "Brick", "pcs");
+        House dest = house(DEST_ID, "Dest", "addr-d", 0.4, 0.0);
+        House a    = house(1, "A", "addr-a", 0.1, 0.0);
+
+        // Order needs 30; house A has 10, depot has 10, supplier has 10 — one slice each,
+        // all collinear so the per-tier extra-km deltas telescope into one straight leg.
+        mockRepos(dest, List.of(m1), List.of(inventory(a, m1, 10.0)));
+
+        Depot d1 = depot(1, "WH1", "addr-w1", 0.2, 0.0);
+        when(depotInventory.findStocked(any()))
+            .thenReturn(List.of(depotInv(d1, m1, 10.0)));
+
+        Supplier s1 = supplier(1, "Sup1", "addr-s1", 0.3, 0.0);
+        when(supplierInventory.findStocked(any()))
+            .thenReturn(List.of(supplierInv(s1, m1, 10.0)));
+
+        OrderResponse r = service.calculate(new OrderRequest(0.0, 0.0, "Origin", DEST_ID,
+            Map.<String, Object>of("1", "30"), "en"));
+
+        assertThat(r.route()).extracting(RouteStopDto::id).containsExactly(1);
+        assertThat(r.totalStops()).isEqualTo(1);
+        assertThat(r.warehouseStops()).extracting(RouteStopDto::id).containsExactly(1);
+        assertThat(r.supplierStops()).extracting(RouteStopDto::id).containsExactly(1);
+
+        assertThat(r.route().get(0).contribution().get(1).quantity()).isEqualTo(10.0);
+        assertThat(r.warehouseStops().get(0).contribution().get(1).quantity()).isEqualTo(10.0);
+        assertThat(r.supplierStops().get(0).contribution().get(1).quantity()).isEqualTo(10.0);
+
+        assertThat(r.deficit()).isEmpty();
+        assertThat(r.fullyFulfilled()).isTrue();
+        assertThat(r.mapsUrl()).isEqualTo(
+            "https://www.google.com/maps/dir/0.0,0.0/0.1,0.0/0.2,0.0/0.3,0.0/0.4,0.0");
+
+        // Mirror the service's own arithmetic so the telescoping is asserted exactly.
+        double houseKm = hv(0, 0, 0.1, 0) + hv(0.1, 0, 0.4, 0);
+        double extraD = (hv(0.1, 0, 0.2, 0) + hv(0.2, 0, 0.4, 0)) - hv(0.1, 0, 0.4, 0);
+        double extraS = (hv(0.2, 0, 0.3, 0) + hv(0.3, 0, 0.4, 0)) - hv(0.2, 0, 0.4, 0);
+        assertThat(r.totalDistance()).isEqualTo(
+            Math.round(houseKm + Math.max(0, extraD) + Math.max(0, extraS)));
+    }
+
+    @Test
+    @DisplayName("tiered priority: a warehouse that covers the deficit is used before any supplier")
+    void warehousePreferredOverCloserSupplier() {
+        Material m1 = material(1, "Brick", "pcs");
+        House dest = house(DEST_ID, "Dest", "addr-d", 0.4, 0.0);
+        House a    = house(1, "A", "addr-a", 0.1, 0.0);
+
+        // House covers 3 of 10. Depot fully covers the remaining 7. The supplier also stocks it
+        // and is geographically closer, but must NOT be used because the warehouse tier runs first.
+        mockRepos(dest, List.of(m1), List.of(inventory(a, m1, 3.0)));
+
+        Depot d1 = depot(1, "WH1", "addr-w1", 0.2, 0.0);
+        when(depotInventory.findStocked(any()))
+            .thenReturn(List.of(depotInv(d1, m1, 20.0)));
+
+        Supplier s1 = supplier(1, "Sup1", "addr-s1", 0.15, 0.0);
+        when(supplierInventory.findStocked(any()))
+            .thenReturn(List.of(supplierInv(s1, m1, 20.0)));
+
+        OrderResponse r = service.calculate(new OrderRequest(0.0, 0.0, "Origin", DEST_ID,
+            Map.<String, Object>of("1", "10"), "en"));
+
+        assertThat(r.route()).extracting(RouteStopDto::id).containsExactly(1);
+        assertThat(r.warehouseStops()).hasSize(1);
+        assertThat(r.warehouseStops().get(0).contribution().get(1).quantity()).isEqualTo(7.0);
+        assertThat(r.supplierStops()).isEmpty();
+        assertThat(r.deficit()).isEmpty();
+        assertThat(r.fullyFulfilled()).isTrue();
+    }
+
     // ── validation paths ────────────────────────────────────────────────────────
 
     @Test
@@ -406,6 +530,24 @@ class RouteOptimizationServiceTest {
         si.setMaterial(m);
         si.setQuantity(BigDecimal.valueOf(quantity));
         return si;
+    }
+
+    private static Depot depot(int id, String name, String location, double lat, double lng) {
+        Depot d = new Depot();
+        d.setId(id);
+        d.setName(name);
+        d.setLocation(location);
+        d.setLat(BigDecimal.valueOf(lat));
+        d.setLng(BigDecimal.valueOf(lng));
+        return d;
+    }
+
+    private static DepotInventory depotInv(Depot d, Material m, double quantity) {
+        DepotInventory di = new DepotInventory();
+        di.setDepot(d);
+        di.setMaterial(m);
+        di.setQuantity(BigDecimal.valueOf(quantity));
+        return di;
     }
 
     private static Inventory inventory(House h, Material m, double quantity) {

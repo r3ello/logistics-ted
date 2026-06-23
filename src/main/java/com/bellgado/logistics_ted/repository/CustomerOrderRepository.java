@@ -153,6 +153,7 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
               opt.total_minutes          AS totalMinutes,
               opt.total_stops            AS totalStops,
               opt.supplier_stops_count   AS supplierStopsCount,
+              opt.warehouse_stops_count  AS warehouseStopsCount,
               opt.fully_fulfilled        AS fullyFulfilled,
               opt.maps_url               AS mapsUrl,
               opt.first_viewed_at        AS firstViewedAt,

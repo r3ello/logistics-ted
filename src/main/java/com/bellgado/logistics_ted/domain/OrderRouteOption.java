@@ -65,6 +65,9 @@ public class OrderRouteOption {
     @Column(name = "supplier_stops_count", nullable = false)
     private int supplierStopsCount;
 
+    @Column(name = "warehouse_stops_count", nullable = false)
+    private int warehouseStopsCount;
+
     @Column(name = "fully_fulfilled", nullable = false)
     private boolean fullyFulfilled;
 

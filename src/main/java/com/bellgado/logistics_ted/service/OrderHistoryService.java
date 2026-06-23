@@ -124,6 +124,7 @@ public class OrderHistoryService {
             opt.setTotalMinutes((int) alt.totalMinutes());
             opt.setTotalStops(alt.totalStops());
             opt.setSupplierStopsCount(alt.supplierStops() == null ? 0 : alt.supplierStops().size());
+            opt.setWarehouseStopsCount(alt.warehouseStops() == null ? 0 : alt.warehouseStops().size());
             opt.setFullyFulfilled(alt.fullyFulfilled());
             opt.setHouseIdsSignature(signatureOf(alt));
             opt.setMapsUrl(alt.mapsUrl());
@@ -262,6 +263,7 @@ public class OrderHistoryService {
             nullToZero(r.getTotalMinutes()),
             nullToZero(r.getTotalStops()),
             nullToZero(r.getSupplierStopsCount()),
+            nullToZero(r.getWarehouseStopsCount()),
             Boolean.TRUE.equals(r.getFullyFulfilled()),
             r.getMapsUrl(),
             r.getFirstViewedAt(),
@@ -332,6 +334,7 @@ public class OrderHistoryService {
     private String signatureOf(RouteOptionDto alt) {
         StringBuilder sb = new StringBuilder();
         appendStopIds(sb, "h", alt.route());
+        appendStopIds(sb, "w", alt.warehouseStops());
         appendStopIds(sb, "s", alt.supplierStops());
         return sb.length() == 0 ? "empty" : sb.toString();
     }
