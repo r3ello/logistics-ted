@@ -1,6 +1,8 @@
 package com.bellgado.logistics_ted.agent;
 
 import com.bellgado.logistics_ted.domain.Crew;
+import com.bellgado.logistics_ted.domain.Depot;
+import com.bellgado.logistics_ted.domain.DepotInventory;
 import com.bellgado.logistics_ted.domain.House;
 import com.bellgado.logistics_ted.domain.Inventory;
 import com.bellgado.logistics_ted.domain.Material;
@@ -12,6 +14,8 @@ import com.bellgado.logistics_ted.domain.Warehouse;
 import com.bellgado.logistics_ted.domain.Worker;
 import com.bellgado.logistics_ted.domain.WorkerRole;
 import com.bellgado.logistics_ted.repository.CrewRepository;
+import com.bellgado.logistics_ted.repository.DepotInventoryRepository;
+import com.bellgado.logistics_ted.repository.DepotRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.InventoryRepository;
 import com.bellgado.logistics_ted.repository.MaterialRepository;
@@ -70,6 +74,8 @@ public class LogisticsAgentTools {
     private final ScaffoldRepository scaffolds;
     private final SupplierRepository suppliers;
     private final SupplierInventoryRepository supplierInventories;
+    private final DepotRepository depots;
+    private final DepotInventoryRepository depotInventories;
     private final RouteOptimizationService routeOptimization;
     private final RoutingProperties routingProperties;
     private final ObjectMapper objectMapper;
@@ -420,6 +426,50 @@ public class LogisticsAgentTools {
         }
     }
 
+    @Tool(description = "List company warehouses (depots) and what they stock. Pass a material id to get " +
+            "only the warehouses stocking that material (with quantity); empty string lists every " +
+            "warehouse with its full stock. Warehouses are the tier-2 source: the route optimizer pulls " +
+            "from them after houses and before external suppliers.")
+    @Transactional(readOnly = true)
+    public String listWarehouses(
+            @ToolParam(description = "Material numeric id to filter by, or empty string for all warehouses")
+            String materialId) {
+        try {
+            Map<Integer, Map<String, Object>> byDepot = new LinkedHashMap<>();
+            List<DepotInventory> rows;
+            if (materialId == null || materialId.isBlank()) {
+                for (Depot d : depots.findAll()) {
+                    byDepot.put(d.getId(), depotJson(d));
+                }
+                rows = depotInventories.findAllStocked();
+            } else {
+                int mid = Integer.parseInt(materialId.trim());
+                rows = depotInventories.findStocked(List.of(mid));
+            }
+            for (DepotInventory di : rows) {
+                Map<String, Object> dep = byDepot.computeIfAbsent(
+                    di.getDepot().getId(), k -> depotJson(di.getDepot()));
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> mats = (List<Map<String, Object>>) dep.get("materials");
+                Map<String, Object> mat = new LinkedHashMap<>();
+                mat.put("materialId", di.getMaterial().getId());
+                mat.put("name", di.getMaterial().getName());
+                mat.put("unit", di.getMaterial().getUnit());
+                mat.put("quantity", di.getQuantity());
+                mats.add(mat);
+            }
+            if (byDepot.isEmpty()) {
+                return materialId == null || materialId.isBlank()
+                    ? "No warehouses defined yet."
+                    : "No warehouse stocks material id " + materialId.trim() + ".";
+            }
+            return objectMapper.writeValueAsString(new ArrayList<>(byDepot.values()));
+        } catch (Exception e) {
+            log.warn("listWarehouses failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
     // ========================================================================
     // CREWS / WORKERS
     // ========================================================================
@@ -641,8 +691,21 @@ public class LogisticsAgentTools {
             sb.append("\nNo house stops selected (no candidate house had any of the requested materials).\n");
         }
 
+        if (resp.warehouseStops() != null && !resp.warehouseStops().isEmpty()) {
+            sb.append("\nWarehouse stops (company depots, used before suppliers):\n");
+            int i = 1;
+            for (RouteStopDto stop : resp.warehouseStops()) {
+                sb.append("  ").append(i++).append(". [warehouse ").append(stop.id()).append("] ")
+                    .append(stop.name()).append(" — ").append(stop.location()).append("\n");
+                for (StopContributionDto c : stop.contribution().values()) {
+                    sb.append("       - ").append(formatQty(c.quantity())).append(" ").append(c.unit())
+                        .append(" of ").append(c.name()).append("\n");
+                }
+            }
+        }
+
         if (resp.supplierStops() != null && !resp.supplierStops().isEmpty()) {
-            sb.append("\nSupplier stops (fallback for what houses couldn't cover):\n");
+            sb.append("\nSupplier stops (external, fallback for what houses + warehouses couldn't cover):\n");
             int i = 1;
             for (RouteStopDto stop : resp.supplierStops()) {
                 sb.append("  ").append(i++).append(". [supplier ").append(stop.id()).append("] ")
@@ -669,6 +732,9 @@ public class LogisticsAgentTools {
                     .append(": ").append(opt.totalDistance()).append(" km, ")
                     .append(opt.totalMinutes()).append(" min, ")
                     .append(opt.route().size()).append(" house stop(s)");
+                if (opt.warehouseStops() != null && !opt.warehouseStops().isEmpty()) {
+                    sb.append(", ").append(opt.warehouseStops().size()).append(" warehouse stop(s)");
+                }
                 if (!opt.supplierStops().isEmpty()) {
                     sb.append(", ").append(opt.supplierStops().size()).append(" supplier stop(s)");
                 }
@@ -717,6 +783,15 @@ public class LogisticsAgentTools {
         row.put("id", s.getId());
         row.put("name", s.getName());
         row.put("location", s.getLocation());
+        row.put("materials", new ArrayList<Map<String, Object>>());
+        return row;
+    }
+
+    private static Map<String, Object> depotJson(Depot d) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("id", d.getId());
+        row.put("name", d.getName());
+        row.put("location", d.getLocation());
         row.put("materials", new ArrayList<Map<String, Object>>());
         return row;
     }
@@ -787,6 +862,9 @@ public class LogisticsAgentTools {
                     .append(": ").append(o.totalDistanceKm()).append(" km, ")
                     .append(o.totalMinutes()).append(" min, ")
                     .append(o.totalStops()).append(" house stop(s)");
+                if (o.warehouseStopsCount() > 0) {
+                    sb.append(", ").append(o.warehouseStopsCount()).append(" warehouse stop(s)");
+                }
                 if (o.supplierStopsCount() > 0) {
                     sb.append(", ").append(o.supplierStopsCount()).append(" supplier stop(s)");
                 }
@@ -802,6 +880,7 @@ public class LogisticsAgentTools {
         if (render != null) {
             sb.append("\nRoute of the ").append(render.objective()).append(" option:\n");
             appendPayloadStops(sb, render.payload(), "route", "house");
+            appendPayloadStops(sb, render.payload(), "warehouseStops", "warehouse");
             appendPayloadStops(sb, render.payload(), "supplierStops", "supplier");
             if (render.mapsUrl() != null) {
                 sb.append("Google Maps: ").append(render.mapsUrl()).append("\n");

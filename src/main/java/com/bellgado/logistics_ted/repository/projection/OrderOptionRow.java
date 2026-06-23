@@ -17,6 +17,7 @@ public interface OrderOptionRow {
     Integer getTotalMinutes();
     Integer getTotalStops();
     Integer getSupplierStopsCount();
+    Integer getWarehouseStopsCount();
     Boolean getFullyFulfilled();
     String getMapsUrl();
     Instant getFirstViewedAt();

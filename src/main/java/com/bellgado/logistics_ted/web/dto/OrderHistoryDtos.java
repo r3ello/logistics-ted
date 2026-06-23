@@ -47,6 +47,7 @@ public final class OrderHistoryDtos {
         int totalMinutes,
         int totalStops,
         int supplierStopsCount,
+        int warehouseStopsCount,
         boolean fullyFulfilled,
         String mapsUrl,
         Instant firstViewedAt,

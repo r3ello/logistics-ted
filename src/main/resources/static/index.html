@@ -583,6 +583,26 @@
       color: #ffaa50;
     }
 
+    /* ── WAREHOUSE (DEPOT) STOPS — tier 2 ── */
+    .warehouse-stop { border-color: rgba(155,120,255,0.35); background: rgba(155,120,255,0.06); }
+    .warehouse-num { background: #9b78ff; color: #160a2e; }
+    .warehouse-pill {
+      display: inline-block;
+      font-size: 0.62rem; font-weight: 700;
+      background: #9b78ff; color: #160a2e;
+      padding: 0.18rem 0.45rem; border-radius: 4px; vertical-align: middle;
+      margin-left: 0.5rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .warehouse-stop .mat-tag {
+      background: rgba(155,120,255,0.12);
+      border-color: rgba(155,120,255,0.3);
+      color: #b79bff;
+    }
+
+    /* ── FACILITY ADMIN (warehouses + suppliers) ── */
+    .facility-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+
     /* ── SPINNER / EMPTY ── */
     .state-msg { text-align: center; color: var(--muted); padding: 3rem; font-size: 0.95rem; }
     .spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 0.75rem; }
@@ -1184,6 +1204,7 @@
     .meta-chip { border-radius: 9px; box-shadow: var(--edge); }
     .stop-num { box-shadow: 0 0 0 4px rgba(127,148,200,0.12); }
     .supplier-num { box-shadow: 0 0 0 4px rgba(255,170,80,0.15); }
+    .warehouse-num { box-shadow: 0 0 0 4px rgba(155,120,255,0.15); }
     .stop-arrow { color: var(--accent); opacity: 0.5; font-size: 1rem; }
     .spinner { border-color: var(--ring); border-top-color: var(--accent); }
 
@@ -1428,6 +1449,45 @@
   </div>
 </div>
 
+<!-- FACILITY MODAL (warehouses + suppliers) -->
+<div class="modal-backdrop" id="facilityModal" onclick="if(event.target===this) closeFacilityModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      <span id="facModalTitle">Add</span>
+      <button class="modal-close" onclick="closeFacilityModal()">✕</button>
+    </div>
+    <div class="modal-field">
+      <label id="facNameLabel">Name</label>
+      <input id="facName" type="text" placeholder="Name" />
+    </div>
+    <div class="modal-field">
+      <label id="facLocationLabel">Location</label>
+      <input id="facLocation" type="text" placeholder="City, region…" />
+    </div>
+    <div class="modal-field">
+      <label id="facCoordLabel">Coordinates <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <div class="modal-coords">
+        <input id="facLat" type="number" step="any" placeholder="Latitude" />
+        <input id="facLng" type="number" step="any" placeholder="Longitude" />
+      </div>
+    </div>
+    <button id="facLocBtn" onclick="fillFacilityCoords()" style="
+      width:100%;padding:0.55rem;background:var(--card);border:1px solid var(--border);
+      border-radius:8px;color:var(--muted);font-size:0.82rem;cursor:pointer;margin-bottom:1rem">
+      📍 Use my location
+    </button>
+    <div class="modal-field">
+      <label id="facStockLabel">Stock</label>
+      <div id="facStockEditor" style="display:flex;flex-direction:column;gap:0.5rem;max-height:38vh;overflow:auto"></div>
+    </div>
+    <p class="modal-err" id="facModalErr"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="facCancelBtn" onclick="closeFacilityModal()">Cancel</button>
+      <button class="btn btn-primary" id="facSaveBtn" onclick="saveFacility()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <div class="login-card">
@@ -1464,6 +1524,12 @@
     </div>
     <div class="nav-item" id="navMap" onclick="showView('map')">
       <span class="nav-icon">🗺</span> <span>Map View</span>
+    </div>
+    <div class="nav-item" id="navWarehouses" onclick="showView('warehouses')">
+      <span class="nav-icon">🏬</span> <span id="navWarehousesLabel">Warehouses</span>
+    </div>
+    <div class="nav-item" id="navSuppliers" onclick="showView('suppliers')">
+      <span class="nav-icon">🏭</span> <span id="navSuppliersLabel">Suppliers</span>
     </div>
     <div class="nav-item" id="navCrews" onclick="showView('crews')">
       <span class="nav-icon">👥</span> <span id="navCrewsLabel">Crews</span>
@@ -1758,6 +1824,24 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- VIEW: WAREHOUSES (company depots — tier 2) -->
+  <div class="view" id="view-warehouses">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+      <p class="section-label" style="margin:0" id="whTitle">🏬 Warehouses</p>
+      <button class="btn btn-primary" id="whAddBtn" onclick="openFacilityModal('warehouse', null)">+ Add warehouse</button>
+    </div>
+    <div id="warehousesList" class="facility-grid"></div>
+  </div>
+
+  <!-- VIEW: SUPPLIERS (external vendors — tier 3) -->
+  <div class="view" id="view-suppliers">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+      <p class="section-label" style="margin:0" id="supTitle">🏭 Suppliers</p>
+      <button class="btn btn-primary" id="supAddBtn" onclick="openFacilityModal('supplier', null)">+ Add supplier</button>
+    </div>
+    <div id="suppliersList" class="facility-grid"></div>
   </div>
 
   <!-- VIEW: ELECTRIC BOXES -->
@@ -2065,6 +2149,22 @@
       // supplier fallback (phase 5)
       supplierLabel:'Supplier', supplierStops:'supplier stops',
       reasonSupplierFallback:'Supplier — picked up to cover deficit, ~{dist} km from previous stop',
+      // warehouse (depot) fallback — tier 2
+      warehouseLabel:'Warehouse', warehouseStops:'warehouse stops',
+      reasonWarehouseFallback:'Warehouse — picked up to cover deficit, ~{dist} km from previous stop',
+      // warehouses + suppliers admin
+      navWarehouses:'Warehouses', navSuppliers:'Suppliers',
+      pageTitle_warehouses:'Warehouses', pageSub_warehouses:'Company depots — tier-2 source for orders',
+      pageTitle_suppliers:'Suppliers', pageSub_suppliers:'External vendors — tier-3 fallback for orders',
+      whTitle:'🏬 Warehouses', supTitle:'🏭 Suppliers',
+      whAdd:'+ Add warehouse', supAdd:'+ Add supplier',
+      facAddWarehouse:'Add warehouse', facEditWarehouse:'Edit warehouse — ',
+      facAddSupplier:'Add supplier', facEditSupplier:'Edit supplier — ',
+      facNameLabel:'Name', facLocationLabel:'Location', facCoordLabel:'Coordinates', facStockLabel:'Stock',
+      facCancel:'Cancel', facSave:'Save', facUseLocation:'📍 Use my location',
+      facEdit:'Edit', facDelete:'Delete', facEmpty:'Nothing here yet — add one with the button above.',
+      facNoStock:'no stock set', facNoCoords:'no coordinates ⚠',
+      facConfirmDelete:'Delete this entry? Its stock will be removed too.',
       // scaffold transport view
       navScaffold:'Scaffold',
       scaffoldFormTitle:'🏗️ Scaffold Transport',
@@ -2240,6 +2340,22 @@
       // supplier fallback (phase 5)
       supplierLabel:'Доставчик', supplierStops:'доставчици',
       reasonSupplierFallback:'Доставчик — взето за покриване на недостиг, ~{dist} км от предишна спирка',
+      // warehouse (depot) fallback — tier 2
+      warehouseLabel:'Склад', warehouseStops:'складове',
+      reasonWarehouseFallback:'Склад — взето за покриване на недостиг, ~{dist} км от предишна спирка',
+      // warehouses + suppliers admin
+      navWarehouses:'Складове', navSuppliers:'Доставчици',
+      pageTitle_warehouses:'Складове', pageSub_warehouses:'Фирмени складове — източник от ниво 2 за поръчки',
+      pageTitle_suppliers:'Доставчици', pageSub_suppliers:'Външни доставчици — резерв от ниво 3 за поръчки',
+      whTitle:'🏬 Складове', supTitle:'🏭 Доставчици',
+      whAdd:'+ Добави склад', supAdd:'+ Добави доставчик',
+      facAddWarehouse:'Добави склад', facEditWarehouse:'Редакция на склад — ',
+      facAddSupplier:'Добави доставчик', facEditSupplier:'Редакция на доставчик — ',
+      facNameLabel:'Име', facLocationLabel:'Локация', facCoordLabel:'Координати', facStockLabel:'Наличност',
+      facCancel:'Отказ', facSave:'Запази', facUseLocation:'📍 Използвай моята локация',
+      facEdit:'Редакция', facDelete:'Изтрий', facEmpty:'Все още няма нищо — добавете с бутона горе.',
+      facNoStock:'няма зададена наличност', facNoCoords:'без координати ⚠',
+      facConfirmDelete:'Да изтрия ли този запис? Наличността му също ще бъде премахната.',
       // scaffold transport view
       navScaffold:'Скеле',
       scaffoldFormTitle:'🏗️ Транспорт на скеле',
@@ -2352,6 +2468,14 @@
     document.getElementById('navOrder').querySelector('span:last-child').textContent     = t('navOrder');
     document.getElementById('navMap').querySelector('span:last-child').textContent       = t('navMap');
     document.getElementById('navHistoryLabel').textContent  = t('navHistory');
+    const facT = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+    facT('navWarehousesLabel','navWarehouses'); facT('navSuppliersLabel','navSuppliers');
+    facT('whTitle','whTitle'); facT('supTitle','supTitle');
+    facT('whAddBtn','whAdd'); facT('supAddBtn','supAdd');
+    facT('facNameLabel','facNameLabel'); facT('facLocationLabel','facLocationLabel');
+    facT('facCoordLabel','facCoordLabel'); facT('facStockLabel','facStockLabel');
+    facT('facCancelBtn','facCancel'); facT('facSaveBtn','facSave');
+    facT('facLocBtn','facUseLocation');
     document.getElementById('navElectricLabel').textContent    = t('navElectric');
     document.getElementById('navAttendanceLabel').textContent  = t('navAttendance');
     document.getElementById('navQrcodesLabel').textContent     = t('navQrcodes');
@@ -2579,7 +2703,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'crews', 'history', 'electric', 'attendance', 'qrcodes'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'electric', 'attendance', 'qrcodes'];
 
   function showView(name) {
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
@@ -2594,6 +2718,8 @@
     closeNav();
 
     if (name === 'map') initHousesMap();
+    if (name === 'warehouses') loadWarehouses();
+    if (name === 'suppliers') loadSuppliers();
     if (name === 'history') loadHistory();
     if (name === 'scaffold') loadScaffoldHouses();
     if (name === 'crews') loadOrgChart();
@@ -4722,7 +4848,7 @@
       ? data.alternatives
       : [{
           objective: 'shortest_distance',
-          route: data.route, supplierStops: data.supplierStops || [],
+          route: data.route, warehouseStops: data.warehouseStops || [], supplierStops: data.supplierStops || [],
           deficit: data.deficit, mapsUrl: data.mapsUrl,
           fullyFulfilled: data.fullyFulfilled, totalStops: data.totalStops,
           totalDistance: data.totalDistance, totalMinutes: data.totalMinutes || 0,
@@ -4818,6 +4944,7 @@
   function renderOptionDetails(data, option, order) {
     const { origin, destination } = data;
     const route          = option.route || [];
+    const warehouseStops = option.warehouseStops || [];
     const supplierStops  = option.supplierStops || [];
     const deficit        = option.deficit || [];
     const mapsUrl        = option.mapsUrl;
@@ -4836,6 +4963,9 @@
       ? `<div class="result-status ok">${t('orderOk')}</div>`
       : `<div class="result-status warn">${t('orderWarn').replace('{deficit}', `<strong>${deficitSummary}</strong>`)}</div>`;
 
+    const warehouseChip = warehouseStops.length > 0
+      ? `<div class="meta-chip">🏬 <strong>${warehouseStops.length}</strong> ${t('warehouseStops')}</div>`
+      : '';
     const supplierChip = supplierStops.length > 0
       ? `<div class="meta-chip">🏭 <strong>${supplierStops.length}</strong> ${t('supplierStops')}</div>`
       : '';
@@ -4845,6 +4975,7 @@
         <div class="meta-chip">🚩 <strong>${origin.name}</strong></div>
         <div class="meta-chip">🏁 <strong>${destination.name}</strong></div>
         <div class="meta-chip">🏠 <strong>${totalStops}</strong> ${t('stops')}</div>
+        ${warehouseChip}
         ${supplierChip}
         <div class="meta-chip">📏 ~<strong>${totalDistance} km</strong> ${t('estimated')}</div>
         <div class="meta-chip">⏱ ~<strong>${totalMinutes} ${t('minLabel')}</strong></div>
@@ -4855,7 +4986,7 @@
         ${renderChooseButton(option)}
       </div>`;
 
-    const hasStops = route.length + supplierStops.length > 0;
+    const hasStops = route.length + warehouseStops.length + supplierStops.length > 0;
 
     const originCard = `
       <div class="stop-card" style="border-color:var(--accent);background:rgba(79,142,247,0.07)">
@@ -4905,6 +5036,27 @@
         <div class="stop-arrow">↓</div>`;
     }).join('');
 
+    const warehouseStopsHtml = warehouseStops.map(stop => {
+      const contribs = Object.values(stop.contribution);
+      const mats = contribs.map(c =>
+        `<span class="mat-tag">${MAT_META[c.name]?.icon || '📦'} ${mn(c.name)}: ${fmt(c.quantity)} ${mu(c.unit)}</span>`
+      ).join('');
+      const dist = contribs[0]?.distanceFromOrigin ?? '?';
+      const reasonLine = t('reasonWarehouseFallback').replace('{dist}', `<strong>${dist}</strong>`);
+
+      return `
+        <div class="stop-card warehouse-stop">
+          <div class="stop-num warehouse-num">🏬</div>
+          <div class="stop-info">
+            <p class="stop-name">${stop.name} <span class="warehouse-pill">${t('warehouseLabel')}</span></p>
+            <p class="stop-loc">📍 ${stop.location}</p>
+            <p class="stop-reason">${reasonLine}</p>
+            <div class="stop-mats">${mats}</div>
+          </div>
+        </div>
+        <div class="stop-arrow">↓</div>`;
+    }).join('');
+
     const supplierStopsHtml = supplierStops.map(stop => {
       const contribs = Object.values(stop.contribution);
       const mats = contribs.map(c =>
@@ -4932,6 +5084,7 @@
       <div class="route-stops">
         ${originCard}
         ${houseStopsHtml}
+        ${warehouseStopsHtml}
         ${supplierStopsHtml}
         ${!hasStops ? '<div class="stop-arrow">↓</div>' : ''}
         ${destCard}
@@ -5112,6 +5265,189 @@
         // auto-fill location text via reverse geocode (same as worker modal)
         const area = await reverseGeocode(lat, lng);
         document.getElementById('mLocation').value = area || `${lat.toFixed(6)},${lng.toFixed(6)}`;
+      },
+      () => { btn.textContent = t('locationError'); },
+      { enableHighAccuracy: false, timeout: 8000 }
+    );
+  }
+
+  // ── WAREHOUSES + SUPPLIERS (admin) ───────────────────────────────────────────
+  let dashWarehouses = [];
+  let dashSuppliers  = [];
+  let _facKind = 'warehouse';   // 'warehouse' | 'supplier'
+  let _editingFacId = null;
+
+  function facCfg(kind) {
+    return kind === 'supplier'
+      ? { list: dashSuppliers,  base: '/api/suppliers',  listEl: 'suppliersList',
+          addKey: 'facAddSupplier',  editKey: 'facEditSupplier' }
+      : { list: dashWarehouses, base: '/api/warehouses', listEl: 'warehousesList',
+          addKey: 'facAddWarehouse', editKey: 'facEditWarehouse' };
+  }
+
+  async function loadWarehouses() {
+    try {
+      const res = await apiFetch('/api/warehouses');
+      dashWarehouses = await res.json();
+      renderFacilityList('warehouse');
+    } catch (e) {
+      document.getElementById('warehousesList').innerHTML =
+        `<div class="state-msg" style="padding:1rem;color:var(--red)">${e.message}</div>`;
+    }
+  }
+
+  async function loadSuppliers() {
+    try {
+      const res = await apiFetch('/api/suppliers');
+      dashSuppliers = await res.json();
+      renderFacilityList('supplier');
+    } catch (e) {
+      document.getElementById('suppliersList').innerHTML =
+        `<div class="state-msg" style="padding:1rem;color:var(--red)">${e.message}</div>`;
+    }
+  }
+
+  function renderFacilityList(kind) {
+    const cfg = facCfg(kind);
+    const el = document.getElementById(cfg.listEl);
+    if (!el) return;
+    if (!cfg.list.length) {
+      el.innerHTML = `<div class="state-msg" style="padding:1rem;color:var(--muted)">${t('facEmpty')}</div>`;
+      return;
+    }
+    el.innerHTML = cfg.list.map(f => {
+      const mats = (f.materials || []).map(m =>
+        `<span class="mat-tag">${MAT_META[m.name]?.icon || '📦'} ${mn(m.name)}: ${fmt(m.quantity)} ${mu(m.unit)}</span>`
+      ).join('') || `<span style="color:var(--muted);font-size:0.8rem">${t('facNoStock')}</span>`;
+      const coords = (f.lat != null && f.lng != null)
+        ? `📍 ${f.lat}, ${f.lng}`
+        : `<span style="color:var(--yellow)">${t('facNoCoords')}</span>`;
+      return `
+        <div class="stop-card" style="display:block">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem">
+            <div>
+              <p class="stop-name">${escapeHtml(f.name)}</p>
+              <p class="stop-loc">${escapeHtml(f.location)} &nbsp;·&nbsp; ${coords}</p>
+            </div>
+            <div style="display:flex;gap:0.4rem;flex-shrink:0">
+              <button class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem" onclick="openFacilityModal('${kind}', ${f.id})">${t('facEdit')}</button>
+              <button class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;color:var(--red)" onclick="deleteFacility('${kind}', ${f.id})">${t('facDelete')}</button>
+            </div>
+          </div>
+          <div class="stop-mats" style="margin-top:0.5rem">${mats}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function openFacilityModal(kind, id) {
+    _facKind = kind;
+    const cfg = facCfg(kind);
+    const f = id != null ? cfg.list.find(x => x.id === id) : null;
+    _editingFacId = f ? f.id : null;
+    document.getElementById('facModalTitle').textContent = f ? (t(cfg.editKey) + f.name) : t(cfg.addKey);
+    document.getElementById('facName').value     = f ? f.name : '';
+    document.getElementById('facLocation').value = f ? f.location : '';
+    document.getElementById('facLat').value      = f?.lat ?? '';
+    document.getElementById('facLng').value      = f?.lng ?? '';
+    document.getElementById('facModalErr').textContent = '';
+    document.getElementById('facLocBtn').textContent = t('facUseLocation');
+
+    // Build the stock editor from the global material catalog; pre-fill from this facility's
+    // lines matched by material name (the facility DTO carries no material id).
+    const existing = {};
+    (f?.materials || []).forEach(m => { existing[m.name] = m; });
+    const isSup = kind === 'supplier';
+    document.getElementById('facStockEditor').innerHTML = (materials || []).map(m => {
+      const cur = existing[m.name];
+      const qty = cur != null ? cur.quantity : '';
+      const price = (cur && cur.price != null) ? cur.price : '';
+      const icon = MAT_META[m.name]?.icon || '📦';
+      return `
+        <div style="display:grid;grid-template-columns:1fr ${isSup ? '80px 80px' : '110px'};gap:0.5rem;align-items:center">
+          <span style="font-size:0.84rem">${icon} ${mn(m.name)} <span style="color:var(--muted)">(${mu(m.unit)})</span></span>
+          <input type="number" min="0" step="any" id="facQty_${m.id}" value="${qty}" placeholder="0" />
+          ${isSup ? `<input type="number" min="0" step="any" id="facPrice_${m.id}" value="${price}" placeholder="€/u" />` : ''}
+        </div>`;
+    }).join('') || `<span style="color:var(--muted);font-size:0.82rem">${t('facNoStock')}</span>`;
+
+    document.getElementById('facilityModal').classList.add('open');
+    document.getElementById('facName').focus();
+  }
+
+  function closeFacilityModal() {
+    document.getElementById('facilityModal').classList.remove('open');
+    _editingFacId = null;
+  }
+
+  async function saveFacility() {
+    const kind = _facKind;
+    const cfg = facCfg(kind);
+    const name     = document.getElementById('facName').value.trim();
+    const location = document.getElementById('facLocation').value.trim();
+    const lat      = document.getElementById('facLat').value;
+    const lng      = document.getElementById('facLng').value;
+    const errEl    = document.getElementById('facModalErr');
+    if (!name || !location) { errEl.textContent = t('nameLocationRequired'); return; }
+    errEl.textContent = '';
+
+    const body = { name, location, lat: lat || null, lng: lng || null };
+    try {
+      const url    = _editingFacId ? `${cfg.base}/${_editingFacId}` : cfg.base;
+      const method = _editingFacId ? 'PUT' : 'POST';
+      const res  = await apiFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const id = _editingFacId || data.id;
+
+      // Persist the stock (only inputs the user actually filled in).
+      const stock = {};
+      (materials || []).forEach(m => {
+        const qEl = document.getElementById(`facQty_${m.id}`);
+        if (!qEl || qEl.value === '') return;
+        if (kind === 'supplier') {
+          const pEl = document.getElementById(`facPrice_${m.id}`);
+          stock[m.id] = { quantity: qEl.value, unitPrice: (pEl && pEl.value !== '') ? pEl.value : null };
+        } else {
+          stock[m.id] = qEl.value;
+        }
+      });
+      if (id != null && Object.keys(stock).length) {
+        const invRes  = await apiFetch(`${cfg.base}/${id}/inventory`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(stock) });
+        const invData = await invRes.json();
+        if (invData.error) throw new Error(invData.error);
+      }
+      closeFacilityModal();
+      if (kind === 'supplier') loadSuppliers(); else loadWarehouses();
+    } catch (e) {
+      errEl.textContent = e.message;
+    }
+  }
+
+  async function deleteFacility(kind, id) {
+    if (!confirm(t('facConfirmDelete'))) return;
+    const cfg = facCfg(kind);
+    try {
+      const res  = await apiFetch(`${cfg.base}/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      if (kind === 'supplier') loadSuppliers(); else loadWarehouses();
+    } catch (e) { alert(e.message); }
+  }
+
+  function fillFacilityCoords() {
+    const btn = document.getElementById('facLocBtn');
+    if (!navigator.geolocation) return;
+    btn.textContent = t('locating');
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
+        document.getElementById('facLat').value = lat.toFixed(6);
+        document.getElementById('facLng').value = lng.toFixed(6);
+        btn.textContent = t('locationFilled');
+        const area = await reverseGeocode(lat, lng);
+        const locEl = document.getElementById('facLocation');
+        if (area && !locEl.value) locEl.value = area;
       },
       () => { btn.textContent = t('locationError'); },
       { enableHighAccuracy: false, timeout: 8000 }
@@ -6137,7 +6473,7 @@
       <div class="${cls.join(' ')}" data-objective="${opt.objective}">
         <div class="history-alt-title">${t('obj_' + opt.objective)}</div>
         <div class="history-alt-row">📏 <strong>${opt.totalDistanceKm}</strong> km · ⏱ <strong>${opt.totalMinutes}</strong> ${t('minLabel')}</div>
-        <div class="history-alt-row">⛽ ${euro(cost)} · 🏠 ${opt.totalStops}${opt.supplierStopsCount > 0 ? ` · 🏭 ${opt.supplierStopsCount}` : ''}</div>
+        <div class="history-alt-row">⛽ ${euro(cost)} · 🏠 ${opt.totalStops}${opt.warehouseStopsCount > 0 ? ` · 🏬 ${opt.warehouseStopsCount}` : ''}${opt.supplierStopsCount > 0 ? ` · 🏭 ${opt.supplierStopsCount}` : ''}</div>
         <div class="history-alt-row">👁 <strong>${opt.viewCount}</strong> ${t('historyViews')}</div>
         ${pill}
       </div>`;
@@ -6194,6 +6530,7 @@
     return {
       objective:      payload.objective,
       route:          payload.route || [],
+      warehouseStops: payload.warehouseStops || [],
       supplierStops:  payload.supplierStops || [],
       deficit:        payload.deficit || [],
       mapsUrl:        payload.mapsUrl,
