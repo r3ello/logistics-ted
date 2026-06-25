@@ -2213,6 +2213,8 @@
       tpDashSummary:'{total} workers evaluated — {pay} need travel pay | Center: {city}, Radius: {r} km',
       tpDashNoWorkers:'No workers with a house assigned.',
       tpDashPayNeeded:'💸 Pay needed', tpDashWithin:'✅ Within radius', tpDashNoCoords:'No coords',
+      tpDashThWorker:'Worker', tpDashThCrew:'Crew', tpDashThHouse:'House', tpDashThRoute:'Route (km)', tpDashThCost:'Daily Cost (€)', tpDashThStatus:'Status',
+      tpDashTotalLabel:'💸 Total daily fuel cost: €{cost} ({n} worker{s})',
       // map toggles
       mapHouses:'🏠 Houses', mapScaffold:'🏗️ Scaffold', mapWorkers:'👷 Workers', mapAll:'🏠👷 Houses & Workers',
       mapCrews:'👥 Crews', mapCrewHouse:'🏠👥 House & Crew',
@@ -2412,6 +2414,8 @@
       tpDashSummary:'{total} работника оценени — {pay} се нуждаят от пътни | Център: {city}, Радиус: {r} км',
       tpDashNoWorkers:'Няма работници с назначен обект.',
       tpDashPayNeeded:'💸 Дължими пътни', tpDashWithin:'✅ В радиуса', tpDashNoCoords:'Няма координати',
+      tpDashThWorker:'Работник', tpDashThCrew:'Екип', tpDashThHouse:'Обект', tpDashThRoute:'Маршрут (км)', tpDashThCost:'Дневен разход (€)', tpDashThStatus:'Статус',
+      tpDashTotalLabel:'💸 Общ дневен разход за гориво: €{cost} ({n} работник{s})',
       // map toggles
       mapHouses:'🏠 Къщи', mapScaffold:'🏗️ Скеле', mapWorkers:'👷 Работници', mapAll:'🏠👷 Къщи и работници',
       mapCrews:'👥 Екипи', mapCrewHouse:'🏠👥 Къща и екип',
@@ -4178,10 +4182,10 @@
       <div style="overflow-x:auto">
         <table class="att-table" id="tpDashTable" style="display:none">
           <thead><tr>
-            <th>#</th><th>Worker</th><th>Crew</th><th>House</th>
-            <th style="text-align:right">Route (km)</th>
-            <th style="text-align:right">Daily Cost (€)</th>
-            <th style="text-align:center">Status</th>
+            <th>#</th><th>${t('tpDashThWorker')}</th><th>${t('tpDashThCrew')}</th><th>${t('tpDashThHouse')}</th>
+            <th style="text-align:right">${t('tpDashThRoute')}</th>
+            <th style="text-align:right">${t('tpDashThCost')}</th>
+            <th style="text-align:center">${t('tpDashThStatus')}</th>
           </tr></thead>
           <tbody id="tpDashTbody"></tbody>
         </table>
@@ -4341,7 +4345,7 @@
     if (totalEl) {
       if (payCount > 0) {
         totalEl.style.display = '';
-        totalEl.textContent = `💸 Total daily fuel cost: €${total.toFixed(2)} (${payCount} worker${payCount !== 1 ? 's' : ''})`;
+        totalEl.textContent = t('tpDashTotalLabel').replace('{cost}', total.toFixed(2)).replace('{n}', payCount).replace('{s}', payCount !== 1 ? 's' : '');
       } else {
         totalEl.style.display = 'none';
       }
@@ -4369,7 +4373,7 @@
     const payWorkers = visible.filter(r => r.dailyCost != null).length;
     doc.autoTable({
       startY: 28,
-      head: [['#','Worker','Crew','House','Route (km)','Daily Cost (€)','Status']],
+      head: [['#', t('tpDashThWorker'), t('tpDashThCrew'), t('tpDashThHouse'), t('tpDashThRoute'), t('tpDashThCost'), t('tpDashThStatus')]],
       body: visible.map((row, i) => [
         i+1,
         row.w.name,
@@ -4377,7 +4381,7 @@
         row.w.crewHouseName || row.w.houseName || '—',
         row.routeKm  != null ? row.routeKm.toFixed(1)  : '—',
         row.dailyCost != null ? `€${row.dailyCost.toFixed(2)}` : '—',
-        row.outside ? 'Pay needed' : (row.straight == null ? 'No coords' : 'Within radius'),
+        row.outside ? t('tpDashPayNeeded') : (row.straight == null ? t('tpDashNoCoords') : t('tpDashWithin')),
       ]),
       styles: { fontSize: 8 },
       headStyles: { fillColor: [79,142,247] },
@@ -4392,7 +4396,7 @@
       const y = doc.lastAutoTable.finalY + 8;
       doc.setFontSize(10);
       doc.setTextColor(167, 139, 250);
-      doc.text(`Total daily fuel cost: €${totalCost.toFixed(2)} (${payWorkers} worker${payWorkers !== 1 ? 's' : ''})`, 14, y);
+      doc.text(t('tpDashTotalLabel').replace('{cost}', totalCost.toFixed(2)).replace('{n}', payWorkers).replace('{s}', payWorkers !== 1 ? 's' : ''), 14, y);
       doc.setTextColor(0);
     }
     doc.save(`travel-pay-${city.name.toLowerCase()}-${_tpDashRadius}km.pdf`);
