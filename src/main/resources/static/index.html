@@ -363,6 +363,11 @@
       font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em;
       color: var(--muted); margin: 0.75rem 0 0.4rem;
     }
+    @keyframes tpHandPop {
+      0%   { transform: scale(0) rotate(-20deg); opacity:0; }
+      50%  { transform: scale(1.3) rotate(10deg); opacity:1; }
+      100% { transform: scale(1) rotate(0deg);   opacity:1; }
+    }
     .house-map-label--green     { background: #1a6b38; border: 1px solid #3ecf6e; }
     .house-map-label--red       { background: #1a1d27; border: 1px solid #2e3250; }
     .house-map-label--worker    { background: #2a1f0e; border: 1px solid #f5a623; color: #f5a623; }
@@ -1298,11 +1303,7 @@
         <option>Framing</option><option>Finishing</option>
       </select>
     </div>
-    <div class="field"><label>Assigned House</label>
-      <select id="wHouseId" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
-        <option value="">— No house assigned —</option>
-      </select>
-    </div>
+    <!-- House is derived from the worker's crew, not assigned directly -->
     <p class="modal-err" id="workerModalErr"></p>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeWorkerModal()">Cancel</button>
@@ -1348,6 +1349,9 @@
       <button onclick="setMapMode('all')" id="mapModeAll" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏠👷 <span class="map-btn-lbl">Houses & Workers</span></button>
       <button onclick="setMapMode('crews')" id="mapModeCrews" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👥 <span class="map-btn-lbl">Crews</span></button>
       <button onclick="setMapMode('crewhouse')" id="mapModeCrewHouse" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏠👥 <span class="map-btn-lbl">House & Crew</span></button>
+      <button onclick="setMapMode('travelpay')"   id="mapModeTravelPay"   style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 <span class="map-btn-lbl">Travel Pay</span></button>
+      <button onclick="setMapMode('warehouses')" id="mapModeWarehouses" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏬 <span class="map-btn-lbl">Warehouses</span></button>
+      <button onclick="setMapMode('suppliers')"  id="mapModeSuppliers"  style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏭 <span class="map-btn-lbl">Suppliers</span></button>
     </div>
     <!-- Crew selector (crews mode only) -->
     <div id="mapCrewSelector" style="display:none;position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:1000;background:#1a1d27;border:1px solid #3ecf6e;border-radius:10px;padding:6px 10px;box-shadow:0 2px 16px rgba(0,0,0,0.5);min-width:260px">
@@ -1364,6 +1368,25 @@
         <option value="">👥 Select a crew…</option>
       </select>
       <div id="mapChStatus" style="font-size:0.75rem;color:#9aa3be;text-align:center;min-height:1rem"></div>
+    </div>
+    <!-- Travel Pay panel -->
+    <div id="mapTravelPayPanel" style="display:none;position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:1000;background:#1a1d27;border:1px solid #3ecf6e;border-radius:10px;padding:10px 14px;box-shadow:0 2px 16px rgba(0,0,0,0.5);min-width:300px;display:none;flex-direction:column;gap:8px">
+      <select id="tpCitySelect" onchange="onTravelPayCityChange()" style="width:100%;background:#1a1d27;border:1px solid #2e3250;border-radius:6px;outline:none;color:#e2e8f0;font-size:0.85rem;font-weight:600;cursor:pointer;padding:4px 6px"></select>
+      <select id="tpWorkerSelect" onchange="onTravelPayWorkerChange()" style="width:100%;background:#1a1d27;border:1px solid #2e3250;border-radius:6px;outline:none;color:#e2e8f0;font-size:0.85rem;font-weight:600;cursor:pointer;padding:4px 6px">
+        <option value="">👷 Select a worker…</option>
+      </select>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:0.75rem;color:#9aa3be;white-space:nowrap">Radius:</span>
+        <input type="range" id="tpRadiusSlider" min="5" max="300" value="25" step="1" oninput="onTravelPayRadiusChange(this.value)" style="flex:1;accent-color:#3ecf6e">
+        <span id="tpRadiusLabel" style="font-size:0.82rem;color:#3ecf6e;font-weight:700;min-width:42px;text-align:right">25 km</span>
+      </div>
+      <div id="tpFuelRow" style="display:none;align-items:center;gap:8px">
+        <span style="font-size:0.75rem;color:#9aa3be;white-space:nowrap">⛽ Fuel (€/L):</span>
+        <input type="number" id="tpFuelPrice" min="0.5" max="5" step="0.01" value="1.80" oninput="evaluateTravelPay()" style="width:70px;background:#21253a;border:1px solid #2e3250;border-radius:6px;color:#e2e8f0;font-size:0.85rem;font-weight:600;padding:3px 6px;outline:none">
+        <span style="font-size:0.72rem;color:#9aa3be">@ 7L/100km</span>
+      </div>
+      <button id="tpAnimBtn" onclick="toggleTravelPayAnim()" style="display:none;width:100%;padding:6px;border:none;border-radius:7px;background:#4f8ef7;color:#fff;font-size:0.85rem;font-weight:700;cursor:pointer">▶ Play Animation</button>
+      <div id="tpResult" style="display:none;font-size:0.82rem;font-weight:600;padding:8px 10px;border-radius:7px;line-height:1.6"></div>
     </div>
     <!-- Map search bar -->
     <div id="mapSearchBar" style="position:absolute;top:10px;right:16px;z-index:1000;background:#1a1d27;border:1px solid #2e3250;border-radius:10px;padding:5px 10px;display:flex;align-items:center;gap:0.4rem;box-shadow:0 2px 12px rgba(0,0,0,0.4)">
@@ -2582,8 +2605,6 @@
     }
     const wCrewSel = document.getElementById('wCrew');
     if (wCrewSel && wCrewSel.options[0]) wCrewSel.options[0].textContent = t('workerTradeSelect');
-    const wHouseSel = document.getElementById('wHouseId');
-    if (wHouseSel && wHouseSel.options[0]) wHouseSel.options[0].textContent = t('workerNoHouse');
 
     // scaffold modal
     const seHouseSel = document.getElementById('seHouseId');
@@ -2767,17 +2788,35 @@
     if (legend) legend.style.display = mode === 'scaffold' ? 'flex' : 'none';
     const cs  = document.getElementById('mapCrewSelector');
     const chs = document.getElementById('mapCrewHouseSelector');
+    const tp  = document.getElementById('mapTravelPayPanel');
     if (cs)  cs.style.display  = mode === 'crews'     ? 'block' : 'none';
     if (chs) chs.style.display = mode === 'crewhouse' ? 'flex'  : 'none';
+    if (tp)  tp.style.display  = mode === 'travelpay' ? 'flex'  : 'none';
+    if (mode !== 'travelpay') {
+      if (_tpCircle)       { _tpCircle.remove();       _tpCircle       = null; }
+      if (_tpDistLine)     { _tpDistLine.remove();     _tpDistLine     = null; }
+      if (_tpRoute)        { _tpRoute.remove();        _tpRoute        = null; }
+      if (_tpCenterMarker) { _tpCenterMarker.remove(); _tpCenterMarker = null; }
+      stopTravelPayAnim();
+    }
+    const tpBtn = document.getElementById('mapModeTravelPay');
+    if (tpBtn) { tpBtn.style.background = mode === 'travelpay'   ? '#3ecf6e' : 'transparent'; tpBtn.style.color = mode === 'travelpay'   ? '#0f1117' : '#9aa3be'; }
+    const whBtn = document.getElementById('mapModeWarehouses');
+    if (whBtn) { whBtn.style.background = mode === 'warehouses'  ? '#a78bfa' : 'transparent'; whBtn.style.color = mode === 'warehouses'  ? '#0f1117' : '#9aa3be'; }
+    const spBtn = document.getElementById('mapModeSuppliers');
+    if (spBtn) { spBtn.style.background = mode === 'suppliers'   ? '#f5a623' : 'transparent'; spBtn.style.color = mode === 'suppliers'   ? '#0f1117' : '#9aa3be'; }
     const msi = document.getElementById('mapSearchInput');
     if (msi) msi.value = '';
     _activeManagerFilter = null;
     const mf = document.getElementById('mapManagerFilters');
     if (mf) mf.style.display = 'none';
-    if (mode === 'workers')   initWorkersMap();
+    if (mode === 'workers')        initWorkersMap();
     else if (mode === 'all')       initAllMap();
     else if (mode === 'crews')     initCrewsMap();
     else if (mode === 'crewhouse') initCrewHouseMap();
+    else if (mode === 'travelpay')  initTravelPayMap();
+    else if (mode === 'warehouses') initWarehousesMap();
+    else if (mode === 'suppliers')  initSuppliersMap();
     else initHousesMap();
   }
 
@@ -2932,6 +2971,399 @@
     _hMap.invalidateSize();
     setTimeout(() => { _hMap.invalidateSize(); }, 120);
   }
+
+  // ── Travel Pay mode ──────────────────────────────────────────────────────
+  const BG_CITIES = [
+    { name: 'Sofia',          lat: 42.6977, lng: 23.3219 },
+    { name: 'Plovdiv',        lat: 42.1354, lng: 24.7453 },
+    { name: 'Varna',          lat: 43.2141, lng: 27.9147 },
+    { name: 'Burgas',         lat: 42.5048, lng: 27.4626 },
+    { name: 'Stara Zagora',   lat: 42.4258, lng: 25.6345 },
+    { name: 'Ruse',           lat: 43.8564, lng: 25.9540 },
+    { name: 'Pleven',         lat: 43.4170, lng: 24.6067 },
+    { name: 'Sliven',         lat: 42.6833, lng: 26.3167 },
+    { name: 'Dobrich',        lat: 43.5667, lng: 27.8333 },
+    { name: 'Shumen',         lat: 43.2667, lng: 26.9333 },
+    { name: 'Blagoevgrad',    lat: 42.0167, lng: 23.1000 },
+    { name: 'Veliko Tarnovo', lat: 43.0828, lng: 25.6167 },
+    { name: 'Vratsa',         lat: 43.2000, lng: 23.5500 },
+    { name: 'Gabrovo',        lat: 42.8667, lng: 25.3167 },
+    { name: 'Vidin',          lat: 43.9833, lng: 22.8833 },
+    { name: 'Montana',        lat: 43.4083, lng: 23.2256 },
+    { name: 'Lovech',         lat: 43.1333, lng: 24.7167 },
+    { name: 'Pernik',         lat: 42.6000, lng: 23.0333 },
+    { name: 'Haskovo',        lat: 41.9333, lng: 25.5667 },
+    { name: 'Yambol',         lat: 42.4833, lng: 26.5000 },
+    { name: 'Razgrad',        lat: 43.5333, lng: 26.5167 },
+    { name: 'Silistra',       lat: 44.1167, lng: 27.2667 },
+    { name: 'Targovishte',    lat: 43.2500, lng: 26.5667 },
+    { name: 'Kardzhali',      lat: 41.6500, lng: 25.3667 },
+    { name: 'Smolyan',        lat: 41.5833, lng: 24.7000 },
+    { name: 'Kyustendil',     lat: 42.2833, lng: 22.6833 },
+    { name: 'Pazardzhik',     lat: 42.1917, lng: 24.3333 },
+    { name: 'Rousse',         lat: 43.8564, lng: 25.9540 },
+  ];
+  let _tpCenterLat = 42.6977, _tpCenterLng = 23.3219;
+  let _tpCenterMarker = null;
+  let _tpCircle = null, _tpDistLine = null, _tpRoute = null, _tpRadiusKm = 25, _tpWorkers = [], _tpSelectedWorker = null;
+
+  function haversineKm(lat1, lng1, lat2, lng2) {
+    const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  async function initTravelPayMap() {
+    if (!_hMap) { initHousesMap(); }
+
+    _hMapMarkers.forEach(m => m.remove());
+    _hMapMarkers = [];
+
+    // Populate city select (only first time)
+    const citysel = document.getElementById('tpCitySelect');
+    if (citysel.options.length === 0) {
+      BG_CITIES.forEach((c, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = '📍 ' + c.name;
+        citysel.appendChild(opt);
+      });
+      citysel.value = '0'; // Sofia default
+    }
+    const selCity = BG_CITIES[parseInt(citysel.value) || 0];
+    _tpCenterLat = selCity.lat; _tpCenterLng = selCity.lng;
+
+    // Load workers
+    try {
+      _tpWorkers = await apiFetch('/api/workers').then(r => r.json());
+    } catch(e) { _tpWorkers = []; }
+
+    // Populate worker select
+    const wsel = document.getElementById('tpWorkerSelect');
+    wsel.innerHTML = '<option value="">👷 Select a worker…</option>';
+    _tpWorkers.forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w.id;
+      opt.textContent = w.name + (w.crewHouseName ? ' — ' + w.crewHouseName : w.houseName ? ' — ' + w.houseName : '');
+      wsel.appendChild(opt);
+    });
+
+    // Draw radius circle and center marker
+    _tpRadiusKm = parseInt(document.getElementById('tpRadiusSlider').value) || 25;
+    if (_tpDistLine) { _tpDistLine.remove(); _tpDistLine = null; }
+    if (_tpRoute)    { _tpRoute.remove();    _tpRoute    = null; }
+    drawTravelPayCircle();
+    _hMap.setView([_tpCenterLat, _tpCenterLng], 9);
+    document.getElementById('tpResult').style.display = 'none';
+    document.getElementById('tpFuelRow').style.display = 'none';
+
+    _hMap.invalidateSize();
+    setTimeout(() => _hMap.invalidateSize(), 120);
+  }
+
+  function onTravelPayCityChange() {
+    const citysel = document.getElementById('tpCitySelect');
+    const city = BG_CITIES[parseInt(citysel.value) || 0];
+    _tpCenterLat = city.lat; _tpCenterLng = city.lng;
+    // Clear worker house markers/route and re-draw circle on new center
+    _hMapMarkers.forEach(m => m.remove()); _hMapMarkers = [];
+    if (_tpDistLine) { _tpDistLine.remove(); _tpDistLine = null; }
+    if (_tpRoute)    { _tpRoute.remove();    _tpRoute    = null; }
+    if (_tpCenterMarker) { _tpCenterMarker.remove(); _tpCenterMarker = null; }
+    drawTravelPayCircle();
+    _hMap.setView([_tpCenterLat, _tpCenterLng], 9);
+    document.getElementById('tpResult').style.display = 'none';
+    document.getElementById('tpFuelRow').style.display = 'none';
+    // Re-evaluate if worker already selected
+    if (_tpSelectedWorker) evaluateTravelPay();
+  }
+
+  function drawTravelPayCircle() {
+    if (_tpCircle) _tpCircle.remove();
+    _tpCircle = L.circle([_tpCenterLat, _tpCenterLng], {
+      radius: _tpRadiusKm * 1000,
+      color: '#f76f6f', weight: 2, opacity: 0.8,
+      fillColor: '#f76f6f', fillOpacity: 0.15
+    }).addTo(_hMap);
+    // Center marker
+    if (_tpCenterMarker) _tpCenterMarker.remove();
+    _tpCenterMarker = L.circleMarker([_tpCenterLat, _tpCenterLng], {
+      radius: 7, color: '#3ecf6e', fillColor: '#3ecf6e', fillOpacity: 1, weight: 2
+    }).addTo(_hMap).bindTooltip(
+      BG_CITIES.find(c => c.lat === _tpCenterLat)?.name || 'Center',
+      { permanent: false, direction: 'top' }
+    );
+  }
+
+  function onTravelPayRadiusChange(val) {
+    _tpRadiusKm = parseInt(val);
+    document.getElementById('tpRadiusLabel').textContent = _tpRadiusKm + ' km';
+    drawTravelPayCircle();
+    evaluateTravelPay();
+  }
+
+  function onTravelPayWorkerChange() {
+    const workerId = parseInt(document.getElementById('tpWorkerSelect').value);
+    _tpSelectedWorker = _tpWorkers.find(w => w.id === workerId) || null;
+    evaluateTravelPay();
+  }
+
+  async function evaluateTravelPay() {
+    const resultEl = document.getElementById('tpResult');
+    const fuelRow  = document.getElementById('tpFuelRow');
+    if (!_tpSelectedWorker) { resultEl.style.display = 'none'; fuelRow.style.display = 'none'; return; }
+
+    const houseId = _tpSelectedWorker.crewHouseId || _tpSelectedWorker.houseId;
+    const house = (dashHouses || []).find(h => h.id === houseId);
+
+    if (!house || !house.lat || !house.lng) {
+      fuelRow.style.display = 'none';
+      resultEl.style.display = 'block';
+      resultEl.style.background = 'rgba(247,111,111,0.12)';
+      resultEl.style.color = '#f76f6f';
+      resultEl.style.border = '1px solid rgba(247,111,111,0.3)';
+      resultEl.innerHTML = '⚠️ House location not set';
+      return;
+    }
+
+    const straightKm = haversineKm(_tpCenterLat, _tpCenterLng, house.lat, house.lng);
+    const inside = straightKm <= _tpRadiusKm;
+
+    // Clear previous markers / lines
+    _hMapMarkers.forEach(m => m.remove()); _hMapMarkers = [];
+    if (_tpDistLine) { _tpDistLine.remove(); _tpDistLine = null; }
+    if (_tpRoute)    { _tpRoute.remove();    _tpRoute    = null; }
+
+    // Worker's house marker
+    const labelClass = 'house-map-label ' + (inside ? 'house-map-label--green' : 'house-map-label--worker');
+    const marker = L.marker([house.lat, house.lng])
+      .addTo(_hMap)
+      .bindTooltip(house.name, { permanent: true, direction: 'top', offset: [0,-10], className: labelClass });
+    _hMapMarkers.push(marker);
+
+    // Fetch road route from OSRM
+    let roadKm = null;
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${_tpCenterLng},${_tpCenterLat};${house.lng},${house.lat}?overview=full&geometries=geojson`;
+      const data = await fetch(url).then(r => r.json());
+      if (data.routes && data.routes[0]) {
+        roadKm = data.routes[0].distance / 1000;
+        const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+        _tpRoute = L.polyline(coords, {
+          color: '#00aaff', weight: 3, opacity: 0.9
+        }).addTo(_hMap);
+      }
+    } catch(e) {}
+
+    // Fallback to straight-line if OSRM failed
+    if (!_tpRoute) {
+      _tpDistLine = L.polyline([[_tpCenterLat, _tpCenterLng], [house.lat, house.lng]], {
+        color: '#00aaff', weight: 2, dashArray: '6 6', opacity: 0.8
+      }).addTo(_hMap);
+    }
+
+    _hMap.fitBounds([[_tpCenterLat, _tpCenterLng], [house.lat, house.lng]], { padding: [60, 60] });
+
+    resultEl.style.display = 'block';
+
+    stopTravelPayAnim();
+    document.getElementById('tpAnimBtn').style.display = inside ? 'none' : 'block';
+
+    if (inside) {
+      fuelRow.style.display = 'none';
+      resultEl.style.background = 'rgba(62,207,110,0.12)';
+      resultEl.style.color = '#3ecf6e';
+      resultEl.style.border = '1px solid rgba(62,207,110,0.3)';
+      const distStr = roadKm != null ? `${roadKm.toFixed(1)} km by road` : `~${straightKm.toFixed(1)} km straight`;
+      resultEl.innerHTML = `✅ No travel pay<br><span style="font-weight:400;font-size:0.78rem;color:#9aa3be">${distStr} from Sofia center</span>`;
+    } else {
+      fuelRow.style.display = 'flex';
+      const fuelPrice = parseFloat(document.getElementById('tpFuelPrice').value) || 1.80;
+      const distKm = roadKm != null ? roadKm : straightKm * 1.25;
+      const roundTrip = distKm * 2;
+      const dailyCost = (roundTrip / 100) * 7 * fuelPrice;
+      _tpDailyCost = dailyCost;
+      _tpWorkerName = _tpSelectedWorker ? _tpSelectedWorker.name : '';
+      const distLabel = roadKm != null ? `${roadKm.toFixed(1)} km by road` : `~${(straightKm*1.25).toFixed(1)} km est.`;
+      resultEl.style.background = 'rgba(245,168,35,0.12)';
+      resultEl.style.color = '#f5a623';
+      resultEl.style.border = '1px solid rgba(245,168,35,0.3)';
+      resultEl.innerHTML = `
+        💰 Travel pay needed<br>
+        <span style="font-weight:400;font-size:0.78rem;color:#9aa3be">
+          ${distLabel} · Round trip ${roundTrip.toFixed(1)} km<br>
+          Daily cost: <strong style="color:#f5a623">€${dailyCost.toFixed(2)}</strong>
+        </span>`;
+    }
+  }
+  // ── Travel Pay Animation ─────────────────────────────────────────────────
+  let _tpAnimCar = null, _tpAnimHand = null, _tpAnimTimer = null, _tpAnimPlaying = false;
+  let _tpAnimCoords = [], _tpAnimIdx = 0, _tpAnimDir = 1; // 1=to center, -1=to house
+  let _tpDailyCost = 0, _tpWorkerName = '';
+
+  function toggleTravelPayAnim() {
+    if (_tpAnimPlaying) {
+      stopTravelPayAnim();
+    } else {
+      startTravelPayAnim();
+    }
+  }
+
+  function startTravelPayAnim() {
+    // Collect route coords (house → center)
+    const coords = _tpRoute ? _tpRoute.getLatLngs() : (_tpDistLine ? _tpDistLine.getLatLngs() : null);
+    if (!coords || coords.length < 2) return;
+    _tpAnimCoords = coords;
+    _tpAnimIdx  = 0;
+    _tpAnimDir  = 1;
+    _tpAnimPlaying = true;
+    document.getElementById('tpAnimBtn').textContent = '⏹ Stop Animation';
+
+    // Create car marker
+    if (_tpAnimCar) _tpAnimCar.remove();
+    _tpAnimCar = L.marker(_tpAnimCoords[0], {
+      icon: L.divIcon({
+        html: `<div style="text-align:center;line-height:1;display:inline-flex;flex-direction:column;align-items:center">
+          <div style="font-size:0.7rem;font-weight:800;color:#0f1117;background:#4f8ef7;border-radius:5px;padding:2px 8px;white-space:nowrap;margin-bottom:3px;display:block;width:100%">${_tpWorkerName}</div>
+          <div id="tpCar" style="font-size:3.2rem;line-height:1;transition:transform .05s">🚗</div>
+        </div>`,
+        className: '', iconSize: null, iconAnchor: [40, 45]
+      }),
+      zIndexOffset: 1000
+    }).addTo(_hMap);
+
+    stepAnim();
+  }
+
+  function stepAnim() {
+    if (!_tpAnimPlaying) return;
+    const total = _tpAnimCoords.length;
+    _tpAnimIdx += _tpAnimDir * 8; // speed: skip 8 coords per step
+
+    // Clamp
+    if (_tpAnimIdx >= total - 1) {
+      _tpAnimIdx = total - 1;
+      // Arrived at center — show hand collecting money
+      showAnimHand(_tpAnimCoords[total - 1], () => {
+        _tpAnimDir = -1; // reverse
+        _tpAnimTimer = setTimeout(stepAnim, 30);
+      });
+      return;
+    }
+    if (_tpAnimIdx <= 0) {
+      _tpAnimIdx = 0;
+      // Arrived back at house — show hand then stop (one loop done)
+      showAnimHand(_tpAnimCoords[0], () => {
+        stopTravelPayAnim();
+      });
+      return;
+    }
+
+    // Move car
+    const pos = _tpAnimCoords[_tpAnimIdx];
+    _tpAnimCar.setLatLng(pos);
+
+    // Flip car emoji based on direction
+    const carEl = document.getElementById('tpCar');
+    if (carEl) carEl.style.transform = _tpAnimDir === 1 ? 'scaleX(-1)' : 'scaleX(1)';
+
+    _tpAnimTimer = setTimeout(stepAnim, 30);
+  }
+
+  function showAnimHand(latlng, onDone) {
+    if (_tpAnimHand) _tpAnimHand.remove();
+    const half = (_tpDailyCost / 2).toFixed(2);
+    _tpAnimHand = L.marker(latlng, {
+      icon: L.divIcon({
+        html: `<div style="text-align:center;animation:tpHandPop .4s ease;display:inline-flex;flex-direction:column;align-items:center">
+          <div style="font-size:2rem;line-height:1">🤚💰</div>
+          <div style="font-size:0.8rem;font-weight:800;color:#0f1117;background:#f5a623;border-radius:5px;padding:3px 10px;margin-top:4px;white-space:nowrap;display:block">€${half}</div>
+        </div>`,
+        className: '', iconSize: null, iconAnchor: [30, 20]
+      }),
+      zIndexOffset: 2000
+    }).addTo(_hMap);
+
+    // Remove hand after 1.2s then call onDone
+    setTimeout(() => {
+      if (_tpAnimHand) { _tpAnimHand.remove(); _tpAnimHand = null; }
+      setTimeout(onDone, 300);
+    }, 1200);
+  }
+
+  function stopTravelPayAnim() {
+    _tpAnimPlaying = false;
+    clearTimeout(_tpAnimTimer);
+    if (_tpAnimCar)  { _tpAnimCar.remove();  _tpAnimCar  = null; }
+    if (_tpAnimHand) { _tpAnimHand.remove(); _tpAnimHand = null; }
+    const btn = document.getElementById('tpAnimBtn');
+    if (btn) btn.textContent = '▶ Play Animation';
+  }
+  // ── Warehouses map ───────────────────────────────────────────────────────
+  async function initWarehousesMap() {
+    if (!_hMap) { initHousesMap(); await new Promise(r => setTimeout(r, 200)); }
+    _hMapMarkers.forEach(m => m.remove()); _hMapMarkers = [];
+    let depots = [];
+    try { depots = await apiFetch('/api/warehouses').then(r => r.json()); } catch(e) {}
+    const withCoords = depots.filter(d => d.lat && d.lng);
+    withCoords.forEach(d => {
+      const materialsHTML = (d.materials || []).map(m =>
+        `<div style="display:flex;justify-content:space-between;font-size:0.8rem;padding:3px 0;border-bottom:1px solid #2e3250">
+          <span style="color:#e2e8f0">📦 ${m.name}</span>
+          <span style="color:#a78bfa;font-weight:600">${m.quantity} ${m.unit}</span>
+        </div>`).join('') || '<div style="color:#9aa3be;font-size:0.8rem">No stock</div>';
+      const popup = `<div style="font-family:'Segoe UI',sans-serif;width:240px;background:#21253a;color:#e2e8f0;border-radius:10px;overflow:hidden;margin:-13px -19px">
+        <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
+          <div style="font-size:0.97rem;font-weight:700">🏬 ${d.name}</div>
+          <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${d.location || '—'}</div>
+        </div>
+        <div style="padding:0.6rem 1rem">${materialsHTML}</div>
+      </div>`;
+      const icon = L.divIcon({ html: '<div style="font-size:1.6rem">🏬</div>', className: '', iconAnchor:[12,12], popupAnchor:[0,-14] });
+      const marker = L.marker([d.lat, d.lng], { icon })
+        .addTo(_hMap)
+        .bindPopup(popup, { maxWidth:260, minWidth:240, className:'house-map-popup' })
+        .bindTooltip(d.name, { permanent:true, direction:'top', offset:[0,-10], className:'house-map-label house-map-label--green' });
+      marker._searchText = (d.name + ' ' + (d.location||'')).toLowerCase();
+      _hMapMarkers.push(marker);
+    });
+    if (withCoords.length > 0) _hMap.fitBounds(withCoords.map(d => [d.lat, d.lng]), { padding:[40,40] });
+    _hMap.invalidateSize(); setTimeout(() => _hMap.invalidateSize(), 120);
+  }
+
+  // ── Suppliers map ─────────────────────────────────────────────────────────
+  async function initSuppliersMap() {
+    if (!_hMap) { initHousesMap(); await new Promise(r => setTimeout(r, 200)); }
+    _hMapMarkers.forEach(m => m.remove()); _hMapMarkers = [];
+    let suppliers = [];
+    try { suppliers = await apiFetch('/api/suppliers').then(r => r.json()); } catch(e) {}
+    const withCoords = suppliers.filter(s => s.lat && s.lng);
+    withCoords.forEach(s => {
+      const materialsHTML = (s.materials || []).map(m =>
+        `<div style="display:flex;justify-content:space-between;font-size:0.8rem;padding:3px 0;border-bottom:1px solid #2e3250">
+          <span style="color:#e2e8f0">📦 ${m.name}</span>
+          <span style="color:#f5a623;font-weight:600">${m.quantity} ${m.unit}</span>
+        </div>`).join('') || '<div style="color:#9aa3be;font-size:0.8rem">No stock</div>';
+      const popup = `<div style="font-family:'Segoe UI',sans-serif;width:240px;background:#21253a;color:#e2e8f0;border-radius:10px;overflow:hidden;margin:-13px -19px">
+        <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
+          <div style="font-size:0.97rem;font-weight:700">🏭 ${s.name}</div>
+          <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${s.location || '—'}</div>
+        </div>
+        <div style="padding:0.6rem 1rem">${materialsHTML}</div>
+      </div>`;
+      const icon = L.divIcon({ html: '<div style="font-size:1.6rem">🏭</div>', className: '', iconAnchor:[12,12], popupAnchor:[0,-14] });
+      const marker = L.marker([s.lat, s.lng], { icon })
+        .addTo(_hMap)
+        .bindPopup(popup, { maxWidth:260, minWidth:240, className:'house-map-popup' })
+        .bindTooltip(s.name, { permanent:true, direction:'top', offset:[0,-10], className:'house-map-label house-map-label--worker' });
+      marker._searchText = (s.name + ' ' + (s.location||'')).toLowerCase();
+      _hMapMarkers.push(marker);
+    });
+    if (withCoords.length > 0) _hMap.fitBounds(withCoords.map(s => [s.lat, s.lng]), { padding:[40,40] });
+    _hMap.invalidateSize(); setTimeout(() => _hMap.invalidateSize(), 120);
+  }
+
+  // ── End Travel Pay ────────────────────────────────────────────────────────
 
   async function initWorkersMap() {
     if (!_hMap) { setMapMode('houses'); return; }
@@ -3710,7 +4142,6 @@
       role:     document.getElementById('wRole').value,
       location: document.getElementById('wLocation').value,
       trade:    document.getElementById('wCrew').value,
-      houseId:  document.getElementById('wHouseId').value,
       lat:      document.getElementById('wLat').value,
       lng:      document.getElementById('wLng').value,
     };
@@ -3733,20 +4164,11 @@
     _editingWorkerId = id || null;
     document.getElementById('workerModalTitle').textContent = id ? 'Edit Worker' : 'Add Worker';
     document.getElementById('workerModalErr').textContent = '';
-    // populate house dropdown
-    const sel = document.getElementById('wHouseId');
-    sel.innerHTML = '<option value="">— No house assigned —</option>';
-    dashHouses.forEach(h => {
-      const opt = document.createElement('option');
-      opt.value = h.id; opt.textContent = h.name;
-      sel.appendChild(opt);
-    });
     if (savedState) {
       document.getElementById('wName').value     = savedState.name     || '';
       document.getElementById('wRole').value     = savedState.role     || 'CREW_MEMBER';
       document.getElementById('wLocation').value = savedState.location || '';
       document.getElementById('wCrew').value     = savedState.trade    || '';
-      document.getElementById('wHouseId').value  = savedState.houseId  || '';
       document.getElementById('wLat').value      = mapCoords ? mapCoords.lat : (savedState.lat || '');
       document.getElementById('wLng').value      = mapCoords ? mapCoords.lng : (savedState.lng || '');
     } else if (id) {
@@ -3758,7 +4180,6 @@
           document.getElementById('wRole').value     = w.role     || 'CREW_MEMBER';
           document.getElementById('wLocation').value = w.location || '';
           document.getElementById('wCrew').value     = w.trade    || '';
-          document.getElementById('wHouseId').value  = w.houseId  || '';
           document.getElementById('wLat').value      = w.lat      || '';
           document.getElementById('wLng').value      = w.lng      || '';
         }
@@ -3768,7 +4189,6 @@
       document.getElementById('wRole').value = 'CREW_MEMBER';
       document.getElementById('wLocation').value = '';
       document.getElementById('wCrew').value = '';
-      document.getElementById('wHouseId').value = '';
       document.getElementById('wLat').value = '';
       document.getElementById('wLng').value = '';
     }
@@ -3821,11 +4241,10 @@
     const role     = document.getElementById('wRole').value;
     const location = document.getElementById('wLocation').value.trim();
     const trade    = role !== 'CREW_MANAGER' ? (document.getElementById('wCrew').value || null) : null;
-    const houseId  = document.getElementById('wHouseId').value || null;
     const lat      = document.getElementById('wLat').value  || null;
     const lng      = document.getElementById('wLng').value  || null;
     if (!name) { document.getElementById('workerModalErr').textContent = 'Name is required.'; return; }
-    const body = { name, role, location, trade, houseId: houseId ? parseInt(houseId) : null,
+    const body = { name, role, location, trade,
                    lat: lat ? parseFloat(lat) : null, lng: lng ? parseFloat(lng) : null };
     try {
       let res;

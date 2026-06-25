@@ -2,7 +2,6 @@ package com.bellgado.logistics_ted.web;
 
 import com.bellgado.logistics_ted.domain.House;
 import com.bellgado.logistics_ted.domain.Worker;
-import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,11 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class WorkerController {
 
     private final WorkerRepository workers;
-    private final HouseRepository  houses;
 
-    public WorkerController(WorkerRepository workers, HouseRepository houses) {
+    public WorkerController(WorkerRepository workers) {
         this.workers = workers;
-        this.houses  = houses;
     }
 
     @GetMapping
@@ -92,15 +89,7 @@ public class WorkerController {
         } else if (body.containsKey("trade")) {
             w.setTrade(body.get("trade") != null ? body.get("trade").toString() : null);
         }
-        if (body.containsKey("houseId")) {
-            if (body.get("houseId") == null) {
-                w.setHouse(null);
-            } else {
-                Integer hid = Integer.parseInt(body.get("houseId").toString());
-                House h = houses.findById(hid).orElse(null);
-                w.setHouse(h);
-            }
-        }
+        // House is derived from the worker's crew — never set directly on the worker.
         return w;
     }
 
@@ -135,13 +124,10 @@ public class WorkerController {
             m.put("leaderId",    null);
             m.put("leaderName",  null);
         }
-        if (w.getHouse() != null) {
-            m.put("houseId",   w.getHouse().getId());
-            m.put("houseName", w.getHouse().getName());
-        } else {
-            m.put("houseId",   null);
-            m.put("houseName", null);
-        }
+        // houseId/houseName come from the crew, not the worker directly
+        House crewHouseForId = w.getCrew() != null ? w.getCrew().getHouse() : null;
+        m.put("houseId",   crewHouseForId != null ? crewHouseForId.getId()   : null);
+        m.put("houseName", crewHouseForId != null ? crewHouseForId.getName() : null);
         return m;
     }
 }

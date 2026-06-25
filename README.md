@@ -106,9 +106,20 @@ src/main/resources/
 │   ├── V14__crew_members_seed.sql seed 5+ CREW_MEMBERs per crew
 │   ├── V15__crew_house.sql       house_id FK on crew (which house the crew works on)
 │   ├── V16__crew_worker_coords.sql assign lat/lng to all crew workers near their house city
-│   └── V17__fix_crew_members.sql fix Beta leader assignment, add Delta/Zeta missing members
+│   ├── V17__fix_crew_members.sql fix Beta leader assignment, add Delta/Zeta missing members
+│   ├── V18__electric_box.sql     electric_box + electric_circuit tables
+│   ├── V19__worker_locations.sql assign lat/lng to remaining workers
+│   ├── V20–V22                   scaffold seed data + cleanup
+│   ├── V23__fix_crew_house_assignments.sql correct crew↔house links
+│   ├── V24__house_checkin_token.sql checkin_token UUID column on house
+│   ├── V25__work_session.sql     work_session table (check-in/out records)
+│   ├── V26__test_house_crew_worker.sql test seed data
+│   ├── V27__depot.sql            depot + depot_inventory tables
+│   ├── V28–V30                   depot/supplier seed data
+│   └── V31__worker_house_from_crew_only.sql null out legacy direct worker.house_id assignments
 └── static/
     ├── index.html                SPA frontend (vanilla JS + Leaflet, EN/BG i18n)
+    ├── checkin.html              Public check-in/out page (QR-code linked, no auth)
     └── map-picker.html           Standalone map pin picker (localStorage round-trip)
 ```
 
@@ -192,11 +203,11 @@ Workers are a first-class entity (`worker` table, `V7–V9`).
 | `location` | Auto-filled via OpenStreetMap reverse geocoding when a map pin is placed |
 | `lat/lng`  | Validated: latitude −90..90, longitude −180..180 |
 | `crew_id`  | FK to the crew the worker belongs to |
-| `house_id` | Optional FK — worker's personally assigned house (added by `V9`) |
+| `house_id` | Legacy column — **no longer set directly**. A worker's house is derived exclusively from the crew they belong to (`crew.house_id`). V31 migration nulled all direct assignments. |
 
 **API:** `GET/POST /api/workers`, `PUT/DELETE /api/workers/{id}`
 
-The worker DTO includes resolved fields: `crewName`, `crewHouseId/crewHouseName` (house the crew works on), `managerId/managerName`, `leaderId/leaderName`.
+The worker DTO includes resolved fields: `crewName`, `crewHouseId/crewHouseName` (house the crew works on), `managerId/managerName`, `leaderId/leaderName`, `houseId/houseName` (same as `crewHouseId/crewHouseName`).
 
 Worker cards on the dashboard show: Role, Trade, Crew, Working On (crew's house), Manager, Crew Leader.
 
@@ -257,7 +268,7 @@ The dashboard has a toggle at the top: **Houses | Workers | Crews | Scaffold**.
 | Crews | Crew cards showing Manager, Leader, assigned House, collapsible Members list; org-chart view; Add/Edit/Delete |
 | Scaffold | Scaffold cards with status, assigned house, dates; Add/Edit/Delete; search bar |
 
-## Map View — six-mode toggle
+## Map View — nine-mode toggle
 
 | Mode | Description |
 |------|-------------|
@@ -267,6 +278,58 @@ The dashboard has a toggle at the top: **Houses | Workers | Crews | Scaffold**.
 | 🏠👷 Houses & Workers | Both layers — house markers + worker markers |
 | 👥 Crews | Select a crew from the dropdown; all members with coordinates appear as markers |
 | 🏠👥 House & Crew | Select a house; its assigned crew auto-loads and all members appear on the map. A status label shows the crew name (clickable to re-render) or indicates no crew is assigned. The crew dropdown can also be set independently. |
+| 💰 Travel Pay | Select a city center (28 Bulgarian cities, default Sofia) and a radius slider (5–300 km). Pick a worker to see their assigned house on the map with a road route drawn via OSRM. Shows whether travel pay is needed (house outside the radius) with round-trip fuel cost calculation (adjustable €/L price). Optional car animation: 🚗 drives the route with worker name label, 🤚💰 hand collects the half-trip cost at each end. |
+| 🏬 Warehouses | Company depot markers with stock popup (materials + quantities). |
+| 🏭 Suppliers | External supplier markers with stock popup (materials + quantities). |
+
+### Travel Pay mode details
+
+- **City center selector**: 28 Bulgarian cities (Sofia, Plovdiv, Varna, Burgas, etc.) with a green dot marking the center on the map.
+- **Radius circle**: red transparent circle; the slider adjusts 5–300 km live.
+- **Route**: actual road route fetched from the OSRM public API drawn in bright blue. Falls back to a dashed straight line if OSRM is unreachable.
+- **Cost**: round trip km × 7L/100km × fuel price (€/L, user-adjustable). Shown only when the house is outside the radius.
+- **Animation** (▶ Play): car emoji drives the road route once; 🤚💰 hand with the half-trip cost (€) appears at each endpoint; button resets after one loop.
+
+## Attendance (Check-in / Check-out)
+
+Workers can check in and out of their assigned house via a QR-code link. The page requires no login.
+
+### Check-in flow
+
+1. A unique `checkin_token` (UUID) is generated per house and stored in `V24`.
+2. Each house QR-code links to `/checkin/{token}`.
+3. The worker selects their name from a searchable dropdown (only crew members for that house are shown).
+4. GPS location is required — checked to be within 200 m of the house coordinates.
+5. One session per worker per day; the same device must be used to check out.
+
+### Admin attendance views
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/attendance/crew/{crewId}?date=YYYY-MM-DD` | All sessions for a crew on a given date |
+| `GET /api/attendance/worker/{workerId}?from=…&to=…` | All sessions for a worker in a date range |
+
+Both endpoints are `@Transactional(readOnly=true)` and use `JOIN FETCH` to avoid lazy-init exceptions.
+
+### Timezone
+
+The work day boundary uses the configured app timezone (default `Europe/Sofia`). Override via `APP_TIMEZONE` env var.
+
+### Attendance dashboard tab
+
+The dashboard has an **Attendance** tab with:
+- **By Crew** — pick a crew + date, see all check-in/out times and durations for that day.
+- **By Worker** — pick a worker + date range, see a log of all sessions with durations.
+- Both tabs have a **Export PDF** button (jsPDF + autoTable) to download a formatted report.
+- Worker and crew selectors are searchable (autocomplete).
+
+## Warehouses & Depots
+
+Company-owned depots (`depot` table, `V27`) hold stock for the route optimizer's tier-2 fulfillment.
+
+**API:** `GET /api/warehouses`, `POST/PUT/DELETE /api/warehouses/{id}`
+
+Each depot has: `name`, `location`, `lat/lng`, and inventory lines (`depot_inventory`).
 
 ## Reverse geocoding
 
