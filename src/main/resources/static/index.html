@@ -1603,6 +1603,7 @@
       <button onclick="setDashMode('workers')" id="dashModeWorkers" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👷 Workers</button>
       <button onclick="setDashMode('scaffold')" id="dashModeScaffold" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏗️ Scaffold</button>
       <button onclick="setDashMode('crews')" id="dashModeCrews" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👥 Crews</button>
+      <button onclick="setDashMode('travelpay')" id="dashModeTravelpay" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 Travel Pay</button>
     </div>
     <div class="totals" id="totals"></div>
     <div class="search-wrap">
@@ -2203,7 +2204,15 @@
       Lumber:'Lumber', Screws:'Screws', Boards:'Boards', Tiles:'Tiles',
       unidades:'units', 'm²':'m²',
       // dashboard toggles
-      dashHouses:'🏠 Houses', dashWorkers:'👷 Workers', dashScaffold:'🏗️ Scaffold', dashCrews:'👥 Crews',
+      dashHouses:'🏠 Houses', dashWorkers:'👷 Workers', dashScaffold:'🏗️ Scaffold', dashCrews:'👥 Crews', dashTravelpay:'💰 Travel Pay',
+      tpDashCityLabel:'📍 City Center', tpDashRadiusLabel:'📏 Radius', tpDashFuelLabel:'⛽ €/L Fuel', tpDashSearchLabel:'🔍 Search Worker',
+      tpDashSearchPlaceholder:'Name, crew or house…', tpDashExportBtn:'📄 Export PDF',
+      tpDashLoading:'Loading workers…', tpDashEvaluating:'Evaluating {n} workers vs {city} ({r} km radius)…',
+      tpDashFetchingRoutes:'Fetching road routes for {n} worker(s) outside radius…',
+      tpDashAllWithin:'All workers within {r} km radius of {city}.',
+      tpDashSummary:'{total} workers evaluated — {pay} need travel pay | Center: {city}, Radius: {r} km',
+      tpDashNoWorkers:'No workers with a house assigned.',
+      tpDashPayNeeded:'💸 Pay needed', tpDashWithin:'✅ Within radius', tpDashNoCoords:'No coords',
       // map toggles
       mapHouses:'🏠 Houses', mapScaffold:'🏗️ Scaffold', mapWorkers:'👷 Workers', mapAll:'🏠👷 Houses & Workers',
       mapCrews:'👥 Crews', mapCrewHouse:'🏠👥 House & Crew',
@@ -2394,7 +2403,15 @@
       Lumber:'Дървен материал', Screws:'Винтове', Boards:'Дъски', Tiles:'Керемиди',
       unidades:'бр.', 'm²':'m²',
       // dashboard toggles
-      dashHouses:'🏠 Къщи', dashWorkers:'👷 Работници', dashScaffold:'🏗️ Скеле', dashCrews:'👥 Екипи',
+      dashHouses:'🏠 Къщи', dashWorkers:'👷 Работници', dashScaffold:'🏗️ Скеле', dashCrews:'👥 Екипи', dashTravelpay:'💰 Пътни разходи',
+      tpDashCityLabel:'📍 Център', tpDashRadiusLabel:'📏 Радиус', tpDashFuelLabel:'⛽ €/л Гориво', tpDashSearchLabel:'🔍 Търсене',
+      tpDashSearchPlaceholder:'Име, екип или обект…', tpDashExportBtn:'📄 Експорт PDF',
+      tpDashLoading:'Зареждане на работници…', tpDashEvaluating:'Оценка на {n} работника спрямо {city} ({r} км радиус)…',
+      tpDashFetchingRoutes:'Изчисляване на маршрути за {n} работника извън радиуса…',
+      tpDashAllWithin:'Всички работници са в рамките на {r} км от {city}.',
+      tpDashSummary:'{total} работника оценени — {pay} се нуждаят от пътни | Център: {city}, Радиус: {r} км',
+      tpDashNoWorkers:'Няма работници с назначен обект.',
+      tpDashPayNeeded:'💸 Дължими пътни', tpDashWithin:'✅ В радиуса', tpDashNoCoords:'Няма координати',
       // map toggles
       mapHouses:'🏠 Къщи', mapScaffold:'🏗️ Скеле', mapWorkers:'👷 Работници', mapAll:'🏠👷 Къщи и работници',
       mapCrews:'👥 Екипи', mapCrewHouse:'🏠👥 Къща и екип',
@@ -2572,6 +2589,7 @@
     const dw = document.getElementById('dashModeWorkers');  if (dw) dw.textContent = t('dashWorkers');
     const ds = document.getElementById('dashModeScaffold'); if (ds) ds.textContent = t('dashScaffold');
     const dc = document.getElementById('dashModeCrews');    if (dc) dc.textContent = t('dashCrews');
+    const dt = document.getElementById('dashModeTravelpay'); if (dt) dt.textContent = t('dashTravelpay');
 
     // map toggles
     const mh = document.getElementById('mapModeHouses');   if (mh) mh.textContent = t('mapHouses');
@@ -3871,9 +3889,9 @@
 
   function setDashMode(mode) {
     _dashMode = mode;
-    const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa' };
+    const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa' };
     const darkText   = new Set(['scaffold']);
-    ['houses','workers','scaffold','crews'].forEach(m => {
+    ['houses','workers','scaffold','crews','travelpay'].forEach(m => {
       const btn = document.getElementById('dashMode' + m.charAt(0).toUpperCase() + m.slice(1));
       if (!btn) return;
       if (m === mode) { btn.style.background = modeColors[m]; btn.style.color = darkText.has(m) ? '#0f1117' : '#fff'; }
@@ -3923,6 +3941,12 @@
       document.getElementById('altSearchInput').placeholder = 'Search crews by name, manager or leader...';
       document.getElementById('altSearchInput').value = '';
       renderCrewCards();
+    } else if (mode === 'travelpay') {
+      if (searchWrap) searchWrap.style.display = 'none';
+      if (crudBar)    crudBar.style.display    = 'none';
+      if (totals)     totals.style.display     = 'none';
+      altSearch.style.display = 'none';
+      renderTravelPayDash();
     }
   }
 
@@ -4110,6 +4134,270 @@
     await apiFetch(`/api/crews/${id}`, { method: 'DELETE' });
     renderCrewCards();
   }
+
+  // ── Travel Pay Dashboard ─────────────────────────────────────────────────────
+  let _tpDashCity = 0;
+  let _tpDashRadius = 25;
+  let _tpDashFuel = 1.80;
+  let _tpDashRows = [];
+  let _tpDashSelectedId = null;
+
+  function haversineKm(lat1, lng1, lat2, lng2) {
+    const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  async function renderTravelPayDash() {
+    const grid = document.getElementById('grid');
+    grid.style.display = 'block';
+    grid.innerHTML = `
+      <div style="margin-bottom:1.2rem;display:flex;flex-wrap:wrap;gap:0.75rem;align-items:flex-end">
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:4px">${t('tpDashCityLabel')}</label>
+          <select id="tpDashCity" onchange="onTpDashSettingChange()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;padding:6px 10px;outline:none">
+            ${BG_CITIES.map((c,i)=>`<option value="${i}" ${i===_tpDashCity?'selected':''}>${c.name}</option>`).join('')}
+          </select>
+        </div>
+        <div style="min-width:180px">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:4px">${t('tpDashRadiusLabel')}: <span id="tpDashRadiusLbl">${_tpDashRadius}</span> km</label>
+          <input type="range" id="tpDashRadius" min="5" max="300" value="${_tpDashRadius}" oninput="document.getElementById('tpDashRadiusLbl').textContent=this.value" onchange="onTpDashSettingChange()" style="width:100%;accent-color:#a78bfa">
+        </div>
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:4px">${t('tpDashFuelLabel')}</label>
+          <input type="number" id="tpDashFuel" min="0.5" max="5" step="0.01" value="${_tpDashFuel}" onchange="onTpDashSettingChange()" style="width:80px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;padding:6px 10px;outline:none">
+        </div>
+        <div style="flex:1;min-width:160px">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:4px">${t('tpDashSearchLabel')}</label>
+          <input type="text" id="tpDashSearch" placeholder="${t('tpDashSearchPlaceholder')}" oninput="tpDashFilterTable()" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;padding:6px 10px;outline:none">
+        </div>
+        <button onclick="tpDashExportPdf()" style="padding:6px 14px;background:#a78bfa;color:#0f1117;border:none;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap">${t('tpDashExportBtn')}</button>
+      </div>
+      <div id="tpDashStatus" style="color:#9aa3be;font-size:0.85rem;margin-bottom:0.75rem">${t('tpDashLoading')}</div>
+      <div id="tpDashTotal" style="display:none;margin-bottom:0.75rem;padding:0.6rem 1rem;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:8px;font-size:0.9rem;font-weight:700;color:#a78bfa"></div>
+      <div style="overflow-x:auto">
+        <table class="att-table" id="tpDashTable" style="display:none">
+          <thead><tr>
+            <th>#</th><th>Worker</th><th>Crew</th><th>House</th>
+            <th style="text-align:right">Route (km)</th>
+            <th style="text-align:right">Daily Cost (€)</th>
+            <th style="text-align:center">Status</th>
+          </tr></thead>
+          <tbody id="tpDashTbody"></tbody>
+        </table>
+      </div>`;
+    await tpDashEvaluate();
+  }
+
+  async function onTpDashSettingChange() {
+    _tpDashCity   = parseInt(document.getElementById('tpDashCity').value) || 0;
+    _tpDashRadius = parseInt(document.getElementById('tpDashRadius').value) || 25;
+    _tpDashFuel   = parseFloat(document.getElementById('tpDashFuel').value) || 1.80;
+    await tpDashEvaluate();
+  }
+
+  async function tpDashEvaluate() {
+    const status = document.getElementById('tpDashStatus');
+    const table  = document.getElementById('tpDashTable');
+    if (!status) return;
+    status.textContent = 'Loading workers…';
+    table && (table.style.display = 'none');
+
+    let workers = [];
+    try { workers = await apiFetch('/api/workers').then(r => r.json()); } catch(e) {
+      status.textContent = 'Failed to load workers.'; return;
+    }
+
+    const city = BG_CITIES[_tpDashCity];
+    status.textContent = t('tpDashEvaluating').replace('{n}',workers.length).replace('{city}',city.name).replace('{r}',_tpDashRadius);
+
+    // Workers without a house can't be evaluated
+    const withHouse = workers.filter(w => w.crewHouseId || w.houseId);
+
+    // Haversine pass — find who is outside radius
+    const outside = [];
+    const rows = withHouse.map(w => {
+      const houseLat = w.houseLat ?? null;
+      const houseLng = w.houseLng ?? null;
+      if (houseLat == null || houseLng == null) return { w, straight: null, routeKm: null, outside: false };
+      const straight = haversineKm(city.lat, city.lng, parseFloat(houseLat), parseFloat(houseLng));
+      const isOut = straight > _tpDashRadius;
+      if (isOut) outside.push({ w, straight, houseLat: parseFloat(houseLat), houseLng: parseFloat(houseLng) });
+      return { w, straight, routeKm: null, outside: isOut };
+    });
+
+    // Workers without house coords — fetch house details to get lat/lng
+    const needCoords = withHouse.filter(w => w.houseLat == null && w.houseLng == null && (w.crewHouseId || w.houseId));
+    if (needCoords.length) {
+      try {
+        const houses = await apiFetch('/api/houses').then(r => r.json());
+        const houseMap = Object.fromEntries(houses.map(h => [h.id, h]));
+        rows.forEach(row => {
+          if (row.straight != null) return;
+          const hid = row.w.crewHouseId || row.w.houseId;
+          const h = houseMap[hid];
+          if (!h || h.lat == null) return;
+          row.straight = haversineKm(city.lat, city.lng, parseFloat(h.lat), parseFloat(h.lng));
+          row.outside = row.straight > _tpDashRadius;
+          if (row.outside) outside.push({ w: row.w, straight: row.straight, houseLat: parseFloat(h.lat), houseLng: parseFloat(h.lng) });
+        });
+      } catch(e) {}
+    }
+
+    // OSRM calls for outside-radius workers (parallel)
+    status.textContent = outside.length
+      ? t('tpDashFetchingRoutes').replace('{n}', outside.length)
+      : t('tpDashAllWithin').replace('{r}', _tpDashRadius).replace('{city}', city.name);
+
+    await Promise.all(outside.map(async item => {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${city.lng},${city.lat};${item.houseLng},${item.houseLat}?overview=false`;
+        const data = await fetch(url).then(r => r.json());
+        if (data.routes && data.routes[0]) {
+          const km = data.routes[0].distance / 1000;
+          const row = rows.find(r => r.w.id === item.w.id);
+          if (row) row.routeKm = km;
+        }
+      } catch(e) {}
+    }));
+
+    // Compute daily costs
+    rows.forEach(row => {
+      if (!row.outside || row.routeKm == null) { row.dailyCost = null; return; }
+      row.dailyCost = (row.routeKm * 2 / 100) * 7 * _tpDashFuel;
+    });
+
+    _tpDashRows = rows;
+    tpDashRenderTable(rows);
+  }
+
+  function tpDashRenderTable(rows) {
+    const status = document.getElementById('tpDashStatus');
+    const table  = document.getElementById('tpDashTable');
+    const tbody  = document.getElementById('tpDashTbody');
+    if (!tbody) return;
+
+    const city = BG_CITIES[_tpDashCity];
+    const payCount = rows.filter(r => r.outside && r.routeKm != null).length;
+    status.textContent = t('tpDashSummary').replace('{total}',rows.length).replace('{pay}',payCount).replace('{city}',city.name).replace('{r}',_tpDashRadius);
+
+    tbody.innerHTML = rows.map((row, i) => {
+      const w = row.w;
+      const houseName = w.crewHouseName || w.houseName || '—';
+      const straightStr = row.straight != null ? row.straight.toFixed(1) : '—';
+      const routeStr    = row.routeKm   != null ? row.routeKm.toFixed(1)   : (row.outside ? '…' : '—');
+      const costStr     = row.dailyCost != null ? `<strong style="color:#a78bfa">€${row.dailyCost.toFixed(2)}</strong>` : '—';
+      const badge       = row.outside
+        ? `<span style="background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.35);border-radius:5px;padding:2px 8px;font-size:0.72rem;font-weight:700">${t('tpDashPayNeeded')}</span>`
+        : row.straight == null
+          ? `<span style="color:#9aa3be;font-size:0.78rem;font-style:italic">${t('tpDashNoCoords')}</span>`
+          : `<span style="background:rgba(62,207,110,.12);color:#3ecf6e;border:1px solid rgba(62,207,110,.3);border-radius:5px;padding:2px 8px;font-size:0.72rem;font-weight:700">${t('tpDashWithin')}</span>`;
+      return `<tr data-search="${(w.name + ' ' + (w.crewName||'') + ' ' + houseName).toLowerCase()}" data-wid="${w.id}" onclick="tpDashSelectRow(this)" onmouseover="if(this.dataset.wid!=='${String(_tpDashSelectedId || '')}')this.style.background='rgba(79,142,247,.07)'" onmouseout="if(this.dataset.wid!=='${String(_tpDashSelectedId || '')}')this.style.background=''" style="cursor:pointer;transition:background .12s">
+        <td style="color:#9aa3be">${i+1}</td>
+        <td style="font-weight:600">👷 ${w.name}</td>
+        <td style="color:#a78bfa">${w.crewName || '—'}</td>
+        <td style="color:#4f8ef7">🏠 ${houseName}</td>
+        <td style="text-align:right;color:#9aa3be">${routeStr}</td>
+        <td style="text-align:right">${costStr}</td>
+        <td style="text-align:center">${badge}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="7" style="text-align:center;color:#9aa3be;padding:1.5rem">${t('tpDashNoWorkers')}</td></tr>`;
+
+    table.style.display = '';
+    tpDashFilterTable();
+  }
+
+  function tpDashSelectRow(tr) {
+    const wid = tr.dataset.wid;
+    if (_tpDashSelectedId === wid) {
+      _tpDashSelectedId = null;
+    } else {
+      _tpDashSelectedId = wid;
+    }
+    tpDashFilterTable();
+  }
+
+  function tpDashFilterTable() {
+    const q = (document.getElementById('tpDashSearch')?.value || '').toLowerCase();
+    let total = 0;
+    let payCount = 0;
+    let visibleTotal = 0;
+    document.querySelectorAll('#tpDashTbody tr').forEach(tr => {
+      const matchSearch = !q || (tr.dataset.search || '').includes(q);
+      const matchSel    = !_tpDashSelectedId || tr.dataset.wid === _tpDashSelectedId;
+      const visible     = matchSearch && matchSel;
+      tr.style.display  = visible ? '' : 'none';
+      tr.style.background = (tr.dataset.wid === _tpDashSelectedId) ? 'rgba(167,139,250,.1)' : '';
+      if (visible) {
+        visibleTotal++;
+        const row = _tpDashRows.find(r => String(r.w.id) === tr.dataset.wid);
+        if (row && row.dailyCost != null) { total += row.dailyCost; payCount++; }
+      }
+    });
+    const city = BG_CITIES[_tpDashCity];
+    const statusEl = document.getElementById('tpDashStatus');
+    if (statusEl) statusEl.textContent = t('tpDashSummary').replace('{total}',visibleTotal).replace('{pay}',payCount).replace('{city}',city.name).replace('{r}',_tpDashRadius);
+    const totalEl = document.getElementById('tpDashTotal');
+    if (totalEl) {
+      if (payCount > 0) {
+        totalEl.style.display = '';
+        totalEl.textContent = `💸 Total daily fuel cost: €${total.toFixed(2)} (${payCount} worker${payCount !== 1 ? 's' : ''})`;
+      } else {
+        totalEl.style.display = 'none';
+      }
+    }
+  }
+
+  function tpDashExportPdf() {
+    if (!_tpDashRows.length) return;
+    const city = BG_CITIES[_tpDashCity];
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape' });
+    doc.setFontSize(14);
+    doc.text('Travel Pay Report', 14, 16);
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text(`Center: ${city.name}  |  Radius: ${_tpDashRadius} km  |  Fuel: €${_tpDashFuel}/L  |  Generated: ${new Date().toLocaleDateString()}`, 14, 23);
+    doc.setTextColor(0);
+    const q = (document.getElementById('tpDashSearch')?.value || '').toLowerCase();
+    const visible = _tpDashRows.filter(r => {
+      const matchSearch = !q || (r.w.name + ' ' + (r.w.crewName||'') + ' ' + (r.w.crewHouseName||r.w.houseName||'')).toLowerCase().includes(q);
+      const matchSel    = !_tpDashSelectedId || String(r.w.id) === _tpDashSelectedId;
+      return matchSearch && matchSel;
+    });
+    const totalCost = visible.reduce((sum, r) => sum + (r.dailyCost || 0), 0);
+    const payWorkers = visible.filter(r => r.dailyCost != null).length;
+    doc.autoTable({
+      startY: 28,
+      head: [['#','Worker','Crew','House','Route (km)','Daily Cost (€)','Status']],
+      body: visible.map((row, i) => [
+        i+1,
+        row.w.name,
+        row.w.crewName || '—',
+        row.w.crewHouseName || row.w.houseName || '—',
+        row.routeKm  != null ? row.routeKm.toFixed(1)  : '—',
+        row.dailyCost != null ? `€${row.dailyCost.toFixed(2)}` : '—',
+        row.outside ? 'Pay needed' : (row.straight == null ? 'No coords' : 'Within radius'),
+      ]),
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [79,142,247] },
+      didParseCell(data) {
+        if (data.column.index === 6 && data.section === 'body') {
+          if (data.cell.raw === 'Pay needed')   data.cell.styles.textColor = [247,111,111];
+          if (data.cell.raw === 'Within radius') data.cell.styles.textColor = [62,207,110];
+        }
+      }
+    });
+    if (payWorkers > 0) {
+      const y = doc.lastAutoTable.finalY + 8;
+      doc.setFontSize(10);
+      doc.setTextColor(167, 139, 250);
+      doc.text(`Total daily fuel cost: €${totalCost.toFixed(2)} (${payWorkers} worker${payWorkers !== 1 ? 's' : ''})`, 14, y);
+      doc.setTextColor(0);
+    }
+    doc.save(`travel-pay-${city.name.toLowerCase()}-${_tpDashRadius}km.pdf`);
+  }
+  // ── End Travel Pay Dashboard ──────────────────────────────────────────────────
 
   function onAltSearch() {
     const q = (document.getElementById('altSearchInput')?.value || '').toLowerCase();
