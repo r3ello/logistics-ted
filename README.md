@@ -257,9 +257,9 @@ The scaffold form has its own independent driver-location picker separate from t
 
 Deleting a scaffold automatically resets the associated house's `scaffold_status` back to `NONE`.
 
-## Dashboard — four-mode toggle
+## Dashboard — five-mode toggle
 
-The dashboard has a toggle at the top: **Houses | Workers | Crews | Scaffold**.
+The dashboard has a toggle at the top: **Houses | Workers | Crews | Scaffold | Travel Pay**.
 
 | Mode | Content |
 |------|---------|
@@ -267,6 +267,30 @@ The dashboard has a toggle at the top: **Houses | Workers | Crews | Scaffold**.
 | Workers | Worker cards showing Role, Trade, Crew, Working On, Manager, Crew Leader; Add/Edit/Delete; search bar (filters by all attributes) |
 | Crews | Crew cards showing Manager, Leader, assigned House, collapsible Members list; org-chart view; Add/Edit/Delete |
 | Scaffold | Scaffold cards with status, assigned house, dates; Add/Edit/Delete; search bar |
+| Travel Pay | Table of all workers with their road route distance and daily fuel cost; see below |
+
+### Travel Pay dashboard tab
+
+Evaluates every worker's commute cost against a configurable center and radius.
+
+**Controls (all update the table and totals live):**
+- **City Center** — dropdown of 28 Bulgarian cities (default: Sofia)
+- **Radius** — slider 5–300 km (default: 25 km); workers whose house falls inside pay nothing
+- **Fuel €/L** — adjustable fuel price (default: €1.80); consumption fixed at 7 L/100 km
+- **Search** — filters table by worker name, crew, or house name in real time
+
+**Table columns:** Worker · Crew · House · Route (km) · Daily Cost (€) · Status badge
+
+**Status badges:**
+- `💸 Pay needed` — house is outside the radius; road route and cost are shown
+- `✅ Within radius` — no travel pay required
+- `No coords` — house has no GPS coordinates on file
+
+**Summary line** and **total cost bar** both update whenever the search or row selection changes, reflecting only visible rows.
+
+**Click a row** to isolate that worker (click again to deselect). Hover highlights rows in blue.
+
+**Export PDF** — downloads a formatted landscape report with city/radius/fuel settings in the header, the filtered table, and the total daily fuel cost at the bottom. Respects current search and row selection.
 
 ## Map View — nine-mode toggle
 
