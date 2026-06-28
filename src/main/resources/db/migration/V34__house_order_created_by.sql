@@ -1,0 +1,1 @@
+ALTER TABLE house_order ADD COLUMN created_by INTEGER REFERENCES worker(id) ON DELETE SET NULL;
