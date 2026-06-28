@@ -135,7 +135,7 @@
     .nav-brand p  { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
     .nav-flag { font-size: 1.5rem; margin-bottom: 0.4rem; }
 
-    .nav-menu { padding: 1rem 0.75rem; flex: 1; }
+    .nav-menu { padding: 1rem 0.75rem; flex: 1; overflow-y: auto; }
     .nav-item {
       display: flex; align-items: center; gap: 0.7rem;
       padding: 0.7rem 0.85rem; border-radius: 9px;
@@ -404,6 +404,17 @@
     }
     .search-wrap input:focus { border-color: var(--accent); }
     .search-wrap input::placeholder { color: var(--muted); }
+    .search-bar {
+      position: relative; display: flex; align-items: center;
+    }
+    .search-bar input {
+      width: 100%; padding: 0.65rem 2.3rem 0.65rem 2.5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 0.92rem; outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus { border-color: var(--accent); }
+    .search-bar input::placeholder { color: var(--muted); }
     .search-icon {
       position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%);
       color: var(--muted); font-size: 0.95rem; pointer-events: none;
@@ -606,7 +617,7 @@
     }
 
     /* ── FACILITY ADMIN (warehouses + suppliers) ── */
-    .facility-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+    .facility-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.2rem; align-items: start; }
 
     /* ── SPINNER / EMPTY ── */
     .state-msg { text-align: center; color: var(--muted); padding: 3rem; font-size: 0.95rem; }
@@ -1349,7 +1360,7 @@
       <button onclick="setMapMode('all')" id="mapModeAll" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏠👷 <span class="map-btn-lbl">Houses & Workers</span></button>
       <button onclick="setMapMode('crews')" id="mapModeCrews" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👥 <span class="map-btn-lbl">Crews</span></button>
       <button onclick="setMapMode('crewhouse')" id="mapModeCrewHouse" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏠👥 <span class="map-btn-lbl">House & Crew</span></button>
-      <button onclick="setMapMode('travelpay')"   id="mapModeTravelPay"   style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 <span class="map-btn-lbl">Travel Pay</span></button>
+      <button onclick="setMapMode('travelpay')"   id="mapModeTravelPay"   style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 <span class="map-btn-lbl">Travel Allowance</span></button>
       <button onclick="setMapMode('warehouses')" id="mapModeWarehouses" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏬 <span class="map-btn-lbl">Warehouses</span></button>
       <button onclick="setMapMode('suppliers')"  id="mapModeSuppliers"  style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏭 <span class="map-btn-lbl">Suppliers</span></button>
     </div>
@@ -1385,7 +1396,7 @@
         <input type="number" id="tpFuelPrice" min="0.5" max="5" step="0.01" value="1.80" oninput="evaluateTravelPay()" style="width:70px;background:#21253a;border:1px solid #2e3250;border-radius:6px;color:#e2e8f0;font-size:0.85rem;font-weight:600;padding:3px 6px;outline:none">
         <span style="font-size:0.72rem;color:#9aa3be">@ 7L/100km</span>
       </div>
-      <button id="tpAnimBtn" onclick="toggleTravelPayAnim()" style="display:none;width:100%;padding:6px;border:none;border-radius:7px;background:#4f8ef7;color:#fff;font-size:0.85rem;font-weight:700;cursor:pointer">▶ Play Animation</button>
+      <button id="tpAnimBtn" onclick="toggleTravelPayAnim()" style="display:none;padding:4px 8px;border:none;border-radius:6px;background:#4f8ef7;color:#fff;font-size:1rem;cursor:pointer;line-height:1;width:fit-content" title="Play Animation">▶</button>
       <div id="tpResult" style="display:none;font-size:0.82rem;font-weight:600;padding:8px 10px;border-radius:7px;line-height:1.6"></div>
     </div>
     <!-- Map search bar -->
@@ -1539,36 +1550,86 @@
     <div class="nav-item active" id="navDashboard" onclick="showView('dashboard')">
       <span class="nav-icon">📊</span> <span>Dashboard</span>
     </div>
-    <div class="nav-item" id="navOrder" onclick="showView('order')">
-      <span class="nav-icon">📦</span> <span>New Order</span>
+    <div class="nav-item" id="navRoutesGroup" onclick="toggleNavGroup('routes')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🛣️</span><span id="navRoutesGroupLabel">Routes</span></span>
+      <span id="navRoutesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
-    <div class="nav-item" id="navScaffold" onclick="showView('scaffold')">
-      <span class="nav-icon">🏗️</span> <span id="navScaffoldLabel">Scaffold</span>
+    <div id="navRoutesChildren" style="display:none">
+      <div class="nav-item nav-sub" id="navOrder" onclick="showView('order')">
+        <span class="nav-icon">🗺️</span> <span id="navOrderLabel">Route Recommendation</span>
+      </div>
+      <div class="nav-item nav-sub" id="navScaffoldRoute" onclick="showView('scaffold')">
+        <span class="nav-icon">🏗️</span> <span id="navScaffoldRouteLabel">Scaffold Route</span>
+      </div>
+      <div class="nav-item nav-sub" id="navHistory" onclick="showView('history')">
+        <span class="nav-icon">📜</span> <span id="navHistoryLabel">Route History</span>
+      </div>
     </div>
-    <div class="nav-item" id="navMap" onclick="showView('map')">
-      <span class="nav-icon">🗺</span> <span>Map View</span>
+    <div class="nav-item" id="navManagementGroup" onclick="toggleNavGroup('management')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">⚙️</span><span id="navManagementGroupLabel">Management</span></span>
+      <span id="navManagementChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
-    <div class="nav-item" id="navWarehouses" onclick="showView('warehouses')">
-      <span class="nav-icon">🏬</span> <span id="navWarehousesLabel">Warehouses</span>
+    <div id="navManagementChildren" style="display:none">
+      <div class="nav-item nav-sub" id="navHouses" onclick="showView('dashboard');setDashMode('houses');setNavActive('navHouses')">
+        <span class="nav-icon">🏠</span> <span id="navHousesLabel">Houses</span>
+      </div>
+      <div class="nav-item nav-sub" id="navWorkers" onclick="showView('dashboard');setDashMode('workers');setNavActive('navWorkers')">
+        <span class="nav-icon">👷</span> <span id="navWorkersLabel">Workers</span>
+      </div>
+      <div class="nav-item nav-sub" id="navCrewsDash" onclick="showView('dashboard');setDashMode('crews');setNavActive('navCrewsDash')">
+        <span class="nav-icon">👥</span> <span id="navCrewsDashLabel">Crews</span>
+      </div>
+      <div class="nav-item nav-sub" id="navOrders" onclick="showView('dashboard');setDashMode('orders');setNavActive('navOrders')">
+        <span class="nav-icon">📦</span> <span id="navOrdersLabel">Orders</span>
+      </div>
+      <div class="nav-item nav-sub" id="navDeliveries" onclick="showView('dashboard');setDashMode('deliveries');setNavActive('navDeliveries')">
+        <span class="nav-icon">🚚</span> <span id="navDeliveriesLabel">Deliveries</span>
+      </div>
+      <div class="nav-item nav-sub" id="navWarehouses" onclick="showView('warehouses')">
+        <span class="nav-icon">🏬</span> <span id="navWarehousesLabel">Warehouses</span>
+      </div>
+      <div class="nav-item nav-sub" id="navSuppliers" onclick="showView('suppliers')">
+        <span class="nav-icon">🏭</span> <span id="navSuppliersLabel">Suppliers</span>
+      </div>
+      <div class="nav-item nav-sub" id="navScaffold" onclick="showView('dashboard');setDashMode('scaffold');setNavActive('navScaffold')">
+        <span class="nav-icon">🏗️</span> <span id="navScaffoldLabel">Scaffold</span>
+      </div>
     </div>
-    <div class="nav-item" id="navSuppliers" onclick="showView('suppliers')">
-      <span class="nav-icon">🏭</span> <span id="navSuppliersLabel">Suppliers</span>
+    <div class="nav-item" id="navOrgChartGroup" onclick="toggleNavGroup('orgchart')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🏢</span><span id="navOrgChartGroupLabel">Org Chart</span></span>
+      <span id="navOrgChartChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
-    <div class="nav-item" id="navCrews" onclick="showView('crews')">
-      <span class="nav-icon">👥</span> <span id="navCrewsLabel">Crews</span>
+    <div id="navOrgChartChildren" style="display:none">
+      <div class="nav-item nav-sub" id="navCrews" onclick="showView('crews')">
+        <span class="nav-icon">🗂️</span> <span id="navCrewsLabel">Crew Manager</span>
+      </div>
     </div>
-    <div class="nav-item" id="navHistory" onclick="showView('history')">
-      <span class="nav-icon">📜</span> <span id="navHistoryLabel">History</span>
+    <div class="nav-item" id="navClientServicesGroup" onclick="toggleNavGroup('clientservices')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🔌</span><span id="navClientServicesGroupLabel">Client Services</span></span>
+      <span id="navClientServicesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
-    <div class="nav-item" id="navElectric" onclick="showView('electric')">
-      <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
+    <div id="navClientServicesChildren" style="display:none">
+      <div class="nav-item nav-sub" id="navElectric" onclick="showView('electric')">
+        <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
+      </div>
     </div>
-    <div class="nav-group-label">Attendance</div>
+    <div class="nav-item" id="navAttendanceGroup" onclick="toggleNavGroup('attendance')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🕐</span><span id="navAttendanceGroupLabel">Attendance</span></span>
+      <span id="navAttendanceChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
+    </div>
+    <div id="navAttendanceChildren" style="display:none">
     <div class="nav-item nav-sub" id="navAttendance" onclick="showView('attendance')">
-      <span class="nav-icon">🕐</span> <span id="navAttendanceLabel">Check-in Log</span>
+      <span class="nav-icon">📋</span> <span id="navAttendanceLabel">Check-in Log</span>
     </div>
     <div class="nav-item nav-sub" id="navQrcodes" onclick="showView('qrcodes')">
       <span class="nav-icon">🔲</span> <span id="navQrcodesLabel">House QR Codes</span>
+    </div>
+    </div>
+    <div class="nav-item" id="navTravelAllowance" onclick="setDashMode('travelpay');showView('dashboard');setNavActive('navTravelAllowance')">
+      <span class="nav-icon">💰</span> <span id="navTravelAllowanceLabel">Travel Allowance</span>
+    </div>
+    <div class="nav-item" id="navMap" onclick="showView('map')">
+      <span class="nav-icon">🌍</span> <span id="navMapLabel">Location Overview</span>
     </div>
   </div>
 </nav>
@@ -1598,12 +1659,16 @@
 
   <!-- VIEW: DASHBOARD -->
   <div class="view active" id="view-dashboard">
-    <div id="dashTabBar" style="display:flex;gap:4px;margin-bottom:1.2rem;background:#1a1d27;border:1px solid #2e3250;border-radius:10px;padding:4px">
-      <button onclick="setDashMode('houses')"  id="dashModeHouses"  style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:#4f8ef7;color:#fff">🏠 Houses</button>
-      <button onclick="setDashMode('workers')" id="dashModeWorkers" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👷 Workers</button>
-      <button onclick="setDashMode('scaffold')" id="dashModeScaffold" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏗️ Scaffold</button>
-      <button onclick="setDashMode('crews')" id="dashModeCrews" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👥 Crews</button>
-      <button onclick="setDashMode('travelpay')" id="dashModeTravelpay" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 Travel Pay</button>
+    <div id="dashTabBar" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:1.2rem;background:#1a1d27;border:1px solid #2e3250;border-radius:10px;padding:4px">
+      <button onclick="setDashMode('houses')"         id="dashModeHouses"         style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:#4f8ef7;color:#fff">🏠 Houses</button>
+      <button onclick="setDashMode('workers')"        id="dashModeWorkers"        style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👷 Workers</button>
+      <button onclick="setDashMode('crews')"          id="dashModeCrews"          style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👥 Crews</button>
+      <button onclick="setDashMode('orders')"         id="dashModeOrders"         style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">📦 Orders</button>
+      <button onclick="setDashMode('deliveries')"     id="dashModeDeliveries"     style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🚚 Deliveries</button>
+      <button onclick="setDashMode('dashWarehouses')" id="dashModeDashWarehouses" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏬 Warehouses</button>
+      <button onclick="setDashMode('dashSuppliers')"  id="dashModeDashSuppliers"  style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏭 Suppliers</button>
+      <button onclick="setDashMode('scaffold')"       id="dashModeScaffold"       style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏗️ Scaffold</button>
+      <button onclick="setDashMode('travelpay')"      id="dashModeTravelpay"      style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 Travel Allowance</button>
     </div>
     <div class="totals" id="totals"></div>
     <div class="search-wrap">
@@ -1640,8 +1705,21 @@
           </a>
           <div id="locStatus" style="display:none;margin-top:0.5rem;font-size:0.8rem;color:var(--green);align-items:center;gap:0.4rem"></div>
         </div>
-        <div class="field" style="margin-bottom:1.4rem">
-          <label id="destHouseLbl" style="color:var(--accent);font-size:0.85rem">🏠 Destination house</label>
+        <div class="field" style="margin-bottom:1.1rem">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;color:var(--accent);font-size:0.85rem">
+            <input type="checkbox" id="useExistingOrderChk" onchange="toggleExistingOrder()" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+            <span id="existingOrderChkLbl">📋 Existing order</span>
+          </label>
+          <div id="existingOrderPicker" style="display:none;margin-top:0.6rem">
+            <select id="routeOrderPicker" onchange="importOrderToRoute()" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--accent);border-radius:8px;color:var(--text);font-size:0.92rem;outline:none;">
+              <option value="">— Select an order —</option>
+            </select>
+            <div id="routeOrderInfo" style="display:none;margin-top:0.5rem;font-size:0.8rem;color:var(--muted)"></div>
+          </div>
+        </div>
+
+        <div id="destHouseField" class="field" style="margin-bottom:1.4rem">
+          <label id="destHouseLbl2" style="color:var(--accent);font-size:0.85rem">🏠 Destination house</label>
           <select id="destHouse" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--accent);border-radius:8px;color:var(--text);font-size:0.92rem;outline:none;">
             <option value="">— Select destination —</option>
           </select>
@@ -1852,28 +1930,31 @@
 
   <!-- VIEW: WAREHOUSES (company depots — tier 2) -->
   <div class="view" id="view-warehouses">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem">
       <p class="section-label" style="margin:0" id="whTitle">🏬 Warehouses</p>
       <button class="btn btn-primary" id="whAddBtn" onclick="openFacilityModal('warehouse', null)">+ Add warehouse</button>
     </div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="whSearchInput" type="text" placeholder="Search warehouses..." autocomplete="off" oninput="filterFacilityList('warehouse')" /></div>
     <div id="warehousesList" class="facility-grid"></div>
   </div>
 
   <!-- VIEW: SUPPLIERS (external vendors — tier 3) -->
   <div class="view" id="view-suppliers">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem">
       <p class="section-label" style="margin:0" id="supTitle">🏭 Suppliers</p>
       <button class="btn btn-primary" id="supAddBtn" onclick="openFacilityModal('supplier', null)">+ Add supplier</button>
     </div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="supSearchInput" type="text" placeholder="Search suppliers..." autocomplete="off" oninput="filterFacilityList('supplier')" /></div>
     <div id="suppliersList" class="facility-grid"></div>
   </div>
 
   <!-- VIEW: ELECTRIC BOXES -->
   <div class="view" id="view-electric">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem">
       <p class="section-label" style="margin:0" id="ebManagerTitle">⚡ Electric Box Manager</p>
       <button class="btn btn-primary" onclick="ebOpenNew()" id="ebBtnNewBox">+ New Box</button>
     </div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="ebSearchInput" type="text" placeholder="Search electric boxes..." autocomplete="off" oninput="filterElectricBoxes()" /></div>
 
     <!-- House list (left) + Panel builder (right) -->
     <div class="eb-layout">
@@ -1985,10 +2066,11 @@
   <!-- ── QR CODES VIEW ──────────────────────────────────────────────────── -->
   <div class="view" id="view-qrcodes">
 
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
       <p class="section-label" style="margin:0">🔲 House QR Codes</p>
       <button class="btn btn-ghost" onclick="window.print()" style="gap:.4rem">🖨️ Print All</button>
     </div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="qrSearchInput" type="text" placeholder="Search houses..." autocomplete="off" oninput="filterQrCodes()" /></div>
 
     <div id="qrGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem"></div>
 
@@ -2060,11 +2142,11 @@
   const i18n = {
     en: {
       brandName:'TEDHOUSE LOGISTICS', brandSub:'Materials Management',
-      navDashboard:'Dashboard', navOrder:'New Order', navMap:'Map View',
+      navDashboard:'Dashboard', navOrder:'Order Route', navMap:'Location Overview',
       pageTitle_dashboard:'Dashboard', pageSub_dashboard:'Surplus materials inventory',
       pageTitle_order:'New Order', pageSub_order:'Calculate optimal pickup route',
-      pageTitle_map:'Map View', pageSub_map:'Houses on map',
-      pageTitle_history:'Order History', pageSub_history:'Past calculations — immutable record',
+      pageTitle_map:'Location Overview', pageSub_map:'Houses on map',
+      pageTitle_history:'Order Route History', pageSub_history:'Past route recommendations — immutable record',
       pageTitle_scaffold:'Scaffold Transport', pageSub_scaffold:'Find closest available scaffold for a destination house',
       pageTitle_electric:'Electric Boxes', pageSub_electric:'Manage electrical panel layouts per house',
       pageTitle_attendance:'Check-in Log', pageSub_attendance:'Worker check-in / check-out times per day',
@@ -2098,7 +2180,7 @@
       ebSaving:'Saving…', ebSaveOk:'✓ Panel saved successfully.',
       ebSaveFail:'Save failed', ebDeleteConfirm:'Delete this electric box? This cannot be undone.',
       ebMainLabel:'MAIN',
-      navHistory:'History', navElectric:'Electric Boxes', ebManagerTitle:'⚡ Electric Box Manager',
+      navRoutes:'Routes', navAttendanceGroup:'Attendance Control', navTravelAllowance:'Travel Allowance', navManagementGroup:'Management', navHouses:'Houses', navWorkers:'Workers', navOrders:'Orders', navDeliveries:'Deliveries', navHistory:'Order Route History', navElectric:'Electric Boxes', ebManagerTitle:'⚡ Electric Box Manager',
       historyFiltersSource:'Source', historyFiltersChosen:'Only chosen', historyFiltersAllUsers:'All users (admin)',
       historyPickHint:'Pick an order from the list to see its details',
       historyNoResults:'No orders yet for this filter.',
@@ -2166,7 +2248,7 @@
       reasonOptimalSingle:'Nearest single warehouse covering the full order — {dist} km from origin',
       reasonOptimalMulti:'Part of the minimum-distance multi-stop route — {dist} km from origin',
       // alternatives (phase 7)
-      obj_shortest_distance:'Shortest distance', obj_fastest_time:'Fastest time', obj_balanced:'Balanced',
+      obj_shortest_distance:'Shortest distance', obj_fastest_time:'Fastest time', obj_balanced:'Balanced', obj_houses_warehouses_only:'Houses & Warehouses', obj_houses_suppliers_only:'Houses & Suppliers',
       objSelected:'Selected', objView:'View', minLabel:'min',
       // order history (this feature)
       useThisRoute:'Use this route', routeChosen:'Route chosen', chooseFailed:'Could not save your choice',
@@ -2204,7 +2286,21 @@
       Lumber:'Lumber', Screws:'Screws', Boards:'Boards', Tiles:'Tiles',
       unidades:'units', 'm²':'m²',
       // dashboard toggles
-      dashHouses:'🏠 Houses', dashWorkers:'👷 Workers', dashScaffold:'🏗️ Scaffold', dashCrews:'👥 Crews', dashTravelpay:'💰 Travel Pay',
+      dashHouses:'🏠 Houses', dashWorkers:'👷 Workers', dashScaffold:'🏗️ Scaffold', dashCrews:'👥 Crews', dashTravelpay:'💰 Travel Allowance', dashOrders:'📦 Orders', dashDeliveries:'🚚 Deliveries',
+      ordersAddBtn:'＋ New Order', ordersEditTitle:'Edit Order', ordersNewTitle:'New Order',
+      ordersColHouse:'House', ordersColMaterials:'Materials', ordersColStatus:'Status', ordersColDate:'Date', ordersColCreatedBy:'Created By', ordersColActions:'Actions',
+      ordersCreatedByLbl:'Created By',
+      ordersNoOrders:'No orders yet.',
+      ordersStatusDraft:'Draft', ordersStatusConfirmed:'Confirmed', ordersStatusDelivered:'Delivered', ordersStatusCancelled:'Cancelled',
+      ordersDeleteConfirm:'Delete this order?',
+      ordersMaterialLbl:'Material', ordersQtyLbl:'Qty', ordersAddMaterial:'＋ Add material', ordersNotesLbl:'Notes',
+      ordersHouseLbl:'House', ordersStatusLbl:'Status', ordersSavBtn:'Save', ordersCancelBtn:'Cancel',
+      ordersAddDelivery:'＋ Add Delivery', ordersDeliveriesTitle:'Deliveries', ordersNoDeliveries:'No deliveries yet.',
+      deliveriesColOrder:'Order', deliveriesColHouse:'House', deliveriesColDate:'Delivered At', deliveriesColItems:'Items', deliveriesColActions:'Actions',
+      deliveriesNoData:'No deliveries yet.', deliveriesDeleteConfirm:'Delete this delivery?',
+      deliveriesNewTitle:'New Delivery', deliveriesDateLbl:'Delivered At', deliveriesNotesLbl:'Notes',
+      deliveriesQtyLbl:'Qty Delivered', deliveriesSaveBtn:'Save', deliveriesCancelBtn:'Cancel',
+      deliveriesResponsibleLbl:'Responsible', deliveriesColResponsible:'Responsible',
       tpDashCityLabel:'📍 City Center', tpDashRadiusLabel:'📏 Radius', tpDashFuelLabel:'⛽ €/L Fuel', tpDashSearchLabel:'🔍 Search Worker',
       tpDashSearchPlaceholder:'Name, crew or house…', tpDashExportBtn:'📄 Export PDF',
       tpDashLoading:'Loading workers…', tpDashEvaluating:'Evaluating {n} workers vs {city} ({r} km radius)…',
@@ -2261,11 +2357,11 @@
     },
     bg: {
       brandName:'Теодор Логистика', brandSub:'Управление на материали',
-      navDashboard:'Табло', navOrder:'Нова поръчка', navMap:'Карта',
+      navDashboard:'Табло', navOrder:'Маршрут на поръчка', navMap:'Преглед на локации',
       pageTitle_dashboard:'Табло', pageSub_dashboard:'Инвентар на излишни материали',
       pageTitle_order:'Нова поръчка', pageSub_order:'Изчисли оптимален маршрут',
-      pageTitle_map:'Карта', pageSub_map:'Къщи на картата',
-      pageTitle_history:'История на поръчките', pageSub_history:'Минали изчисления — неизменен запис',
+      pageTitle_map:'Преглед на локации', pageSub_map:'Къщи на картата',
+      pageTitle_history:'История на маршрута на поръчката', pageSub_history:'Минали препоръки за маршрут — неизменен запис',
       pageTitle_scaffold:'Транспорт на скеле', pageSub_scaffold:'Намери най-близко налично скеле за дестинация',
       pageTitle_electric:'Електрически табла', pageSub_electric:'Управление на електрически инсталации по къщи',
       pageTitle_attendance:'Дневник присъствия', pageSub_attendance:'Влизане и излизане на работници по дни',
@@ -2299,7 +2395,7 @@
       ebSaving:'Записва се…', ebSaveOk:'✓ Таблото е записано успешно.',
       ebSaveFail:'Грешка при запис', ebDeleteConfirm:'Изтриване на електрическото табло? Действието е необратимо.',
       ebMainLabel:'ГЛАВЕН',
-      navHistory:'История', navElectric:'Електрически табла', ebManagerTitle:'⚡ Мениджър на табла',
+      navRoutes:'Маршрути', navAttendanceGroup:'Контрол на присъствието', navTravelAllowance:'Пътни надбавки', navManagementGroup:'Управление', navHouses:'Обекти', navWorkers:'Работници', navOrders:'Поръчки', navDeliveries:'Доставки', navHistory:'История на маршрута на поръчката', navElectric:'Електрически табла', ebManagerTitle:'⚡ Мениджър на табла',
       historyFiltersSource:'Източник', historyFiltersChosen:'Само избрани', historyFiltersAllUsers:'Всички (админ)',
       historyPickHint:'Изберете поръчка от списъка',
       historyNoResults:'Няма поръчки за този филтър.',
@@ -2367,7 +2463,7 @@
       reasonOptimalSingle:'Единственият склад, покриващ цялата поръчка с най-кратко разстояние — {dist} км от начало',
       reasonOptimalMulti:'Част от маршрута с минимално общо разстояние — {dist} км от начало',
       // alternatives (phase 7)
-      obj_shortest_distance:'Най-късо разстояние', obj_fastest_time:'Най-бързо време', obj_balanced:'Балансиран',
+      obj_shortest_distance:'Най-късо разстояние', obj_fastest_time:'Най-бързо време', obj_balanced:'Балансиран', obj_houses_warehouses_only:'Къщи и складове', obj_houses_suppliers_only:'Къщи и доставчици',
       objSelected:'Избран', objView:'Виж', minLabel:'мин',
       // история на поръчките
       useThisRoute:'Избери този маршрут', routeChosen:'Маршрутът е избран', chooseFailed:'Изборът не можа да бъде запазен',
@@ -2405,7 +2501,21 @@
       Lumber:'Дървен материал', Screws:'Винтове', Boards:'Дъски', Tiles:'Керемиди',
       unidades:'бр.', 'm²':'m²',
       // dashboard toggles
-      dashHouses:'🏠 Къщи', dashWorkers:'👷 Работници', dashScaffold:'🏗️ Скеле', dashCrews:'👥 Екипи', dashTravelpay:'💰 Пътни разходи',
+      dashHouses:'🏠 Къщи', dashWorkers:'👷 Работници', dashScaffold:'🏗️ Скеле', dashCrews:'👥 Екипи', dashTravelpay:'💰 Пътни разходи (надбавка)', dashOrders:'📦 Поръчки', dashDeliveries:'🚚 Доставки',
+      ordersAddBtn:'＋ Нова поръчка', ordersEditTitle:'Редактиране на поръчка', ordersNewTitle:'Нова поръчка',
+      ordersColHouse:'Обект', ordersColMaterials:'Материали', ordersColStatus:'Статус', ordersColDate:'Дата', ordersColCreatedBy:'Създадена от', ordersColActions:'Действия',
+      ordersCreatedByLbl:'Създадена от',
+      ordersNoOrders:'Няма поръчки.',
+      ordersStatusDraft:'Чернова', ordersStatusConfirmed:'Потвърдена', ordersStatusDelivered:'Доставена', ordersStatusCancelled:'Отменена',
+      ordersDeleteConfirm:'Изтриване на тази поръчка?',
+      ordersMaterialLbl:'Материал', ordersQtyLbl:'Кол.', ordersAddMaterial:'＋ Добави материал', ordersNotesLbl:'Бележки',
+      ordersHouseLbl:'Обект', ordersStatusLbl:'Статус', ordersSavBtn:'Запази', ordersCancelBtn:'Отказ',
+      ordersAddDelivery:'＋ Добави доставка', ordersDeliveriesTitle:'Доставки', ordersNoDeliveries:'Няма доставки.',
+      deliveriesColOrder:'Поръчка', deliveriesColHouse:'Обект', deliveriesColDate:'Дата на доставка', deliveriesColItems:'Артикули', deliveriesColActions:'Действия',
+      deliveriesNoData:'Няма доставки.', deliveriesDeleteConfirm:'Изтриване на тази доставка?',
+      deliveriesNewTitle:'Нова доставка', deliveriesDateLbl:'Дата на доставка', deliveriesNotesLbl:'Бележки',
+      deliveriesQtyLbl:'Доставено кол.', deliveriesSaveBtn:'Запази', deliveriesCancelBtn:'Отказ',
+      deliveriesResponsibleLbl:'Отговорник', deliveriesColResponsible:'Отговорник',
       tpDashCityLabel:'📍 Център', tpDashRadiusLabel:'📏 Радиус', tpDashFuelLabel:'⛽ €/л Гориво', tpDashSearchLabel:'🔍 Търсене',
       tpDashSearchPlaceholder:'Име, екип или обект…', tpDashExportBtn:'📄 Експорт PDF',
       tpDashLoading:'Зареждане на работници…', tpDashEvaluating:'Оценка на {n} работника спрямо {city} ({r} км радиус)…',
@@ -2509,7 +2619,13 @@
     document.getElementById('brandName').textContent    = t('brandName');
     document.getElementById('brandSub').textContent     = t('brandSub');
     document.getElementById('navDashboard').querySelector('span:last-child').textContent = t('navDashboard');
-    document.getElementById('navOrder').querySelector('span:last-child').textContent     = t('navOrder');
+    document.getElementById('navOrderLabel').textContent    = t('navOrder');
+    document.getElementById('navRoutesGroupLabel').textContent = t('navRoutes');
+    document.getElementById('navAttendanceGroupLabel').textContent = t('navAttendanceGroup');
+    document.getElementById('navManagementGroupLabel').textContent = t('navManagementGroup');
+    const facM = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+    facM('navHousesLabel','navHouses'); facM('navWorkersLabel','navWorkers');
+    facM('navOrdersLabel','navOrders'); facM('navDeliveriesLabel','navDeliveries');
     document.getElementById('navMap').querySelector('span:last-child').textContent       = t('navMap');
     document.getElementById('navHistoryLabel').textContent  = t('navHistory');
     const facT = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
@@ -2522,7 +2638,8 @@
     facT('facLocBtn','facUseLocation');
     document.getElementById('navElectricLabel').textContent    = t('navElectric');
     document.getElementById('navAttendanceLabel').textContent  = t('navAttendance');
-    document.getElementById('navQrcodesLabel').textContent     = t('navQrcodes');
+    document.getElementById('navQrcodesLabel').textContent          = t('navQrcodes');
+    document.getElementById('navTravelAllowanceLabel').textContent  = t('navTravelAllowance');
     const eb = id => document.getElementById(id);
     const ebt = (id, key) => { const el = eb(id); if (el) el.textContent = t(key); };
     ebt('ebManagerTitle','ebManagerTitle');
@@ -2594,6 +2711,8 @@
     const ds = document.getElementById('dashModeScaffold'); if (ds) ds.textContent = t('dashScaffold');
     const dc = document.getElementById('dashModeCrews');    if (dc) dc.textContent = t('dashCrews');
     const dt = document.getElementById('dashModeTravelpay'); if (dt) dt.textContent = t('dashTravelpay');
+    const do_ = document.getElementById('dashModeOrders');    if (do_) do_.textContent = t('dashOrders');
+    const dd  = document.getElementById('dashModeDeliveries'); if (dd) dd.textContent = t('dashDeliveries');
 
     // map toggles
     const mh = document.getElementById('mapModeHouses');   if (mh) mh.textContent = t('mapHouses');
@@ -2747,6 +2866,29 @@
   }
 
   const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'electric', 'attendance', 'qrcodes'];
+
+  const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false };
+  const _navGroupConfig = {
+    routes:         { children: 'navRoutesChildren',          chevron: 'navRoutesChevron' },
+    attendance:     { children: 'navAttendanceChildren',      chevron: 'navAttendanceChevron' },
+    management:     { children: 'navManagementChildren',      chevron: 'navManagementChevron' },
+    orgchart:       { children: 'navOrgChartChildren',        chevron: 'navOrgChartChevron' },
+    clientservices: { children: 'navClientServicesChildren',  chevron: 'navClientServicesChevron' },
+  };
+  function setNavActive(id) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active');
+  }
+
+  function toggleNavGroup(group) {
+    _navGroupOpen[group] = !_navGroupOpen[group];
+    const cfg = _navGroupConfig[group];
+    const children = document.getElementById(cfg.children);
+    const chevron  = document.getElementById(cfg.chevron);
+    if (children) children.style.display = _navGroupOpen[group] ? '' : 'none';
+    if (chevron)  chevron.style.transform = _navGroupOpen[group] ? '' : 'rotate(-90deg)';
+  }
 
   function showView(name) {
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
@@ -3211,7 +3353,7 @@
       resultEl.style.color = '#f5a623';
       resultEl.style.border = '1px solid rgba(245,168,35,0.3)';
       resultEl.innerHTML = `
-        💰 Travel pay needed<br>
+        💰 Travel allowance needed<br>
         <span style="font-weight:400;font-size:0.78rem;color:#9aa3be">
           ${distLabel} · Round trip ${roundTrip.toFixed(1)} km<br>
           Daily cost: <strong style="color:#f5a623">€${dailyCost.toFixed(2)}</strong>
@@ -3239,7 +3381,7 @@
     _tpAnimIdx  = 0;
     _tpAnimDir  = 1;
     _tpAnimPlaying = true;
-    document.getElementById('tpAnimBtn').textContent = '⏹ Stop Animation';
+    document.getElementById('tpAnimBtn').textContent = '⏹';
 
     // Create car marker
     if (_tpAnimCar) _tpAnimCar.remove();
@@ -3319,7 +3461,7 @@
     if (_tpAnimCar)  { _tpAnimCar.remove();  _tpAnimCar  = null; }
     if (_tpAnimHand) { _tpAnimHand.remove(); _tpAnimHand = null; }
     const btn = document.getElementById('tpAnimBtn');
-    if (btn) btn.textContent = '▶ Play Animation';
+    if (btn) btn.textContent = '▶';
   }
   // ── Warehouses map ───────────────────────────────────────────────────────
   async function initWarehousesMap() {
@@ -3893,9 +4035,9 @@
 
   function setDashMode(mode) {
     _dashMode = mode;
-    const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa' };
+    const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa', orders:'#00c9b1', deliveries:'#f97316', dashWarehouses:'#38bdf8', dashSuppliers:'#fb7185' };
     const darkText   = new Set(['scaffold']);
-    ['houses','workers','scaffold','crews','travelpay'].forEach(m => {
+    ['houses','workers','scaffold','crews','travelpay','orders','deliveries','dashWarehouses','dashSuppliers'].forEach(m => {
       const btn = document.getElementById('dashMode' + m.charAt(0).toUpperCase() + m.slice(1));
       if (!btn) return;
       if (m === mode) { btn.style.background = modeColors[m]; btn.style.color = darkText.has(m) ? '#0f1117' : '#fff'; }
@@ -3914,6 +4056,11 @@
       const grid = document.getElementById('grid');
       grid.parentNode.insertBefore(altSearch, grid);
     }
+
+    const grid = document.getElementById('grid');
+    grid.style.display = '';
+    grid.style.flexDirection = '';
+    grid.style.gap = '';
 
     if (mode === 'houses') {
       if (searchWrap) searchWrap.style.display = '';
@@ -3951,7 +4098,59 @@
       if (totals)     totals.style.display     = 'none';
       altSearch.style.display = 'none';
       renderTravelPayDash();
+    } else if (mode === 'orders') {
+      if (searchWrap) searchWrap.style.display = 'none';
+      if (crudBar)    crudBar.style.display    = 'none';
+      if (totals)     totals.style.display     = 'none';
+      altSearch.style.display = '';
+      document.getElementById('altSearchInput').placeholder = 'Search orders by house, status or material...';
+      document.getElementById('altSearchInput').value = '';
+      renderOrdersDash();
+    } else if (mode === 'deliveries') {
+      if (searchWrap) searchWrap.style.display = 'none';
+      if (crudBar)    crudBar.style.display    = 'none';
+      if (totals)     totals.style.display     = 'none';
+      altSearch.style.display = '';
+      document.getElementById('altSearchInput').placeholder = 'Search deliveries by house, order or notes...';
+      document.getElementById('altSearchInput').value = '';
+      renderDeliveriesDash();
+    } else if (mode === 'dashWarehouses') {
+      if (searchWrap) searchWrap.style.display = 'none';
+      if (crudBar)    crudBar.style.display    = 'none';
+      if (totals)     totals.style.display     = 'none';
+      altSearch.style.display = '';
+      document.getElementById('altSearchInput').placeholder = 'Search warehouses by name or location...';
+      document.getElementById('altSearchInput').value = '';
+      renderFacilityDash('warehouse');
+    } else if (mode === 'dashSuppliers') {
+      if (searchWrap) searchWrap.style.display = 'none';
+      if (crudBar)    crudBar.style.display    = 'none';
+      if (totals)     totals.style.display     = 'none';
+      altSearch.style.display = '';
+      document.getElementById('altSearchInput').placeholder = 'Search suppliers by name or location...';
+      document.getElementById('altSearchInput').value = '';
+      renderFacilityDash('supplier');
     }
+  }
+
+  async function renderFacilityDash(kind) {
+    const grid = document.getElementById('grid');
+    grid.style.display = '';
+    grid.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>Loading...</div>`;
+    try {
+      const url = kind === 'warehouse' ? '/api/warehouses' : '/api/suppliers';
+      const list = await apiFetch(url).then(r => r.json());
+      if (!list.length) { grid.innerHTML = `<div class="state-msg">No ${kind}s found.</div>`; return; }
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(290px, 1fr))';
+      grid.style.gap = '1.2rem';
+      grid.style.alignItems = 'start';
+      const addLabel = kind === 'warehouse' ? t('facAddWarehouse') || '+ Add warehouse' : t('facAddSupplier') || '+ Add supplier';
+      grid.innerHTML = `<div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-bottom:0.25rem" class="admin-only">
+        <button class="btn btn-primary" onclick="openFacilityModal('${kind}', null)">${addLabel}</button>
+      </div>` + list.map(f => facilityCardHtml(f, kind)).join('');
+    } catch(e) { grid.innerHTML = `<div class="state-msg">Failed to load ${kind}s.</div>`; return; }
+    onAltSearch();
   }
 
   async function renderWorkerCards() {
@@ -3970,7 +4169,8 @@
         CREW_LEADER:  { label: t('roleCrewLeader'),  icon: '🦺', color: '#f5a623', bg:'rgba(245,166,35,0.1)',  border:'rgba(245,166,35,0.3)' },
         CREW_MANAGER: { label: t('roleCrewManager'), icon: '👔', color: '#a78bfa', bg:'rgba(167,139,250,0.1)', border:'rgba(167,139,250,0.3)' },
       }[w.role || 'CREW_MEMBER'];
-      return `<div class="house-card">
+      const searchKey = [w.name, w.trade, w.crewName, w.houseName].filter(Boolean).join(' ').toLowerCase();
+      return `<div class="house-card" data-search="${searchKey.replace(/"/g,'&quot;')}">
         <div class="house-header">
           <div>
             <p class="house-name">${roleCfg.icon} ${w.name}</p>
@@ -4016,6 +4216,7 @@
         </div>
       </div>`;
     }).join('');
+    onAltSearch();
   }
 
   async function renderScaffoldCards() {
@@ -4358,7 +4559,7 @@
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape' });
     doc.setFontSize(14);
-    doc.text('Travel Pay Report', 14, 16);
+    doc.text('Travel Allowance Report', 14, 16);
     doc.setFontSize(9);
     doc.setTextColor(120);
     doc.text(`Center: ${city.name}  |  Radius: ${_tpDashRadius} km  |  Fuel: €${_tpDashFuel}/L  |  Generated: ${new Date().toLocaleDateString()}`, 14, 23);
@@ -4403,12 +4604,439 @@
   }
   // ── End Travel Pay Dashboard ──────────────────────────────────────────────────
 
+  // ── Orders Dashboard ─────────────────────────────────────────────────────────
+  const ORDER_STATUSES = ['DRAFT','CONFIRMED','DELIVERED','CANCELLED'];
+  const ORDER_STATUS_COLORS = { DRAFT:'#9aa3be', CONFIRMED:'#4f8ef7', DELIVERED:'#3ecf6e', CANCELLED:'#f76f6f' };
+  function orderStatusLabel(s) { return t('ordersStatus'+s.charAt(0)+s.slice(1).toLowerCase()) || s; }
+  let _ordersList = [], _ordersMats = [], _ordersHouses = [], _ordersWorkers = [], _editingOrderId = null;
+
+  async function renderOrdersDash() {
+    const grid = document.getElementById('grid');
+    grid.style.display = 'block';
+    grid.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>Loading...</div>`;
+    try {
+      [_ordersList, _ordersMats, _ordersHouses, _ordersWorkers] = await Promise.all([
+        apiFetch('/api/material-orders').then(r => r.json()),
+        apiFetch('/api/materials').then(r => r.json()),
+        apiFetch('/api/houses').then(r => r.json()),
+        apiFetch('/api/workers').then(r => r.json()),
+      ]);
+    } catch(e) { grid.innerHTML = `<div class="state-msg">Failed to load orders.</div>`; return; }
+    renderOrdersTable();
+  }
+
+  function renderOrdersTable() {
+    const grid = document.getElementById('grid');
+    const statusBadge = s => `<span style="background:${ORDER_STATUS_COLORS[s]}22;color:${ORDER_STATUS_COLORS[s]};border:1px solid ${ORDER_STATUS_COLORS[s]}55;border-radius:5px;padding:2px 9px;font-size:0.72rem;font-weight:700">${orderStatusLabel(s)}</span>`;
+    grid.innerHTML = `
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+        <button class="btn btn-primary admin-only" onclick="openOrderModal()" style="background:#00c9b1;color:#0f1117;border:none">${t('ordersAddBtn')}</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="att-table" id="ordersTable">
+          <thead><tr>
+            <th style="width:28px"></th>
+            <th>#</th>
+            <th>${t('ordersColHouse')}</th>
+            <th>${t('ordersColMaterials')}</th>
+            <th style="text-align:center">${t('ordersColStatus')}</th>
+            <th>${t('ordersColCreatedBy')}</th>
+            <th>${t('ordersColDate')}</th>
+            <th style="text-align:center">${t('ordersColActions')}</th>
+          </tr></thead>
+          <tbody>
+            ${_ordersList.length ? _ordersList.map(o => {
+              const materialsStr = o.items.map(i => `${i.materialName}: ${i.quantity} ${i.unit}`).join(', ');
+              const date = new Date(o.createdAt).toLocaleDateString();
+              return `<tr style="cursor:pointer" onclick="toggleOrderDeliveries(${o.id}, this)">
+                <td style="color:var(--text);text-align:center;font-size:0.75rem" id="order-toggle-${o.id}">▶</td>
+                <td style="color:var(--text)">${o.id}</td>
+                <td style="font-weight:600;color:#4f8ef7">🏠 ${o.houseName}</td>
+                <td style="font-size:0.82rem;color:var(--text);max-width:300px">${materialsStr || '—'}</td>
+                <td style="text-align:center">${statusBadge(o.status)}</td>
+                <td style="font-size:0.82rem;color:var(--text)">${o.createdByName ? '👷 '+o.createdByName : '—'}</td>
+                <td style="color:var(--text);font-size:0.82rem">${date}</td>
+                <td style="text-align:center" onclick="event.stopPropagation()">
+                  <div style="display:flex;gap:0.4rem;justify-content:center" class="admin-only">
+                    <button class="card-btn card-btn-edit" onclick="openOrderModal(${o.id})" title="Edit">✏</button>
+                    <button class="card-btn card-btn-del"  onclick="deleteOrder(${o.id})" title="Delete">🗑</button>
+                  </div>
+                </td>
+              </tr>
+              <tr id="order-deliveries-row-${o.id}" style="display:none">
+                <td colspan="8" style="padding:0">
+                  <div id="order-deliveries-${o.id}"></div>
+                </td>
+              </tr>`;
+            }).join('') : `<tr><td colspan="8" style="text-align:center;color:#9aa3be;padding:2rem">${t('ordersNoOrders')}</td></tr>`}
+          </tbody>
+        </table>
+      </div>`;
+    onAltSearch();
+  }
+
+  async function toggleOrderDeliveries(orderId, tr) {
+    const row = document.getElementById(`order-deliveries-row-${orderId}`);
+    const toggle = document.getElementById(`order-toggle-${orderId}`);
+    if (!row) return;
+    if (row.style.display !== 'none') { row.style.display = 'none'; toggle.textContent = '▶'; return; }
+    row.style.display = '';
+    toggle.textContent = '▼';
+    const container = document.getElementById(`order-deliveries-${orderId}`);
+    container.style.cssText = 'background:rgba(249,115,22,0.05);border-left:3px solid #f97316;padding:0.75rem 1.2rem';
+    container.innerHTML = '<div class="spinner" style="display:inline-block;width:14px;height:14px"></div>';
+    try {
+      const dels = await apiFetch(`/api/material-orders/${orderId}/deliveries`).then(r => r.json());
+      container.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
+          <span style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#f97316">${t('ordersDeliveriesTitle')}</span>
+          <button class="admin-only" onclick="openDeliveryModal(${orderId})" style="padding:3px 10px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.35);border-radius:6px;color:#f97316;font-size:0.78rem;font-weight:600;cursor:pointer">${t('ordersAddDelivery')}</button>
+        </div>
+        ${dels.length ? `<table style="width:100%;font-size:0.8rem;border-collapse:collapse">
+          <thead><tr style="color:#9aa3be">
+            <th style="text-align:left;padding:2px 8px">${t('deliveriesColDate')}</th>
+            <th style="text-align:left;padding:2px 8px">${t('deliveriesColItems')}</th>
+            <th style="text-align:left;padding:2px 8px">${t('deliveriesColResponsible')}</th>
+            <th style="text-align:left;padding:2px 8px">${t('ordersNotesLbl')}</th>
+            <th style="text-align:center;padding:2px 8px" class="admin-only">${t('deliveriesColActions')}</th>
+          </tr></thead>
+          <tbody>
+            ${dels.map(d => `<tr>
+              <td style="padding:3px 8px;color:var(--text);white-space:nowrap">${new Date(d.deliveredAt).toLocaleString()}</td>
+              <td style="padding:3px 8px;color:var(--text)">${d.items.map(i => `${i.materialName}: ${i.qtyDelivered} ${i.unit}`).join(', ')}</td>
+              <td style="padding:3px 8px;color:var(--text)">${d.responsibleName ? '👷 '+d.responsibleName : '—'}</td>
+              <td style="padding:3px 8px;color:var(--text-muted,#9aa3be)">${d.notes || '—'}</td>
+              <td style="text-align:center;padding:3px 8px" class="admin-only">
+                <button onclick="deleteDelivery(${d.id}, ${orderId})" style="background:rgba(247,111,111,.12);border:1px solid rgba(247,111,111,.3);border-radius:5px;color:#f76f6f;padding:2px 7px;cursor:pointer;font-size:0.8rem">🗑</button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>` : `<div style="color:#9aa3be;font-size:0.82rem;padding:0.25rem 0">${t('ordersNoDeliveries')}</div>`}`;
+    } catch(e) {
+      container.innerHTML = `<div style="color:#f76f6f;font-size:0.82rem">Failed to load deliveries.</div>`;
+    }
+  }
+
+  async function openOrderModal(id) {
+    _editingOrderId = id || null;
+    const existing = id ? _ordersList.find(o => o.id === id) : null;
+    const title = existing ? t('ordersEditTitle') : t('ordersNewTitle');
+    const houseOptions = _ordersHouses.map(h => `<option value="${h.id}" ${existing && existing.houseId===h.id?'selected':''}>${h.name}</option>`).join('');
+    const leaderOptions = _ordersWorkers.filter(w => w.role==='CREW_LEADER'||w.role==='CREW_MANAGER').map(w => `<option value="${w.id}" ${existing && existing.createdById===w.id?'selected':''}>${w.name} (${w.role==='CREW_LEADER'?'Leader':'Manager'})</option>`).join('');
+    const statusOptions = ORDER_STATUSES.map(s => `<option value="${s}" ${existing && existing.status===s?'selected':''}>${orderStatusLabel(s)}</option>`).join('');
+    const existingItems = existing ? existing.items : [];
+    const modal = document.createElement('div');
+    modal.id = 'orderModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem';
+    modal.innerHTML = `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto">
+        <h3 style="margin-bottom:1.2rem;font-size:1.05rem;font-weight:700;color:#00c9b1">${title}</h3>
+        <div class="field">
+          <label>${t('ordersHouseLbl')}</label>
+          <select id="omHouse" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+            <option value="">—</option>${houseOptions}
+          </select>
+        </div>
+        <div class="field">
+          <label>${t('ordersStatusLbl')}</label>
+          <select id="omStatus" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+            ${statusOptions}
+          </select>
+        </div>
+        <div class="field">
+          <label>${t('ordersCreatedByLbl')}</label>
+          <select id="omCreatedBy" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+            <option value="">— ${t('ordersCreatedByLbl')} —</option>${leaderOptions}
+          </select>
+        </div>
+        <div class="field">
+          <label>${t('ordersNotesLbl')}</label>
+          <input id="omNotes" type="text" value="${existing?.notes||''}" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+        </div>
+        <div style="margin-bottom:0.75rem">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:6px">${t('ordersMaterialLbl')}</label>
+          <div id="omItems">${existingItems.map(i => omItemRow(i.materialId, i.quantity)).join('')}</div>
+          <button type="button" onclick="omAddItem()" style="margin-top:0.5rem;padding:5px 12px;background:rgba(0,201,177,.1);border:1px solid rgba(0,201,177,.3);border-radius:7px;color:#00c9b1;font-size:0.82rem;font-weight:600;cursor:pointer">${t('ordersAddMaterial')}</button>
+        </div>
+        <div style="display:flex;gap:0.75rem;margin-top:1.25rem;justify-content:flex-end">
+          <button onclick="closeOrderModal()" style="padding:8px 18px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer">${t('ordersCancelBtn')}</button>
+          <button onclick="saveOrder()" style="padding:8px 18px;background:#00c9b1;color:#0f1117;border:none;border-radius:8px;font-size:0.88rem;font-weight:700;cursor:pointer">${t('ordersSavBtn')}</button>
+        </div>
+        <div id="omError" style="display:none;margin-top:0.75rem;color:#f76f6f;font-size:0.85rem"></div>
+      </div>`;
+    document.body.appendChild(modal);
+    if (!existingItems.length) omAddItem();
+  }
+
+  function omItemRow(materialId, quantity) {
+    const opts = _ordersMats.map(m => `<option value="${m.id}" ${String(m.id)===String(materialId)?'selected':''}>${m.name} (${m.unit})</option>`).join('');
+    return `<div class="om-item" style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.4rem">
+      <select style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 8px;font-size:0.85rem;outline:none">
+        <option value="">—</option>${opts}
+      </select>
+      <input type="number" min="0.01" step="0.01" value="${quantity||''}" placeholder="${t('ordersQtyLbl')}" style="width:80px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 8px;font-size:0.85rem;outline:none">
+      <button type="button" onclick="this.parentElement.remove()" style="background:rgba(247,111,111,.12);border:1px solid rgba(247,111,111,.3);border-radius:6px;color:#f76f6f;padding:4px 8px;cursor:pointer;font-size:0.9rem">✕</button>
+    </div>`;
+  }
+
+  function omAddItem() { document.getElementById('omItems').insertAdjacentHTML('beforeend', omItemRow('','')); }
+  function closeOrderModal() { document.getElementById('orderModal')?.remove(); }
+
+  async function saveOrder() {
+    const houseId     = document.getElementById('omHouse').value;
+    const status      = document.getElementById('omStatus').value;
+    const notes       = document.getElementById('omNotes').value.trim();
+    const createdById = document.getElementById('omCreatedBy').value || null;
+    const items = [];
+    for (const el of document.querySelectorAll('#omItems .om-item')) {
+      const matId = el.querySelector('select').value;
+      const qty   = el.querySelector('input').value;
+      if (matId && qty) items.push({ materialId: parseInt(matId), quantity: parseFloat(qty) });
+    }
+    const errEl = document.getElementById('omError');
+    if (!houseId)      { errEl.textContent = t('ordersHouseLbl') + ' is required.'; errEl.style.display=''; return; }
+    if (!items.length) { errEl.textContent = t('ordersMaterialLbl') + ' is required.'; errEl.style.display=''; return; }
+    errEl.style.display = 'none';
+    try {
+      const url    = _editingOrderId ? `/api/material-orders/${_editingOrderId}` : '/api/material-orders';
+      const method = _editingOrderId ? 'PUT' : 'POST';
+      const res    = await apiFetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify({ houseId: parseInt(houseId), status, notes: notes||null, createdById: createdById ? parseInt(createdById) : null, items }) });
+      if (!res.ok) { const d = await res.json(); errEl.textContent = d.error || 'Error'; errEl.style.display=''; return; }
+      closeOrderModal();
+      await renderOrdersDash();
+    } catch(e) { errEl.textContent = e.message; errEl.style.display=''; }
+  }
+
+  async function deleteOrder(id) {
+    if (!confirm(t('ordersDeleteConfirm'))) return;
+    await apiFetch(`/api/material-orders/${id}`, { method: 'DELETE' });
+    await renderOrdersDash();
+  }
+
+  async function openDeliveryModal(orderId) {
+    const order = _ordersList.find(o => o.id === orderId);
+    if (!order) return;
+    const modal = document.createElement('div');
+    modal.id = 'deliveryModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1001;display:flex;align-items:center;justify-content:center;padding:1rem';
+    const today = new Date().toISOString().slice(0,16);
+    const workerOpts = _ordersWorkers.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+    modal.innerHTML = `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto">
+        <h3 style="margin-bottom:1.2rem;font-size:1.05rem;font-weight:700;color:#f97316">${t('deliveriesNewTitle')} — 🏠 ${order.houseName}</h3>
+        <div class="field">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:6px">${t('deliveriesDateLbl')}</label>
+          <input id="dmDate" type="datetime-local" value="${today}" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+        </div>
+        <div class="field">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:6px">${t('deliveriesResponsibleLbl')}</label>
+          <select id="dmResponsible" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+            <option value="">—</option>${workerOpts}
+          </select>
+        </div>
+        <div style="margin-bottom:0.75rem">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:6px">${t('ordersMaterialLbl')}</label>
+          <div id="dmItems">${order.items.map(i => `
+            <div class="dm-item" data-material-id="${i.materialId}" style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.4rem">
+              <span style="flex:1;font-size:0.85rem;color:var(--text)">${i.materialName} (${i.unit}) — ordered: ${i.quantity}</span>
+              <input type="number" min="0.01" step="0.01" placeholder="${t('deliveriesQtyLbl')}" style="width:100px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 8px;font-size:0.85rem;outline:none">
+            </div>`).join('')}</div>
+        </div>
+        <div class="field">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:6px">${t('deliveriesNotesLbl')}</label>
+          <input id="dmNotes" type="text" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+        </div>
+        <div style="display:flex;gap:0.75rem;margin-top:1.25rem;justify-content:flex-end">
+          <button onclick="document.getElementById('deliveryModal').remove()" style="padding:8px 18px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer">${t('deliveriesCancelBtn')}</button>
+          <button onclick="saveDelivery(${orderId})" style="padding:8px 18px;background:#f97316;color:#fff;border:none;border-radius:8px;font-size:0.88rem;font-weight:700;cursor:pointer">${t('deliveriesSaveBtn')}</button>
+        </div>
+        <div id="dmError" style="display:none;margin-top:0.75rem;color:#f76f6f;font-size:0.85rem"></div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+
+  async function saveDelivery(orderId) {
+    const deliveredAt   = document.getElementById('dmDate').value;
+    const notes         = document.getElementById('dmNotes').value.trim();
+    const responsibleId = document.getElementById('dmResponsible').value || null;
+    const items = [];
+    document.querySelectorAll('#dmItems .dm-item').forEach(el => {
+      const qty = el.querySelector('input').value;
+      if (qty && parseFloat(qty) > 0) items.push({ materialId: parseInt(el.dataset.materialId), qtyDelivered: parseFloat(qty) });
+    });
+    const errEl = document.getElementById('dmError');
+    if (!items.length) { errEl.textContent = t('ordersMaterialLbl') + ' — enter at least one qty.'; errEl.style.display=''; return; }
+    errEl.style.display = 'none';
+    try {
+      const res = await apiFetch(`/api/material-orders/${orderId}/deliveries`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ deliveredAt, notes: notes||null, responsibleId: responsibleId ? parseInt(responsibleId) : null, items }) });
+      if (!res.ok) { const d = await res.json(); errEl.textContent = d.error || 'Error'; errEl.style.display=''; return; }
+      document.getElementById('deliveryModal').remove();
+      [_ordersList] = await Promise.all([apiFetch('/api/material-orders').then(r => r.json())]);
+      renderOrdersTable();
+      const row = document.getElementById(`order-deliveries-row-${orderId}`);
+      if (row) row.style.display = 'none';
+      toggleOrderDeliveries(orderId, null);
+    } catch(e) { errEl.textContent = e.message; errEl.style.display=''; }
+  }
+
+  async function deleteDelivery(deliveryId, orderId) {
+    if (!confirm(t('deliveriesDeleteConfirm'))) return;
+    await apiFetch(`/api/deliveries/${deliveryId}`, { method: 'DELETE' });
+    [_ordersList] = await Promise.all([apiFetch('/api/material-orders').then(r => r.json())]);
+    renderOrdersTable();
+    toggleOrderDeliveries(orderId, null);
+  }
+
+  // ── Deliveries Dashboard ─────────────────────────────────────────────────────
+  let _deliveriesOrdersList = [], _deliveriesWorkersList = [];
+
+  async function renderDeliveriesDash() {
+    const grid = document.getElementById('grid');
+    grid.style.display = 'block';
+    grid.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>Loading...</div>`;
+    let dels = [];
+    try {
+      [dels, _deliveriesOrdersList, _deliveriesWorkersList] = await Promise.all([
+        apiFetch('/api/deliveries').then(r => r.json()),
+        apiFetch('/api/material-orders').then(r => r.json()),
+        apiFetch('/api/workers').then(r => r.json()),
+      ]);
+    } catch(e) { grid.innerHTML = `<div class="state-msg">Failed to load deliveries.</div>`; return; }
+    grid.innerHTML = `
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+        <button class="btn btn-primary admin-only" onclick="openDeliveryFromTab()" style="background:#f97316;color:#fff;border:none">${t('ordersAddDelivery')}</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="att-table">
+          <thead><tr>
+            <th>#</th>
+            <th>${t('deliveriesColOrder')}</th>
+            <th>${t('deliveriesColHouse')}</th>
+            <th>${t('deliveriesColDate')}</th>
+            <th>${t('deliveriesColItems')}</th>
+            <th>${t('deliveriesColResponsible')}</th>
+            <th style="text-align:center" class="admin-only">${t('deliveriesColActions')}</th>
+          </tr></thead>
+          <tbody>
+            ${dels.length ? dels.map(d => `<tr>
+              <td style="color:var(--text)">${d.id}</td>
+              <td style="color:#00c9b1;font-weight:600">#${d.orderId}</td>
+              <td style="font-weight:600;color:#4f8ef7">🏠 ${d.houseName}</td>
+              <td style="color:var(--text);font-size:0.82rem;white-space:nowrap">${new Date(d.deliveredAt).toLocaleString()}</td>
+              <td style="font-size:0.82rem;color:var(--text)">${d.items.map(i=>`${i.materialName}: ${i.qtyDelivered} ${i.unit}`).join(', ') || '—'}</td>
+              <td style="font-size:0.82rem;color:var(--text)">${d.responsibleName ? '👷 '+d.responsibleName : '—'}</td>
+              <td style="text-align:center" class="admin-only">
+                <button onclick="deleteDeliveryFromTab(${d.id})" style="background:rgba(247,111,111,.12);border:1px solid rgba(247,111,111,.3);border-radius:5px;color:#f76f6f;padding:2px 7px;cursor:pointer;font-size:0.85rem">🗑</button>
+              </td>
+            </tr>`).join('') : `<tr><td colspan="6" style="text-align:center;color:#9aa3be;padding:2rem">${t('deliveriesNoData')}</td></tr>`}
+          </tbody>
+        </table>
+      </div>`;
+    onAltSearch();
+  }
+
+  async function openDeliveryFromTab() {
+    const activeOrders = _deliveriesOrdersList.filter(o => o.status !== 'CANCELLED' && o.status !== 'DELIVERED');
+    if (!activeOrders.length) { alert('No active orders to deliver to.'); return; }
+    const modal = document.createElement('div');
+    modal.id = 'deliveryTabModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1001;display:flex;align-items:center;justify-content:center;padding:1rem';
+    const today = new Date().toISOString().slice(0,16);
+    const orderOptions = activeOrders.map(o => `<option value="${o.id}">#${o.id} — 🏠 ${o.houseName} (${orderStatusLabel(o.status)})</option>`).join('');
+    const workerOpts = _deliveriesWorkersList.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+    modal.innerHTML = `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto">
+        <h3 style="margin-bottom:1.2rem;font-size:1.05rem;font-weight:700;color:#f97316">${t('deliveriesNewTitle')}</h3>
+        <div class="field">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:6px">${t('deliveriesColOrder')}</label>
+          <select id="dtOrder" onchange="dtLoadItems()" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+            <option value="">—</option>${orderOptions}
+          </select>
+        </div>
+        <div class="field">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:6px">${t('deliveriesDateLbl')}</label>
+          <input id="dtDate" type="datetime-local" value="${today}" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+        </div>
+        <div class="field">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:6px">${t('deliveriesResponsibleLbl')}</label>
+          <select id="dtResponsible" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+            <option value="">—</option>${workerOpts}
+          </select>
+        </div>
+        <div id="dtItemsWrap" style="margin-bottom:0.75rem;display:none">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:6px">${t('ordersMaterialLbl')}</label>
+          <div id="dtItems"></div>
+        </div>
+        <div class="field">
+          <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:6px">${t('deliveriesNotesLbl')}</label>
+          <input id="dtNotes" type="text" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:0.9rem;outline:none">
+        </div>
+        <div style="display:flex;gap:0.75rem;margin-top:1.25rem;justify-content:flex-end">
+          <button onclick="document.getElementById('deliveryTabModal').remove()" style="padding:8px 18px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer">${t('deliveriesCancelBtn')}</button>
+          <button onclick="saveDeliveryFromTab()" style="padding:8px 18px;background:#f97316;color:#fff;border:none;border-radius:8px;font-size:0.88rem;font-weight:700;cursor:pointer">${t('deliveriesSaveBtn')}</button>
+        </div>
+        <div id="dtError" style="display:none;margin-top:0.75rem;color:#f76f6f;font-size:0.85rem"></div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+
+  function dtLoadItems() {
+    const orderId = parseInt(document.getElementById('dtOrder').value);
+    const wrap = document.getElementById('dtItemsWrap');
+    const container = document.getElementById('dtItems');
+    if (!orderId) { wrap.style.display = 'none'; return; }
+    const order = _deliveriesOrdersList.find(o => o.id === orderId);
+    if (!order || !order.items.length) { wrap.style.display = 'none'; return; }
+    container.innerHTML = order.items.map(i => `
+      <div class="dm-item" data-material-id="${i.materialId}" style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.4rem">
+        <span style="flex:1;font-size:0.85rem;color:var(--text)">${i.materialName} (${i.unit}) — ordered: ${i.quantity}</span>
+        <input type="number" min="0.01" step="0.01" placeholder="${t('deliveriesQtyLbl')}" style="width:100px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 8px;font-size:0.85rem;outline:none">
+      </div>`).join('');
+    wrap.style.display = '';
+  }
+
+  async function saveDeliveryFromTab() {
+    const orderId       = document.getElementById('dtOrder').value;
+    const deliveredAt   = document.getElementById('dtDate').value;
+    const notes         = document.getElementById('dtNotes').value.trim();
+    const responsibleId = document.getElementById('dtResponsible').value || null;
+    const items = [];
+    document.querySelectorAll('#dtItems .dm-item').forEach(el => {
+      const qty = el.querySelector('input').value;
+      if (qty && parseFloat(qty) > 0) items.push({ materialId: parseInt(el.dataset.materialId), qtyDelivered: parseFloat(qty) });
+    });
+    const errEl = document.getElementById('dtError');
+    if (!orderId)      { errEl.textContent = t('deliveriesColOrder') + ' is required.'; errEl.style.display=''; return; }
+    if (!items.length) { errEl.textContent = t('ordersMaterialLbl') + ' — enter at least one qty.'; errEl.style.display=''; return; }
+    errEl.style.display = 'none';
+    try {
+      const res = await apiFetch(`/api/material-orders/${orderId}/deliveries`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ deliveredAt, notes: notes||null, responsibleId: responsibleId ? parseInt(responsibleId) : null, items }) });
+      if (!res.ok) { const d = await res.json(); errEl.textContent = d.error || 'Error'; errEl.style.display=''; return; }
+      document.getElementById('deliveryTabModal').remove();
+      renderDeliveriesDash();
+    } catch(e) { errEl.textContent = e.message; errEl.style.display=''; }
+  }
+
+  async function deleteDeliveryFromTab(deliveryId) {
+    if (!confirm(t('deliveriesDeleteConfirm'))) return;
+    await apiFetch(`/api/deliveries/${deliveryId}`, { method: 'DELETE' });
+    renderDeliveriesDash();
+  }
+  // ── End Orders & Deliveries Dashboard ────────────────────────────────────────
+
   function onAltSearch() {
     const q = (document.getElementById('altSearchInput')?.value || '').toLowerCase();
-    document.querySelectorAll('#grid .house-card').forEach(card => {
-      const text = card.textContent.toLowerCase();
-      card.style.display = text.includes(q) ? '' : 'none';
-    });
+    if (_dashMode === 'orders' || _dashMode === 'deliveries') {
+      document.querySelectorAll('#grid table tbody tr').forEach(row => {
+        if (row.id && row.id.startsWith('order-deliveries-row-')) return;
+        row.style.display = (!q || row.textContent.toLowerCase().includes(q)) ? '' : 'none';
+      });
+    } else {
+      document.querySelectorAll('#grid .house-card').forEach(card => {
+        const search = card.dataset.search || card.textContent.toLowerCase();
+        card.style.display = (!q || search.includes(q)) ? '' : 'none';
+      });
+    }
   }
 
   async function reverseGeocode(lat, lng) {
@@ -5385,7 +6013,8 @@
     if (locStatus) locStatus.style.display = 'none';
 
     document.getElementById('startingPointLbl').textContent = t('startingPoint');
-    document.getElementById('destHouseLbl').textContent     = t('destHouseLabel');
+    if (document.getElementById('destHouseLbl2'))
+      document.getElementById('destHouseLbl2').textContent = t('destHouseLabel');
 
     try {
       const [mats, houses] = await Promise.all([
@@ -5398,6 +6027,22 @@
       const sel = document.getElementById('destHouse');
       sel.innerHTML = `<option value="">${t('selectDestHouse')}</option>` +
         houses.map(h => `<option value="${h.id}">${h.name} — ${h.location}</option>`).join('');
+
+      // Populate order picker with non-cancelled orders (excluding DELIVERED)
+      const orderSel = document.getElementById('routeOrderPicker');
+      if (orderSel) {
+        try {
+          const orders = await apiFetch('/api/material-orders').then(r => r.json());
+          const active = orders.filter(o => o.status !== 'CANCELLED' && o.status !== 'DELIVERED');
+          orderSel.innerHTML = `<option value="">— Select an order —</option>` +
+            active.map(o => `<option value="${o.id}" data-house-id="${o.houseId}"
+              data-items='${JSON.stringify(o.items)}'>
+              #${o.id} — 🏠 ${o.houseName} (${o.status})</option>`).join('');
+        } catch(e) {}
+      }
+      // Reset checkbox state on view init
+      const chk = document.getElementById('useExistingOrderChk');
+      if (chk) { chk.checked = false; toggleExistingOrder(); }
 
       // Populate material inputs
       document.getElementById('materialFields').innerHTML = `
@@ -5415,6 +6060,77 @@
     } catch (e) {
       document.getElementById('materialFields').innerHTML =
         `<div class="state-msg" style="padding:1rem">${t('errLoadData')}<br><small style="color:var(--muted)">${e.message}</small></div>`;
+    }
+  }
+
+  // Holds the computed remaining quantities when in order mode: { materialId -> remaining }
+  let _routeOrderMats = null;
+  let _routeOrderHouseId = null;
+
+  function toggleExistingOrder() {
+    const chk = document.getElementById('useExistingOrderChk');
+    const picker = document.getElementById('existingOrderPicker');
+    const destField = document.getElementById('destHouseField');
+    const matFields = document.getElementById('materialFields');
+    if (chk.checked) {
+      picker.style.display = 'block';
+      destField.style.display = 'none';
+      matFields.style.display = 'none';
+      _routeOrderMats = null;
+      _routeOrderHouseId = null;
+    } else {
+      picker.style.display = 'none';
+      destField.style.display = '';
+      matFields.style.display = '';
+      document.getElementById('routeOrderPicker').value = '';
+      document.getElementById('routeOrderInfo').style.display = 'none';
+      _routeOrderMats = null;
+      _routeOrderHouseId = null;
+    }
+  }
+
+  async function importOrderToRoute() {
+    const sel = document.getElementById('routeOrderPicker');
+    const opt = sel.options[sel.selectedIndex];
+    const infoEl = document.getElementById('routeOrderInfo');
+    _routeOrderMats = null;
+    _routeOrderHouseId = null;
+    if (!opt || !opt.value) { infoEl.style.display = 'none'; return; }
+
+    _routeOrderHouseId = parseInt(opt.dataset.houseId);
+    const orderedItems = JSON.parse(opt.dataset.items || '[]');
+
+    // Fetch deliveries to compute remaining quantities
+    try {
+      const dels = await apiFetch(`/api/material-orders/${opt.value}/deliveries`).then(r => r.json());
+      const delivered = {};
+      dels.forEach(d => d.items.forEach(i => {
+        delivered[i.materialId] = (delivered[i.materialId] || 0) + parseFloat(i.qtyDelivered);
+      }));
+      const remaining = {};
+      let allZero = true;
+      orderedItems.forEach(i => {
+        const rem = Math.max(0, parseFloat(i.quantity) - (delivered[i.materialId] || 0));
+        remaining[i.materialId] = rem;
+        if (rem > 0) allZero = false;
+      });
+      if (allZero) {
+        infoEl.style.display = 'block';
+        infoEl.textContent = '✅ All materials already delivered for this order.';
+        _routeOrderMats = null;
+      } else {
+        const partial = dels.length > 0;
+        const lines = orderedItems
+          .filter(i => remaining[i.materialId] > 0)
+          .map(i => `${i.materialName}: ${remaining[i.materialId]} ${i.unit}`);
+        infoEl.style.display = 'block';
+        infoEl.innerHTML = (partial ? '⚠️ Partial delivery — missing:<br>' : '📦 Materials needed:<br>') +
+          lines.map(l => `&nbsp;&nbsp;• ${l}`).join('<br>');
+        _routeOrderMats = remaining;
+      }
+    } catch(e) {
+      infoEl.style.display = 'block';
+      infoEl.textContent = 'Error loading deliveries: ' + e.message;
     }
   }
 
@@ -5509,24 +6225,37 @@
         `<div class="state-msg" style="padding:2rem"><span style="color:var(--red)">${t('selectStartLocation')}</span></div>`;
       return;
     }
-    const destHouseId = parseInt(document.getElementById('destHouse')?.value);
-    if (!destHouseId) {
-      document.getElementById('results').innerHTML =
-        `<div class="state-msg" style="padding:2rem"><span style="color:var(--red)">${t('selectDestHouseErr')}</span></div>`;
-      return;
-    }
 
-    const mats = {};
-    let hasAny = false;
-    for (const m of materials) {
-      const val = parseFloat(document.getElementById(`mat_${m.id}`).value) || 0;
-      if (val > 0) hasAny = true;
-      mats[m.id] = val;
-    }
-    if (!hasAny) {
-      document.getElementById('results').innerHTML =
-        `<div class="state-msg" style="padding:2rem"><span style="color:var(--red)">${t('enterQty')}</span></div>`;
-      return;
+    const orderMode = document.getElementById('useExistingOrderChk')?.checked;
+    let destHouseId, mats;
+
+    if (orderMode) {
+      if (!_routeOrderHouseId || !_routeOrderMats) {
+        document.getElementById('results').innerHTML =
+          `<div class="state-msg" style="padding:2rem"><span style="color:var(--red)">Please select an order with missing materials.</span></div>`;
+        return;
+      }
+      destHouseId = _routeOrderHouseId;
+      mats = _routeOrderMats;
+    } else {
+      destHouseId = parseInt(document.getElementById('destHouse')?.value);
+      if (!destHouseId) {
+        document.getElementById('results').innerHTML =
+          `<div class="state-msg" style="padding:2rem"><span style="color:var(--red)">${t('selectDestHouseErr')}</span></div>`;
+        return;
+      }
+      mats = {};
+      let hasAny = false;
+      for (const m of materials) {
+        const val = parseFloat(document.getElementById(`mat_${m.id}`).value) || 0;
+        if (val > 0) hasAny = true;
+        mats[m.id] = val;
+      }
+      if (!hasAny) {
+        document.getElementById('results').innerHTML =
+          `<div class="state-msg" style="padding:2rem"><span style="color:var(--red)">${t('enterQty')}</span></div>`;
+        return;
+      }
     }
 
     document.getElementById('results').innerHTML =
@@ -5639,14 +6368,23 @@
   }
 
   function renderAlternativesCards(alts) {
+    const sourceTag = {
+      houses_warehouses_only: '🏠+🏭 No suppliers',
+      houses_suppliers_only:  '🏠+🏪 No warehouses',
+    };
     return `<div class="alt-cards">${alts.map(a => {
       const { cost } = fuelEstimate(a.totalDistance);
       const isSel = a.objective === selectedAltLabel;
+      const deficitBadge = !a.fullyFulfilled
+        ? `<div style="font-size:0.7rem;color:var(--red);font-weight:600;margin-top:0.3rem">⚠ Partial coverage</div>` : '';
+      const sourceBadge = sourceTag[a.objective]
+        ? `<div style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem">${sourceTag[a.objective]}</div>` : '';
       return `<div class="alt-card${isSel ? ' selected' : ''}" data-objective="${a.objective}">
         <div class="alt-card-title">${t('obj_' + a.objective)}</div>
         <div class="alt-card-row">📏 <strong>${a.totalDistance}</strong> km</div>
         <div class="alt-card-row">⏱ <strong>${a.totalMinutes}</strong> ${t('minLabel')}</div>
         <div class="alt-card-row">⛽ <strong>${euro(cost)}</strong></div>
+        ${sourceBadge}${deficitBadge}
         <div class="alt-card-pill">${isSel ? '✓ ' + t('objSelected') : t('objView')}</div>
       </div>`;
     }).join('')}</div>`;
@@ -6018,6 +6756,28 @@
     }
   }
 
+  function facilityCardHtml(f, kind) {
+    const mats = (f.materials || []).map(m =>
+      `<span class="mat-tag">${MAT_META[m.name]?.icon || '📦'} ${mn(m.name)}: ${fmt(m.quantity)} ${mu(m.unit)}</span>`
+    ).join('') || `<span style="color:var(--muted);font-size:0.8rem">${t('facNoStock')}</span>`;
+    const hasCoords = f.lat != null && f.lng != null;
+    return `
+      <div class="house-card">
+        <div class="house-header">
+          <div style="flex:1;min-width:0">
+            <p class="house-name">${escapeHtml(f.name)}</p>
+            ${f.location ? `<p class="house-loc">📍 ${escapeHtml(f.location)}</p>` : ''}
+            ${hasCoords ? `<p class="house-loc" style="font-size:0.72rem;color:var(--muted)">🗺 ${f.lat}, ${f.lng}</p>` : `<p class="house-loc" style="color:var(--yellow);font-size:0.72rem">${t('facNoCoords')}</p>`}
+          </div>
+          <div class="card-actions admin-only" onclick="event.stopPropagation()">
+            <button class="card-btn card-btn-edit" title="${t('facEdit')}" onclick="openFacilityModal('${kind}', ${f.id})">✏</button>
+            <button class="card-btn card-btn-del"  title="${t('facDelete')}" onclick="deleteFacility('${kind}', ${f.id})">🗑</button>
+          </div>
+        </div>
+        <div class="stop-mats">${mats}</div>
+      </div>`;
+  }
+
   function renderFacilityList(kind) {
     const cfg = facCfg(kind);
     const el = document.getElementById(cfg.listEl);
@@ -6026,28 +6786,44 @@
       el.innerHTML = `<div class="state-msg" style="padding:1rem;color:var(--muted)">${t('facEmpty')}</div>`;
       return;
     }
-    el.innerHTML = cfg.list.map(f => {
-      const mats = (f.materials || []).map(m =>
-        `<span class="mat-tag">${MAT_META[m.name]?.icon || '📦'} ${mn(m.name)}: ${fmt(m.quantity)} ${mu(m.unit)}</span>`
-      ).join('') || `<span style="color:var(--muted);font-size:0.8rem">${t('facNoStock')}</span>`;
-      const coords = (f.lat != null && f.lng != null)
-        ? `📍 ${f.lat}, ${f.lng}`
-        : `<span style="color:var(--yellow)">${t('facNoCoords')}</span>`;
-      return `
-        <div class="stop-card" style="display:block">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem">
-            <div>
-              <p class="stop-name">${escapeHtml(f.name)}</p>
-              <p class="stop-loc">${escapeHtml(f.location)} &nbsp;·&nbsp; ${coords}</p>
-            </div>
-            <div style="display:flex;gap:0.4rem;flex-shrink:0">
-              <button class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem" onclick="openFacilityModal('${kind}', ${f.id})">${t('facEdit')}</button>
-              <button class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;color:var(--red)" onclick="deleteFacility('${kind}', ${f.id})">${t('facDelete')}</button>
-            </div>
-          </div>
-          <div class="stop-mats" style="margin-top:0.5rem">${mats}</div>
-        </div>`;
-    }).join('');
+    el.innerHTML = cfg.list.map(f => facilityCardHtml(f, kind)).join('');
+  }
+
+  function filterFacilityList(kind) {
+    const q = document.getElementById(kind === 'warehouse' ? 'whSearchInput' : 'supSearchInput').value.trim().toLowerCase();
+    const cfg = facCfg(kind);
+    const filtered = q ? cfg.list.filter(f => f.name.toLowerCase().includes(q) || (f.location || '').toLowerCase().includes(q)) : cfg.list;
+    const el = document.getElementById(cfg.listEl);
+    if (!el) return;
+    if (!filtered.length) {
+      el.innerHTML = `<div class="state-msg" style="padding:1rem;color:var(--muted)">${t('facEmpty')}</div>`;
+      return;
+    }
+    el.innerHTML = filtered.map(f => facilityCardHtml(f, kind)).join('');
+  }
+
+  function filterCrews() {
+    const q = document.getElementById('crewsSearchInput').value.trim().toLowerCase();
+    document.querySelectorAll('#view-crews .worker-card, #view-crews .crew-card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = (!q || text.includes(q)) ? '' : 'none';
+    });
+  }
+
+  function filterElectricBoxes() {
+    const q = document.getElementById('ebSearchInput').value.trim().toLowerCase();
+    document.querySelectorAll('#ebList .eb-box-row').forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = (!q || text.includes(q)) ? '' : 'none';
+    });
+  }
+
+  function filterQrCodes() {
+    const q = document.getElementById('qrSearchInput').value.trim().toLowerCase();
+    document.querySelectorAll('#qrGrid .qr-card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = (!q || text.includes(q)) ? '' : 'none';
+    });
   }
 
   function openFacilityModal(kind, id) {
