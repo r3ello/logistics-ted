@@ -1,0 +1,31 @@
+ALTER TABLE house_stage ADD COLUMN IF NOT EXISTS stage_name_en VARCHAR(120);
+
+UPDATE house_stage SET stage_name_en = CASE stage_order
+    WHEN 1  THEN 'Structure'
+    WHEN 2  THEN 'Cladding'
+    WHEN 3  THEN 'Gutters'
+    WHEN 4  THEN 'Roof Covering'
+    WHEN 5  THEN 'Chimney'
+    WHEN 6  THEN 'Joinery Measurements'
+    WHEN 7  THEN 'Screed Level'
+    WHEN 8  THEN 'Joinery Installation'
+    WHEN 9  THEN 'Doors Order'
+    WHEN 10 THEN 'Electrical'
+    WHEN 11 THEN 'Plumbing'
+    WHEN 12 THEN 'Insulation'
+    WHEN 13 THEN 'Drywall'
+    WHEN 14 THEN 'Plastering'
+    WHEN 15 THEN 'Screed'
+    WHEN 16 THEN 'Electrical Conduits'
+    WHEN 17 THEN 'Render'
+    WHEN 18 THEN 'Downpipes'
+    WHEN 19 THEN 'Tiles'
+    WHEN 20 THEN 'Paint'
+    WHEN 21 THEN 'Laminate'
+    WHEN 22 THEN 'Switches & Sockets'
+    WHEN 23 THEN 'Lightning Protection'
+    WHEN 24 THEN 'Doors'
+    WHEN 25 THEN 'Skirting Boards'
+    WHEN 26 THEN 'Completion'
+    ELSE stage_name
+END;

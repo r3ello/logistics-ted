@@ -69,6 +69,16 @@
     body.theme-light input[type="date"],   body.theme-light select {
       background: #fff; color: #1a1d27; border-color: var(--border);
     }
+    /* Stage matrix status selects — dark mode */
+    .stage-sel-NOT_STARTED { background:#1e2235 !important; color:#8892b0 !important; border:1px solid #3a4060 !important; }
+    .stage-sel-ASSIGNED    { background:#1e40af !important; color:#ffffff !important; border:none !important; }
+    .stage-sel-IN_PROGRESS { background:#b45309 !important; color:#ffffff !important; border:none !important; }
+    .stage-sel-DONE        { background:#065f46 !important; color:#ffffff !important; border:none !important; }
+    /* Stage matrix status selects — light mode */
+    body.theme-light .stage-sel-NOT_STARTED { background:#f1f5f9 !important; color:#334155 !important; border:1px solid #cbd5e1 !important; }
+    body.theme-light .stage-sel-ASSIGNED    { background:#1e40af !important; color:#ffffff !important; border:none !important; }
+    body.theme-light .stage-sel-IN_PROGRESS { background:#b45309 !important; color:#ffffff !important; border:none !important; }
+    body.theme-light .stage-sel-DONE        { background:#065f46 !important; color:#ffffff !important; border:none !important; }
     body {
       background:
         radial-gradient(1100px 700px at 85% -10%, rgba(79,142,247,0.07), transparent 60%),
@@ -1444,22 +1454,7 @@
         <label id="mStartDateLabel">Start date <span id="mStartOptional" style="font-weight:400;color:var(--muted)">(optional)</span></label>
         <input id="mStartDate" type="date" />
       </div>
-      <div class="modal-field" style="margin-bottom:0">
-        <label id="mPhaseLabel">Current phase <span id="mPhaseOptional" style="font-weight:400;color:var(--muted)">(optional)</span></label>
-        <select id="mPhase">
-          <option value="">— none —</option>
-          <option value="Foundation">Foundation</option>
-          <option value="Framing">Framing</option>
-          <option value="Roofing">Roofing</option>
-          <option value="Electrical">Electrical</option>
-          <option value="Plumbing">Plumbing</option>
-          <option value="Insulation">Insulation</option>
-          <option value="Drywall">Drywall</option>
-          <option value="Finishing">Finishing</option>
-          <option value="Landscaping">Landscaping</option>
-          <option value="Completed">Completed</option>
-        </select>
-      </div>
+      <input type="hidden" id="mPhase" value="" />
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:-0.25rem">
       <button id="mLocBtn" onclick="fillModalCoords()" style="
@@ -1522,6 +1517,29 @@
   </div>
 </div>
 
+<!-- STAGE MODAL -->
+<div class="modal-backdrop" id="stageModal" onclick="if(event.target===this) closeStageModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      <span id="stageModalTitle">Add Stage</span>
+      <button class="modal-close" onclick="closeStageModal()">✕</button>
+    </div>
+    <div class="modal-field">
+      <label>Name (BG)</label>
+      <input id="stageInputBg" type="text" placeholder="Наименование на етап" />
+    </div>
+    <div class="modal-field">
+      <label>Name (EN)</label>
+      <input id="stageInputEn" type="text" placeholder="Stage name in English" />
+    </div>
+    <p class="modal-err" id="stageModalErr"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeStageModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStageModal()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <div class="login-card">
@@ -1570,6 +1588,9 @@
       <span id="navManagementChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
     <div id="navManagementChildren" style="display:none">
+      <div class="nav-item nav-sub" id="navStageMatrix" onclick="showView('stagematrix');setNavActive('navStageMatrix')">
+        <span class="nav-icon">📊</span> <span id="navStageMatrixLabel">Stage Matrix</span>
+      </div>
       <div class="nav-item nav-sub" id="navHouses" onclick="showView('dashboard');setDashMode('houses');setNavActive('navHouses')">
         <span class="nav-icon">🏠</span> <span id="navHousesLabel">Houses</span>
       </div>
@@ -1593,6 +1614,9 @@
       </div>
       <div class="nav-item nav-sub" id="navScaffold" onclick="showView('dashboard');setDashMode('scaffold');setNavActive('navScaffold')">
         <span class="nav-icon">🏗️</span> <span id="navScaffoldLabel">Scaffold</span>
+      </div>
+      <div class="nav-item nav-sub" id="navStages" onclick="showView('dashboard');setDashMode('stages');setNavActive('navStages')">
+        <span class="nav-icon">🔢</span> <span id="navStagesLabel">House Stages</span>
       </div>
     </div>
     <div class="nav-item" id="navOrgChartGroup" onclick="toggleNavGroup('orgchart')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
@@ -1660,6 +1684,7 @@
   <!-- VIEW: DASHBOARD -->
   <div class="view active" id="view-dashboard">
     <div id="dashTabBar" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:1.2rem;background:#1a1d27;border:1px solid #2e3250;border-radius:10px;padding:4px">
+      <button onclick="showView('stagematrix');setNavActive('navStageMatrix')" id="dashModeStageMatrix" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">📊 Project Stages</button>
       <button onclick="setDashMode('houses')"         id="dashModeHouses"         style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:#4f8ef7;color:#fff">🏠 Houses</button>
       <button onclick="setDashMode('workers')"        id="dashModeWorkers"        style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👷 Workers</button>
       <button onclick="setDashMode('crews')"          id="dashModeCrews"          style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">👥 Crews</button>
@@ -1669,6 +1694,7 @@
       <button onclick="setDashMode('dashSuppliers')"  id="dashModeDashSuppliers"  style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏭 Suppliers</button>
       <button onclick="setDashMode('scaffold')"       id="dashModeScaffold"       style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏗️ Scaffold</button>
       <button onclick="setDashMode('travelpay')"      id="dashModeTravelpay"      style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 Travel Allowance</button>
+      <button onclick="setDashMode('stages')"          id="dashModeStages"          style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🔢 House Stages</button>
     </div>
     <div class="totals" id="totals"></div>
     <div class="search-wrap">
@@ -1848,11 +1874,7 @@
           <option value="">— No manager —</option>
         </select>
       </div>
-      <div class="field"><label>Assigned House</label>
-        <select id="cHouse" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
-          <option value="">— No house assigned —</option>
-        </select>
-      </div>
+      <input type="hidden" id="cHouse" value="" />
       <div class="field"><label>Leader</label>
         <select id="cLeader" onchange="onCrewLeaderChange(this)" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
           <option value="">— No leader —</option>
@@ -2135,6 +2157,21 @@
 
   </div><!-- /view-attendance -->
 
+  <div class="view" id="view-stagematrix">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem">
+      <div>
+        <h2 id="stageMatrixTitle" style="margin:0;font-size:1.25rem;font-weight:700">Stage Matrix</h2>
+        <p id="stageMatrixSub" style="margin:0.25rem 0 0;color:var(--muted);font-size:0.85rem">All houses × all construction stages</p>
+      </div>
+      <input id="stageMatrixSearch" type="text" placeholder="Search house by name..."
+        oninput="filterMatrixRows(this.value)"
+        style="background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:0.45rem 0.9rem;font-size:0.85rem;color:var(--text);width:220px;outline:none" />
+    </div>
+    <div id="stageMatrixWrap" style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
+      <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
+    </div>
+  </div>
+
 </div><!-- /main -->
 
 <script>
@@ -2196,7 +2233,7 @@
       historyImmutableNote:'Historical record — read-only.',
       historyViews:'views',
       refresh:'⟳ Refresh', langBtn:'🌐 BG', pdfBtn:'⬇ PDF',
-      searchPlaceholder:'Search house...', searchClear:'Clear',
+      searchPlaceholder:'Search house...', searchClear:'Clear', matrixSearchPlaceholder:'Search house by name...', stagesSearchPlaceholder:'Search stage by name...',
       sectionLabel:'Houses — warehouse detail',
       loading:'Loading...', noData:'No data.', connError:'Connection error.',
       totalInventory:'Total inventory value', totalWarehouse:'Remaining materials estimated value',
@@ -2238,7 +2275,7 @@
       // fuel
       fuelSectionLabel:'⛽ Fuel estimate', fuelConsLbl:'L / 100 km', fuelPriceLbl:'€ / litre',
       // house card chips
-      chipStart:'Start', chipPhase:'Phase', chipDestination:'Destination',
+      chipStart:'Start', chipPhase:'Phase', chipStage:'Stage', chipDestination:'Destination',
       // delete confirm
       deleteConfirmPrefix:'Delete ', btnNo:'No', btnYesDelete:'Yes, delete',
       // validation / errors
@@ -2259,6 +2296,11 @@
       warehouseLabel:'Warehouse', warehouseStops:'warehouse stops',
       reasonWarehouseFallback:'Warehouse — picked up to cover deficit, ~{dist} km from previous stop',
       // warehouses + suppliers admin
+      navStages:'House Stages', dashModeStagesLabel:'🔢 House Stages',
+      stagesColStage:'Stage Name', stagesAddBtn:'＋ Add stage', stagesNoResults:'No stages found.',
+      stagesPromptAdd:'New stage name:', stagesPromptRename:'Rename stage:',
+      stagesDeleteConfirm:'Delete stage "{name}"? This removes it from all houses.',
+      stagesErrAdd:'Failed to add stage', stagesErrRename:'Failed to rename stage', stagesErrDelete:'Failed to delete stage',
       navWarehouses:'Warehouses', navSuppliers:'Suppliers',
       pageTitle_warehouses:'Warehouses', pageSub_warehouses:'Company depots — tier-2 source for orders',
       pageTitle_suppliers:'Suppliers', pageSub_suppliers:'External vendors — tier-3 fallback for orders',
@@ -2326,7 +2368,9 @@
       workerRole:'Role', workerTrade:'Trade', workerTradeSelect:'— Select trade —',
       roleCrewMember:'Crew Member', roleCrewLeader:'Crew Leader', roleCrewManager:'Crew Manager',
       // crews view
-      navCrews:'Crews', pageTitle_crews:'Crew Organisation', pageSub_crews:'Manage crews, leaders, and members',
+      navOrgChartGroup:'Org Chart', navCrews:'Crews', navClientServicesGroup:'Client Services',
+      navStageMatrix:'Project Stages', pageTitle_stagematrix:'Project Stages', pageSub_stagematrix:'All houses × all construction stages',
+      pageTitle_crews:'Crew Organisation', pageSub_crews:'Manage crews, leaders, and members',
       crewsSectionLabel:'Crew Organisation Chart', crewAddBtn:'＋ Add Crew',
       crewModalAdd:'Add Crew', crewModalEdit:'Edit Crew', crewName:'Crew Name',
       crewManager:'Manager', crewLeader:'Leader', crewMembers:'Members',
@@ -2411,7 +2455,7 @@
       historyImmutableNote:'Исторически запис — само за четене.',
       historyViews:'прегл.',
       refresh:'⟳ Опресни', langBtn:'🌐 EN', pdfBtn:'⬇ PDF',
-      searchPlaceholder:'Търси къща...', searchClear:'Изчисти',
+      searchPlaceholder:'Търси къща...', searchClear:'Изчисти', matrixSearchPlaceholder:'Търси обект по име...', stagesSearchPlaceholder:'Търси етап по име...',
       sectionLabel:'Къщи — детайли на склад',
       loading:'Зареждане...', noData:'Няма данни.', connError:'Грешка при свързване.',
       totalInventory:'Обща стойност на инвентара', totalWarehouse:'Прогнозна стойност на оставащи материали',
@@ -2453,7 +2497,7 @@
       // fuel
       fuelSectionLabel:'⛽ Разход на гориво', fuelConsLbl:'Л / 100 км', fuelPriceLbl:'€ / литър',
       // house card chips
-      chipStart:'Начало', chipPhase:'Фаза', chipDestination:'Дестинация',
+      chipStart:'Начало', chipPhase:'Фаза', chipStage:'Етап', chipDestination:'Дестинация',
       // delete confirm
       deleteConfirmPrefix:'Изтрий ', btnNo:'Не', btnYesDelete:'Да, изтрий',
       // validation / errors
@@ -2474,6 +2518,11 @@
       warehouseLabel:'Склад', warehouseStops:'складове',
       reasonWarehouseFallback:'Склад — взето за покриване на недостиг, ~{dist} км от предишна спирка',
       // warehouses + suppliers admin
+      navStages:'Етапи на обект', dashModeStagesLabel:'🔢 Етапи на обект',
+      stagesColStage:'Наименование на етап', stagesAddBtn:'＋ Добави етап', stagesNoResults:'Няма намерени етапи.',
+      stagesPromptAdd:'Наименование на нов етап:', stagesPromptRename:'Преименувай етап:',
+      stagesDeleteConfirm:'Изтриване на етап "{name}"? Това го премахва от всички обекти.',
+      stagesErrAdd:'Грешка при добавяне на етап', stagesErrRename:'Грешка при преименуване', stagesErrDelete:'Грешка при изтриване на етап',
       navWarehouses:'Складове', navSuppliers:'Доставчици',
       pageTitle_warehouses:'Складове', pageSub_warehouses:'Фирмени складове — източник от ниво 2 за поръчки',
       pageTitle_suppliers:'Доставчици', pageSub_suppliers:'Външни доставчици — резерв от ниво 3 за поръчки',
@@ -2541,7 +2590,9 @@
       workerRole:'Роля', workerTrade:'Специалност', workerTradeSelect:'— Изберете специалност —',
       roleCrewMember:'Член на екип', roleCrewLeader:'Ръководител екип', roleCrewManager:'Мениджър екип',
       // crews view
-      navCrews:'Екипи', pageTitle_crews:'Организация на екипи', pageSub_crews:'Управление на екипи, лидери и членове',
+      navOrgChartGroup:'Орг. схема', navCrews:'Екипи', navClientServicesGroup:'Клиентски услуги',
+      navStageMatrix:'Етапи на проект', pageTitle_stagematrix:'Етапи на проект', pageSub_stagematrix:'Всички обекти × всички строителни етапи',
+      pageTitle_crews:'Организация на екипи', pageSub_crews:'Управление на екипи, лидери и членове',
       crewsSectionLabel:'Организационна схема на екипи', crewAddBtn:'＋ Добави екип',
       crewModalAdd:'Добави екип', crewModalEdit:'Редактирай екип', crewName:'Име на екип',
       crewManager:'Мениджър', crewLeader:'Лидер', crewMembers:'Членове',
@@ -2598,9 +2649,12 @@
     translateStatic();
     retranslateMaterials();
     const activeView = document.querySelector('.view.active').id.replace('view-','');
-    if (activeView === 'dashboard') loadDashboard();
-    else if (activeView === 'scaffold') setDashMode('scaffold');
-    else if (activeView === 'history') loadHistory();
+    if (activeView === 'dashboard') {
+      if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash(); else loadDashboard();
+    }
+    else if (activeView === 'scaffold')    setDashMode('scaffold');
+    else if (activeView === 'history')     loadHistory();
+    else if (activeView === 'stagematrix') loadStageMatrix();
   }
 
   function retranslateMaterials() {
@@ -2626,6 +2680,9 @@
     const facM = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
     facM('navHousesLabel','navHouses'); facM('navWorkersLabel','navWorkers');
     facM('navOrdersLabel','navOrders'); facM('navDeliveriesLabel','navDeliveries');
+    facM('navStagesLabel','navStages');
+    const stagesTab = document.getElementById('dashModeStages'); if (stagesTab) stagesTab.textContent = t('dashModeStagesLabel');
+    const stageMatrixTab = document.getElementById('dashModeStageMatrix'); if (stageMatrixTab) stageMatrixTab.textContent = t('navStageMatrix');
     document.getElementById('navMap').querySelector('span:last-child').textContent       = t('navMap');
     document.getElementById('navHistoryLabel').textContent  = t('navHistory');
     const facT = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
@@ -2636,10 +2693,14 @@
     facT('facCoordLabel','facCoordLabel'); facT('facStockLabel','facStockLabel');
     facT('facCancelBtn','facCancel'); facT('facSaveBtn','facSave');
     facT('facLocBtn','facUseLocation');
-    document.getElementById('navElectricLabel').textContent    = t('navElectric');
-    document.getElementById('navAttendanceLabel').textContent  = t('navAttendance');
-    document.getElementById('navQrcodesLabel').textContent          = t('navQrcodes');
-    document.getElementById('navTravelAllowanceLabel').textContent  = t('navTravelAllowance');
+    document.getElementById('navElectricLabel').textContent          = t('navElectric');
+    document.getElementById('navAttendanceLabel').textContent        = t('navAttendance');
+    document.getElementById('navQrcodesLabel').textContent           = t('navQrcodes');
+    document.getElementById('navTravelAllowanceLabel').textContent   = t('navTravelAllowance');
+    document.getElementById('navOrgChartGroupLabel').textContent       = t('navOrgChartGroup');
+    document.getElementById('navClientServicesGroupLabel').textContent = t('navClientServicesGroup');
+    facM('navCrewsLabel','navCrews');
+    facM('navStageMatrixLabel','navStageMatrix');
     const eb = id => document.getElementById(id);
     const ebt = (id, key) => { const el = eb(id); if (el) el.textContent = t(key); };
     ebt('ebManagerTitle','ebManagerTitle');
@@ -2683,6 +2744,7 @@
 
     document.getElementById('searchInput').placeholder  = t('searchPlaceholder');
     document.getElementById('clearBtn').title           = t('searchClear');
+    document.getElementById('stageMatrixSearch').placeholder = t('matrixSearchPlaceholder');
     document.getElementById('sectionLabel').textContent = t('sectionLabel');
     document.getElementById('orderFormTitle').textContent = t('orderFormTitle');
     document.getElementById('orderFormDesc').textContent  = t('orderFormDesc');
@@ -2865,7 +2927,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'electric', 'attendance', 'qrcodes'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'electric', 'attendance', 'qrcodes', 'stagematrix'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false };
   const _navGroupConfig = {
@@ -2895,7 +2957,9 @@
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     document.getElementById(`view-${name}`).classList.add('active');
-    document.getElementById(`nav${name.charAt(0).toUpperCase() + name.slice(1)}`).classList.add('active');
+    const navIdMap = { stagematrix: 'navStageMatrix' };
+    const navId = navIdMap[name] || `nav${name.charAt(0).toUpperCase() + name.slice(1)}`;
+    const navEl = document.getElementById(navId); if (navEl) navEl.classList.add('active');
 
     document.getElementById('pageTitle').textContent = t(`pageTitle_${name}`);
     document.getElementById('pageSub').textContent   = t(`pageSub_${name}`);
@@ -2910,7 +2974,8 @@
     if (name === 'crews') loadOrgChart();
     if (name === 'electric') ebInit();
     if (name === 'attendance') attInit();
-    if (name === 'qrcodes')   qrInit();
+    if (name === 'qrcodes')      qrInit();
+    if (name === 'stagematrix')  loadStageMatrix();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -3070,9 +3135,9 @@
               <span style="font-size:0.65rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${t('chipStart')}</span>
               <span style="font-size:0.78rem;color:${h.start_date ? '#e2e8f0' : '#9aa3be'};font-weight:600">📅 ${h.start_date || '—'}</span>
             </div>
-            <div style="display:flex;align-items:center;gap:0.3rem;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);border-radius:6px;padding:0.2rem 0.5rem">
-              <span style="font-size:0.65rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${t('chipPhase')}</span>
-              <span style="font-size:0.78rem;color:${h.current_phase ? '#a78bfa' : '#9aa3be'};font-weight:600">${h.current_phase ? '🔧 ' + t(h.current_phase) : '—'}</span>
+            <div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);border-radius:6px;padding:0.2rem 0.5rem">
+              <span style="font-size:0.65rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${t('chipStage')}</span>
+              ${h.current_phase ? h.current_phase.split(', ').map(s=>`<div style="font-size:0.78rem;color:#a78bfa;font-weight:600">🔧 ${s}</div>`).join('') : '<span style="font-size:0.78rem;color:#9aa3be;font-weight:600">—</span>'}
             </div>
           </div>
           ${materialsHTML}
@@ -3876,9 +3941,9 @@
             <span style="font-size:0.65rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${t('chipStart')}</span>
             <span style="font-size:0.78rem;color:${h.start_date ? '#e2e8f0' : '#9aa3be'};font-weight:600">📅 ${h.start_date || '—'}</span>
           </div>
-          <div style="display:flex;align-items:center;gap:0.3rem;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);border-radius:6px;padding:0.2rem 0.5rem">
-            <span style="font-size:0.65rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${t('chipPhase')}</span>
-            <span style="font-size:0.78rem;color:${h.current_phase ? '#a78bfa' : '#9aa3be'};font-weight:600">${h.current_phase ? '🔧 ' + t(h.current_phase) : '—'}</span>
+          <div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);border-radius:6px;padding:0.2rem 0.5rem">
+            <span style="font-size:0.65rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${t('chipStage')}</span>
+            ${h.current_phase ? h.current_phase.split(', ').map(s=>`<div style="font-size:0.78rem;color:#a78bfa;font-weight:600">🔧 ${s}</div>`).join('') : '<span style="font-size:0.78rem;color:#9aa3be;font-weight:600">—</span>'}
           </div>
         </div>
         ${materialsHTML}
@@ -4011,6 +4076,7 @@
     if (res.status === 401) {
       setToken(null);
       showLoginScreen();
+      throw new Error('Unauthorized');
     }
     return res;
   }
@@ -4027,9 +4093,9 @@
 
   function setDashMode(mode) {
     _dashMode = mode;
-    const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa', orders:'#00c9b1', deliveries:'#f97316', dashWarehouses:'#38bdf8', dashSuppliers:'#fb7185' };
+    const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa', orders:'#00c9b1', deliveries:'#f97316', dashWarehouses:'#38bdf8', dashSuppliers:'#fb7185', stages:'#e879f9' };
     const darkText   = new Set(['scaffold']);
-    ['houses','workers','scaffold','crews','travelpay','orders','deliveries','dashWarehouses','dashSuppliers'].forEach(m => {
+    ['houses','workers','scaffold','crews','travelpay','orders','deliveries','dashWarehouses','dashSuppliers','stages'].forEach(m => {
       const btn = document.getElementById('dashMode' + m.charAt(0).toUpperCase() + m.slice(1));
       if (!btn) return;
       if (m === mode) { btn.style.background = modeColors[m]; btn.style.color = darkText.has(m) ? '#0f1117' : '#fff'; }
@@ -4122,6 +4188,14 @@
       document.getElementById('altSearchInput').placeholder = 'Search suppliers by name or location...';
       document.getElementById('altSearchInput').value = '';
       renderFacilityDash('supplier');
+    } else if (mode === 'stages') {
+      if (searchWrap) searchWrap.style.display = 'none';
+      if (crudBar)    crudBar.style.display    = 'none';
+      if (totals)     totals.style.display     = 'none';
+      altSearch.style.display = '';
+      document.getElementById('altSearchInput').placeholder = t('stagesSearchPlaceholder') || 'Search stage by name...';
+      document.getElementById('altSearchInput').value = '';
+      renderStagesDash();
     }
   }
 
@@ -4143,6 +4217,324 @@
       </div>` + list.map(f => facilityCardHtml(f, kind)).join('');
     } catch(e) { grid.innerHTML = `<div class="state-msg">Failed to load ${kind}s.</div>`; return; }
     onAltSearch();
+  }
+
+  // ── House Stages Dashboard ────────────────────────────────────────────────
+
+  async function renderStagesDash() {
+    const grid = document.getElementById('grid');
+    grid.style.display = 'block';
+    grid.style.gridTemplateColumns = '';
+    grid.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>Loading...</div>`;
+    let list = [];
+    try { list = await apiFetch('/api/stage-types').then(r => r.json()); } catch(e) { grid.innerHTML = `<div class="state-msg">${t('stagesErrDelete')}</div>`; return; }
+
+    const q = (document.getElementById('altSearchInput')?.value || '').toLowerCase();
+    const filtered = q ? list.filter(s => s.stageName.toLowerCase().includes(q)) : list;
+
+    const isEn = currentLang === 'en';
+    const rows = filtered.map(s => {
+      const displayName = isEn && s.stageNameEn ? s.stageNameEn : s.stageName;
+      return `
+      <tr id="stageTypeRow_${s.stageOrder}" style="border-bottom:1px solid #2e3250">
+        <td style="padding:0.55rem 0.75rem;color:#9aa3be;font-size:0.78rem;font-weight:700;width:40px">${s.stageOrder}</td>
+        <td style="padding:0.55rem 0.75rem;font-size:0.9rem;font-weight:600" id="stageTypeName_${s.stageOrder}">${displayName}</td>
+        <td style="padding:0.55rem 0.75rem;text-align:right;white-space:nowrap" class="admin-only">
+          <button onclick="editStageType(${s.stageOrder},'${s.stageName.replace(/'/g,"\\'")}','${(s.stageNameEn||'').replace(/'/g,"\\'")}')" style="background:none;border:none;color:#4f8ef7;cursor:pointer;font-size:1rem;padding:0.2rem 0.4rem">✏</button>
+          <button onclick="deleteStageType(${s.stageOrder},'${displayName.replace(/'/g,"\\'")}')" style="background:none;border:none;color:#f76f6f;cursor:pointer;font-size:1rem;padding:0.2rem 0.4rem">🗑</button>
+        </td>
+      </tr>`;}).join('');
+
+    grid.innerHTML = `
+      <div style="max-width:600px">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:1rem" class="admin-only">
+          <button class="btn btn-primary" onclick="addStageType()">${t('stagesAddBtn')}</button>
+        </div>
+        <table style="width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;border:1px solid #2e3250">
+          <thead><tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase;width:40px">#</th>
+            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase">${t('stagesColStage')}</th>
+            <th class="admin-only"></th>
+          </tr></thead>
+          <tbody>${rows || `<tr><td colspan="3" style="padding:1rem;color:#9aa3be;text-align:center">${t('stagesNoResults')}</td></tr>`}</tbody>
+        </table>
+      </div>`;
+  }
+
+  let _stageModalOrder = null;
+
+  function openStageModal(order, nameBg, nameEn) {
+    _stageModalOrder = order ?? null;
+    document.getElementById('stageModalTitle').textContent = order ? t('stagesPromptRename') : t('stagesAddBtn');
+    document.getElementById('stageInputBg').value  = nameBg  || '';
+    document.getElementById('stageInputEn').value  = nameEn  || '';
+    document.getElementById('stageModalErr').textContent = '';
+    document.getElementById('stageModal').classList.add('open');
+    document.getElementById('stageInputBg').focus();
+  }
+
+  function closeStageModal() {
+    document.getElementById('stageModal').classList.remove('open');
+  }
+
+  async function saveStageModal() {
+    const nameBg = document.getElementById('stageInputBg').value.trim();
+    const nameEn = document.getElementById('stageInputEn').value.trim();
+    const err    = document.getElementById('stageModalErr');
+    if (!nameBg) { err.textContent = 'Bulgarian name is required.'; return; }
+    try {
+      if (_stageModalOrder) {
+        await apiFetch(`/api/stage-types/${_stageModalOrder}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ stageName: nameBg, stageNameEn: nameEn }) });
+      } else {
+        await apiFetch('/api/stage-types', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ stageName: nameBg, stageNameEn: nameEn }) });
+      }
+      closeStageModal();
+      renderStagesDash();
+    } catch(e) { err.textContent = _stageModalOrder ? t('stagesErrRename') : t('stagesErrAdd'); }
+  }
+
+  function addStageType()                          { openStageModal(null, '', ''); }
+  function editStageType(order, nameBg, nameEn)    { openStageModal(order, nameBg, nameEn); }
+
+  async function deleteStageType(order, name) {
+    if (!confirm(t('stagesDeleteConfirm').replace('{name}', name))) return;
+    try {
+      await apiFetch(`/api/stage-types/${order}`, { method:'DELETE' });
+      renderStagesDash();
+    } catch(e) { alert(t('stagesErrDelete')); }
+  }
+
+  // ── Stage Matrix ─────────────────────────────────────────────────────────────
+
+  const STAGE_STATUS_OPTS = ['NOT_STARTED','ASSIGNED','IN_PROGRESS','DONE'];
+
+  function stageStatusLabel(s) {
+    if (s === 'ASSIGNED')    return currentLang === 'bg' ? 'Назначен'  : 'Assigned';
+    if (s === 'IN_PROGRESS') return currentLang === 'bg' ? 'В процес'  : 'In Progress';
+    if (s === 'DONE')        return currentLang === 'bg' ? 'Завършен'  : 'Done';
+    return '—';
+  }
+
+  async function loadStageMatrix() {
+    const wrap = document.getElementById('stageMatrixWrap');
+    wrap.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>Loading…</div>`;
+    let data;
+    try { data = await apiFetch('/api/house-stages/matrix').then(r => r.json()); }
+    catch(e) { wrap.innerHTML = `<div class="state-msg">Failed to load matrix.</div>`; return; }
+
+    const { columns, rows } = data;
+    const isEn = currentLang === 'en';
+
+    const thCols = columns.map(c => {
+      const label = isEn && c.stageNameEn ? c.stageNameEn : c.stageName;
+      return `<th title="${label}" style="min-width:130px;padding:0.5rem 0.6rem;text-align:center;font-size:0.65rem;color:#9aa3be;text-transform:uppercase;white-space:nowrap;border-right:1px solid #2e3250">${label}</th>`;
+    }).join('');
+
+    // build a map: stageOrder → crews array
+    const crewsByStage = {};
+    columns.forEach(c => { crewsByStage[c.stageOrder] = c.crews || []; });
+
+    const PILL_COLOR = {
+      ASSIGNED:    { bg:'#fde68a', text:'#78350f' },
+      IN_PROGRESS: { bg:'#fca5a5', text:'#7f1d1d' },
+      DONE:        { bg:'#bbf7d0', text:'#14532d' },
+    };
+    const statusLabel = (v) => {
+      if (v === 'IN_PROGRESS') return currentLang === 'bg' ? ' в Процес' : ' In Progress';
+      if (v === 'DONE')        return currentLang === 'bg' ? ' Завършен'  : ' Done';
+      return '';
+    };
+
+    const bodyRows = rows.map(row => {
+      const foundationCell = row.stages.find(s => s.stageOrder === 0);
+      const foundationDone = foundationCell?.status === 'DONE';
+
+      const cells = row.stages.map(s => {
+        const isFoundation = s.stageOrder === 0;
+        const isLocked = !isFoundation && !foundationDone;
+
+        if (isFoundation) {
+          const done = s.status === 'DONE';
+          const pillStyle = done
+            ? `background:${PILL_COLOR.DONE.bg};color:${PILL_COLOR.DONE.text};border:none;cursor:pointer`
+            : `background:transparent;color:var(--muted);border:1px dashed var(--border);cursor:pointer`;
+          const label = done ? (isEn ? '✓ Done' : '✓ Завършен') : '—';
+          return `<td style="padding:0.2rem 0.3rem;border-right:1px solid #1a1d27;min-width:130px">
+            <button onclick="openFoundationPicker(${s.id},this,'${s.status||'NOT_STARTED'}')"
+              style="${pillStyle};width:100%;padding:0.28rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap"
+              >${label}</button>
+          </td>`;
+        }
+
+        const crews = crewsByStage[s.stageOrder] || [];
+        const currentCrew = crews.find(c => c.crewId == s.crewId);
+        const currentLeader = s.workerName || currentCrew?.leaderName || '';
+        const pc = s.status && s.status !== 'NOT_STARTED' ? PILL_COLOR[s.status] : null;
+        const pillLabel = pc ? `${currentLeader}${statusLabel(s.status)}` : '—';
+        const pillStyle = isLocked
+          ? `background:transparent;color:#3a4060;border:1px dashed #2a2f4a;cursor:not-allowed`
+          : pc
+            ? `background:${pc.bg};color:${pc.text};border:none;cursor:pointer`
+            : `background:transparent;color:var(--muted);border:1px dashed var(--border);cursor:pointer`;
+        const pillsData = JSON.stringify(crews.map(c => ({ crewId: c.crewId, leader: c.leaderName || c.crewName }))).replace(/"/g,'&quot;');
+        const clickHandler = isLocked
+          ? `onclick="showToast('${isEn ? 'Foundation must be completed first' : 'Фундаментът трябва да е завършен първо'}')"`
+          : `onclick="openStagePicker(${s.id},this,'${s.status||'NOT_STARTED'}',${s.crewId||'null'},this.dataset.crews)"`;
+        return `<td style="padding:0.2rem 0.3rem;border-right:1px solid #1a1d27;min-width:130px">
+          <button ${clickHandler}
+            data-crews="${pillsData}"
+            style="${pillStyle};width:100%;padding:0.28rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+            title="${isLocked ? (isEn ? 'Foundation required' : 'Необходим фундамент') : pillLabel}">${isLocked ? '🔒' : pillLabel}</button>
+        </td>`;
+      }).join('');
+      return `<tr style="border-bottom:1px solid #2e3250">
+        <td style="padding:0.5rem 0.75rem;font-size:0.85rem;font-weight:600;white-space:nowrap;position:sticky;left:0;background:var(--card);z-index:1;border-right:2px solid #2e3250">${row.houseName}</td>
+        ${cells}
+      </tr>`;
+    }).join('');
+
+    wrap.innerHTML = `
+      <table style="border-collapse:collapse;background:var(--card)">
+        <thead>
+          <tr style="background:#1a1d27;border-bottom:2px solid #2e3250">
+            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase;position:sticky;left:0;background:#1a1d27;z-index:2;border-right:2px solid #2e3250">House</th>
+            ${thCols}
+          </tr>
+        </thead>
+        <tbody>${bodyRows}</tbody>
+      </table>`;
+  }
+
+  function filterMatrixRows(q) {
+    const term = q.trim().toLowerCase();
+    document.querySelectorAll('#stageMatrixWrap tbody tr').forEach(tr => {
+      const name = tr.querySelector('td')?.textContent.toLowerCase() || '';
+      tr.style.display = (!term || name.includes(term)) ? '' : 'none';
+    });
+  }
+
+  // ── Stage pill picker ────────────────────────────────────────────────────────
+  const PILL_COLORS = {
+    ASSIGNED:    { bg:'#fde68a', text:'#78350f' },
+    IN_PROGRESS: { bg:'#fca5a5', text:'#7f1d1d' },
+    DONE:        { bg:'#bbf7d0', text:'#14532d' },
+  };
+
+  function stagePillLabel(leader, status) {
+    if (status === 'IN_PROGRESS') return leader + (currentLang === 'bg' ? ' в Процес'  : ' In Progress');
+    if (status === 'DONE')        return leader + (currentLang === 'bg' ? ' Завършен'   : ' Done');
+    return leader;
+  }
+
+  function openFoundationPicker(id, btn, currentStatus) {
+    document.getElementById('stagePicker')?.remove();
+    const picker = document.createElement('div');
+    picker.id = 'stagePicker';
+    picker.style.cssText = 'position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.5rem;box-shadow:0 8px 32px rgba(0,0,0,0.35);display:flex;flex-direction:column;gap:0.3rem;min-width:140px';
+
+    const isEn = currentLang === 'en';
+    const options = [
+      { status: 'NOT_STARTED', label: '—', bg: 'transparent', color: 'var(--muted)', border: '1px dashed var(--border)' },
+      { status: 'DONE', label: isEn ? '✓ Done' : '✓ Завършен', bg: PILL_COLORS.DONE.bg, color: PILL_COLORS.DONE.text, border: 'none' },
+    ];
+    options.forEach(opt => {
+      const b = document.createElement('button');
+      b.textContent = opt.label;
+      b.style.cssText = `background:${opt.bg};color:${opt.color};border:${opt.border};border-radius:20px;padding:0.28rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;text-align:center;outline:${currentStatus === opt.status ? '2px solid #fff' : 'none'}`;
+      b.onclick = async () => {
+        picker.remove();
+        const done = opt.status === 'DONE';
+        btn.style.background = done ? PILL_COLORS.DONE.bg : 'transparent';
+        btn.style.color      = done ? PILL_COLORS.DONE.text : 'var(--muted)';
+        btn.style.border     = done ? 'none' : '1px dashed var(--border)';
+        btn.textContent      = opt.label;
+        try {
+          await apiFetch(`/api/house-stages/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ status: opt.status, crewId: null, workerName: null }) });
+          loadStageMatrix();
+        } catch(e) { console.error('Failed to update foundation', e); }
+      };
+      picker.appendChild(b);
+    });
+
+    document.body.appendChild(picker);
+    const r = btn.getBoundingClientRect();
+    const pw = picker.offsetWidth || 160;
+    let left = r.left;
+    if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+    picker.style.left = left + 'px';
+    picker.style.top  = (r.bottom + 4) + 'px';
+    const close = (e) => { if (!picker.contains(e.target) && e.target !== btn) { picker.remove(); document.removeEventListener('click', close, true); } };
+    setTimeout(() => document.addEventListener('click', close, true), 10);
+  }
+
+  function openStagePicker(id, btn, currentStatus, currentCrewId, crewsJson) {
+    document.getElementById('stagePicker')?.remove();
+    const crews = JSON.parse(crewsJson.replace(/&quot;/g, '"'));
+    const picker = document.createElement('div');
+    picker.id = 'stagePicker';
+    picker.style.cssText = 'position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.5rem;box-shadow:0 8px 32px rgba(0,0,0,0.35);display:flex;flex-direction:column;gap:0.3rem;min-width:160px';
+
+    // Clear option
+    const clearBtn = document.createElement('button');
+    clearBtn.textContent = '—';
+    clearBtn.style.cssText = 'background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:20px;padding:0.25rem 0.75rem;font-size:0.75rem;font-weight:600;cursor:pointer;text-align:center';
+    clearBtn.onclick = () => { pickStageCell(id, null, 'NOT_STARTED', null, btn); picker.remove(); };
+    picker.appendChild(clearBtn);
+
+    crews.forEach((c, i) => {
+      if (i > 0) {
+        const sep = document.createElement('hr');
+        sep.style.cssText = 'border:none;border-top:1px solid var(--border);margin:0.1rem 0';
+        picker.appendChild(sep);
+      }
+      ['ASSIGNED','IN_PROGRESS','DONE'].forEach(v => {
+        const pc = PILL_COLORS[v];
+        const label = stagePillLabel(c.leader, v);
+        const active = currentStatus === v && currentCrewId == c.crewId;
+        const b = document.createElement('button');
+        b.textContent = label;
+        b.style.cssText = `background:${pc.bg};color:${pc.text};border:none;border-radius:20px;padding:0.28rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;text-align:center;outline:${active ? '2px solid #fff' : 'none'};white-space:nowrap`;
+        b.onclick = () => { pickStageCell(id, c.crewId, v, c.leader, btn); picker.remove(); };
+        picker.appendChild(b);
+      });
+    });
+
+    document.body.appendChild(picker);
+    const r = btn.getBoundingClientRect();
+    const pw = picker.offsetWidth || 180;
+    let left = r.left;
+    if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+    picker.style.left = left + 'px';
+    picker.style.top  = (r.bottom + 4) + 'px';
+
+    const close = (e) => { if (!picker.contains(e.target) && e.target !== btn) { picker.remove(); document.removeEventListener('click', close, true); } };
+    setTimeout(() => document.addEventListener('click', close, true), 10);
+  }
+
+  async function pickStageCell(id, crewId, status, leader, btn) {
+    const pc = PILL_COLORS[status];
+    const label = pc && leader ? stagePillLabel(leader, status) : '—';
+    if (pc) {
+      btn.style.background = pc.bg;
+      btn.style.color      = pc.text;
+      btn.style.border     = 'none';
+    } else {
+      btn.style.background = 'transparent';
+      btn.style.color      = 'var(--muted)';
+      btn.style.border     = '1px dashed var(--border)';
+    }
+    btn.textContent = label;
+    btn.title       = label;
+    btn.onclick = () => openStagePicker(id, btn, status, crewId, btn.dataset.crews || '[]');
+    try {
+      await apiFetch(`/api/house-stages/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ crewId: crewId || null, status, workerName: leader || null }) });
+      // Reload matrix so lock state updates if foundation changed
+      const stageOrder = btn.closest('td')?.previousElementSibling ? null : 0;
+      if (document.getElementById('view-stagematrix')?.classList.contains('active') || true)
+        loadStageMatrix();
+    } catch(e) { console.error('Failed to update stage', e); }
   }
 
   async function renderWorkerCards() {
@@ -5916,6 +6308,9 @@
         apiFetch('/api/houses').then(r => r.json()),
         apiFetch('/api/totals').then(r => r.json()),
       ]);
+      if (!Array.isArray(houses) || !Array.isArray(totals)) {
+        throw new Error('Unexpected response from server (houses=' + typeof houses + ', totals=' + typeof totals + ')');
+      }
       dashHouses = houses;
       dashTotals = totals;
       renderTotals(totals);
@@ -5927,6 +6322,7 @@
   }
 
   function renderTotals(totals) {
+    if (!Array.isArray(totals)) { console.error('renderTotals: expected array, got', totals); return; }
     const grandTotal = totals.reduce((s, t) => s + parseFloat(t.total_value), 0);
 
     const materialCards = totals.map(t => {
@@ -5985,9 +6381,9 @@
             <span style="font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">${t('chipStart')}</span>
             <span style="font-size:0.82rem;color:${h.start_date ? 'var(--text)' : 'var(--muted)'};font-weight:600">📅 ${h.start_date || '—'}</span>
           </div>
-          <div style="display:flex;align-items:center;gap:0.4rem;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.25);border-radius:7px;padding:0.3rem 0.65rem">
-            <span style="font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">${t('chipPhase')}</span>
-            <span style="font-size:0.82rem;color:${h.current_phase ? 'var(--purple)' : 'var(--muted)'};font-weight:600">${h.current_phase ? '🔧 ' + t(h.current_phase) : '—'}</span>
+          <div style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.25);border-radius:7px;padding:0.3rem 0.65rem">
+            <span style="font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">${t('chipStage')}</span>
+            ${h.current_phase ? h.current_phase.split(', ').map(s=>`<div style="font-size:0.82rem;color:var(--purple);font-weight:600">🔧 ${s}</div>`).join('') : '<span style="font-size:0.82rem;color:var(--muted);font-weight:600">—</span>'}
           </div>
           ${(() => {
             const ss = h.scaffold_status || 'NONE';
