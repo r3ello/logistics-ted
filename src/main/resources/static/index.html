@@ -4608,18 +4608,19 @@
   const ORDER_STATUSES = ['DRAFT','CONFIRMED','DELIVERED','CANCELLED'];
   const ORDER_STATUS_COLORS = { DRAFT:'#9aa3be', CONFIRMED:'#4f8ef7', DELIVERED:'#3ecf6e', CANCELLED:'#f76f6f' };
   function orderStatusLabel(s) { return t('ordersStatus'+s.charAt(0)+s.slice(1).toLowerCase()) || s; }
-  let _ordersList = [], _ordersMats = [], _ordersHouses = [], _ordersWorkers = [], _editingOrderId = null;
+  let _ordersList = [], _ordersMats = [], _ordersHouses = [], _ordersWorkers = [], _ordersDeliveries = [], _editingOrderId = null;
 
   async function renderOrdersDash() {
     const grid = document.getElementById('grid');
     grid.style.display = 'block';
     grid.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>Loading...</div>`;
     try {
-      [_ordersList, _ordersMats, _ordersHouses, _ordersWorkers] = await Promise.all([
+      [_ordersList, _ordersMats, _ordersHouses, _ordersWorkers, _ordersDeliveries] = await Promise.all([
         apiFetch('/api/material-orders').then(r => r.json()),
         apiFetch('/api/materials').then(r => r.json()),
         apiFetch('/api/houses').then(r => r.json()),
         apiFetch('/api/workers').then(r => r.json()),
+        apiFetch('/api/deliveries').then(r => r.json()),
       ]);
     } catch(e) { grid.innerHTML = `<div class="state-msg">Failed to load orders.</div>`; return; }
     renderOrdersTable();
@@ -4646,7 +4647,15 @@
           </tr></thead>
           <tbody>
             ${_ordersList.length ? _ordersList.map(o => {
-              const materialsStr = o.items.map(i => `${i.materialName}: ${i.quantity} ${i.unit}`).join(', ');
+              const deliveredMap = {};
+              _ordersDeliveries.filter(d => d.orderId === o.id).forEach(d =>
+                d.items.forEach(i => { deliveredMap[i.materialId] = (deliveredMap[i.materialId] || 0) + Number(i.qtyDelivered); })
+              );
+              const materialsStr = o.items.map(i => {
+                const del = deliveredMap[i.materialId] || 0;
+                const delStr = del > 0 ? `<span style="color:#3ecf6e;font-weight:700">${del}</span>/` : '';
+                return `${i.materialName}: ${delStr}${i.quantity} ${i.unit}`;
+              }).join(', ');
               const date = new Date(o.createdAt).toLocaleDateString();
               return `<tr style="cursor:pointer" onclick="toggleOrderDeliveries(${o.id}, this)">
                 <td style="color:var(--text);text-align:center;font-size:0.75rem" id="order-toggle-${o.id}">▶</td>
@@ -4687,10 +4696,12 @@
     container.innerHTML = '<div class="spinner" style="display:inline-block;width:14px;height:14px"></div>';
     try {
       const dels = await apiFetch(`/api/material-orders/${orderId}/deliveries`).then(r => r.json());
+      const order = _ordersList.find(o => o.id === orderId);
+      const canDeliver = order && order.status !== 'DRAFT' && order.status !== 'CANCELLED';
       container.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
           <span style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#f97316">${t('ordersDeliveriesTitle')}</span>
-          <button class="admin-only" onclick="openDeliveryModal(${orderId})" style="padding:3px 10px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.35);border-radius:6px;color:#f97316;font-size:0.78rem;font-weight:600;cursor:pointer">${t('ordersAddDelivery')}</button>
+          ${canDeliver ? `<button class="admin-only" onclick="openDeliveryModal(${orderId})" style="padding:3px 10px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.35);border-radius:6px;color:#f97316;font-size:0.78rem;font-weight:600;cursor:pointer">${t('ordersAddDelivery')}</button>` : `<span style="font-size:0.75rem;color:#9aa3be;font-style:italic">Confirm order to add deliveries</span>`}
         </div>
         ${dels.length ? `<table style="width:100%;font-size:0.8rem;border-collapse:collapse">
           <thead><tr style="color:#9aa3be">
@@ -4871,7 +4882,7 @@
       const res = await apiFetch(`/api/material-orders/${orderId}/deliveries`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ deliveredAt, notes: notes||null, responsibleId: responsibleId ? parseInt(responsibleId) : null, items }) });
       if (!res.ok) { const d = await res.json(); errEl.textContent = d.error || 'Error'; errEl.style.display=''; return; }
       document.getElementById('deliveryModal').remove();
-      [_ordersList] = await Promise.all([apiFetch('/api/material-orders').then(r => r.json())]);
+      [_ordersList, _ordersDeliveries] = await Promise.all([apiFetch('/api/material-orders').then(r => r.json()), apiFetch('/api/deliveries').then(r => r.json())]);
       renderOrdersTable();
       const row = document.getElementById(`order-deliveries-row-${orderId}`);
       if (row) row.style.display = 'none';
@@ -4882,7 +4893,7 @@
   async function deleteDelivery(deliveryId, orderId) {
     if (!confirm(t('deliveriesDeleteConfirm'))) return;
     await apiFetch(`/api/deliveries/${deliveryId}`, { method: 'DELETE' });
-    [_ordersList] = await Promise.all([apiFetch('/api/material-orders').then(r => r.json())]);
+    [_ordersList, _ordersDeliveries] = await Promise.all([apiFetch('/api/material-orders').then(r => r.json()), apiFetch('/api/deliveries').then(r => r.json())]);
     renderOrdersTable();
     toggleOrderDeliveries(orderId, null);
   }

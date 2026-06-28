@@ -51,6 +51,8 @@ public class DeliveryController {
     public ResponseEntity<?> create(@PathVariable Integer orderId, @RequestBody Map<String, Object> body) {
         MaterialOrder order = orders.findById(orderId).orElse(null);
         if (order == null) return ResponseEntity.notFound().build();
+        if ("DRAFT".equals(order.getStatus()) || "CANCELLED".equals(order.getStatus()))
+            return ResponseEntity.badRequest().body(Map.of("error", "Order must be confirmed before adding deliveries."));
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> itemList = (List<Map<String, Object>>) body.get("items");
