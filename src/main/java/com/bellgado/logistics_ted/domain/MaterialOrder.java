@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "house_order")
+@Table(name = "material_order")
 @Getter @Setter @NoArgsConstructor
-public class HouseOrder {
+public class MaterialOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,5 +38,5 @@ public class HouseOrder {
     private Worker createdBy;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HouseOrderItem> items = new ArrayList<>();
+    private List<MaterialOrderItem> items = new ArrayList<>();
 }

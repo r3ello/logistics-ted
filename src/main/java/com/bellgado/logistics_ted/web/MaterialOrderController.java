@@ -1,11 +1,11 @@
 package com.bellgado.logistics_ted.web;
 
 import com.bellgado.logistics_ted.domain.House;
-import com.bellgado.logistics_ted.domain.HouseOrder;
-import com.bellgado.logistics_ted.domain.HouseOrderItem;
+import com.bellgado.logistics_ted.domain.MaterialOrder;
+import com.bellgado.logistics_ted.domain.MaterialOrderItem;
 import com.bellgado.logistics_ted.domain.Material;
 import com.bellgado.logistics_ted.domain.Worker;
-import com.bellgado.logistics_ted.repository.HouseOrderRepository;
+import com.bellgado.logistics_ted.repository.MaterialOrderRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.MaterialRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
@@ -20,16 +20,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/house-orders")
-public class HouseOrderController {
+@RequestMapping("/api/material-orders")
+public class MaterialOrderController {
 
-    private final HouseOrderRepository orders;
+    private final MaterialOrderRepository orders;
     private final HouseRepository houses;
     private final MaterialRepository materials;
     private final WorkerRepository workers;
     private final EntityManager em;
 
-    public HouseOrderController(HouseOrderRepository orders, HouseRepository houses, MaterialRepository materials, WorkerRepository workers, EntityManager em) {
+    public MaterialOrderController(MaterialOrderRepository orders, HouseRepository houses, MaterialRepository materials, WorkerRepository workers, EntityManager em) {
         this.orders    = orders;
         this.houses    = houses;
         this.materials = materials;
@@ -48,7 +48,7 @@ public class HouseOrderController {
     public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
         String err = validate(body, true);
         if (err != null) return ResponseEntity.badRequest().body(Map.of("error", err));
-        HouseOrder o = applyBody(new HouseOrder(), body);
+        MaterialOrder o = applyBody(new MaterialOrder(), body);
         return ResponseEntity.ok(toDto(orders.save(o)));
     }
 
@@ -77,7 +77,7 @@ public class HouseOrderController {
     }
 
     @SuppressWarnings("unchecked")
-    private HouseOrder applyBody(HouseOrder o, Map<String, Object> body) {
+    private MaterialOrder applyBody(MaterialOrder o, Map<String, Object> body) {
         if (body.get("houseId") != null) {
             House h = houses.findById(Integer.parseInt(body.get("houseId").toString()))
                 .orElseThrow(() -> new IllegalArgumentException("House not found"));
@@ -102,12 +102,12 @@ public class HouseOrderController {
 
         if (body.containsKey("items")) {
             o.getItems().clear();
-            em.flush(); // ensure deletes hit DB before re-inserting same material IDs
+            em.flush();
             List<Map<String, Object>> itemList = (List<Map<String, Object>>) body.get("items");
             for (Map<String, Object> item : itemList) {
                 Material m = materials.findById(Integer.parseInt(item.get("materialId").toString()))
                     .orElseThrow(() -> new IllegalArgumentException("Material not found"));
-                HouseOrderItem i = new HouseOrderItem();
+                MaterialOrderItem i = new MaterialOrderItem();
                 i.setOrder(o);
                 i.setMaterial(m);
                 i.setQuantity(new BigDecimal(item.get("quantity").toString()));
@@ -117,7 +117,7 @@ public class HouseOrderController {
         return o;
     }
 
-    private Map<String, Object> toDto(HouseOrder o) {
+    private Map<String, Object> toDto(MaterialOrder o) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id",        o.getId());
         m.put("houseId",   o.getHouse().getId());

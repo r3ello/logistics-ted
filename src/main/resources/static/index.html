@@ -4616,7 +4616,7 @@
     grid.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>Loading...</div>`;
     try {
       [_ordersList, _ordersMats, _ordersHouses, _ordersWorkers] = await Promise.all([
-        apiFetch('/api/house-orders').then(r => r.json()),
+        apiFetch('/api/material-orders').then(r => r.json()),
         apiFetch('/api/materials').then(r => r.json()),
         apiFetch('/api/houses').then(r => r.json()),
         apiFetch('/api/workers').then(r => r.json()),
@@ -4665,9 +4665,7 @@
               </tr>
               <tr id="order-deliveries-row-${o.id}" style="display:none">
                 <td colspan="8" style="padding:0">
-                  <div id="order-deliveries-${o.id}" style="background:rgba(249,115,22,0.05);border-left:3px solid #f97316;padding:0.75rem 1.2rem">
-                    <div class="spinner" style="display:inline-block;width:14px;height:14px"></div>
-                  </div>
+                  <div id="order-deliveries-${o.id}"></div>
                 </td>
               </tr>`;
             }).join('') : `<tr><td colspan="8" style="text-align:center;color:#9aa3be;padding:2rem">${t('ordersNoOrders')}</td></tr>`}
@@ -4685,8 +4683,10 @@
     row.style.display = '';
     toggle.textContent = '▼';
     const container = document.getElementById(`order-deliveries-${orderId}`);
+    container.style.cssText = 'background:rgba(249,115,22,0.05);border-left:3px solid #f97316;padding:0.75rem 1.2rem';
+    container.innerHTML = '<div class="spinner" style="display:inline-block;width:14px;height:14px"></div>';
     try {
-      const dels = await apiFetch(`/api/house-orders/${orderId}/deliveries`).then(r => r.json());
+      const dels = await apiFetch(`/api/material-orders/${orderId}/deliveries`).then(r => r.json());
       container.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
           <span style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#f97316">${t('ordersDeliveriesTitle')}</span>
@@ -4798,7 +4798,7 @@
     if (!items.length) { errEl.textContent = t('ordersMaterialLbl') + ' is required.'; errEl.style.display=''; return; }
     errEl.style.display = 'none';
     try {
-      const url    = _editingOrderId ? `/api/house-orders/${_editingOrderId}` : '/api/house-orders';
+      const url    = _editingOrderId ? `/api/material-orders/${_editingOrderId}` : '/api/material-orders';
       const method = _editingOrderId ? 'PUT' : 'POST';
       const res    = await apiFetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify({ houseId: parseInt(houseId), status, notes: notes||null, createdById: createdById ? parseInt(createdById) : null, items }) });
       if (!res.ok) { const d = await res.json(); errEl.textContent = d.error || 'Error'; errEl.style.display=''; return; }
@@ -4809,7 +4809,7 @@
 
   async function deleteOrder(id) {
     if (!confirm(t('ordersDeleteConfirm'))) return;
-    await apiFetch(`/api/house-orders/${id}`, { method: 'DELETE' });
+    await apiFetch(`/api/material-orders/${id}`, { method: 'DELETE' });
     await renderOrdersDash();
   }
 
@@ -4868,10 +4868,10 @@
     if (!items.length) { errEl.textContent = t('ordersMaterialLbl') + ' — enter at least one qty.'; errEl.style.display=''; return; }
     errEl.style.display = 'none';
     try {
-      const res = await apiFetch(`/api/house-orders/${orderId}/deliveries`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ deliveredAt, notes: notes||null, responsibleId: responsibleId ? parseInt(responsibleId) : null, items }) });
+      const res = await apiFetch(`/api/material-orders/${orderId}/deliveries`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ deliveredAt, notes: notes||null, responsibleId: responsibleId ? parseInt(responsibleId) : null, items }) });
       if (!res.ok) { const d = await res.json(); errEl.textContent = d.error || 'Error'; errEl.style.display=''; return; }
       document.getElementById('deliveryModal').remove();
-      [_ordersList] = await Promise.all([apiFetch('/api/house-orders').then(r => r.json())]);
+      [_ordersList] = await Promise.all([apiFetch('/api/material-orders').then(r => r.json())]);
       renderOrdersTable();
       const row = document.getElementById(`order-deliveries-row-${orderId}`);
       if (row) row.style.display = 'none';
@@ -4882,7 +4882,7 @@
   async function deleteDelivery(deliveryId, orderId) {
     if (!confirm(t('deliveriesDeleteConfirm'))) return;
     await apiFetch(`/api/deliveries/${deliveryId}`, { method: 'DELETE' });
-    [_ordersList] = await Promise.all([apiFetch('/api/house-orders').then(r => r.json())]);
+    [_ordersList] = await Promise.all([apiFetch('/api/material-orders').then(r => r.json())]);
     renderOrdersTable();
     toggleOrderDeliveries(orderId, null);
   }
@@ -4898,7 +4898,7 @@
     try {
       [dels, _deliveriesOrdersList, _deliveriesWorkersList] = await Promise.all([
         apiFetch('/api/deliveries').then(r => r.json()),
-        apiFetch('/api/house-orders').then(r => r.json()),
+        apiFetch('/api/material-orders').then(r => r.json()),
         apiFetch('/api/workers').then(r => r.json()),
       ]);
     } catch(e) { grid.innerHTML = `<div class="state-msg">Failed to load deliveries.</div>`; return; }
@@ -5010,7 +5010,7 @@
     if (!items.length) { errEl.textContent = t('ordersMaterialLbl') + ' — enter at least one qty.'; errEl.style.display=''; return; }
     errEl.style.display = 'none';
     try {
-      const res = await apiFetch(`/api/house-orders/${orderId}/deliveries`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ deliveredAt, notes: notes||null, responsibleId: responsibleId ? parseInt(responsibleId) : null, items }) });
+      const res = await apiFetch(`/api/material-orders/${orderId}/deliveries`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ deliveredAt, notes: notes||null, responsibleId: responsibleId ? parseInt(responsibleId) : null, items }) });
       if (!res.ok) { const d = await res.json(); errEl.textContent = d.error || 'Error'; errEl.style.display=''; return; }
       document.getElementById('deliveryTabModal').remove();
       renderDeliveriesDash();
@@ -5028,6 +5028,7 @@
     const q = (document.getElementById('altSearchInput')?.value || '').toLowerCase();
     if (_dashMode === 'orders' || _dashMode === 'deliveries') {
       document.querySelectorAll('#grid table tbody tr').forEach(row => {
+        if (row.id && row.id.startsWith('order-deliveries-row-')) return;
         row.style.display = (!q || row.textContent.toLowerCase().includes(q)) ? '' : 'none';
       });
     } else {
@@ -6031,7 +6032,7 @@
       const orderSel = document.getElementById('routeOrderPicker');
       if (orderSel) {
         try {
-          const orders = await apiFetch('/api/house-orders').then(r => r.json());
+          const orders = await apiFetch('/api/material-orders').then(r => r.json());
           const active = orders.filter(o => o.status !== 'CANCELLED' && o.status !== 'DELIVERED');
           orderSel.innerHTML = `<option value="">— Select an order —</option>` +
             active.map(o => `<option value="${o.id}" data-house-id="${o.houseId}"
@@ -6101,7 +6102,7 @@
 
     // Fetch deliveries to compute remaining quantities
     try {
-      const dels = await apiFetch(`/api/house-orders/${opt.value}/deliveries`).then(r => r.json());
+      const dels = await apiFetch(`/api/material-orders/${opt.value}/deliveries`).then(r => r.json());
       const delivered = {};
       dels.forEach(d => d.items.forEach(i => {
         delivered[i.materialId] = (delivered[i.materialId] || 0) + parseFloat(i.qtyDelivered);

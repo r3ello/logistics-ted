@@ -19,7 +19,7 @@ public class Delivery {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
-    private HouseOrder order;
+    private MaterialOrder order;
 
     @Column(name = "delivered_at", nullable = false)
     private LocalDateTime deliveredAt = LocalDateTime.now();

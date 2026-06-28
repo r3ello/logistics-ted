@@ -10,11 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/index.html")
-                .addResourceLocations("classpath:/static/")
-                .setCacheControl(CacheControl.noStore());
-
-        registry.addResourceHandler("/**")
+        registry.addResourceHandler("/index.html", "/*.js", "/*.css", "/*.ico", "/*.png", "/*.svg")
                 .addResourceLocations("classpath:/static/")
                 .setCacheControl(CacheControl.noStore());
     }

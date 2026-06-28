@@ -2,11 +2,11 @@ package com.bellgado.logistics_ted.web;
 
 import com.bellgado.logistics_ted.domain.Delivery;
 import com.bellgado.logistics_ted.domain.DeliveryItem;
-import com.bellgado.logistics_ted.domain.HouseOrder;
+import com.bellgado.logistics_ted.domain.MaterialOrder;
 import com.bellgado.logistics_ted.domain.Material;
 import com.bellgado.logistics_ted.domain.Worker;
 import com.bellgado.logistics_ted.repository.DeliveryRepository;
-import com.bellgado.logistics_ted.repository.HouseOrderRepository;
+import com.bellgado.logistics_ted.repository.MaterialOrderRepository;
 import com.bellgado.logistics_ted.repository.MaterialRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import java.math.BigDecimal;
@@ -23,11 +23,11 @@ import org.springframework.web.bind.annotation.*;
 public class DeliveryController {
 
     private final DeliveryRepository deliveries;
-    private final HouseOrderRepository orders;
+    private final MaterialOrderRepository orders;
     private final MaterialRepository materials;
     private final WorkerRepository workers;
 
-    public DeliveryController(DeliveryRepository deliveries, HouseOrderRepository orders, MaterialRepository materials, WorkerRepository workers) {
+    public DeliveryController(DeliveryRepository deliveries, MaterialOrderRepository orders, MaterialRepository materials, WorkerRepository workers) {
         this.deliveries = deliveries;
         this.orders     = orders;
         this.materials  = materials;
@@ -40,16 +40,16 @@ public class DeliveryController {
         return deliveries.findAllWithDetails().stream().map(this::toDto).toList();
     }
 
-    @GetMapping("/house-orders/{orderId}/deliveries")
+    @GetMapping("/material-orders/{orderId}/deliveries")
     @Transactional(readOnly = true)
     public List<Map<String, Object>> listForOrder(@PathVariable Integer orderId) {
         return deliveries.findByOrderId(orderId).stream().map(this::toDto).toList();
     }
 
-    @PostMapping("/house-orders/{orderId}/deliveries")
+    @PostMapping("/material-orders/{orderId}/deliveries")
     @Transactional
     public ResponseEntity<?> create(@PathVariable Integer orderId, @RequestBody Map<String, Object> body) {
-        HouseOrder order = orders.findById(orderId).orElse(null);
+        MaterialOrder order = orders.findById(orderId).orElse(null);
         if (order == null) return ResponseEntity.notFound().build();
 
         @SuppressWarnings("unchecked")
@@ -79,7 +79,6 @@ public class DeliveryController {
         }
         deliveries.save(d);
 
-        // Auto-flip order to DELIVERED if all materials fully covered
         autoUpdateOrderStatus(order);
 
         return ResponseEntity.ok(toDto(d));
@@ -89,7 +88,7 @@ public class DeliveryController {
     @Transactional
     public ResponseEntity<?> delete(@PathVariable Integer id) {
         return deliveries.findById(id).map(d -> {
-            HouseOrder order = d.getOrder();
+            MaterialOrder order = d.getOrder();
             deliveries.deleteById(id);
             deliveries.flush();
             autoUpdateOrderStatus(order);
@@ -97,19 +96,16 @@ public class DeliveryController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    private void autoUpdateOrderStatus(HouseOrder staleOrder) {
-        // Reload order fresh to avoid stale items collection
-        HouseOrder order = orders.findAllWithDetails().stream()
+    private void autoUpdateOrderStatus(MaterialOrder staleOrder) {
+        MaterialOrder order = orders.findAllWithDetails().stream()
             .filter(o -> o.getId().equals(staleOrder.getId())).findFirst().orElse(staleOrder);
         List<Delivery> dels = deliveries.findByOrderId(order.getId());
 
-        // Sum delivered per material
         Map<Integer, BigDecimal> delivered = new java.util.HashMap<>();
         for (Delivery del : dels)
             for (DeliveryItem di : del.getItems())
                 delivered.merge(di.getMaterial().getId(), di.getQtyDelivered(), BigDecimal::add);
 
-        // Check if every ordered item is fully covered
         boolean fullyDelivered = !order.getItems().isEmpty() && order.getItems().stream().allMatch(item ->
             delivered.getOrDefault(item.getMaterial().getId(), BigDecimal.ZERO)
                 .compareTo(item.getQuantity()) >= 0);
