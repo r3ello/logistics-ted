@@ -135,7 +135,7 @@ public class RouteOptimizationService {
             log.debug("calculate: relevant ids={}", relevant.stream().map(CandidateStop::id).toList());
         }
         if (relevant.isEmpty()) {
-            log.warn("calculate: no relevant candidate houses found — all 3 objectives will produce an empty route and dedupe to a single alternative");
+            log.warn("calculate: no relevant candidate houses found — all objectives will produce an empty route and dedupe to a single alternative");
         }
 
         // Matrix layout: 0 = origin, 1..relevant.size() = relevant houses, last = destination.
@@ -162,7 +162,9 @@ public class RouteOptimizationService {
         List<ObjectiveSpec> objectives = List.of(
             ObjectiveSpec.shortestDistance(),
             ObjectiveSpec.fastestTime(),
-            ObjectiveSpec.balanced(properties.balanced().alpha(), properties.balanced().beta())
+            ObjectiveSpec.balanced(properties.balanced().alpha(), properties.balanced().beta()),
+            ObjectiveSpec.housesAndWarehousesOnly(),
+            ObjectiveSpec.housesAndSuppliersOnly()
         );
 
         // Phase 1: solve each objective independently. Per the heuristic 2-opt limitation,
@@ -189,12 +191,21 @@ public class RouteOptimizationService {
         List<RouteOptionDto> relabeled = new ArrayList<>(objectives.size());
         for (int i = 0; i < objectives.size(); i++) {
             ObjectiveSpec spec = objectives.get(i);
+            // Source-type objectives keep their own solved route — relabeling across source modes
+            // would assign a supplier route to a warehouse-only card (or vice versa).
+            if (!spec.useDepots() || !spec.useSuppliers()) {
+                relabeled.add(rawResults.get(i));
+                continue;
+            }
             // Start from the route that was originally solved for this objective so ties resolve
             // in favour of the natural assignment (no spurious relabels when scores match).
             int bestIdx = i;
             double bestScore = scoreRoute(rawResults.get(i), spec);
+            // Only consider routes from objectives with the same source mode (all tiers enabled).
             for (int j = 0; j < rawResults.size(); j++) {
                 if (j == i) continue;
+                ObjectiveSpec other = objectives.get(j);
+                if (!other.useDepots() || !other.useSuppliers()) continue;
                 double s = scoreRoute(rawResults.get(j), spec);
                 if (s < bestScore) { bestScore = s; bestIdx = j; }
             }
@@ -323,9 +334,10 @@ public class RouteOptimizationService {
             log.info("[{}] house allocation left {} material(s) short — invoking warehouse fallback (anchor=({},{}))",
                 spec.label(), remainingNeeds.size(), houseAnchorLat, houseAnchorLng);
         }
-        DepotFallbackResult depotResult = depotFallback.coverDeficits(
-            remainingNeeds, houseAnchorLat, houseAnchorLng, destLatD, destLngD, spec);
-        if (!remainingNeeds.isEmpty()) {
+        DepotFallbackResult depotResult = spec.useDepots()
+            ? depotFallback.coverDeficits(remainingNeeds, houseAnchorLat, houseAnchorLng, destLatD, destLngD, spec)
+            : DepotFallbackResult.empty(remainingNeeds);
+        if (spec.useDepots() && !remainingNeeds.isEmpty()) {
             log.info("[{}] warehouse fallback: {} stops, +{}km +{}s extra, remaining deficits={}",
                 spec.label(), depotResult.stops().size(),
                 Math.round(depotResult.extraKm()), Math.round(depotResult.extraSeconds()),
@@ -346,9 +358,10 @@ public class RouteOptimizationService {
             supplierAnchorLng = houseAnchorLng;
         }
         Map<Integer, RemainingNeed> afterDepot = depotResult.remaining();
-        SupplierFallbackResult fallback = supplierFallback.coverDeficits(
-            afterDepot, supplierAnchorLat, supplierAnchorLng, destLatD, destLngD, spec);
-        if (!afterDepot.isEmpty()) {
+        SupplierFallbackResult fallback = spec.useSuppliers()
+            ? supplierFallback.coverDeficits(afterDepot, supplierAnchorLat, supplierAnchorLng, destLatD, destLngD, spec)
+            : SupplierFallbackResult.empty(afterDepot);
+        if (spec.useSuppliers() && !afterDepot.isEmpty()) {
             log.info("[{}] supplier fallback: {} stops, +{}km +{}s extra, remaining deficits={}",
                 spec.label(), fallback.stops().size(),
                 Math.round(fallback.extraKm()), Math.round(fallback.extraSeconds()),
@@ -415,16 +428,18 @@ public class RouteOptimizationService {
         double km = opt.totalDistance();
         double min = opt.totalMinutes();
         return switch (spec.type()) {
-            case SHORTEST_DISTANCE -> km;
+            case SHORTEST_DISTANCE, HOUSES_WAREHOUSES_ONLY, HOUSES_SUPPLIERS_ONLY -> km;
             case FASTEST_TIME -> min;
             case BALANCED -> spec.alpha() * km + spec.beta() * min;
         };
     }
 
     private static String signature(String label, RouteOptionDto opt) {
-        // Tie-breaker note: the label is intentionally NOT part of the signature so two
-        // objectives that produce the same stop+supplier sequence dedupe to a single entry.
+        // Source-type objectives always get a unique signature so they appear as separate cards
+        // even when the stop sequence happens to match another objective.
+        boolean pinLabel = label.equals("houses_warehouses_only") || label.equals("houses_suppliers_only");
         StringBuilder sb = new StringBuilder();
+        if (pinLabel) sb.append(label).append(':');
         sb.append("H[");
         for (RouteStopDto s : opt.route()) sb.append(s.id()).append(',');
         sb.append("]W[");

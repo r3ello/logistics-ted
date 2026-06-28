@@ -12,7 +12,7 @@ import com.bellgado.logistics_ted.service.distance.RouteCostMatrix;
  */
 public record ObjectiveSpec(Type type, double alpha, double beta) {
 
-    public enum Type { SHORTEST_DISTANCE, FASTEST_TIME, BALANCED }
+    public enum Type { SHORTEST_DISTANCE, FASTEST_TIME, BALANCED, HOUSES_WAREHOUSES_ONLY, HOUSES_SUPPLIERS_ONLY }
 
     public static ObjectiveSpec shortestDistance() {
         return new ObjectiveSpec(Type.SHORTEST_DISTANCE, 1.0, 0.0);
@@ -26,17 +26,35 @@ public record ObjectiveSpec(Type type, double alpha, double beta) {
         return new ObjectiveSpec(Type.BALANCED, alpha, beta);
     }
 
+    public static ObjectiveSpec housesAndWarehousesOnly() {
+        return new ObjectiveSpec(Type.HOUSES_WAREHOUSES_ONLY, 1.0, 0.0);
+    }
+
+    public static ObjectiveSpec housesAndSuppliersOnly() {
+        return new ObjectiveSpec(Type.HOUSES_SUPPLIERS_ONLY, 1.0, 0.0);
+    }
+
     public String label() {
         return switch (type) {
             case SHORTEST_DISTANCE -> "shortest_distance";
             case FASTEST_TIME -> "fastest_time";
             case BALANCED -> "balanced";
+            case HOUSES_WAREHOUSES_ONLY -> "houses_warehouses_only";
+            case HOUSES_SUPPLIERS_ONLY -> "houses_suppliers_only";
         };
+    }
+
+    public boolean useDepots() {
+        return type != Type.HOUSES_SUPPLIERS_ONLY;
+    }
+
+    public boolean useSuppliers() {
+        return type != Type.HOUSES_WAREHOUSES_ONLY;
     }
 
     public Cost toCost(RouteCostMatrix matrix) {
         return switch (type) {
-            case SHORTEST_DISTANCE -> matrix::km;
+            case SHORTEST_DISTANCE, HOUSES_WAREHOUSES_ONLY, HOUSES_SUPPLIERS_ONLY -> matrix::km;
             case FASTEST_TIME -> (a, b) -> matrix.seconds(a, b) / 60.0;
             case BALANCED -> (a, b) -> alpha * matrix.km(a, b) + beta * (matrix.seconds(a, b) / 60.0);
         };
