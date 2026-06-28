@@ -437,7 +437,8 @@ public class RouteOptimizationService {
     private static String signature(String label, RouteOptionDto opt) {
         // Source-type objectives always get a unique signature so they appear as separate cards
         // even when the stop sequence happens to match another objective.
-        boolean pinLabel = label.equals("houses_warehouses_only") || label.equals("houses_suppliers_only");
+        boolean pinLabel = label.equals("houses_warehouses_only") || label.equals("houses_suppliers_only")
+            || label.equals("shortest_distance") || label.equals("fastest_time");
         StringBuilder sb = new StringBuilder();
         if (pinLabel) sb.append(label).append(':');
         sb.append("H[");
