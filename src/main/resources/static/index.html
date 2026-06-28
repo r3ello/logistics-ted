@@ -3587,10 +3587,6 @@
               <span style="font-size:0.68rem;color:#9aa3be;text-transform:uppercase;font-weight:700;letter-spacing:0.05em">Trade</span>
               <span style="font-size:0.82rem;color:#f5a623;font-weight:600">🔧 ${w.trade}</span>
             </div>` : ''}
-            ${w.houseName ? `<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem">
-              <span style="font-size:0.68rem;color:#9aa3be;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;white-space:nowrap">House</span>
-              <span style="font-size:0.82rem;color:#4f8ef7;font-weight:600;text-align:right">🏠 ${w.houseName}</span>
-            </div>` : ''}
           </div>
         </div>`;
       const marker = L.marker([w.lat, w.lng], { icon: workerIcon })
@@ -3958,10 +3954,6 @@
               <span style="font-size:0.68rem;color:#9aa3be;text-transform:uppercase;font-weight:700;letter-spacing:0.05em">Crew</span>
               <span style="font-size:0.82rem;color:${w.trade ? '#f5a623' : '#9aa3be'};font-weight:600">${w.trade || '—'}</span>
             </div>
-            ${w.houseName ? `<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem">
-              <span style="font-size:0.68rem;color:#9aa3be;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;white-space:nowrap">House</span>
-              <span style="font-size:0.82rem;color:#4f8ef7;font-weight:600;text-align:right">🏠 ${w.houseName}</span>
-            </div>` : ''}
           </div>
         </div>`;
       const marker = L.marker([w.lat, w.lng], { icon: workerIcon })
@@ -4209,10 +4201,6 @@
             <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Crew Leader</span>
             <span style="font-size:0.82rem;color:#f5a623;font-weight:600">🦺 ${w.leaderName}</span>
           </div>` : ''}
-          ${w.houseName ? `<div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">House</span>
-            <span style="font-size:0.82rem;color:#4f8ef7;font-weight:600">🏠 ${w.houseName}</span>
-          </div>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -4376,10 +4364,20 @@
           <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;display:block;margin-bottom:4px">${t('tpDashSearchLabel')}</label>
           <input type="text" id="tpDashSearch" placeholder="${t('tpDashSearchPlaceholder')}" oninput="tpDashFilterTable()" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;padding:6px 10px;outline:none">
         </div>
+        <button id="tpDashPayOnly" onclick="tpDashTogglePayOnly()" style="padding:6px 14px;background:transparent;border:1px solid rgba(167,139,250,.4);border-radius:8px;color:#a78bfa;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap">💰 Pay only</button>
         <button onclick="tpDashExportPdf()" style="padding:6px 14px;background:#a78bfa;color:#0f1117;border:none;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap">${t('tpDashExportBtn')}</button>
       </div>
       <div id="tpDashStatus" style="color:#9aa3be;font-size:0.85rem;margin-bottom:0.75rem">${t('tpDashLoading')}</div>
-      <div id="tpDashTotal" style="display:none;margin-bottom:0.75rem;padding:0.6rem 1rem;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:8px;font-size:0.9rem;font-weight:700;color:#a78bfa"></div>
+      <div id="tpDashCards" style="display:none;display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+        <div class="house-card" style="flex:1;min-width:160px;max-width:220px">
+          <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;margin-bottom:0.4rem">Workers needing pay</p>
+          <p id="tpDashCardWorkers" style="font-size:1.6rem;font-weight:800;color:#a78bfa;margin:0">—</p>
+        </div>
+        <div class="house-card" style="flex:1;min-width:160px;max-width:220px">
+          <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9aa3be;margin-bottom:0.4rem">Total daily cost</p>
+          <p id="tpDashCardCost" style="font-size:1.6rem;font-weight:800;color:#3ecf6e;margin:0">—</p>
+        </div>
+      </div>
       <div style="overflow-x:auto">
         <table class="att-table" id="tpDashTable" style="display:none">
           <thead><tr>
@@ -4483,8 +4481,18 @@
     if (!tbody) return;
 
     const city = BG_CITIES[_tpDashCity];
-    const payCount = rows.filter(r => r.outside && r.routeKm != null).length;
+    const payRows = rows.filter(r => r.outside && r.routeKm != null);
+    const payCount = payRows.length;
+    const totalCost = payRows.reduce((sum, r) => sum + (r.dailyCost || 0), 0);
     status.textContent = t('tpDashSummary').replace('{total}',rows.length).replace('{pay}',payCount).replace('{city}',city.name).replace('{r}',_tpDashRadius);
+    const cards = document.getElementById('tpDashCards');
+    if (cards) {
+      cards.style.display = 'flex';
+      const wEl = document.getElementById('tpDashCardWorkers');
+      const cEl = document.getElementById('tpDashCardCost');
+      if (wEl) wEl.textContent = payCount;
+      if (cEl) cEl.textContent = `€${totalCost.toFixed(2)}`;
+    }
 
     tbody.innerHTML = rows.map((row, i) => {
       const w = row.w;
@@ -4522,6 +4530,17 @@
     tpDashFilterTable();
   }
 
+  let _tpDashPayOnly = false;
+  function tpDashTogglePayOnly() {
+    _tpDashPayOnly = !_tpDashPayOnly;
+    const btn = document.getElementById('tpDashPayOnly');
+    if (btn) {
+      btn.style.background = _tpDashPayOnly ? '#a78bfa' : 'transparent';
+      btn.style.color = _tpDashPayOnly ? '#0f1117' : '#a78bfa';
+    }
+    tpDashFilterTable();
+  }
+
   function tpDashFilterTable() {
     const q = (document.getElementById('tpDashSearch')?.value || '').toLowerCase();
     let total = 0;
@@ -4530,7 +4549,9 @@
     document.querySelectorAll('#tpDashTbody tr').forEach(tr => {
       const matchSearch = !q || (tr.dataset.search || '').includes(q);
       const matchSel    = !_tpDashSelectedId || tr.dataset.wid === _tpDashSelectedId;
-      const visible     = matchSearch && matchSel;
+      const row         = _tpDashRows.find(r => String(r.w.id) === tr.dataset.wid);
+      const matchPay    = !_tpDashPayOnly || (row && row.dailyCost != null);
+      const visible     = matchSearch && matchSel && matchPay;
       tr.style.display  = visible ? '' : 'none';
       tr.style.background = (tr.dataset.wid === _tpDashSelectedId) ? 'rgba(167,139,250,.1)' : '';
       if (visible) {
@@ -4542,15 +4563,6 @@
     const city = BG_CITIES[_tpDashCity];
     const statusEl = document.getElementById('tpDashStatus');
     if (statusEl) statusEl.textContent = t('tpDashSummary').replace('{total}',visibleTotal).replace('{pay}',payCount).replace('{city}',city.name).replace('{r}',_tpDashRadius);
-    const totalEl = document.getElementById('tpDashTotal');
-    if (totalEl) {
-      if (payCount > 0) {
-        totalEl.style.display = '';
-        totalEl.textContent = t('tpDashTotalLabel').replace('{cost}', total.toFixed(2)).replace('{n}', payCount).replace('{s}', payCount !== 1 ? 's' : '');
-      } else {
-        totalEl.style.display = 'none';
-      }
-    }
   }
 
   function tpDashExportPdf() {
@@ -4568,27 +4580,28 @@
     const visible = _tpDashRows.filter(r => {
       const matchSearch = !q || (r.w.name + ' ' + (r.w.crewName||'') + ' ' + (r.w.crewHouseName||r.w.houseName||'')).toLowerCase().includes(q);
       const matchSel    = !_tpDashSelectedId || String(r.w.id) === _tpDashSelectedId;
-      return matchSearch && matchSel;
+      const matchPay    = !_tpDashPayOnly || r.dailyCost != null;
+      return matchSearch && matchSel && matchPay;
     });
     const totalCost = visible.reduce((sum, r) => sum + (r.dailyCost || 0), 0);
     const payWorkers = visible.filter(r => r.dailyCost != null).length;
     doc.autoTable({
       startY: 28,
-      head: [['#', t('tpDashThWorker'), t('tpDashThCrew'), t('tpDashThHouse'), t('tpDashThRoute'), t('tpDashThCost'), t('tpDashThStatus')]],
+      head: [['#', t('tpDashThWorker'), t('tpDashThCrew'), t('tpDashThHouse'), t('tpDashThRoute') + ' km', t('tpDashThCost'), 'Status']],
       body: visible.map((row, i) => [
         i+1,
         row.w.name,
-        row.w.crewName || '—',
-        row.w.crewHouseName || row.w.houseName || '—',
-        row.routeKm  != null ? row.routeKm.toFixed(1)  : '—',
-        row.dailyCost != null ? `€${row.dailyCost.toFixed(2)}` : '—',
-        row.outside ? t('tpDashPayNeeded') : (row.straight == null ? t('tpDashNoCoords') : t('tpDashWithin')),
+        row.w.crewName || '-',
+        row.w.crewHouseName || row.w.houseName || '-',
+        row.routeKm  != null ? row.routeKm.toFixed(1)  : '-',
+        row.dailyCost != null ? `EUR ${row.dailyCost.toFixed(2)}` : '-',
+        row.outside ? 'Pay needed' : (row.straight == null ? 'No coords' : 'Within radius'),
       ]),
       styles: { fontSize: 8 },
       headStyles: { fillColor: [79,142,247] },
       didParseCell(data) {
         if (data.column.index === 6 && data.section === 'body') {
-          if (data.cell.raw === 'Pay needed')   data.cell.styles.textColor = [247,111,111];
+          if (data.cell.raw === 'Pay needed')    data.cell.styles.textColor = [167,139,250];
           if (data.cell.raw === 'Within radius') data.cell.styles.textColor = [62,207,110];
         }
       }

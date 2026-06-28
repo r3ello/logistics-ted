@@ -288,9 +288,15 @@ Evaluates every worker's commute cost against a configurable center and radius.
 
 **Summary line** and **total cost bar** both update whenever the search or row selection changes, reflecting only visible rows.
 
-**Click a row** to isolate that worker (click again to deselect). Hover highlights rows in blue.
+**Click a row** to isolate that worker (click again to deselect). Hover highlights rows in blue; selected row highlighted in purple.
+
+**Live totals** — a summary line and a purple total bar below the controls both recalculate instantly as you search or select rows, reflecting only the currently visible workers.
 
 **Export PDF** — downloads a formatted landscape report with city/radius/fuel settings in the header, the filtered table, and the total daily fuel cost at the bottom. Respects current search and row selection.
+
+**i18n** — all strings (tab button, labels, headers, badges, totals, PDF content) are fully translated in both English and Bulgarian.
+
+**Color theme** — purple (`#a78bfa`) throughout: tab button, slider, export button, cost values, pay badge, row highlight, and total bar.
 
 ## Map View — nine-mode toggle
 
