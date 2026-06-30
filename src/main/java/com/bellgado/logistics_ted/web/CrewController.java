@@ -6,6 +6,7 @@ import com.bellgado.logistics_ted.domain.Worker;
 import com.bellgado.logistics_ted.domain.WorkerRole;
 import com.bellgado.logistics_ted.repository.CrewRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
+import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,14 +26,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/crews")
 public class CrewController {
 
-    private final CrewRepository   crews;
-    private final WorkerRepository workers;
-    private final HouseRepository  houses;
+    private final CrewRepository        crews;
+    private final WorkerRepository      workers;
+    private final HouseRepository       houses;
+    private final HouseStageRepository  houseStages;
 
-    public CrewController(CrewRepository crews, WorkerRepository workers, HouseRepository houses) {
-        this.crews   = crews;
-        this.workers = workers;
-        this.houses  = houses;
+    public CrewController(CrewRepository crews, WorkerRepository workers, HouseRepository houses, HouseStageRepository houseStages) {
+        this.crews       = crews;
+        this.workers     = workers;
+        this.houses      = houses;
+        this.houseStages = houseStages;
     }
 
     @GetMapping
@@ -183,6 +186,15 @@ public class CrewController {
             }).toList();
         m.put("members", memberList);
         m.put("memberCount", memberList.size());
+        List<Map<String, Object>> assignedHouses = houseStages.findAssignedHousesForCrew(c.getId())
+            .stream().map(row -> {
+                Map<String, Object> h = new LinkedHashMap<>();
+                h.put("id",   row[0]);
+                h.put("name", row[1]);
+                return h;
+            }).toList();
+        m.put("assignedHouses", assignedHouses);
+        // keep legacy houseId/houseName for map features
         if (c.getHouse() != null) {
             m.put("houseId",   c.getHouse().getId());
             m.put("houseName", c.getHouse().getName());

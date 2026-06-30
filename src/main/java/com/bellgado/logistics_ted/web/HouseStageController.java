@@ -114,9 +114,10 @@ public class HouseStageController {
             m.put("stageNameEn", row[2]);
             m.put("crews", stages.findCrewsForStage(order).stream().map(cr -> {
                 Map<String, Object> c = new LinkedHashMap<>();
-                c.put("crewId",     cr[0]);
-                c.put("crewName",   cr[1]);
-                c.put("leaderName", cr[3]);
+                c.put("crewId",         cr[0]);
+                c.put("crewName",        cr[1]);
+                c.put("leaderName",      cr[3]);
+                c.put("assignedHouses",  cr[4]);
                 return c;
             }).toList());
             return m;
