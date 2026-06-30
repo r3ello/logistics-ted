@@ -194,6 +194,7 @@ public class CrewController {
                 return h;
             }).toList();
         m.put("assignedHouses", assignedHouses);
+        m.put("stageNames", houseStages.findStageNamesForCrew(c.getId()));
         // keep legacy houseId/houseName for map features
         if (c.getHouse() != null) {
             m.put("houseId",   c.getHouse().getId());

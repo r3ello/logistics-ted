@@ -681,9 +681,9 @@
     /* ── CARD CRUD BUTTONS ── */
     .card-actions { display: flex; gap: 0.4rem; }
     .card-btn {
-      width: 28px; height: 28px; border-radius: 7px; border: none;
+      width: 34px; height: 34px; border-radius: 8px; border: none;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.85rem; cursor: pointer; transition: background 0.15s;
+      font-size: 1.05rem; cursor: pointer; transition: background 0.15s;
       flex-shrink: 0;
     }
     .card-btn-edit  { background: rgba(79,142,247,0.15); color: var(--accent); }
@@ -1957,7 +1957,7 @@
       <button class="btn btn-primary" id="whAddBtn" onclick="openFacilityModal('warehouse', null)">+ Add warehouse</button>
     </div>
     <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="whSearchInput" type="text" placeholder="Search warehouses..." autocomplete="off" oninput="filterFacilityList('warehouse')" /></div>
-    <div id="warehousesList" class="facility-grid"></div>
+    <div id="warehousesList"></div>
   </div>
 
   <!-- VIEW: SUPPLIERS (external vendors — tier 3) -->
@@ -1967,7 +1967,7 @@
       <button class="btn btn-primary" id="supAddBtn" onclick="openFacilityModal('supplier', null)">+ Add supplier</button>
     </div>
     <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="supSearchInput" type="text" placeholder="Search suppliers..." autocomplete="off" oninput="filterFacilityList('supplier')" /></div>
-    <div id="suppliersList" class="facility-grid"></div>
+    <div id="suppliersList"></div>
   </div>
 
   <!-- VIEW: ELECTRIC BOXES -->
@@ -2387,6 +2387,12 @@
       scaffoldDeleteConfirm:'Delete this scaffold?',
       scaffoldSaveFail:'Save failed',
       scaffoldStatusNone:'None', scaffoldStatusAvailable:'Available', scaffoldStatusInUse:'In Use',
+      // shared management table column headers
+      colActions:'Actions', colName:'Name', colWorker:'Worker', colRole:'Role', colTrade:'Trade',
+      colCrew:'Crew', colHouse:'House', colHouses:'Houses', colLocation:'Location', colManager:'Manager',
+      colLeader:'Leader', colMembers:'Members', colStartDate:'Start Date', colEndDate:'End Date',
+      colStatus:'Status', colStage:'Stage', colScaffold:'Scaffold', colCoordinates:'Coordinates',
+      colMaterials:'Materials', colNumber:'#',
       // scaffold map legend
       legendAvailable:'Available', legendInUse:'In Use', legendNone:'None',
       // map popup scaffold rows
@@ -2609,6 +2615,12 @@
       scaffoldDeleteConfirm:'Изтрий скелето?',
       scaffoldSaveFail:'Грешка при запис',
       scaffoldStatusNone:'Няма', scaffoldStatusAvailable:'Налично', scaffoldStatusInUse:'В употреба',
+      // shared management table column headers
+      colActions:'Действия', colName:'Име', colWorker:'Работник', colRole:'Роля', colTrade:'Специалност',
+      colCrew:'Екип', colHouse:'Къща', colHouses:'Къщи', colLocation:'Локация', colManager:'Мениджър',
+      colLeader:'Лидер', colMembers:'Членове', colStartDate:'Начална дата', colEndDate:'Крайна дата',
+      colStatus:'Статус', colStage:'Етап', colScaffold:'Скеле', colCoordinates:'Координати',
+      colMaterials:'Материали', colNumber:'#',
       // scaffold map legend
       legendAvailable:'Налично', legendInUse:'В употреба', legendNone:'Няма',
       // map popup scaffold rows
@@ -2648,11 +2660,14 @@
     currentLang = currentLang === 'en' ? 'bg' : 'en';
     translateStatic();
     retranslateMaterials();
-    const activeView = document.querySelector('.view.active').id.replace('view-','');
+    const activeView = document.querySelector('.view.active')?.id?.replace('view-','') || 'dashboard';
     if (activeView === 'dashboard') {
-      if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash(); else loadDashboard();
+      if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash(); else setDashMode(_dashMode);
     }
     else if (activeView === 'scaffold')    setDashMode('scaffold');
+    else if (activeView === 'crews')       renderCrewCards();
+    else if (activeView === 'warehouses')  renderFacilityList('warehouse');
+    else if (activeView === 'suppliers')   renderFacilityList('supplier');
     else if (activeView === 'history')     loadHistory();
     else if (activeView === 'stagematrix') loadStageMatrix();
   }
@@ -4241,7 +4256,7 @@
         <td style="padding:0.55rem 0.75rem;color:#9aa3be;font-size:0.78rem;font-weight:700;width:40px">${s.stageOrder}</td>
         <td style="padding:0.55rem 0.75rem;font-size:0.9rem;font-weight:600" id="stageTypeName_${s.stageOrder}">${displayName}</td>
         <td style="padding:0.55rem 0.75rem;text-align:right;white-space:nowrap" class="admin-only">
-          <button onclick="editStageType(${s.stageOrder},'${s.stageName.replace(/'/g,"\\'")}','${(s.stageNameEn||'').replace(/'/g,"\\'")}')" style="background:none;border:none;color:#4f8ef7;cursor:pointer;font-size:1rem;padding:0.2rem 0.4rem">✏</button>
+          <button onclick="editStageType(${s.stageOrder},'${s.stageName.replace(/'/g,"\\'")}','${(s.stageNameEn||'').replace(/'/g,"\\'")}')" style="background:none;border:none;color:#4f8ef7;cursor:pointer;font-size:1rem;padding:0.2rem 0.4rem">✎</button>
           <button onclick="deleteStageType(${s.stageOrder},'${displayName.replace(/'/g,"\\'")}')" style="background:none;border:none;color:#f76f6f;cursor:pointer;font-size:1rem;padding:0.2rem 0.4rem">🗑</button>
         </td>
       </tr>`;}).join('');
@@ -4599,59 +4614,51 @@
     let wList = [];
     try { wList = await apiFetch('/api/workers').then(r => r.json()); } catch(e) {}
     if (!wList.length) { grid.innerHTML = `<div class="state-msg">No workers found. <button class="btn btn-primary admin-only" style="margin-top:1rem" onclick="openWorkerModal()">＋ Add worker</button></div>`; return; }
-    const crewColors = { Roofing:'#f76f6f', Plumbing:'#4f8ef7', Electricity:'#f5c842', Framing:'#a78bfa', Finishing:'#3ecf6e' };
-    grid.innerHTML = `<div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-bottom:0.5rem">
-      <button class="btn btn-primary admin-only" onclick="openWorkerModal()">${t('workerAddBtn')}</button>
-    </div>` + wList.map(w => {
-      const crewColor = crewColors[w.trade] || '#7a85a3';
+    const rows = wList.map(w => {
       const roleCfg = {
-        CREW_MEMBER:  { label: t('roleCrewMember'),  icon: '👷', color: '#9aa3be', bg:'rgba(122,133,163,0.1)', border:'rgba(122,133,163,0.3)' },
-        CREW_LEADER:  { label: t('roleCrewLeader'),  icon: '🦺', color: '#f5a623', bg:'rgba(245,166,35,0.1)',  border:'rgba(245,166,35,0.3)' },
-        CREW_MANAGER: { label: t('roleCrewManager'), icon: '👔', color: '#a78bfa', bg:'rgba(167,139,250,0.1)', border:'rgba(167,139,250,0.3)' },
+        CREW_MEMBER:  { label: t('roleCrewMember'),  icon: '👷', color: '#9aa3be' },
+        CREW_LEADER:  { label: t('roleCrewLeader'),  icon: '🦺', color: '#f5a623' },
+        CREW_MANAGER: { label: t('roleCrewManager'), icon: '👔', color: '#a78bfa' },
       }[w.role || 'CREW_MEMBER'];
-      const searchKey = [w.name, w.trade, w.crewName, w.houseName].filter(Boolean).join(' ').toLowerCase();
-      return `<div class="house-card" data-search="${searchKey.replace(/"/g,'&quot;')}">
-        <div class="house-header">
-          <div>
-            <p class="house-name">${roleCfg.icon} ${w.name}</p>
-            <p class="house-loc">📍 ${w.location || (w.lat && w.lng ? `${parseFloat(w.lat).toFixed(4)}, ${parseFloat(w.lng).toFixed(4)}` : '—')}</p>
+      return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+        <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
+          <span style="margin-right:0.3rem">${roleCfg.icon}</span>${w.name}
+        </td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${roleCfg.color};font-weight:700">${roleCfg.icon} ${roleCfg.label}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#a78bfa;font-weight:600">${w.crewStages ? '🔧 ' + w.crewStages : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewName ? '👥 ' + w.crewName : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.crewHouseName ? '🏠 ' + w.crewHouseName : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.82rem;color:var(--muted)">${w.location || (w.lat && w.lng ? `${parseFloat(w.lat).toFixed(4)}, ${parseFloat(w.lng).toFixed(4)}` : '—')}</td>
+        <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
+          <div style="display:flex;gap:0.4rem">
+            <button class="card-btn card-btn-edit" title="Edit" onclick="openWorkerModal(${w.id})">✎</button>
+            <button class="card-btn card-btn-del" title="Delete" onclick="deleteWorker(${w.id},'${w.name.replace(/'/g,"\\'")}')">🗑</button>
           </div>
-          <div style="display:flex;align-items:center;gap:0.4rem">
-            <span class="house-id">#${w.id}</span>
-            <div class="card-actions admin-only" onclick="event.stopPropagation()">
-              <button class="card-btn card-btn-edit" title="Edit" onclick="openWorkerModal(${w.id})">✏</button>
-              <button class="card-btn card-btn-del"  title="Delete" onclick="deleteWorker(${w.id},'${w.name.replace(/'/g,"\\'")}')">🗑</button>
-            </div>
-          </div>
+        </td>
+      </tr>`;
+    }).join('');
+    grid.innerHTML = `
+      <div style="grid-column:1/-1">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
+          <button class="btn btn-primary admin-only" onclick="openWorkerModal()">${t('workerAddBtn')}</button>
         </div>
-        <div style="margin-top:0.6rem;display:flex;flex-direction:column;gap:0.28rem">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Role</span>
-            <span style="font-size:0.82rem;color:${roleCfg.color};font-weight:700">${roleCfg.icon} ${roleCfg.label}</span>
-          </div>
-          ${w.trade ? `<div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Trade</span>
-            <span style="font-size:0.82rem;color:${crewColor};font-weight:600">🔧 ${w.trade}</span>
-          </div>` : ''}
-          ${w.crewName ? `<div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Crew</span>
-            <span style="font-size:0.82rem;color:#3ecf6e;font-weight:600">👥 ${w.crewName}</span>
-          </div>` : ''}
-          ${w.crewHouseName ? `<div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Working On</span>
-            <span style="font-size:0.82rem;color:#4f8ef7;font-weight:600">🏠 ${w.crewHouseName}</span>
-          </div>` : ''}
-          ${w.managerName ? `<div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Manager</span>
-            <span style="font-size:0.82rem;color:#a78bfa;font-weight:600">👔 ${w.managerName}</span>
-          </div>` : ''}
-          ${w.leaderName ? `<div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Crew Leader</span>
-            <span style="font-size:0.82rem;color:#f5a623;font-weight:600">🦺 ${w.leaderName}</span>
-          </div>` : ''}
+        <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)">
+          <table style="width:100%;border-collapse:collapse;background:var(--card)">
+            <thead>
+              <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colWorker')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colRole')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colTrade')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
         </div>
       </div>`;
-    }).join('');
     onAltSearch();
   }
 
@@ -4660,45 +4667,57 @@
     grid.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>Loading...</div>`;
     let sList = [];
     try { sList = await apiFetch('/api/scaffolds').then(r => r.json()); } catch(e) {}
-    const cfg = {
-      AVAILABLE: { bg:'rgba(26,122,63,0.12)',  border:'rgba(26,122,63,0.35)',  color:'#1a7a3f', label:t('chipScaffoldAvailable'), icon:'🏗️' },
-      IN_USE:    { bg:'rgba(245,166,35,0.12)', border:'rgba(245,166,35,0.35)', color:'#f5a623', label:t('chipScaffoldInUse'),      icon:'🔧' },
-      NONE:      { bg:'rgba(122,133,163,0.08)',border:'rgba(122,133,163,0.2)', color:'#9aa3be', label:t('chipScaffoldNone'),       icon:'—'  },
+    const statusCfg = {
+      AVAILABLE: { color:'#1a7a3f', label:t('chipScaffoldAvailable') },
+      IN_USE:    { color:'#f5a623', label:t('chipScaffoldInUse')      },
+      NONE:      { color:'#9aa3be', label:t('chipScaffoldNone')       },
     };
-    grid.innerHTML = `<div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-bottom:0.5rem">
-      <button class="btn btn-primary admin-only" onclick="openScaffoldEditModal()">${t('scaffoldAddBtn')}</button>
-    </div>` + (sList.length ? sList.map(s => {
-      const c = cfg[s.status] || cfg.NONE;
-      return `<div class="house-card">
-        <div class="house-header">
-          <div>
-            <p class="house-name">🏗️ Scaffold #${s.id}</p>
-            <p class="house-loc">${s.houseName ? '🏠 ' + s.houseName : '— Unassigned —'}</p>
-          </div>
-          <div style="display:flex;align-items:center;gap:0.4rem">
-            <span class="house-id">#${s.id}</span>
-            <div class="card-actions admin-only" onclick="event.stopPropagation()">
-              <button class="card-btn card-btn-edit" title="Edit" onclick="openScaffoldEditModal(${s.id})">✏</button>
-              <button class="card-btn card-btn-del"  title="Delete" onclick="deleteScaffold(${s.id})">🗑</button>
-            </div>
-          </div>
+    if (!sList.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
+          <button class="btn btn-primary admin-only" onclick="openScaffoldEditModal()">${t('scaffoldAddBtn')}</button>
         </div>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem">
-          <div style="display:flex;align-items:center;gap:0.4rem;background:${c.bg};border:1px solid ${c.border};border-radius:7px;padding:0.3rem 0.65rem">
-            <span style="font-size:0.85rem">${c.icon}</span>
-            <span style="font-size:0.82rem;color:${c.color};font-weight:700">${c.label}</span>
+        <div class="state-msg">No scaffolds found.</div>
+      </div>`;
+      return;
+    }
+    const rows = sList.map(s => {
+      const c = statusCfg[s.status] || statusCfg.NONE;
+      return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+        <td style="padding:0.7rem 1rem;font-weight:700;color:var(--muted)">#${s.id}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${c.color};font-weight:700">🏗️ ${c.label}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${s.houseName ? '🏠 ' + s.houseName : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${s.startDate ? '📅 ' + s.startDate : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${s.endDate ? '📅 ' + s.endDate : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
+          <div style="display:flex;gap:0.4rem">
+            <button class="card-btn card-btn-edit" title="Edit" onclick="openScaffoldEditModal(${s.id})">✎</button>
+            <button class="card-btn card-btn-del" title="Delete" onclick="deleteScaffold(${s.id})">🗑</button>
           </div>
-          ${s.startDate ? `<div style="display:flex;align-items:center;gap:0.4rem;background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.2);border-radius:7px;padding:0.3rem 0.65rem">
-            <span style="font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Start</span>
-            <span style="font-size:0.82rem;font-weight:600">📅 ${s.startDate}</span>
-          </div>` : ''}
-          ${s.endDate ? `<div style="display:flex;align-items:center;gap:0.4rem;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.25);border-radius:7px;padding:0.3rem 0.65rem">
-            <span style="font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">End</span>
-            <span style="font-size:0.82rem;font-weight:600">📅 ${s.endDate}</span>
-          </div>` : ''}
+        </td>
+      </tr>`;
+    }).join('');
+    grid.innerHTML = `
+      <div style="grid-column:1/-1">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
+          <button class="btn btn-primary admin-only" onclick="openScaffoldEditModal()">${t('scaffoldAddBtn')}</button>
+        </div>
+        <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)">
+          <table style="width:100%;border-collapse:collapse;background:var(--card)">
+            <thead>
+              <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colNumber')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStatus')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStartDate')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colEndDate')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
         </div>
       </div>`;
-    }).join('') : '<div class="state-msg" style="grid-column:1/-1">No scaffolds found.</div>');
   }
 
   async function renderCrewCards() {
@@ -4740,11 +4759,14 @@
         </td>
         <td style="padding:0.7rem 1rem;color:#a78bfa;font-weight:600;font-size:0.85rem">${c.managerName ? '👔 ' + c.managerName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;color:#f5a623;font-weight:600;font-size:0.85rem">${c.leaderName ? '🦺 ' + c.leaderName : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${c.stageNames ? '🔧 ' + c.stageNames : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem">${housesHtml}</td>
         <td style="padding:0.7rem 1rem">${membersHtml}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
-          <button class="card-btn card-btn-edit" title="Edit" onclick="openCrewModal(${c.id})">✏</button>
-          <button class="card-btn card-btn-del" title="Delete" onclick="deleteCrewDash(${c.id})">🗑</button>
+          <div style="display:flex;gap:0.4rem">
+            <button class="card-btn card-btn-edit" title="Edit" onclick="openCrewModal(${c.id})">✎</button>
+            <button class="card-btn card-btn-del" title="Delete" onclick="deleteCrewDash(${c.id})">🗑</button>
+          </div>
         </td>
       </tr>`;
     }).join('');
@@ -4758,12 +4780,13 @@
           <table style="width:100%;border-collapse:collapse;background:var(--card)">
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Crew</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Manager</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Leader</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Houses</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Members</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em" class="admin-only"></th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colManager')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLeader')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouses')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colMembers')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -5162,7 +5185,7 @@
                 <td style="color:var(--text);font-size:0.82rem">${date}</td>
                 <td style="text-align:center" onclick="event.stopPropagation()">
                   <div style="display:flex;gap:0.4rem;justify-content:center" class="admin-only">
-                    <button class="card-btn card-btn-edit" onclick="openOrderModal(${o.id})" title="Edit">✏</button>
+                    <button class="card-btn card-btn-edit" onclick="openOrderModal(${o.id})" title="Edit">✎</button>
                     <button class="card-btn card-btn-del"  onclick="deleteOrder(${o.id})" title="Delete">🗑</button>
                   </div>
                 </td>
@@ -5532,7 +5555,7 @@
 
   function onAltSearch() {
     const q = (document.getElementById('altSearchInput')?.value || '').toLowerCase();
-    if (_dashMode === 'orders' || _dashMode === 'deliveries' || _dashMode === 'crews') {
+    if (_dashMode === 'orders' || _dashMode === 'deliveries' || _dashMode === 'crews' || _dashMode === 'workers' || _dashMode === 'scaffold') {
       document.querySelectorAll('#grid table tbody tr').forEach(row => {
         if (row.id && row.id.startsWith('order-deliveries-row-')) return;
         row.style.display = (!q || row.textContent.toLowerCase().includes(q)) ? '' : 'none';
@@ -5885,7 +5908,7 @@
         <div style="display:flex;align-items:center;gap:0.4rem">
           <span class="house-id">#${c.id}</span>
           <div class="card-actions admin-only" onclick="event.stopPropagation()">
-            <button class="card-btn card-btn-edit" title="Edit" onclick="openCrewModal(${c.id})">✏</button>
+            <button class="card-btn card-btn-edit" title="Edit" onclick="openCrewModal(${c.id})">✎</button>
             <button class="card-btn card-btn-del"  title="Delete" onclick="deleteCrew(${c.id})">🗑</button>
           </div>
         </div>
@@ -6444,68 +6467,59 @@
       document.getElementById('grid').innerHTML = `<div class="state-msg">${t('noData')}</div>`;
       return;
     }
-    const houseMax = {};
-    houses.forEach(h => h.materials.forEach(m => {
-      houseMax[m.name] = Math.max(houseMax[m.name] || 0, m.quantity);
-    }));
     initSearch(houses);
-    document.getElementById('grid').innerHTML = houses.map(h => `
-      <div class="house-card" data-name="${h.name}" data-loc="${h.location}" onclick="selectCard(this)">
-        <div class="house-header">
-          <div>
-            <p class="house-name">${h.name}</p>
-            <p class="house-loc">📍 ${h.location}</p>
-          </div>
-          <div style="display:flex;align-items:center;gap:0.4rem">
-            <span class="house-id">#${h.id}</span>
-            ${currentUser?.role === 'admin' ? `
-            <div class="card-actions" onclick="event.stopPropagation()">
-              <button class="card-btn card-btn-edit" title="Edit" onclick="openHouseModal(${h.id})">✏</button>
-              <button class="card-btn" title="Update stock" style="background:rgba(62,207,110,0.15);color:var(--green)" onclick="openInventoryModal(${h.id})">📦</button>
-              <button class="card-btn card-btn-del"  title="Delete" onclick="askDelete(this,${h.id},'${h.name.replace(/'/g,"\\'")}')">🗑</button>
-            </div>` : ''}
-          </div>
+    const scaffoldColors = {
+      AVAILABLE: { color:'#1a7a3f', label:t('chipScaffoldAvailable') },
+      IN_USE:    { color:'#f5a623', label:t('chipScaffoldInUse')      },
+      NONE:      { color:'#9aa3be', label:t('chipScaffoldNone')       },
+    };
+    const rows = houses.map(h => {
+      const ss = h.scaffold_status || 'NONE';
+      const sc = scaffoldColors[ss] || scaffoldColors.NONE;
+      const stageHtml = h.current_phase
+        ? h.current_phase.split(', ').map(s => `<div style="font-size:0.8rem;color:var(--purple);font-weight:600">🔧 ${s}</div>`).join('')
+        : '<span style="color:var(--muted)">—</span>';
+      const actionsHtml = currentUser?.role === 'admin' ? `
+        <div style="display:flex;gap:0.4rem">
+        <button class="card-btn card-btn-edit" title="Edit" onclick="openHouseModal(${h.id})">✎</button>
+        <button class="card-btn" title="Update stock" style="background:rgba(62,207,110,0.15);color:var(--green)" onclick="openInventoryModal(${h.id})">📦</button>
+        <button class="card-btn card-btn-del" title="Delete" onclick="askDelete(this,${h.id},'${h.name.replace(/'/g,"\\'")}')">🗑</button>
         </div>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.9rem">
-          <div style="display:flex;align-items:center;gap:0.4rem;background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.2);border-radius:7px;padding:0.3rem 0.65rem">
-            <span style="font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">${t('chipStart')}</span>
-            <span style="font-size:0.82rem;color:${h.start_date ? 'var(--text)' : 'var(--muted)'};font-weight:600">📅 ${h.start_date || '—'}</span>
-          </div>
-          <div style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.25);border-radius:7px;padding:0.3rem 0.65rem">
-            <span style="font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">${t('chipStage')}</span>
-            ${h.current_phase ? h.current_phase.split(', ').map(s=>`<div style="font-size:0.82rem;color:var(--purple);font-weight:600">🔧 ${s}</div>`).join('') : '<span style="font-size:0.82rem;color:var(--muted);font-weight:600">—</span>'}
-          </div>
-          ${(() => {
-            const ss = h.scaffold_status || 'NONE';
-            const cfg = {
-              AVAILABLE: { bg:'rgba(26,122,63,0.12)',  border:'rgba(26,122,63,0.35)',  color:'#1a7a3f', label:t('chipScaffoldAvailable') },
-              IN_USE:    { bg:'rgba(245,166,35,0.12)', border:'rgba(245,166,35,0.35)', color:'#f5a623', label:t('chipScaffoldInUse')      },
-              NONE:      { bg:'rgba(122,133,163,0.08)',border:'rgba(122,133,163,0.2)', color:'#9aa3be', label:t('chipScaffoldNone')       },
-            }[ss];
-            return `<div style="display:flex;align-items:center;gap:0.4rem;background:${cfg.bg};border:1px solid ${cfg.border};border-radius:7px;padding:0.3rem 0.65rem">
-              <span style="font-size:0.85rem">🏗️</span>
-              <span style="font-size:0.78rem;color:${cfg.color};font-weight:700">${cfg.label}</span>
-            </div>`;
-          })()}
-        </div>
-        <div class="del-confirm" id="del-${h.id}">
-          <span>${t('deleteConfirmPrefix')}<strong>${h.name}</strong>?</span>
+        <div class="del-confirm" id="del-${h.id}" style="display:none;position:absolute;right:0;top:100%;z-index:200;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.75rem;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4)">
+          <span style="font-size:0.82rem">${t('deleteConfirmPrefix')}<strong>${h.name}</strong>?</span>
           <button class="btn btn-ghost" style="padding:0.25rem 0.65rem;font-size:0.76rem" onclick="cancelDelete(${h.id})">${t('btnNo')}</button>
           <button class="btn" style="padding:0.25rem 0.65rem;font-size:0.76rem;background:var(--red);color:#fff" onclick="confirmDelete(${h.id})">${t('btnYesDelete')}</button>
+        </div>` : '';
+      return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+        <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
+          🏠 ${h.name}
+          <span style="font-size:0.7rem;color:var(--muted);margin-left:0.3rem">#${h.id}</span>
+        </td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.location}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${h.start_date ? '📅 ' + h.start_date : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem">${stageHtml}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${sc.color};font-weight:700">🏗️ ${sc.label}</td>
+        <td style="padding:0.7rem 1rem;white-space:nowrap;position:relative" class="admin-only">${actionsHtml}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('grid').innerHTML = `
+      <div style="grid-column:1/-1">
+        <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)">
+          <table style="width:100%;border-collapse:collapse;background:var(--card)">
+            <thead>
+              <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStartDate')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colScaffold')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
         </div>
-        ${h.materials.map(m => {
-          const meta = MAT_META[m.name] || { icon: '📦', cls: 'bar-boards', color: '#7a85a3' };
-          const pct  = houseMax[m.name] ? Math.round((m.quantity / houseMax[m.name]) * 100) : 0;
-          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.22rem 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-            <span style="font-size:0.8rem;color:var(--muted)">${meta.icon} ${mn(m.name)}</span>
-            <span style="font-size:0.82rem;color:var(--text);font-weight:600">${fmt(m.quantity)} <span style="font-weight:400;color:var(--muted)">${mu(m.unit)}</span></span>
-          </div>`;
-        }).join('')}
-        <div style="border-top:1px solid var(--border);margin-top:0.9rem;padding-top:0.7rem;display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:0.75rem;color:var(--muted)">${t('totalWarehouse')}</span>
-          <span style="font-size:0.95rem;font-weight:700;color:var(--green)">${euro(h.totalValue)}</span>
-        </div>
-      </div>`).join('');
+      </div>`;
   }
 
   // ── ORDER FORM ───────────────────────────────────────────────────────────────
@@ -7077,6 +7091,10 @@
       card.classList.toggle('hidden', !match);
       card.classList.remove('highlighted');
     });
+    document.querySelectorAll('#grid table tbody tr').forEach(row => {
+      const match = !q || row.textContent.toLowerCase().includes(q);
+      row.style.display = match ? '' : 'none';
+    });
   }
 
   function clearSearch() {
@@ -7266,29 +7284,77 @@
     }
   }
 
-  function facilityCardHtml(f, kind) {
-    const mats = (f.materials || []).map(m =>
-      `<span class="mat-tag">${MAT_META[m.name]?.icon || '📦'} ${mn(m.name)}: ${fmt(m.quantity)} ${mu(m.unit)}</span>`
-    ).join('') || `<span style="color:var(--muted);font-size:0.8rem">${t('facNoStock')}</span>`;
+  function facilityRowHtml(f, kind) {
+    const mats = f.materials || [];
+    const matListHtml = mats.map(m =>
+      `<div style="font-size:0.8rem;color:var(--text);padding:0.2rem 0;white-space:nowrap">${MAT_META[m.name]?.icon || '📦'} ${mn(m.name)}: ${fmt(m.quantity)} ${mu(m.unit)}</div>`
+    ).join('') || `<div style="font-size:0.8rem;color:var(--muted)">${t('facNoStock')}</div>`;
+    const matsHtml = mats.length
+      ? `<div style="position:relative;display:inline-block">
+          <button onclick="toggleMatsFloat(this)" data-fac="${f.id}"
+            style="display:flex;align-items:center;gap:0.4rem;background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.2);border-radius:7px;padding:0.28rem 0.65rem;cursor:pointer">
+            <span style="font-size:0.8rem;color:var(--accent);font-weight:700">📦 ${mats.length} material${mats.length !== 1 ? 's' : ''}</span>
+            <span style="font-size:0.7rem;color:var(--accent)" class="mats-chevron">▾</span>
+          </button>
+          <div id="fac-mats-${f.id}" style="display:none;position:fixed;z-index:1000;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.5rem 0.75rem;box-shadow:0 8px 28px rgba(0,0,0,.4);min-width:200px;flex-direction:column;gap:0.1rem">${matListHtml}</div>
+        </div>`
+      : `<span style="color:var(--muted);font-size:0.8rem">${t('facNoStock')}</span>`;
     const hasCoords = f.lat != null && f.lng != null;
-    return `
-      <div class="house-card">
-        <div class="house-header">
-          <div style="flex:1;min-width:0">
-            <p class="house-name">${escapeHtml(f.name)}</p>
-            ${f.location ? `<p class="house-loc">📍 ${escapeHtml(f.location)}</p>` : ''}
-            ${hasCoords ? `<p class="house-loc" style="font-size:0.72rem;color:var(--muted)">🗺 ${f.lat}, ${f.lng}</p>` : `<p class="house-loc" style="color:var(--yellow);font-size:0.72rem">${t('facNoCoords')}</p>`}
-          </div>
-          <div class="card-actions admin-only" onclick="event.stopPropagation()">
-            <button class="card-btn card-btn-edit" title="${t('facEdit')}" onclick="openFacilityModal('${kind}', ${f.id})">✏</button>
-            <button class="card-btn card-btn-del"  title="${t('facDelete')}" onclick="deleteFacility('${kind}', ${f.id})">🗑</button>
-          </div>
+    const coordsHtml = hasCoords
+      ? `<span style="font-size:0.82rem;color:var(--muted)">🗺 ${f.lat}, ${f.lng}</span>`
+      : `<span style="font-size:0.82rem;color:var(--yellow)">${t('facNoCoords')}</span>`;
+    return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+      <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">${escapeHtml(f.name)}</td>
+      <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted);white-space:nowrap">${f.location ? '📍 ' + escapeHtml(f.location) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td style="padding:0.7rem 1rem;white-space:nowrap">${coordsHtml}</td>
+      <td style="padding:0.7rem 1rem">${matsHtml}</td>
+      <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
+        <div style="display:flex;gap:0.4rem">
+          <button class="card-btn card-btn-edit" title="${t('facEdit')}" onclick="openFacilityModal('${kind}', ${f.id})">✎</button>
+          <button class="card-btn card-btn-del" title="${t('facDelete')}" onclick="deleteFacility('${kind}', ${f.id})">🗑</button>
         </div>
-        <div class="stop-mats">${mats}</div>
-      </div>`;
+      </td>
+    </tr>`;
+  }
+
+  function closeMatsPanel(panel) {
+    panel.style.display = 'none';
+    const btn = document.querySelector(`[data-fac="${panel.id.replace('fac-mats-', '')}"]`);
+    if (btn) { const c = btn.querySelector('.mats-chevron'); if (c) c.textContent = '▾'; btn.style.background = 'rgba(79,142,247,0.08)'; }
+  }
+
+  function toggleMatsFloat(btn) {
+    const id = btn.dataset.fac;
+    const panel = document.getElementById('fac-mats-' + id);
+    const chevron = btn.querySelector('.mats-chevron');
+    const open = panel.style.display === 'flex';
+    document.querySelectorAll('[id^="fac-mats-"]').forEach(p => { if (p !== panel && p.style.display === 'flex') closeMatsPanel(p); });
+    if (open) { closeMatsPanel(panel); return; }
+    const r = btn.getBoundingClientRect();
+    panel.style.top = (r.bottom + 6) + 'px';
+    panel.style.left = r.left + 'px';
+    panel.style.display = 'flex';
+    document.body.appendChild(panel);
+    chevron.textContent = '▴';
+    btn.style.background = 'rgba(79,142,247,0.18)';
+    const reposition = () => { const rr = btn.getBoundingClientRect(); panel.style.top = (rr.bottom + 6) + 'px'; panel.style.left = rr.left + 'px'; };
+    const close = (e) => {
+      if (!panel.contains(e.target) && e.target !== btn) {
+        closeMatsPanel(panel);
+        document.removeEventListener('click', close, true);
+        window.removeEventListener('scroll', reposition, true);
+        window.removeEventListener('resize', reposition);
+      }
+    };
+    setTimeout(() => {
+      document.addEventListener('click', close, true);
+      window.addEventListener('scroll', reposition, true);
+      window.addEventListener('resize', reposition);
+    }, 10);
   }
 
   function renderFacilityList(kind) {
+    document.querySelectorAll('body > [id^="fac-mats-"]').forEach(p => p.remove());
     const cfg = facCfg(kind);
     const el = document.getElementById(cfg.listEl);
     if (!el) return;
@@ -7296,20 +7362,30 @@
       el.innerHTML = `<div class="state-msg" style="padding:1rem;color:var(--muted)">${t('facEmpty')}</div>`;
       return;
     }
-    el.innerHTML = cfg.list.map(f => facilityCardHtml(f, kind)).join('');
+    el.innerHTML = `<div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)">
+      <table style="width:100%;border-collapse:collapse;background:var(--card)">
+        <thead>
+          <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
+            <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colName')}</th>
+            <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
+            <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCoordinates')}</th>
+            <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colMaterials')}</th>
+            <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
+          </tr>
+        </thead>
+        <tbody>${cfg.list.map(f => facilityRowHtml(f, kind)).join('')}</tbody>
+      </table>
+    </div>`;
   }
 
   function filterFacilityList(kind) {
     const q = document.getElementById(kind === 'warehouse' ? 'whSearchInput' : 'supSearchInput').value.trim().toLowerCase();
     const cfg = facCfg(kind);
-    const filtered = q ? cfg.list.filter(f => f.name.toLowerCase().includes(q) || (f.location || '').toLowerCase().includes(q)) : cfg.list;
     const el = document.getElementById(cfg.listEl);
     if (!el) return;
-    if (!filtered.length) {
-      el.innerHTML = `<div class="state-msg" style="padding:1rem;color:var(--muted)">${t('facEmpty')}</div>`;
-      return;
-    }
-    el.innerHTML = filtered.map(f => facilityCardHtml(f, kind)).join('');
+    el.querySelectorAll('tbody tr').forEach(row => {
+      row.style.display = (!q || row.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
   }
 
   function filterCrews() {

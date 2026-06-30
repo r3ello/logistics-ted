@@ -2,6 +2,7 @@ package com.bellgado.logistics_ted.web;
 
 import com.bellgado.logistics_ted.domain.House;
 import com.bellgado.logistics_ted.domain.Worker;
+import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,9 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class WorkerController {
 
     private final WorkerRepository workers;
+    private final HouseStageRepository houseStages;
 
-    public WorkerController(WorkerRepository workers) {
+    public WorkerController(WorkerRepository workers, HouseStageRepository houseStages) {
         this.workers = workers;
+        this.houseStages = houseStages;
     }
 
     @GetMapping
@@ -116,7 +119,9 @@ public class WorkerController {
                     ldr -> { m.put("leaderId", ldr.getId()); m.put("leaderName", ldr.getName()); },
                     ()  -> { m.put("leaderId", null);        m.put("leaderName", null); }
                 );
+            m.put("crewStages", houseStages.findStageNamesForCrew(w.getCrew().getId()));
         } else {
+            m.put("crewStages",  null);
             m.put("crewId",      null);
             m.put("crewName",    null);
             m.put("managerId",   null);
