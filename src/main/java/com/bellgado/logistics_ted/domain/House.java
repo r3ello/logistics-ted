@@ -40,7 +40,7 @@ public class House {
     @Column(name = "start_date")
     private LocalDate startDate;
 
-    @Column(name = "current_phase", length = 100)
+    @Column(name = "current_phase", length = 1000)
     private String currentPhase;
 
     @Enumerated(EnumType.STRING)

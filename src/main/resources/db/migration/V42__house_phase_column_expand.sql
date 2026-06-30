@@ -1,0 +1,1 @@
+ALTER TABLE house ALTER COLUMN current_phase TYPE VARCHAR(1000);
