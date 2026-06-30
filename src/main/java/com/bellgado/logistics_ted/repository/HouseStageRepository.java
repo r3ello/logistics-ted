@@ -39,6 +39,14 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     List<Object[]> findAssignedHousesForCrew(Integer crewId);
 
     @Query(value = """
+        SELECT string_agg(DISTINCT hs.stage_name, ', ' ORDER BY hs.stage_name)
+        FROM stage_type_crew stc
+        JOIN house_stage hs ON hs.stage_order = stc.stage_order
+        WHERE stc.crew_id = :crewId
+        """, nativeQuery = true)
+    String findStageNamesForCrew(Integer crewId);
+
+    @Query(value = """
         SELECT c.id, c.name,
                w.id AS leader_id, w.name AS leader_name,
                string_agg(DISTINCT h2.name, ', ' ORDER BY h2.name) AS assigned_houses
