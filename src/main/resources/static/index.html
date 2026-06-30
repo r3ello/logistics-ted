@@ -2966,16 +2966,17 @@
     location.hash = name;
     closeNav();
 
-    if (name === 'map') initHousesMap();
-    if (name === 'warehouses') loadWarehouses();
-    if (name === 'suppliers') loadSuppliers();
-    if (name === 'history') loadHistory();
-    if (name === 'scaffold') loadScaffoldHouses();
-    if (name === 'crews') loadOrgChart();
-    if (name === 'electric') ebInit();
-    if (name === 'attendance') attInit();
-    if (name === 'qrcodes')      qrInit();
-    if (name === 'stagematrix')  loadStageMatrix();
+    if (name === 'dashboard')   loadDashboard();
+    if (name === 'map')         apiFetch('/api/houses').then(r=>r.json()).then(h=>{dashHouses=h;initHousesMap();}).catch(()=>initHousesMap());
+    if (name === 'warehouses')  loadWarehouses();
+    if (name === 'suppliers')   loadSuppliers();
+    if (name === 'history')     loadHistory();
+    if (name === 'scaffold')    loadScaffoldHouses();
+    if (name === 'crews')       loadOrgChart();
+    if (name === 'electric')    ebInit();
+    if (name === 'attendance')  attInit();
+    if (name === 'qrcodes')     qrInit();
+    if (name === 'stagematrix') loadStageMatrix();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -4376,7 +4377,7 @@
           : pc
             ? `background:${pc.bg};color:${pc.text};border:none;cursor:pointer`
             : `background:transparent;color:var(--muted);border:1px dashed var(--border);cursor:pointer`;
-        const pillsData = JSON.stringify(crews.map(c => ({ crewId: c.crewId, leader: c.leaderName || c.crewName }))).replace(/"/g,'&quot;');
+        const pillsData = JSON.stringify(crews.map(c => ({ crewId: c.crewId, leader: c.leaderName || c.crewName, assignedHouses: c.assignedHouses || null }))).replace(/"/g,'&quot;');
         const clickHandler = isLocked
           ? `onclick="showToast('${isEn ? 'Foundation must be completed first' : 'Фундаментът трябва да е завършен първо'}')"`
           : `onclick="openStagePicker(${s.id},this,'${s.status||'NOT_STARTED'}',${s.crewId||'null'},this.dataset.crews)"`;
@@ -4475,30 +4476,85 @@
     picker.id = 'stagePicker';
     picker.style.cssText = 'position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.5rem;box-shadow:0 8px 32px rgba(0,0,0,0.35);display:flex;flex-direction:column;gap:0.3rem;min-width:160px';
 
-    // Clear option
+    // Clear option always at top
     const clearBtn = document.createElement('button');
     clearBtn.textContent = '—';
     clearBtn.style.cssText = 'background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:20px;padding:0.25rem 0.75rem;font-size:0.75rem;font-weight:600;cursor:pointer;text-align:center';
     clearBtn.onclick = () => { pickStageCell(id, null, 'NOT_STARTED', null, btn); picker.remove(); };
     picker.appendChild(clearBtn);
 
-    crews.forEach((c, i) => {
-      if (i > 0) {
-        const sep = document.createElement('hr');
-        sep.style.cssText = 'border:none;border-top:1px solid var(--border);margin:0.1rem 0';
-        picker.appendChild(sep);
-      }
+    const currentCrew = crews.find(c => c.crewId == currentCrewId);
+
+    if (currentCrew && currentStatus !== 'NOT_STARTED') {
+      // Leader already selected — show only status options for that leader
+      const sep = document.createElement('hr');
+      sep.style.cssText = 'border:none;border-top:1px solid var(--border);margin:0.1rem 0';
+      picker.appendChild(sep);
+
       ['ASSIGNED','IN_PROGRESS','DONE'].forEach(v => {
         const pc = PILL_COLORS[v];
-        const label = stagePillLabel(c.leader, v);
-        const active = currentStatus === v && currentCrewId == c.crewId;
+        const label = stagePillLabel(currentCrew.leader, v);
+        const active = currentStatus === v;
         const b = document.createElement('button');
         b.textContent = label;
         b.style.cssText = `background:${pc.bg};color:${pc.text};border:none;border-radius:20px;padding:0.28rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;text-align:center;outline:${active ? '2px solid #fff' : 'none'};white-space:nowrap`;
-        b.onclick = () => { pickStageCell(id, c.crewId, v, c.leader, btn); picker.remove(); };
+        b.onclick = () => { pickStageCell(id, currentCrew.crewId, v, currentCrew.leader, btn); picker.remove(); };
         picker.appendChild(b);
       });
-    });
+    } else {
+      // No leader selected — show leader names to pick from
+      const sep = document.createElement('hr');
+      sep.style.cssText = 'border:none;border-top:1px solid var(--border);margin:0.1rem 0';
+      picker.appendChild(sep);
+
+      crews.forEach(c => {
+        const b = document.createElement('button');
+        const alreadyAssigned = !!c.assignedHouses;
+        b.textContent = (c.leader || c.crewName || '—') + (alreadyAssigned ? ' ⚠️' : '');
+        b.title = alreadyAssigned ? (currentLang === 'bg' ? `Вече назначен на: ${c.assignedHouses}` : `Already assigned to: ${c.assignedHouses}`) : '';
+        b.style.cssText = 'background:transparent;color:var(--text);border:1px solid var(--border);border-radius:20px;padding:0.28rem 0.75rem;font-size:0.78rem;font-weight:600;cursor:pointer;text-align:center;white-space:nowrap';
+        b.onclick = () => {
+          if (alreadyAssigned) {
+            picker.remove();
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:1rem';
+            const box = document.createElement('div');
+            box.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1.75rem;max-width:340px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:1rem';
+            const icon = document.createElement('div');
+            icon.textContent = '⚠️';
+            icon.style.cssText = 'font-size:2rem;text-align:center';
+            const houseList = c.assignedHouses.split(', ').map(h => `• ${h}`).join('\n');
+            const msg = document.createElement('p');
+            msg.style.cssText = 'margin:0;color:var(--text);font-size:0.92rem;text-align:center;line-height:1.6;white-space:pre-line';
+            msg.textContent = currentLang === 'bg'
+              ? `Екипът вече е назначен на:\n${houseList}\n\nПродължаване?`
+              : `This crew is already assigned to:\n${houseList}\n\nContinue anyway?`;
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;gap:0.75rem;justify-content:center';
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = currentLang === 'bg' ? 'Отказ' : 'Cancel';
+            cancelBtn.style.cssText = 'flex:1;padding:0.55rem 1rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.88rem;font-weight:600;cursor:pointer';
+            cancelBtn.onclick = () => overlay.remove();
+            const okBtn = document.createElement('button');
+            okBtn.textContent = currentLang === 'bg' ? 'Продължи' : 'Continue';
+            okBtn.style.cssText = 'flex:1;padding:0.55rem 1rem;border-radius:8px;border:none;background:#f97316;color:#fff;font-size:0.88rem;font-weight:700;cursor:pointer';
+            okBtn.onclick = () => { overlay.remove(); pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn); };
+            row.appendChild(cancelBtn);
+            row.appendChild(okBtn);
+            box.appendChild(icon);
+            box.appendChild(msg);
+            box.appendChild(row);
+            overlay.appendChild(box);
+            overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+            document.body.appendChild(overlay);
+            return;
+          }
+          pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn);
+          picker.remove();
+        };
+        picker.appendChild(b);
+      });
+    }
 
     document.body.appendChild(picker);
     const r = btn.getBoundingClientRect();
@@ -4531,9 +4587,9 @@
       await apiFetch(`/api/house-stages/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ crewId: crewId || null, status, workerName: leader || null }) });
       // Reload matrix so lock state updates if foundation changed
-      const stageOrder = btn.closest('td')?.previousElementSibling ? null : 0;
-      if (document.getElementById('view-stagematrix')?.classList.contains('active') || true)
-        loadStageMatrix();
+      // Refresh houses cache so house cards show updated stage immediately
+      apiFetch('/api/houses').then(r => r.json()).then(h => { dashHouses = h; }).catch(() => {});
+      loadStageMatrix();
     } catch(e) { console.error('Failed to update stage', e); }
   }
 
@@ -4651,57 +4707,69 @@
     let cList = [];
     try { cList = await apiFetch('/api/crews').then(r => r.json()); } catch(e) {}
     const tradeColors = { Roofing:'#f76f6f', Plumbing:'#4f8ef7', Electricity:'#f5c842', Framing:'#a78bfa', Finishing:'#3ecf6e' };
-    grid.innerHTML = `<div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-bottom:0.5rem">
-      <button class="btn btn-primary admin-only" onclick="openCrewModal()">${t('crewAddBtn') || '＋ Add Crew'}</button>
-    </div>` + (cList.length ? cList.map(c => {
+
+    if (!cList.length) {
+      grid.innerHTML = '<div class="state-msg" style="grid-column:1/-1">No crews yet.</div>';
+      return;
+    }
+
+    const rows = cList.map(c => {
       const members = c.members || [];
-      const memberCount = members.length;
-      const membersHtml = members.map(m => `
-        <div style="display:flex;align-items:center;gap:0.5rem;padding:0.28rem 0.55rem;background:var(--surface);border:1px solid var(--border);border-radius:6px">
-          <span style="font-size:0.82rem">👷</span>
-          <span style="font-size:0.78rem;font-weight:600;flex:1">${m.name}</span>
-          ${m.trade ? `<span style="font-size:0.68rem;font-weight:600;color:${tradeColors[m.trade]||'#9aa3be'}">🔧 ${m.trade}</span>` : ''}
-        </div>`).join('');
-      return `<div class="house-card">
-        <div class="house-header">
-          <div>
-            <p class="house-name">👥 ${c.name}</p>
-          </div>
-          <div style="display:flex;align-items:center;gap:0.4rem">
-            <span class="house-id">#${c.id}</span>
-            <div class="card-actions admin-only" onclick="event.stopPropagation()">
-              <button class="card-btn card-btn-edit" title="Edit" onclick="openCrewModal(${c.id})">✏</button>
-              <button class="card-btn card-btn-del"  title="Delete" onclick="deleteCrewDash(${c.id})">🗑</button>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:0.6rem;display:flex;flex-direction:column;gap:0.28rem">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Manager</span>
-            <span style="font-size:0.82rem;color:#a78bfa;font-weight:600">${c.managerName ? '👔 ' + c.managerName : '<span style="color:var(--muted);font-style:italic">—</span>'}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Leader</span>
-            <span style="font-size:0.82rem;color:#f5a623;font-weight:600">${c.leaderName ? '🦺 ' + c.leaderName : '<span style="color:var(--muted);font-style:italic">—</span>'}</span>
-          </div>
-          ${c.houseName ? `<div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">House</span>
-            <span style="font-size:0.82rem;color:#4f8ef7;font-weight:600">🏠 ${c.houseName}</span>
-          </div>` : ''}
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.1rem">
-            <span style="font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Members</span>
-            <button onclick="toggleCrewMembers(this)" data-crew="${c.id}"
-              style="display:flex;align-items:center;gap:0.4rem;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:7px;padding:0.3rem 0.65rem;cursor:pointer;transition:background .15s">
-              <span style="font-size:0.82rem;color:#a78bfa;font-weight:700">👷 ${memberCount} member${memberCount !== 1 ? 's' : ''}</span>
+      const memberListHtml = members.map(m => `<div style="display:flex;align-items:center;gap:0.4rem;padding:0.2rem 0;border-top:1px solid var(--border)">
+            <span style="font-size:0.8rem">👷</span>
+            <span style="font-size:0.78rem;font-weight:600;color:var(--text)">${m.name}</span>
+            ${m.trade ? `<span style="font-size:0.68rem;font-weight:600;color:${tradeColors[m.trade]||'#9aa3be'}">· ${m.trade}</span>` : ''}
+          </div>`).join('');
+      const membersHtml = members.length
+        ? `<div style="position:relative;display:inline-block">
+            <button onclick="toggleCrewMembersFloat(this)" data-crew="${c.id}"
+              style="display:flex;align-items:center;gap:0.4rem;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:7px;padding:0.28rem 0.65rem;cursor:pointer">
+              <span style="font-size:0.8rem;color:#a78bfa;font-weight:700">👷 ${members.length} member${members.length !== 1 ? 's' : ''}</span>
               <span style="font-size:0.7rem;color:#a78bfa" class="crew-chevron">▾</span>
             </button>
-          </div>
+            <div id="crew-members-${c.id}" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:500;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.5rem 0.75rem;box-shadow:0 8px 28px rgba(0,0,0,.4);min-width:200px;flex-direction:column;gap:0.1rem">${memberListHtml}</div>
+          </div>`
+        : `<span style="font-size:0.75rem;color:var(--muted);font-style:italic">—</span>`;
+      const housesHtml = c.assignedHouses && c.assignedHouses.length
+        ? c.assignedHouses.map(h => `<div style="font-size:0.8rem;color:#4f8ef7;font-weight:600">🏠 ${h.name}</div>`).join('')
+        : `<span style="color:var(--muted);font-size:0.8rem">—</span>`;
+      return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+        <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
+          <span style="color:#a78bfa;margin-right:0.3rem">👥</span>${c.name}
+          <span style="font-size:0.7rem;color:var(--muted);margin-left:0.3rem">#${c.id}</span>
+        </td>
+        <td style="padding:0.7rem 1rem;color:#a78bfa;font-weight:600;font-size:0.85rem">${c.managerName ? '👔 ' + c.managerName : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;color:#f5a623;font-weight:600;font-size:0.85rem">${c.leaderName ? '🦺 ' + c.leaderName : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem">${housesHtml}</td>
+        <td style="padding:0.7rem 1rem">${membersHtml}</td>
+        <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
+          <button class="card-btn card-btn-edit" title="Edit" onclick="openCrewModal(${c.id})">✏</button>
+          <button class="card-btn card-btn-del" title="Delete" onclick="deleteCrewDash(${c.id})">🗑</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    grid.innerHTML = `
+      <div style="grid-column:1/-1">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
+          <button class="btn btn-primary admin-only" onclick="openCrewModal()">${t('crewAddBtn') || '＋ Add Crew'}</button>
         </div>
-        <div id="crew-members-${c.id}" style="display:none;margin-top:0.6rem;flex-direction:column;gap:0.28rem">
-          ${membersHtml || `<div style="font-size:0.75rem;color:var(--muted);font-style:italic;padding:0.25rem 0.4rem">No members yet</div>`}
+        <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)">
+          <table style="width:100%;border-collapse:collapse;background:var(--card)">
+            <thead>
+              <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Crew</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Manager</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Leader</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Houses</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Members</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em" class="admin-only"></th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
         </div>
       </div>`;
-    }).join('') : '<div class="state-msg" style="grid-column:1/-1">No crews yet.</div>');
   }
 
   function toggleCrewMembers(btn) {
@@ -4712,6 +4780,28 @@
     panel.style.display = open ? 'none' : 'flex';
     chevron.textContent = open ? '▾' : '▴';
     btn.style.background = open ? 'rgba(167,139,250,0.08)' : 'rgba(167,139,250,0.18)';
+  }
+
+  function toggleCrewMembersFloat(btn) {
+    const id = btn.dataset.crew;
+    const panel = document.getElementById('crew-members-' + id);
+    const chevron = btn.querySelector('.crew-chevron');
+    const open = panel.style.display === 'flex';
+    // close any other open panels first
+    document.querySelectorAll('[id^="crew-members-"]').forEach(p => {
+      if (p !== panel && p.style.display === 'flex') {
+        p.style.display = 'none';
+        const ob = p.previousElementSibling;
+        if (ob) { const oc = ob.querySelector('.crew-chevron'); if (oc) oc.textContent = '▾'; ob.style.background = 'rgba(167,139,250,0.08)'; }
+      }
+    });
+    panel.style.display = open ? 'none' : 'flex';
+    chevron.textContent = open ? '▾' : '▴';
+    btn.style.background = open ? 'rgba(167,139,250,0.08)' : 'rgba(167,139,250,0.18)';
+    if (!open) {
+      const close = (e) => { if (!panel.contains(e.target) && e.target !== btn) { panel.style.display = 'none'; chevron.textContent = '▾'; btn.style.background = 'rgba(167,139,250,0.08)'; document.removeEventListener('click', close, true); } };
+      setTimeout(() => document.addEventListener('click', close, true), 10);
+    }
   }
 
   async function deleteCrewDash(id) {
@@ -5442,7 +5532,7 @@
 
   function onAltSearch() {
     const q = (document.getElementById('altSearchInput')?.value || '').toLowerCase();
-    if (_dashMode === 'orders' || _dashMode === 'deliveries') {
+    if (_dashMode === 'orders' || _dashMode === 'deliveries' || _dashMode === 'crews') {
       document.querySelectorAll('#grid table tbody tr').forEach(row => {
         if (row.id && row.id.startsWith('order-deliveries-row-')) return;
         row.style.display = (!q || row.textContent.toLowerCase().includes(q)) ? '' : 'none';
@@ -5800,7 +5890,7 @@
           </div>
         </div>
       </div>
-      ${c.houseName ? `<div style="display:flex;align-items:center;gap:0.4rem;padding:0.3rem 0.5rem 0;font-size:0.78rem;color:#4f8ef7;font-weight:600">🏠 ${c.houseName}</div>` : ''}
+      ${c.assignedHouses && c.assignedHouses.length ? `<div style="padding:0.3rem 0.5rem 0;display:flex;flex-direction:column;gap:0.15rem">${c.assignedHouses.map(h=>`<div style="font-size:0.78rem;color:#4f8ef7;font-weight:600">🏠 ${h.name}</div>`).join('')}</div>` : ''}
       ${c.leaderName
         ? `<div class="org-crew-leader">
             <span style="font-size:1rem">🦺</span>
@@ -7224,9 +7314,9 @@
 
   function filterCrews() {
     const q = document.getElementById('crewsSearchInput').value.trim().toLowerCase();
-    document.querySelectorAll('#view-crews .worker-card, #view-crews .crew-card').forEach(card => {
-      const text = card.textContent.toLowerCase();
-      card.style.display = (!q || text.includes(q)) ? '' : 'none';
+    document.querySelectorAll('#view-crews table tbody tr').forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = (!q || text.includes(q)) ? '' : 'none';
     });
   }
 

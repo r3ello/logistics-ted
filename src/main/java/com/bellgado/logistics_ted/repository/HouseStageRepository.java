@@ -35,13 +35,20 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query(value = "SELECT stage_name FROM house_stage WHERE house_id = :houseId AND status = 'IN_PROGRESS' ORDER BY stage_order", nativeQuery = true)
     List<String> findAllInProgressStageNames(Integer houseId);
 
+    @Query(value = "SELECT DISTINCT h.id, h.name FROM house_stage hs JOIN house h ON h.id = hs.house_id WHERE hs.crew_id = :crewId AND hs.status <> 'NOT_STARTED' ORDER BY h.name", nativeQuery = true)
+    List<Object[]> findAssignedHousesForCrew(Integer crewId);
+
     @Query(value = """
         SELECT c.id, c.name,
-               w.id AS leader_id, w.name AS leader_name
+               w.id AS leader_id, w.name AS leader_name,
+               string_agg(DISTINCT h2.name, ', ' ORDER BY h2.name) AS assigned_houses
         FROM stage_type_crew stc
         JOIN crew c ON c.id = stc.crew_id
         LEFT JOIN worker w ON w.crew_id = c.id AND w.role = 'CREW_LEADER'
+        LEFT JOIN house_stage hs2 ON hs2.crew_id = c.id AND hs2.status <> 'NOT_STARTED'
+        LEFT JOIN house h2 ON h2.id = hs2.house_id
         WHERE stc.stage_order = :stageOrder
+        GROUP BY c.id, c.name, w.id, w.name
         ORDER BY c.name
         """, nativeQuery = true)
     List<Object[]> findCrewsForStage(Integer stageOrder);
