@@ -60,4 +60,16 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
         ORDER BY c.name
         """, nativeQuery = true)
     List<Object[]> findCrewsForStage(Integer stageOrder);
+
+    @Query(value = "SELECT DISTINCT ON (stage_order) stage_name FROM house_stage WHERE stage_order = :stageOrder LIMIT 1", nativeQuery = true)
+    String findStageNameByOrder(Integer stageOrder);
+
+    /** All house→crew mappings: [house_id, crew_id, crew_name] for every crew assigned to any stage. */
+    @Query(value = """
+        SELECT DISTINCT hs.house_id, c.id AS crew_id, c.name AS crew_name
+        FROM house_stage hs
+        JOIN crew c ON c.id = hs.crew_id
+        ORDER BY hs.house_id, c.name
+        """, nativeQuery = true)
+    List<Object[]> findAllHouseCrewMappings();
 }

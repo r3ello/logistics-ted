@@ -12,27 +12,41 @@ import java.util.Optional;
 
 public interface WorkSessionRepository extends JpaRepository<WorkSession, Integer> {
 
-    /** Today's open session for a worker at a house (not yet checked out). */
+    /** Any session for a worker at a house today (for status display). */
     @Query("""
         SELECT s FROM WorkSession s
         WHERE s.worker.id = :workerId
           AND s.house.id  = :houseId
           AND s.sessionDate = :today
+        ORDER BY s.checkedInAt DESC
         """)
-    Optional<WorkSession> findTodaySession(@Param("workerId") Integer workerId,
-                                           @Param("houseId")  Integer houseId,
-                                           @Param("today")    LocalDate today);
+    List<WorkSession> findTodaySessions(@Param("workerId") Integer workerId,
+                                        @Param("houseId")  Integer houseId,
+                                        @Param("today")    LocalDate today);
 
-    /** Any session from this device at this house today (to block multi-worker abuse). */
+    /** Currently open session for a worker at a house (checked in, not yet checked out). */
+    @Query("""
+        SELECT s FROM WorkSession s
+        WHERE s.worker.id = :workerId
+          AND s.house.id  = :houseId
+          AND s.sessionDate = :today
+          AND s.checkedOutAt IS NULL
+        """)
+    Optional<WorkSession> findOpenSession(@Param("workerId") Integer workerId,
+                                          @Param("houseId")  Integer houseId,
+                                          @Param("today")    LocalDate today);
+
+    /** Open session from this device at this house today (to block multi-worker abuse). */
     @Query("""
         SELECT s FROM WorkSession s
         WHERE s.deviceId = :deviceId
           AND s.house.id = :houseId
           AND s.sessionDate = :today
+          AND s.checkedOutAt IS NULL
         """)
-    Optional<WorkSession> findTodaySessionByDevice(@Param("deviceId") String deviceId,
-                                                    @Param("houseId")  Integer houseId,
-                                                    @Param("today")    LocalDate today);
+    Optional<WorkSession> findOpenSessionByDevice(@Param("deviceId") String deviceId,
+                                                   @Param("houseId")  Integer houseId,
+                                                   @Param("today")    LocalDate today);
 
     /** All sessions for a crew on a given date (via crew→worker join). */
     @Query("""

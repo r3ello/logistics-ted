@@ -1589,7 +1589,7 @@
     </div>
     <div id="navManagementChildren" style="display:none">
       <div class="nav-item nav-sub" id="navStageMatrix" onclick="showView('stagematrix');setNavActive('navStageMatrix')">
-        <span class="nav-icon">📊</span> <span id="navStageMatrixLabel">Stage Matrix</span>
+        <span class="nav-icon">📊</span> <span id="navStageMatrixLabel">Project Stages</span>
       </div>
       <div class="nav-item nav-sub" id="navHouses" onclick="showView('dashboard');setDashMode('houses');setNavActive('navHouses')">
         <span class="nav-icon">🏠</span> <span id="navHousesLabel">Houses</span>
@@ -1875,10 +1875,21 @@
         </select>
       </div>
       <input type="hidden" id="cHouse" value="" />
-      <div class="field"><label>Leader</label>
-        <select id="cLeader" onchange="onCrewLeaderChange(this)" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
-          <option value="">— No leader —</option>
+      <div class="field"><label>Stage Responsible For</label>
+        <select id="cStage" onchange="onCrewStageChange()" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
+          <option value="">— No stage —</option>
         </select>
+      </div>
+      <div class="field"><label>Leader</label>
+        <div style="position:relative;display:flex;align-items:center;gap:0.5rem">
+          <select id="cLeader" onchange="onCrewLeaderChange(this)" style="flex:1;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
+            <option value="">— No leader —</option>
+          </select>
+          <span id="cLeaderEye" onclick="toggleLeaderInfo()" title="View leader info"
+            style="cursor:pointer;font-size:1.1rem;padding:0.4rem;border-radius:6px;transition:background .15s;user-select:none"
+            onmouseover="this.style.background='rgba(79,142,247,0.15)'" onmouseout="this.style.background=''">👁</span>
+          <div id="cLeaderInfo" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:800;min-width:220px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1rem;box-shadow:0 8px 24px rgba(0,0,0,.45);font-size:0.83rem"></div>
+        </div>
         <div id="cLeaderWarn" style="display:none;margin-top:0.4rem;padding:0.5rem 0.7rem;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.35);border-radius:7px;font-size:0.8rem;color:#f5a623"></div>
       </div>
       <div class="field"><label>Members</label>
@@ -2103,23 +2114,23 @@
 
     <!-- Tab bar: By Crew / By Worker -->
     <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:1rem">
-      <button class="btn btn-ghost att-tab active" id="attTabCrew"   onclick="attSwitchTab('crew')">👥 By Crew</button>
-      <button class="btn btn-ghost att-tab"        id="attTabWorker" onclick="attSwitchTab('worker')">👤 By Worker</button>
+      <button class="btn btn-ghost att-tab active" id="attTabCrew"   onclick="attSwitchTab('crew')"   data-i18n="attTabByCrew">👥 By Crew</button>
+      <button class="btn btn-ghost att-tab"        id="attTabWorker" onclick="attSwitchTab('worker')" data-i18n="attTabByWorker">👤 By Worker</button>
     </div>
 
     <!-- BY CREW panel -->
     <div id="attPanelCrew">
       <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:flex-end">
         <div class="field" style="margin:0;flex:1;min-width:160px">
-          <label>Crew</label>
+          <label data-i18n="attFieldCrew">Crew</label>
           <div class="ss-wrap" id="ss-crew">
-            <input class="ss-inp" id="ss-crew-inp" type="text" placeholder="— select crew —" autocomplete="off" readonly>
+            <input class="ss-inp" id="ss-crew-inp" type="text" placeholder="— select crew —" data-i18n-placeholder="attSelectCrew" autocomplete="off" readonly>
             <div class="ss-drop" id="ss-crew-drop"></div>
             <input type="hidden" id="attCrewSelect" value="">
           </div>
         </div>
         <div class="field" style="margin:0">
-          <label>Date</label>
+          <label data-i18n="attFieldDate">Date</label>
           <input type="date" id="attCrewDate" onchange="attLoadCrew()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
         </div>
       </div>
@@ -2133,19 +2144,19 @@
     <div id="attPanelWorker" style="display:none">
       <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:flex-end">
         <div class="field" style="margin:0;flex:1;min-width:160px">
-          <label>Worker</label>
+          <label data-i18n="attFieldWorker">Worker</label>
           <div class="ss-wrap" id="ss-worker">
-            <input class="ss-inp" id="ss-worker-inp" type="text" placeholder="— select worker —" autocomplete="off" readonly>
+            <input class="ss-inp" id="ss-worker-inp" type="text" placeholder="— select worker —" data-i18n-placeholder="attSelectWorker" autocomplete="off" readonly>
             <div class="ss-drop" id="ss-worker-drop"></div>
             <input type="hidden" id="attWorkerSelect" value="">
           </div>
         </div>
         <div class="field" style="margin:0">
-          <label>From</label>
+          <label data-i18n="attFieldFrom">From</label>
           <input type="date" id="attWorkerFrom" onchange="attLoadWorker()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
         </div>
         <div class="field" style="margin:0">
-          <label>To</label>
+          <label data-i18n="attFieldTo">To</label>
           <input type="date" id="attWorkerTo" onchange="attLoadWorker()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
         </div>
       </div>
@@ -2160,7 +2171,7 @@
   <div class="view" id="view-stagematrix">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem">
       <div>
-        <h2 id="stageMatrixTitle" style="margin:0;font-size:1.25rem;font-weight:700">Stage Matrix</h2>
+        <h2 id="stageMatrixTitle" style="margin:0;font-size:1.25rem;font-weight:700">Project Stages</h2>
         <p id="stageMatrixSub" style="margin:0.25rem 0 0;color:var(--muted);font-size:0.85rem">All houses × all construction stages</p>
       </div>
       <input id="stageMatrixSearch" type="text" placeholder="Search house by name..."
@@ -2388,7 +2399,7 @@
       scaffoldSaveFail:'Save failed',
       scaffoldStatusNone:'None', scaffoldStatusAvailable:'Available', scaffoldStatusInUse:'In Use',
       // shared management table column headers
-      colActions:'Actions', colName:'Name', colWorker:'Worker', colRole:'Role', colTrade:'Trade',
+      colActions:'Actions', colName:'Name', colWorker:'Worker', colRole:'Role', colTrade:'Trade', colCrews:'Crews',
       colCrew:'Crew', colHouse:'House', colHouses:'Houses', colLocation:'Location', colManager:'Manager',
       colLeader:'Leader', colMembers:'Members', colStartDate:'Start Date', colEndDate:'End Date',
       colStatus:'Status', colStage:'Stage', colScaffold:'Scaffold', colCoordinates:'Coordinates',
@@ -2404,6 +2415,21 @@
       chipScaffoldAvailable:'Available', chipScaffoldInUse:'In Use', chipScaffoldNone:'No Scaffold',
       // scaffold start location label on scaffold view
       scaffoldStartLbl:'📍 Driver starting location',
+      // attendance view
+      attTabByCrew:'👥 By Crew', attTabByWorker:'👤 By Worker',
+      attFieldCrew:'Crew', attFieldWorker:'Worker', attFieldDate:'Date', attFieldFrom:'From', attFieldTo:'To',
+      attSelectCrew:'— select crew —', attSelectWorker:'— select worker —',
+      attHeaderWorker:'Worker', attHeaderHouse:'House', attHeaderIn:'In', attHeaderOut:'Out',
+      attHeaderDuration:'Duration', attHeaderStatus:'Status',
+      attBadgeDone:'Done', attBadgeWorking:'Working',
+      attNoSessionsCrew:'No sessions recorded for this date.',
+      attNoSessionsWorker:'No sessions in this date range.',
+      // stage matrix
+      matrixHeaderHouse:'House',
+      stageStatusInProgress:'In Progress', stageStatusDone:'Done',
+      stageFoundationFirst:'Foundation must be completed first',
+      stageFoundationRequired:'Foundation required',
+      matrixLoading:'Loading…',
     },
     bg: {
       brandName:'Теодор Логистика', brandSub:'Управление на материали',
@@ -2616,7 +2642,7 @@
       scaffoldSaveFail:'Грешка при запис',
       scaffoldStatusNone:'Няма', scaffoldStatusAvailable:'Налично', scaffoldStatusInUse:'В употреба',
       // shared management table column headers
-      colActions:'Действия', colName:'Име', colWorker:'Работник', colRole:'Роля', colTrade:'Специалност',
+      colActions:'Действия', colName:'Име', colWorker:'Работник', colRole:'Роля', colTrade:'Специалност', colCrews:'Екипи',
       colCrew:'Екип', colHouse:'Къща', colHouses:'Къщи', colLocation:'Локация', colManager:'Мениджър',
       colLeader:'Лидер', colMembers:'Членове', colStartDate:'Начална дата', colEndDate:'Крайна дата',
       colStatus:'Статус', colStage:'Етап', colScaffold:'Скеле', colCoordinates:'Координати',
@@ -2632,6 +2658,21 @@
       chipScaffoldAvailable:'Налично', chipScaffoldInUse:'В употреба', chipScaffoldNone:'Без скеле',
       // scaffold start location label on scaffold view
       scaffoldStartLbl:'📍 Начална локация на шофьора',
+      // attendance view
+      attTabByCrew:'👥 По екип', attTabByWorker:'👤 По работник',
+      attFieldCrew:'Екип', attFieldWorker:'Работник', attFieldDate:'Дата', attFieldFrom:'От', attFieldTo:'До',
+      attSelectCrew:'— изберете екип —', attSelectWorker:'— изберете работник —',
+      attHeaderWorker:'Работник', attHeaderHouse:'Обект', attHeaderIn:'Влизане', attHeaderOut:'Излизане',
+      attHeaderDuration:'Продължителност', attHeaderStatus:'Статус',
+      attBadgeDone:'Завършен', attBadgeWorking:'На работа',
+      attNoSessionsCrew:'Няма записани сесии за тази дата.',
+      attNoSessionsWorker:'Няма сесии в този период.',
+      // stage matrix
+      matrixHeaderHouse:'Обект',
+      stageStatusInProgress:'В процес', stageStatusDone:'Завършен',
+      stageFoundationFirst:'Фундаментът трябва да е завършен първо',
+      stageFoundationRequired:'Необходим фундамент',
+      matrixLoading:'Зареждане…',
     },
   };
 
@@ -2670,6 +2711,7 @@
     else if (activeView === 'suppliers')   renderFacilityList('supplier');
     else if (activeView === 'history')     loadHistory();
     else if (activeView === 'stagematrix') loadStageMatrix();
+    else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
   }
 
   function retranslateMaterials() {
@@ -2760,6 +2802,9 @@
     document.getElementById('searchInput').placeholder  = t('searchPlaceholder');
     document.getElementById('clearBtn').title           = t('searchClear');
     document.getElementById('stageMatrixSearch').placeholder = t('matrixSearchPlaceholder');
+    // Generic data-i18n sweep
+    document.querySelectorAll('[data-i18n]').forEach(el => { const v = t(el.dataset.i18n); if (v) el.textContent = v; });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const v = t(el.dataset.i18nPlaceholder); if (v) el.placeholder = v; });
     document.getElementById('sectionLabel').textContent = t('sectionLabel');
     document.getElementById('orderFormTitle').textContent = t('orderFormTitle');
     document.getElementById('orderFormDesc').textContent  = t('orderFormDesc');
@@ -4269,7 +4314,7 @@
         <table style="width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;border:1px solid #2e3250">
           <thead><tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
             <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase;width:40px">#</th>
-            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase">${t('stagesColStage')}</th>
+            <th data-i18n="stagesColStage" style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase">${t('stagesColStage')}</th>
             <th class="admin-only"></th>
           </tr></thead>
           <tbody>${rows || `<tr><td colspan="3" style="padding:1rem;color:#9aa3be;text-align:center">${t('stagesNoResults')}</td></tr>`}</tbody>
@@ -4333,7 +4378,7 @@
 
   async function loadStageMatrix() {
     const wrap = document.getElementById('stageMatrixWrap');
-    wrap.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>Loading…</div>`;
+    wrap.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>${t('matrixLoading')}</div>`;
     let data;
     try { data = await apiFetch('/api/house-stages/matrix').then(r => r.json()); }
     catch(e) { wrap.innerHTML = `<div class="state-msg">Failed to load matrix.</div>`; return; }
@@ -4347,7 +4392,8 @@
     }).join('');
 
     // build a map: stageOrder → crews array
-    const crewsByStage = {};
+    window._crewsByStage = {};
+    const crewsByStage = window._crewsByStage;
     columns.forEach(c => { crewsByStage[c.stageOrder] = c.crews || []; });
 
     const PILL_COLOR = {
@@ -4356,8 +4402,8 @@
       DONE:        { bg:'#bbf7d0', text:'#14532d' },
     };
     const statusLabel = (v) => {
-      if (v === 'IN_PROGRESS') return currentLang === 'bg' ? ' в Процес' : ' In Progress';
-      if (v === 'DONE')        return currentLang === 'bg' ? ' Завършен'  : ' Done';
+      if (v === 'IN_PROGRESS') return ' ' + t('stageStatusInProgress');
+      if (v === 'DONE')        return ' ' + t('stageStatusDone');
       return '';
     };
 
@@ -4374,7 +4420,7 @@
           const pillStyle = done
             ? `background:${PILL_COLOR.DONE.bg};color:${PILL_COLOR.DONE.text};border:none;cursor:pointer`
             : `background:transparent;color:var(--muted);border:1px dashed var(--border);cursor:pointer`;
-          const label = done ? (isEn ? '✓ Done' : '✓ Завършен') : '—';
+          const label = done ? `✓ ${t('stageStatusDone')}` : '—';
           return `<td style="padding:0.2rem 0.3rem;border-right:1px solid #1a1d27;min-width:130px">
             <button onclick="openFoundationPicker(${s.id},this,'${s.status||'NOT_STARTED'}')"
               style="${pillStyle};width:100%;padding:0.28rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap"
@@ -4392,15 +4438,25 @@
           : pc
             ? `background:${pc.bg};color:${pc.text};border:none;cursor:pointer`
             : `background:transparent;color:var(--muted);border:1px dashed var(--border);cursor:pointer`;
-        const pillsData = JSON.stringify(crews.map(c => ({ crewId: c.crewId, leader: c.leaderName || c.crewName, assignedHouses: c.assignedHouses || null }))).replace(/"/g,'&quot;');
+        const pillsData = JSON.stringify(crews.map(c => ({ crewId: c.crewId, leader: c.leaderName || c.crewName, crewName: c.crewName, assignedHouses: c.assignedHouses || null }))).replace(/"/g,'&quot;');
+        const currentCrewName = (currentCrew?.crewName || '').replace(/"/g,'&quot;');
+        const currentLeaderName = (currentCrew?.leaderName || s.workerName || '').replace(/"/g,'&quot;');
         const clickHandler = isLocked
-          ? `onclick="showToast('${isEn ? 'Foundation must be completed first' : 'Фундаментът трябва да е завършен първо'}')"`
-          : `onclick="openStagePicker(${s.id},this,'${s.status||'NOT_STARTED'}',${s.crewId||'null'},this.dataset.crews)"`;
+          ? `onclick="showToast('${t('stageFoundationFirst').replace(/'/g,"\\'")}')"`
+          : `onclick="openStagePicker(${s.id},this,'${s.status||'NOT_STARTED'}',${s.crewId||'null'},this.dataset.crews,this.dataset.currentCrewName,this.dataset.currentLeader)"`;
+        const eyeHtml = (pc && !isLocked && s.crewId)
+          ? `<span onclick="event.stopPropagation();showCrewLeaderInfo(this,${s.crewId},${s.stageOrder})" title="View leader info" style="cursor:pointer;font-size:0.8rem;padding:0.15rem 0.3rem;border-radius:5px;color:var(--muted);flex-shrink:0;user-select:none" onmouseover="this.style.background='rgba(79,142,247,0.15)'" onmouseout="this.style.background=''">👁</span>`
+          : '';
         return `<td style="padding:0.2rem 0.3rem;border-right:1px solid #1a1d27;min-width:130px">
-          <button ${clickHandler}
-            data-crews="${pillsData}"
-            style="${pillStyle};width:100%;padding:0.28rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
-            title="${isLocked ? (isEn ? 'Foundation required' : 'Необходим фундамент') : pillLabel}">${isLocked ? '🔒' : pillLabel}</button>
+          <div style="display:flex;align-items:center;gap:0.25rem">
+            <button ${clickHandler}
+              data-crews="${pillsData}"
+              data-current-crew-name="${currentCrewName}"
+              data-current-leader="${currentLeaderName}"
+              style="${pillStyle};flex:1;padding:0.28rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+              title="${isLocked ? t('stageFoundationRequired') : pillLabel}">${isLocked ? '🔒' : pillLabel}</button>
+            ${eyeHtml}
+          </div>
         </td>`;
       }).join('');
       return `<tr style="border-bottom:1px solid #2e3250">
@@ -4413,7 +4469,7 @@
       <table style="border-collapse:collapse;background:var(--card)">
         <thead>
           <tr style="background:#1a1d27;border-bottom:2px solid #2e3250">
-            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase;position:sticky;left:0;background:#1a1d27;z-index:2;border-right:2px solid #2e3250">House</th>
+            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase;position:sticky;left:0;background:#1a1d27;z-index:2;border-right:2px solid #2e3250">${t('matrixHeaderHouse')}</th>
             ${thCols}
           </tr>
         </thead>
@@ -4484,12 +4540,12 @@
     setTimeout(() => document.addEventListener('click', close, true), 10);
   }
 
-  function openStagePicker(id, btn, currentStatus, currentCrewId, crewsJson) {
+  function openStagePicker(id, btn, currentStatus, currentCrewId, crewsJson, currentCrewName, currentLeader) {
     document.getElementById('stagePicker')?.remove();
     const crews = JSON.parse(crewsJson.replace(/&quot;/g, '"'));
     const picker = document.createElement('div');
     picker.id = 'stagePicker';
-    picker.style.cssText = 'position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.5rem;box-shadow:0 8px 32px rgba(0,0,0,0.35);display:flex;flex-direction:column;gap:0.3rem;min-width:160px';
+    picker.style.cssText = 'position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.5rem;box-shadow:0 8px 32px rgba(0,0,0,0.35);display:flex;flex-direction:column;gap:0.3rem;min-width:200px;overflow:visible';
 
     // Clear option always at top
     const clearBtn = document.createElement('button');
@@ -4498,15 +4554,16 @@
     clearBtn.onclick = () => { pickStageCell(id, null, 'NOT_STARTED', null, btn); picker.remove(); };
     picker.appendChild(clearBtn);
 
-    const currentCrew = crews.find(c => c.crewId == currentCrewId);
+    const currentCrew = crews.find(c => c.crewId == currentCrewId)
+      || (currentCrewId ? { crewId: currentCrewId, leader: currentLeader, crewName: currentCrewName } : null);
 
     if (currentCrew && currentStatus !== 'NOT_STARTED') {
-      // Leader already selected — show only status options for that leader
+      // Leader already selected — show leader name then status options
       const sep = document.createElement('hr');
       sep.style.cssText = 'border:none;border-top:1px solid var(--border);margin:0.1rem 0';
       picker.appendChild(sep);
 
-      ['ASSIGNED','IN_PROGRESS','DONE'].forEach(v => {
+      ['IN_PROGRESS','DONE'].forEach(v => {
         const pc = PILL_COLORS[v];
         const label = stagePillLabel(currentCrew.leader, v);
         const active = currentStatus === v;
@@ -4523,11 +4580,24 @@
       picker.appendChild(sep);
 
       crews.forEach(c => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:0.3rem';
         const b = document.createElement('button');
         const alreadyAssigned = !!c.assignedHouses;
         b.textContent = (c.leader || c.crewName || '—') + (alreadyAssigned ? ' ⚠️' : '');
         b.title = alreadyAssigned ? (currentLang === 'bg' ? `Вече назначен на: ${c.assignedHouses}` : `Already assigned to: ${c.assignedHouses}`) : '';
-        b.style.cssText = 'background:transparent;color:var(--text);border:1px solid var(--border);border-radius:20px;padding:0.28rem 0.75rem;font-size:0.78rem;font-weight:600;cursor:pointer;text-align:center;white-space:nowrap';
+        b.style.cssText = 'flex:1;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:20px;padding:0.28rem 0.75rem;font-size:0.78rem;font-weight:600;cursor:pointer;text-align:center;white-space:nowrap';
+        // eye icon for leader info
+        const eye = document.createElement('span');
+        eye.textContent = '👁';
+        eye.title = 'View leader info';
+        eye.style.cssText = 'cursor:pointer;font-size:0.85rem;padding:0.2rem 0.3rem;border-radius:5px;flex-shrink:0';
+        eye.onmouseover = () => eye.style.background = 'rgba(79,142,247,0.15)';
+        eye.onmouseout  = () => eye.style.background = '';
+        eye.onclick = (e) => {
+          e.stopPropagation();
+          showLeaderTooltip(eye, c);
+        };
         b.onclick = () => {
           if (alreadyAssigned) {
             picker.remove();
@@ -4567,7 +4637,9 @@
           pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn);
           picker.remove();
         };
-        picker.appendChild(b);
+        row.appendChild(b);
+        row.appendChild(eye);
+        picker.appendChild(row);
       });
     }
 
@@ -4646,13 +4718,13 @@
           <table style="width:100%;border-collapse:collapse;background:var(--card)">
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colWorker')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colRole')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colTrade')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
+                <th data-i18n="colWorker" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colWorker')}</th>
+                <th data-i18n="colRole" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colRole')}</th>
+                <th data-i18n="colTrade" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colTrade')}</th>
+                <th data-i18n="colCrew" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
+                <th data-i18n="colHouse" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
+                <th data-i18n="colLocation" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
+                <th data-i18n="colActions" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -4706,12 +4778,12 @@
           <table style="width:100%;border-collapse:collapse;background:var(--card)">
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colNumber')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStatus')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStartDate')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colEndDate')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
+                <th data-i18n="colNumber" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colNumber')}</th>
+                <th data-i18n="colStatus" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStatus')}</th>
+                <th data-i18n="colHouse" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
+                <th data-i18n="colStartDate" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStartDate')}</th>
+                <th data-i18n="colEndDate" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colEndDate')}</th>
+                <th data-i18n="colActions" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -4780,13 +4852,13 @@
           <table style="width:100%;border-collapse:collapse;background:var(--card)">
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colManager')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLeader')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouses')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colMembers')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
+                <th data-i18n="colCrew" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
+                <th data-i18n="colManager" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colManager')}</th>
+                <th data-i18n="colLeader" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLeader')}</th>
+                <th data-i18n="colStage" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
+                <th data-i18n="colHouses" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouses')}</th>
+                <th data-i18n="colMembers" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colMembers')}</th>
+                <th data-i18n="colActions" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -5156,12 +5228,12 @@
           <thead><tr>
             <th style="width:28px"></th>
             <th>#</th>
-            <th>${t('ordersColHouse')}</th>
-            <th>${t('ordersColMaterials')}</th>
-            <th style="text-align:center">${t('ordersColStatus')}</th>
-            <th>${t('ordersColCreatedBy')}</th>
-            <th>${t('ordersColDate')}</th>
-            <th style="text-align:center">${t('ordersColActions')}</th>
+            <th data-i18n="ordersColHouse">${t('ordersColHouse')}</th>
+            <th data-i18n="ordersColMaterials">${t('ordersColMaterials')}</th>
+            <th data-i18n="ordersColStatus" style="text-align:center">${t('ordersColStatus')}</th>
+            <th data-i18n="ordersColCreatedBy">${t('ordersColCreatedBy')}</th>
+            <th data-i18n="ordersColDate">${t('ordersColDate')}</th>
+            <th data-i18n="ordersColActions" style="text-align:center">${t('ordersColActions')}</th>
           </tr></thead>
           <tbody>
             ${_ordersList.length ? _ordersList.map(o => {
@@ -5439,12 +5511,12 @@
         <table class="att-table">
           <thead><tr>
             <th>#</th>
-            <th>${t('deliveriesColOrder')}</th>
-            <th>${t('deliveriesColHouse')}</th>
-            <th>${t('deliveriesColDate')}</th>
-            <th>${t('deliveriesColItems')}</th>
-            <th>${t('deliveriesColResponsible')}</th>
-            <th style="text-align:center" class="admin-only">${t('deliveriesColActions')}</th>
+            <th data-i18n="deliveriesColOrder">${t('deliveriesColOrder')}</th>
+            <th data-i18n="deliveriesColHouse">${t('deliveriesColHouse')}</th>
+            <th data-i18n="deliveriesColDate">${t('deliveriesColDate')}</th>
+            <th data-i18n="deliveriesColItems">${t('deliveriesColItems')}</th>
+            <th data-i18n="deliveriesColResponsible">${t('deliveriesColResponsible')}</th>
+            <th data-i18n="deliveriesColActions" style="text-align:center" class="admin-only">${t('deliveriesColActions')}</th>
           </tr></thead>
           <tbody>
             ${dels.length ? dels.map(d => `<tr>
@@ -6209,6 +6281,7 @@
   let _editingCrewId = null;
   let _crewMembers = [];
   let _memberSearchList = [];
+  let _leaderSearchList = [];
 
   async function openCrewModal(id) {
     _editingCrewId = id || null;
@@ -6216,11 +6289,24 @@
     document.getElementById('crewModalTitle').textContent = id ? t('crewModalEdit') : t('crewModalAdd');
     document.getElementById('crewModalErr').textContent = '';
 
-    // fetch workers and houses in parallel
-    const [allWorkers, allHouses] = await Promise.all([
-      apiFetch('/api/workers').then(r => r.json()),
-      apiFetch('/api/houses').then(r => r.json()),
-    ]);
+    // fetch workers, houses, and stage types in parallel
+    let allWorkers, allHouses, stageTypes;
+    try {
+      [allWorkers, allHouses, stageTypes] = await Promise.all([
+        apiFetch('/api/workers').then(r => r.json()),
+        apiFetch('/api/houses').then(r => r.json()),
+        apiFetch('/api/stage-types').then(r => r.json()),
+      ]);
+    } catch(e) {
+      document.getElementById('crewModalErr').textContent = 'Failed to load form data: ' + e.message;
+      document.getElementById('crewModal').classList.add('open');
+      return;
+    }
+
+    // populate stage dropdown
+    const stageSel = document.getElementById('cStage');
+    stageSel.innerHTML = `<option value="">— No stage —</option>` +
+      stageTypes.map(s => `<option value="${s.stageOrder}">${s.stageName}</option>`).join('');
     const managers = allWorkers.filter(w => w.role === 'CREW_MANAGER');
     const leaders  = allWorkers.filter(w => w.role === 'CREW_LEADER');
     const members  = allWorkers.filter(w => w.role === 'CREW_MEMBER');
@@ -6243,21 +6329,24 @@
 
     // populate member search list
     _memberSearchList = members;
+    _leaderSearchList = leaders;
     document.getElementById('cMemberSearch').value = '';
     renderMemberDropdown('');
 
     if (id) {
       const crew = await apiFetch(`/api/crews/${id}`).then(r => r.json());
       document.getElementById('cName').value = crew.name || '';
-      mgrSel.value   = crew.managerId || '';
-      ldrSel.value   = crew.leaderId  || '';
-      houseSel.value = crew.houseId   || '';
+      mgrSel.value   = crew.managerId  || '';
+      ldrSel.value   = crew.leaderId   || '';
+      houseSel.value = crew.houseId    || '';
+      stageSel.value = crew.stageOrder || '';
       _crewMembers = (crew.members || []).map(m => m.id);
     } else {
       document.getElementById('cName').value = '';
       mgrSel.value   = '';
       ldrSel.value   = '';
       houseSel.value = '';
+      stageSel.value = '';
       _crewMembers = [];
     }
     renderCrewMembers();
@@ -6277,12 +6366,32 @@
     }).join('');
   }
 
+  function tradeFromStageName(name) {
+    if (!name) return null;
+    const n = name.toLowerCase();
+    if (/ел|конзоли|мълниезащита|ключове/.test(n)) return 'Electricity';
+    if (/вик|в и к/.test(n))                        return 'Plumbing';
+    if (/покривно|улуци|водостоци|комин/.test(n))   return 'Roofing';
+    if (/конструкция|дограма|фундамент/.test(n))    return 'Framing';
+    return 'Finishing';
+  }
+
+  function onCrewStageChange() {
+    document.getElementById('cMemberSearch').value = '';
+    renderMemberDropdown('');
+  }
+
   function renderMemberDropdown(query) {
     const dd = document.getElementById('cMemberDropdown');
     if (!dd) return;
     const q = (query || '').toLowerCase().trim();
+    // filter by stage trade if a stage is selected
+    const stageSel = document.getElementById('cStage');
+    const stageOpt = stageSel?.options[stageSel.selectedIndex];
+    const stageTrade = stageOpt?.value ? tradeFromStageName(stageOpt.text) : null;
     const available = _memberSearchList.filter(m =>
       !_crewMembers.includes(m.id) &&
+      (!stageTrade || (m.trade||'') === stageTrade) &&
       (m.name.toLowerCase().includes(q) || (m.trade||'').toLowerCase().includes(q))
     );
     if (!available.length) {
@@ -6326,7 +6435,54 @@
     if (dd) dd.style.display = 'none';
   }
 
+  function showCrewLeaderInfo(anchor, crewId, stageOrder) {
+    const crews = (window._crewsByStage || {})[stageOrder] || [];
+    const c = crews.find(x => x.crewId == crewId) || { crewId };
+    showLeaderTooltip(anchor, { leader: c.leaderName, crewName: c.crewName, assignedHouses: c.assignedHouses });
+  }
+
+  function showLeaderTooltip(anchor, c) {
+    const existing = document.getElementById('leaderTooltip');
+    if (existing) { existing.remove(); return; }
+    const tip = document.createElement('div');
+    tip.id = 'leaderTooltip';
+    tip.style.cssText = 'position:fixed;z-index:10000;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;box-shadow:0 8px 24px rgba(0,0,0,.5);font-size:0.83rem;min-width:180px';
+    tip.innerHTML = `
+      <button onclick="document.getElementById('leaderTooltip')?.remove()" style="position:absolute;top:0.3rem;right:0.4rem;background:none;border:none;color:var(--muted);font-size:0.9rem;cursor:pointer;line-height:1;padding:0.1rem 0.3rem" title="Close">✕</button>
+      <div style="font-weight:700;margin-bottom:0.4rem">👷 ${c.leader || c.crewName || '—'}</div>
+      ${c.crewName ? `<div style="color:var(--muted);margin-bottom:0.2rem">👥 ${c.crewName}</div>` : ''}
+      ${c.assignedHouses ? `<div style="color:#f5a623;font-size:0.78rem">🏠 ${c.assignedHouses}</div>` : '<div style="color:var(--muted);font-size:0.78rem">No house assigned</div>'}`;
+    document.body.appendChild(tip);
+    const r = anchor.getBoundingClientRect();
+    let left = r.right + 6;
+    if (left + 200 > window.innerWidth) left = r.left - 206;
+    tip.style.left = Math.max(8, left) + 'px';
+    tip.style.top  = Math.max(8, r.top) + 'px';
+    const close = (e) => { if (!tip.contains(e.target) && e.target !== anchor) { tip.remove(); document.removeEventListener('click', close, true); } };
+    setTimeout(() => document.addEventListener('click', close, true), 0);
+  }
+
+  function toggleLeaderInfo() {
+    const panel = document.getElementById('cLeaderInfo');
+    if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
+    const sel = document.getElementById('cLeader');
+    const id  = sel.value;
+    if (!id) { panel.innerHTML = '<span style="color:var(--muted)">No leader selected</span>'; panel.style.display = ''; return; }
+    const w = (_leaderSearchList || []).find(x => String(x.id) === String(id))
+           || { name: sel.options[sel.selectedIndex]?.text || '—' };
+    panel.innerHTML = `
+      <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.5rem">👷 ${w.name || '—'}</div>
+      ${w.trade    ? `<div style="color:var(--muted);margin-bottom:0.25rem">🔧 <strong>Trade:</strong> ${w.trade}</div>` : ''}
+      ${w.crewName ? `<div style="color:var(--muted);margin-bottom:0.25rem">👥 <strong>Crew:</strong> ${w.crewName}</div>` : ''}
+      ${w.phone    ? `<div style="color:var(--muted)">📞 ${w.phone}</div>` : ''}
+      ${!w.trade && !w.crewName && !w.phone ? `<div style="color:var(--muted);font-size:0.8rem">No additional info</div>` : ''}`;
+    panel.style.display = '';
+    const close = (e) => { if (!panel.contains(e.target) && e.target.id !== 'cLeaderEye') { panel.style.display = 'none'; document.removeEventListener('click', close); } };
+    setTimeout(() => document.addEventListener('click', close), 0);
+  }
+
   function onCrewLeaderChange(sel) {
+    document.getElementById('cLeaderInfo').style.display = 'none';
     const warn = document.getElementById('cLeaderWarn');
     const opt = sel.options[sel.selectedIndex];
     const existingCrewId   = opt?.dataset.crewId   || '';
@@ -6354,7 +6510,8 @@
     const houseId   = document.getElementById('cHouse').value   || null;
     if (!name) { document.getElementById('crewModalErr').textContent = t('crewSaveFail') + ': name required.'; return; }
 
-    const body = { name, managerId: managerId ? parseInt(managerId) : null, houseId: houseId ? parseInt(houseId) : null };
+    const stageOrder = document.getElementById('cStage').value || null;
+    const body = { name, managerId: managerId ? parseInt(managerId) : null, houseId: houseId ? parseInt(houseId) : null, stageOrder: stageOrder ? parseInt(stageOrder) : null };
     try {
       let res;
       if (_editingCrewId) {
@@ -6484,12 +6641,10 @@
         <button class="card-btn card-btn-edit" title="Edit" onclick="openHouseModal(${h.id})">✎</button>
         <button class="card-btn" title="Update stock" style="background:rgba(62,207,110,0.15);color:var(--green)" onclick="openInventoryModal(${h.id})">📦</button>
         <button class="card-btn card-btn-del" title="Delete" onclick="askDelete(this,${h.id},'${h.name.replace(/'/g,"\\'")}')">🗑</button>
-        </div>
-        <div class="del-confirm" id="del-${h.id}" style="display:none;position:absolute;right:0;top:100%;z-index:200;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.75rem;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4)">
-          <span style="font-size:0.82rem">${t('deleteConfirmPrefix')}<strong>${h.name}</strong>?</span>
-          <button class="btn btn-ghost" style="padding:0.25rem 0.65rem;font-size:0.76rem" onclick="cancelDelete(${h.id})">${t('btnNo')}</button>
-          <button class="btn" style="padding:0.25rem 0.65rem;font-size:0.76rem;background:var(--red);color:#fff" onclick="confirmDelete(${h.id})">${t('btnYesDelete')}</button>
         </div>` : '';
+      const crewsHtml = h.crews && h.crews.length
+        ? h.crews.map(c => `<div style="font-size:0.78rem;color:#a78bfa;font-weight:600">👥 ${c.name}</div>`).join('')
+        : '<span style="color:var(--muted)">—</span>';
       return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
           🏠 ${h.name}
@@ -6498,6 +6653,7 @@
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.location}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${h.start_date ? '📅 ' + h.start_date : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem">${stageHtml}</td>
+        <td style="padding:0.7rem 1rem">${crewsHtml}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${sc.color};font-weight:700">🏗️ ${sc.label}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap;position:relative" class="admin-only">${actionsHtml}</td>
       </tr>`;
@@ -6508,12 +6664,13 @@
           <table style="width:100%;border-collapse:collapse;background:var(--card)">
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStartDate')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colScaffold')}</th>
-                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
+                <th data-i18n="colHouse" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
+                <th data-i18n="colLocation" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
+                <th data-i18n="colStartDate" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStartDate')}</th>
+                <th data-i18n="colStage" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
+                <th data-i18n="colCrews" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrews')}</th>
+                <th data-i18n="colScaffold" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colScaffold')}</th>
+                <th data-i18n="colActions" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -7191,16 +7348,38 @@
     }
   }
 
+  let _deleteTargetId = null;
+
   function askDelete(btn, id, name) {
-    document.querySelectorAll('.del-confirm.open').forEach(el => el.classList.remove('open'));
-    document.getElementById(`del-${id}`).classList.add('open');
+    _deleteTargetId = id;
+    let overlay = document.getElementById('houseDelOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'houseDelOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center';
+      overlay.innerHTML = `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem 2rem;box-shadow:0 12px 40px rgba(0,0,0,.6);text-align:center;min-width:280px">
+        <div id="houseDelMsg" style="font-size:0.95rem;margin-bottom:1.2rem"></div>
+        <div style="display:flex;gap:0.75rem;justify-content:center">
+          <button class="btn btn-ghost" style="padding:0.4rem 1rem" onclick="cancelDelete()">${t('btnNo')}</button>
+          <button class="btn" style="padding:0.4rem 1rem;background:var(--red);color:#fff" onclick="confirmDelete()">${t('btnYesDelete')}</button>
+        </div>
+      </div>`;
+      overlay.addEventListener('click', e => { if (e.target === overlay) cancelDelete(); });
+      document.body.appendChild(overlay);
+    }
+    document.getElementById('houseDelMsg').innerHTML = `${t('deleteConfirmPrefix')}<strong>${name}</strong>?`;
+    overlay.style.display = 'flex';
   }
 
-  function cancelDelete(id) {
-    document.getElementById(`del-${id}`).classList.remove('open');
+  function cancelDelete() {
+    const overlay = document.getElementById('houseDelOverlay');
+    if (overlay) overlay.style.display = 'none';
+    _deleteTargetId = null;
   }
 
-  async function confirmDelete(id) {
+  async function confirmDelete() {
+    const id = _deleteTargetId;
+    cancelDelete();
     try {
       const res  = await apiFetch(`/api/houses/${id}`, { method: 'DELETE' });
       const data = await res.json();
@@ -7366,11 +7545,11 @@
       <table style="width:100%;border-collapse:collapse;background:var(--card)">
         <thead>
           <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
-            <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colName')}</th>
-            <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
-            <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCoordinates')}</th>
-            <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colMaterials')}</th>
-            <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
+            <th data-i18n="colName" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colName')}</th>
+            <th data-i18n="colLocation" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
+            <th data-i18n="colCoordinates" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCoordinates')}</th>
+            <th data-i18n="colMaterials" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colMaterials')}</th>
+            <th data-i18n="colActions" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
           </tr>
         </thead>
         <tbody>${cfg.list.map(f => facilityRowHtml(f, kind)).join('')}</tbody>
@@ -8008,6 +8187,17 @@
           dl.onclick = () => qrDownload(canvasWrap.querySelector('canvas'), h.name);
           card.appendChild(dl);
 
+          // check-in URL
+          const urlEl = document.createElement('a');
+          urlEl.href = url;
+          urlEl.target = '_blank';
+          urlEl.rel = 'noopener';
+          urlEl.textContent = url;
+          urlEl.style.cssText = 'display:block;margin-top:0.5rem;font-size:0.68rem;color:var(--muted);word-break:break-all;text-align:center;text-decoration:none;';
+          urlEl.onmouseover = () => urlEl.style.color = 'var(--accent)';
+          urlEl.onmouseout  = () => urlEl.style.color = 'var(--muted)';
+          card.appendChild(urlEl);
+
           grid.appendChild(card);
 
           // generate QR into canvasWrap
@@ -8017,7 +8207,7 @@
             height: 160,
             colorDark:  '#000000',
             colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
+            correctLevel: QRCode.CorrectLevel.L
           });
         });
 
@@ -8147,21 +8337,22 @@
       const r    = await apiFetch(`/api/attendance/crew/${crewId}?date=${date}`);
       const list = await r.json();
       if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; _attCrewLastData = null; return; }
-      if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions recorded for this date.</p>'; _attCrewLastData = null; document.getElementById('attCrewExportBtn').style.display = 'none'; return; }
+      if (list.length === 0) { box.innerHTML = `<p class="att-empty">${t('attNoSessionsCrew')}</p>`; _attCrewLastData = null; document.getElementById('attCrewExportBtn').style.display = 'none'; return; }
       const crewName = document.getElementById('ss-crew-inp').value || crewId;
       _attCrewLastData = { crewName, date, list };
       document.getElementById('attCrewExportBtn').style.display = '';
       box.innerHTML = `
         <table class="att-table">
-          <thead><tr><th>Worker</th><th>In</th><th>Out</th><th>Duration</th><th>Status</th></tr></thead>
+          <thead><tr><th>${t('attHeaderWorker')}</th><th>${t('attHeaderHouse')}</th><th>${t('attHeaderIn')}</th><th>${t('attHeaderOut')}</th><th>${t('attHeaderDuration')}</th><th>${t('attHeaderStatus')}</th></tr></thead>
           <tbody>
             ${list.map(s => `
               <tr>
                 <td>${s.workerName}</td>
+                <td style="color:#a78bfa;font-size:0.82rem">${s.houseName || '—'}</td>
                 <td>${attFmtTime(s.checkedInAt)}</td>
                 <td>${s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—'}</td>
                 <td>${s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'}</td>
-                <td>${s.checkedOutAt ? '<span class="att-badge-out">Done</span>' : '<span class="att-badge-in">Working</span>'}</td>
+                <td>${s.checkedOutAt ? `<span class="att-badge-out">${t('attBadgeDone')}</span>` : `<span class="att-badge-in">${t('attBadgeWorking')}</span>`}</td>
               </tr>`).join('')}
           </tbody>
         </table>`;
@@ -8180,7 +8371,7 @@
       const r    = await apiFetch(`/api/attendance/worker/${workerId}?from=${from}&to=${to}`);
       const list = await r.json();
       if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; _attWorkerLastData = null; return; }
-      if (list.length === 0) { box.innerHTML = '<p class="att-empty">No sessions in this date range.</p>'; _attWorkerLastData = null; document.getElementById('attWorkerExportBtn').style.display = 'none'; return; }
+      if (list.length === 0) { box.innerHTML = `<p class="att-empty">${t('attNoSessionsWorker')}</p>`; _attWorkerLastData = null; document.getElementById('attWorkerExportBtn').style.display = 'none'; return; }
       const workerName = document.getElementById('ss-worker-inp').value || workerId;
       _attWorkerLastData = { workerName, from, to, list };
       document.getElementById('attWorkerExportBtn').style.display = '';
@@ -8196,7 +8387,7 @@
         <div style="margin-bottom:1.25rem">
           <p style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.5rem">${d}</p>
           <table class="att-table">
-            <thead><tr><th>House</th><th>In</th><th>Out</th><th>Duration</th></tr></thead>
+            <thead><tr><th>${t('attHeaderHouse')}</th><th>${t('attHeaderIn')}</th><th>${t('attHeaderOut')}</th><th>${t('attHeaderDuration')}</th></tr></thead>
             <tbody>
               ${byDate[d].map(s => `
                 <tr>

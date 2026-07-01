@@ -152,6 +152,9 @@ public class CrewController {
             if (body.get("houseId") == null) c.setHouse(null);
             else c.setHouse(houses.findById(Integer.parseInt(body.get("houseId").toString())).orElse(null));
         }
+        if (body.containsKey("stageOrder")) {
+            c.setStageOrder(body.get("stageOrder") == null ? null : Integer.parseInt(body.get("stageOrder").toString()));
+        }
         return c;
     }
 
@@ -195,6 +198,13 @@ public class CrewController {
             }).toList();
         m.put("assignedHouses", assignedHouses);
         m.put("stageNames", houseStages.findStageNamesForCrew(c.getId()));
+        m.put("stageOrder", c.getStageOrder());
+        if (c.getStageOrder() != null) {
+            String stageName = houseStages.findStageNameByOrder(c.getStageOrder());
+            m.put("stageName", stageName);
+        } else {
+            m.put("stageName", null);
+        }
         // keep legacy houseId/houseName for map features
         if (c.getHouse() != null) {
             m.put("houseId",   c.getHouse().getId());

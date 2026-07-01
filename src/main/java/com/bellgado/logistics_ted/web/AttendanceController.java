@@ -75,21 +75,29 @@ public class AttendanceController {
         House house = houses.findByCheckinToken(token).orElse(null);
         if (house == null) return ResponseEntity.notFound().build();
 
-        Optional<WorkSession> session = sessions.findTodaySession(workerId, house.getId(), today());
+        LocalDate today = today();
+        Optional<WorkSession> openSession = sessions.findOpenSession(workerId, house.getId(), today);
+        List<WorkSession> allToday = sessions.findTodaySessions(workerId, house.getId(), today);
+
         Map<String, Object> res = new LinkedHashMap<>();
-        if (session.isEmpty()) {
-            res.put("status", "NONE");
-        } else {
-            WorkSession s = session.get();
-            res.put("status",        s.getCheckedOutAt() == null ? "CHECKED_IN" : "CHECKED_OUT");
+        if (openSession.isPresent()) {
+            WorkSession s = openSession.get();
+            res.put("status",      "CHECKED_IN");
+            res.put("sessionId",   s.getId());
+            res.put("checkedInAt", s.getCheckedInAt().toString());
+            res.put("checkedOutAt", null);
+        } else if (!allToday.isEmpty()) {
+            WorkSession s = allToday.get(0);
+            res.put("status",        "CHECKED_OUT");
             res.put("sessionId",     s.getId());
             res.put("checkedInAt",   s.getCheckedInAt().toString());
-            res.put("checkedOutAt",  s.getCheckedOutAt() != null ? s.getCheckedOutAt().toString() : null);
-            if (s.getCheckedOutAt() != null) {
-                long mins = ChronoUnit.MINUTES.between(s.getCheckedInAt(), s.getCheckedOutAt());
-                res.put("durationMinutes", mins);
-            }
+            res.put("checkedOutAt",  s.getCheckedOutAt().toString());
+            long mins = ChronoUnit.MINUTES.between(s.getCheckedInAt(), s.getCheckedOutAt());
+            res.put("durationMinutes", mins);
+        } else {
+            res.put("status", "NONE");
         }
+        res.put("sessionCount", allToday.size());
         return ResponseEntity.ok(res);
     }
 
@@ -114,14 +122,14 @@ public class AttendanceController {
 
         LocalDate today = today();
 
-        // Validation 1: worker not already checked in today
-        if (sessions.findTodaySession(workerId, house.getId(), today).isPresent())
-            return error("Already checked in today");
+        // Validation 1: worker not currently checked in (open session)
+        if (sessions.findOpenSession(workerId, house.getId(), today).isPresent())
+            return error("Already checked in — check out first");
 
-        // Validation 2: device not used by another worker today at this house
-        Optional<WorkSession> deviceSession = sessions.findTodaySessionByDevice(deviceId, house.getId(), today);
+        // Validation 2: device not currently in use by another worker at this house
+        Optional<WorkSession> deviceSession = sessions.findOpenSessionByDevice(deviceId, house.getId(), today);
         if (deviceSession.isPresent() && !deviceSession.get().getWorker().getId().equals(workerId))
-            return error("This device was already used by " + deviceSession.get().getWorker().getName() + " today");
+            return error("This device is currently checked in as " + deviceSession.get().getWorker().getName());
 
         // Validation 3: GPS within 200m of house
         if (house.getLat() != null && lat != null) {
