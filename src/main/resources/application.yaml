@@ -100,6 +100,11 @@ app:
   # Override in production: APP_TIMEZONE=Europe/Sofia
   timezone: ${APP_TIMEZONE:Europe/Sofia}
 
+observability:
+  # A @Service call slower than this (ms) is logged at WARN by ServiceLoggingAspect regardless of
+  # the configured level — surfaces performance problems without enabling full DEBUG tracing.
+  slow-call-threshold-ms: ${OBSERVABILITY_SLOW_CALL_MS:1000}
+
 # Bearer token (JWT HS256) auth — replaces the old session/cookie scheme. POST /api/login
 # returns { token, tokenType, expiresIn, user } and clients send Authorization: Bearer <token>
 # on every /api/** request. TEDHOUSE_JWT_SECRET MUST be set to a strong random value (>= 32
@@ -115,13 +120,28 @@ logging:
     org.springframework.security: INFO
     org.hibernate.SQL: INFO
     com.bellgado.logistics_ted: INFO
+    # Service-layer method tracing (ServiceLoggingAspect): DEBUG = entry/exit/timing for every
+    # @Service call; set to WARN to see only slow calls and failures. Independent of the route
+    # engine's own verbose DEBUG below.
+    com.bellgado.logistics_ted.observability: DEBUG
     # Flip to DEBUG to see per-objective stop IDs, exhaustive vs greedy mode pick
     # and cache hit/miss detail. Useful when investigating why N alternatives didn't appear.
     # com.bellgado.logistics_ted.service.RouteOptimizationService: DEBUG
     # com.bellgado.logistics_ted.service.solver.HeuristicRouteSolver: DEBUG
     # com.bellgado.logistics_ted.service.distance: DEBUG
   pattern:
-    console: "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
+    # Human-readable console for local dev. [requestId] and user come from the MDC populated by
+    # RequestCorrelationFilter + JwtAuthenticationFilter, so every line of one request is
+    # correlatable. In containers we emit ECS JSON instead by setting
+    # LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs (Spring Boot 3.4+ structured logging) — this pattern
+    # is then ignored. See Dockerfile.
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId:-}] %X{user:-} %logger{36} - %msg%n"
+  structured:
+    # Metadata stamped into every ECS-JSON line (only used when structured logging is active).
+    ecs:
+      service:
+        name: logistics-ted
+        environment: ${APP_ENVIRONMENT:production}
 
 # ============================================================================
 # AI AGENT + TELEGRAM BOT

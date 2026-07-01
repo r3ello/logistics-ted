@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -52,6 +53,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContext ctx = SecurityContextHolder.createEmptyContext();
                 ctx.setAuthentication(auth);
                 SecurityContextHolder.setContext(ctx);
+                // Enrich the MDC seeded by RequestCorrelationFilter so every log line for the rest
+                // of this request carries the caller's identity. Cleared by that filter's finally.
+                MDC.put("user", parsed.username());
+                MDC.put("role", parsed.role());
             }
         }
         chain.doFilter(request, response);
