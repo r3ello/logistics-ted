@@ -96,8 +96,10 @@ logging:
     # com.bellgado.logistics_ted.service.RouteOptimizationService: DEBUG
     # com.bellgado.logistics_ted.service.solver.HeuristicRouteSolver: DEBUG
     # com.bellgado.logistics_ted.service.distance: DEBUG
-  pattern:
-    console: "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
+  # NOTE: the console pattern (with the [requestId] correlation id + user) is inherited from the
+  # base application.yaml. Do NOT redefine logging.pattern.console here — a profile-level override
+  # shadows the base and drops the requestId. In containers structured ECS JSON is used anyway
+  # (LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs in the Dockerfile).
 
 # ============================================================================
 # AI AGENT + TELEGRAM BOT
