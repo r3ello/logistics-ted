@@ -2462,6 +2462,23 @@
       stageFoundationFirst:'Foundation must be completed first',
       stageFoundationRequired:'Foundation required',
       matrixLoading:'Loading…',
+      // search field labels
+      sfName:'Name', sfCrew:'Crew', sfHouse:'House', sfStage:'Stage', sfMaterial:'Material', sfLocation:'Location',
+      // chip group labels
+      chipGrpRole:'Role', chipGrpCrew:'Crew', chipGrpHouse:'House', chipGrpMembers:'Members',
+      chipGrpPassword:'Password', chipGrpStatus:'Status', chipGrpPhase:'Phase',
+      // chip option labels
+      chipRoleLeader:'⭐ Leader', chipRoleMember:'👷 Member', chipRoleManager:'👔 Manager',
+      chipHasCrew:'✓ Has Crew', chipNoCrew:'✗ No Crew',
+      chipHasHouse:'✓ Has House', chipNoHouse:'✗ No House',
+      chipHasMembers:'✓ Has Members', chipEmpty:'✗ Empty',
+      chipHasPassword:'✓ Has Password', chipNoPassword:'✗ No Password',
+      chipStatusAvailable:'✓ Available', chipStatusInUse:'🏗 In Use', chipStatusNone:'— None',
+      chipStatusAssigned:'✓ Assigned', chipStatusFree:'✗ Free',
+      chipHasActivePhase:'✓ Active Phase', chipNoPhase:'✗ No Phase',
+      chipOrderPending:'⏳ Pending', chipOrderApproved:'✓ Approved', chipOrderOrdered:'📦 Ordered',
+      chipOrderInTransit:'🚚 In Transit', chipOrderDelivered:'✅ Delivered',
+      chipClearFilters:'✕ Clear',
     },
     bg: {
       brandName:'Теодор Логистика', brandSub:'Управление на материали',
@@ -2707,6 +2724,23 @@
       stageFoundationFirst:'Фундаментът трябва да е завършен първо',
       stageFoundationRequired:'Необходим фундамент',
       matrixLoading:'Зареждане…',
+      // search field labels
+      sfName:'Наименование', sfCrew:'Екип', sfHouse:'Обект', sfStage:'Етап', sfMaterial:'Материал', sfLocation:'Локация',
+      // chip group labels
+      chipGrpRole:'Роля', chipGrpCrew:'Екип', chipGrpHouse:'Обект', chipGrpMembers:'Членове',
+      chipGrpPassword:'Парола', chipGrpStatus:'Статус', chipGrpPhase:'Фаза',
+      // chip option labels
+      chipRoleLeader:'⭐ Лидер', chipRoleMember:'👷 Член', chipRoleManager:'👔 Мениджър',
+      chipHasCrew:'✓ С екип', chipNoCrew:'✗ Без екип',
+      chipHasHouse:'✓ С обект', chipNoHouse:'✗ Без обект',
+      chipHasMembers:'✓ С членове', chipEmpty:'✗ Без членове',
+      chipHasPassword:'✓ С парола', chipNoPassword:'✗ Без парола',
+      chipStatusAvailable:'✓ Налично', chipStatusInUse:'🏗 Заето', chipStatusNone:'— Без',
+      chipStatusAssigned:'✓ Назначено', chipStatusFree:'✗ Свободно',
+      chipHasActivePhase:'✓ Активна фаза', chipNoPhase:'✗ Без фаза',
+      chipOrderPending:'⏳ Чакащ', chipOrderApproved:'✓ Одобрен', chipOrderOrdered:'📦 Поръчан',
+      chipOrderInTransit:'🚚 В транзит', chipOrderDelivered:'✅ Доставен',
+      chipClearFilters:'✕ Изчисти',
     },
   };
 
@@ -2745,6 +2779,7 @@
     else if (activeView === 'suppliers')   renderFacilityList('supplier');
     else if (activeView === 'history')     loadHistory();
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
+    else if (activeView === 'workeraccess') waBuildChipBar();
     // always re-render stage matrix if it is the active view (column headers come from DB in both languages)
     if (document.getElementById('view-stagematrix')?.classList.contains('active')) loadStageMatrix(true);
   }
@@ -4998,18 +5033,18 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'role', label: 'Role', options: [
-        { value: 'CREW_LEADER',  label: '⭐ Leader'  },
-        { value: 'CREW_MEMBER',  label: '👷 Member'  },
-        { value: 'CREW_MANAGER', label: '👔 Manager' },
+      { key: 'role', label: t('chipGrpRole'), options: [
+        { value: 'CREW_LEADER',  label: t('chipRoleLeader')  },
+        { value: 'CREW_MEMBER',  label: t('chipRoleMember')  },
+        { value: 'CREW_MANAGER', label: t('chipRoleManager') },
       ]},
-      { key: 'hascrew', label: 'Crew', options: [
-        { value: '1', label: '✓ Has Crew' },
-        { value: '0', label: '✗ No Crew'  },
+      { key: 'hascrew', label: t('chipGrpCrew'), options: [
+        { value: '1', label: t('chipHasCrew') },
+        { value: '0', label: t('chipNoCrew')  },
       ]},
-      { key: 'hashouse', label: 'House', options: [
-        { value: '1', label: '✓ Has House' },
-        { value: '0', label: '✗ No House'  },
+      { key: 'hashouse', label: t('chipGrpHouse'), options: [
+        { value: '1', label: t('chipHasHouse') },
+        { value: '0', label: t('chipNoHouse')  },
       ]},
     ]);
     onAltSearch();
@@ -5072,14 +5107,14 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'status', label: 'Status', options: [
-        { value: 'AVAILABLE', label: '✓ Available' },
-        { value: 'IN_USE',    label: '🏗 In Use'   },
-        { value: 'NONE',      label: '— None'      },
+      { key: 'status', label: t('chipGrpStatus'), options: [
+        { value: 'AVAILABLE', label: t('chipStatusAvailable') },
+        { value: 'IN_USE',    label: t('chipStatusInUse')     },
+        { value: 'NONE',      label: t('chipStatusNone')      },
       ]},
-      { key: 'hashouse', label: 'House', options: [
-        { value: '1', label: '✓ Assigned' },
-        { value: '0', label: '✗ Free'     },
+      { key: 'hashouse', label: t('chipGrpHouse'), options: [
+        { value: '1', label: t('chipStatusAssigned') },
+        { value: '0', label: t('chipStatusFree')     },
       ]},
     ]);
     onAltSearch();
@@ -5164,13 +5199,13 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'hashouse', label: 'House', options: [
-        { value: '1', label: '✓ Has House' },
-        { value: '0', label: '✗ No House'  },
+      { key: 'hashouse', label: t('chipGrpHouse'), options: [
+        { value: '1', label: t('chipHasHouse') },
+        { value: '0', label: t('chipNoHouse')  },
       ]},
-      { key: 'hasmembers', label: 'Members', options: [
-        { value: '1', label: '✓ Has Members' },
-        { value: '0', label: '✗ Empty'       },
+      { key: 'hasmembers', label: t('chipGrpMembers'), options: [
+        { value: '1', label: t('chipHasMembers') },
+        { value: '0', label: t('chipEmpty')      },
       ]},
     ]);
     onAltSearch();
@@ -5582,12 +5617,12 @@
         </table>
       </div>`;
     buildChipBar([
-      { key: 'status', label: 'Status', options: [
-        { value: 'PENDING',    label: '⏳ Pending'    },
-        { value: 'APPROVED',   label: '✓ Approved'   },
-        { value: 'ORDERED',    label: '📦 Ordered'   },
-        { value: 'IN_TRANSIT', label: '🚚 In Transit' },
-        { value: 'DELIVERED',  label: '✅ Delivered'  },
+      { key: 'status', label: t('chipGrpStatus'), options: [
+        { value: 'PENDING',    label: t('chipOrderPending')   },
+        { value: 'APPROVED',   label: t('chipOrderApproved')  },
+        { value: 'ORDERED',    label: t('chipOrderOrdered')   },
+        { value: 'IN_TRANSIT', label: t('chipOrderInTransit') },
+        { value: 'DELIVERED',  label: t('chipOrderDelivered') },
       ]},
     ]);
     onAltSearch();
@@ -5946,12 +5981,12 @@
 
   // ── Multi-field search bar ───────────────────────────────────────────────────
   const _sfConfigs = {
-    workers:    [{ key:'name', label:'Name' }, { key:'crew', label:'Crew' }, { key:'house', label:'House' }],
-    crews:      [{ key:'name', label:'Name' }, { key:'stage', label:'Stage' }, { key:'house', label:'House' }],
-    scaffold:   [{ key:'house', label:'House' }],
-    orders:     [{ key:'house', label:'House' }, { key:'material', label:'Material' }],
-    deliveries: [{ key:'house', label:'House' }],
-    houses:     [],
+    workers:    [{ key:'name', label:'sfName' }, { key:'crew', label:'sfCrew' }, { key:'house', label:'sfHouse' }],
+    crews:      [{ key:'name', label:'sfName' }, { key:'stage', label:'sfStage' }, { key:'house', label:'sfHouse' }],
+    scaffold:   [{ key:'house', label:'sfHouse' }],
+    orders:     [{ key:'house', label:'sfHouse' }, { key:'material', label:'sfMaterial' }],
+    deliveries: [{ key:'house', label:'sfHouse' }],
+    houses:     [{ key:'name', label:'sfName' }, { key:'location', label:'sfLocation' }],
   };
 
   function buildSearchBar(mode) {
@@ -5976,7 +6011,7 @@
       `<span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;flex-shrink:0;border-right:1px solid var(--border)">🔍</span>` +
       fields.map((f, i) =>
         `<div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;flex:1;min-width:0;${i < fields.length-1 ? 'border-right:1px solid var(--border);' : ''}">` +
-        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${f.label}</span>` +
+        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${t(f.label)}</span>` +
         `<input class="sf-field" data-field="${f.key}" type="text" autocomplete="off" oninput="onAltSearch()" ` +
         `style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.65rem 0;min-width:50px"></div>`
       ).join('') +
@@ -7135,29 +7170,16 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'hascrew', label: 'Crew', options: [
-        { value: '1', label: '✓ Has Crew' },
-        { value: '0', label: '✗ No Crew'  },
+      { key: 'hascrew', label: t('chipGrpCrew'), options: [
+        { value: '1', label: t('chipHasCrew') },
+        { value: '0', label: t('chipNoCrew')  },
       ]},
-      { key: 'hasphase', label: 'Phase', options: [
-        { value: '1', label: '✓ Active Phase' },
-        { value: '0', label: '✗ No Phase'     },
+      { key: 'hasphase', label: t('chipGrpPhase'), options: [
+        { value: '1', label: t('chipHasActivePhase') },
+        { value: '0', label: t('chipNoPhase')        },
       ]},
     ]);
-    // add Name + Location text search inputs for houses
-    const altSearchWrap = document.getElementById('altSearchWrap');
-    if (altSearchWrap && !altSearchWrap.querySelector('.sf-field')) {
-      altSearchWrap.style.cssText = 'display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem';
-      altSearchWrap.innerHTML =
-        `<span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;flex-shrink:0;border-right:1px solid var(--border)">🔍</span>` +
-        `<div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;flex:1;min-width:0;border-right:1px solid var(--border)">` +
-        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">Name</span>` +
-        `<input class="sf-field" data-field="name" type="text" autocomplete="off" oninput="onAltSearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.65rem 0;min-width:50px"></div>` +
-        `<div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;flex:1;min-width:0">` +
-        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">Location</span>` +
-        `<input class="sf-field" data-field="location" type="text" autocomplete="off" oninput="onAltSearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.65rem 0;min-width:50px"></div>` +
-        `<button onclick="clearSearchBar()" title="Clear" style="flex-shrink:0;border:none;background:none;color:var(--muted);font-size:0.78rem;cursor:pointer;border-left:1px solid var(--border);padding:0 0.65rem">✕</button>`;
-    }
+    buildSearchBar('houses');
     onAltSearch();
   }
 
@@ -8868,15 +8890,15 @@
     if (!wrap) return;
     const cs = 'background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:0.18rem 0.6rem;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1.5';
     wrap.innerHTML = `<div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.45rem 0.75rem;background:var(--surface);border-radius:10px;margin-bottom:1rem">
-      <span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Role</span>
-      <button class="wa-chip" data-group="role" data-value="CREW_LEADER"  onclick="waChipToggle('role','CREW_LEADER',this)"  style="${cs}">⭐ Leader</button>
-      <button class="wa-chip" data-group="role" data-value="CREW_MEMBER"  onclick="waChipToggle('role','CREW_MEMBER',this)"  style="${cs}">👷 Member</button>
-      <button class="wa-chip" data-group="role" data-value="CREW_MANAGER" onclick="waChipToggle('role','CREW_MANAGER',this)" style="${cs}">👔 Manager</button>
+      <span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">${t('chipGrpRole')}</span>
+      <button class="wa-chip" data-group="role" data-value="CREW_LEADER"  onclick="waChipToggle('role','CREW_LEADER',this)"  style="${cs}">${t('chipRoleLeader')}</button>
+      <button class="wa-chip" data-group="role" data-value="CREW_MEMBER"  onclick="waChipToggle('role','CREW_MEMBER',this)"  style="${cs}">${t('chipRoleMember')}</button>
+      <button class="wa-chip" data-group="role" data-value="CREW_MANAGER" onclick="waChipToggle('role','CREW_MANAGER',this)" style="${cs}">${t('chipRoleManager')}</button>
       <div style="width:1px;height:16px;background:var(--border);flex-shrink:0;align-self:center"></div>
-      <span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Password</span>
-      <button class="wa-chip" data-group="haspw" data-value="1" onclick="waChipToggle('haspw','1',this)" style="${cs}">✓ Has Password</button>
-      <button class="wa-chip" data-group="haspw" data-value="0" onclick="waChipToggle('haspw','0',this)" style="${cs}">✗ No Password</button>
-      <button onclick="waChipBarClear()" id="waChipClearBtn" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;white-space:nowrap;display:none">✕ Clear</button>
+      <span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">${t('chipGrpPassword')}</span>
+      <button class="wa-chip" data-group="haspw" data-value="1" onclick="waChipToggle('haspw','1',this)" style="${cs}">${t('chipHasPassword')}</button>
+      <button class="wa-chip" data-group="haspw" data-value="0" onclick="waChipToggle('haspw','0',this)" style="${cs}">${t('chipNoPassword')}</button>
+      <button onclick="waChipBarClear()" id="waChipClearBtn" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;white-space:nowrap;display:none">${t('chipClearFilters')}</button>
     </div>`;
     wrap.style.display = '';
   }
