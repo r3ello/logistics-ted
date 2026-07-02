@@ -5044,18 +5044,18 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'role', label: t('chipGrpRole'), options: [
-        { value: 'CREW_LEADER',  label: t('chipRoleLeader')  },
-        { value: 'CREW_MEMBER',  label: t('chipRoleMember')  },
-        { value: 'CREW_MANAGER', label: t('chipRoleManager') },
+      { key: 'role', labelKey: 'chipGrpRole', options: [
+        { value: 'CREW_LEADER',  labelKey: 'chipRoleLeader'  },
+        { value: 'CREW_MEMBER',  labelKey: 'chipRoleMember'  },
+        { value: 'CREW_MANAGER', labelKey: 'chipRoleManager' },
       ]},
-      { key: 'hascrew', label: t('chipGrpCrew'), options: [
-        { value: '1', label: t('chipHasCrew') },
-        { value: '0', label: t('chipNoCrew')  },
+      { key: 'hascrew', labelKey: 'chipGrpCrew', options: [
+        { value: '1', labelKey: 'chipHasCrew' },
+        { value: '0', labelKey: 'chipNoCrew'  },
       ]},
-      { key: 'hashouse', label: t('chipGrpHouse'), options: [
-        { value: '1', label: t('chipHasHouse') },
-        { value: '0', label: t('chipNoHouse')  },
+      { key: 'hashouse', labelKey: 'chipGrpHouse', options: [
+        { value: '1', labelKey: 'chipHasHouse' },
+        { value: '0', labelKey: 'chipNoHouse'  },
       ]},
     ]);
     onAltSearch();
@@ -5118,14 +5118,14 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'status', label: t('chipGrpStatus'), options: [
-        { value: 'AVAILABLE', label: t('chipStatusAvailable') },
-        { value: 'IN_USE',    label: t('chipStatusInUse')     },
-        { value: 'NONE',      label: t('chipStatusNone')      },
+      { key: 'status', labelKey: 'chipGrpStatus', options: [
+        { value: 'AVAILABLE', labelKey: 'chipStatusAvailable' },
+        { value: 'IN_USE',    labelKey: 'chipStatusInUse'     },
+        { value: 'NONE',      labelKey: 'chipStatusNone'      },
       ]},
-      { key: 'hashouse', label: t('chipGrpHouse'), options: [
-        { value: '1', label: t('chipStatusAssigned') },
-        { value: '0', label: t('chipStatusFree')     },
+      { key: 'hashouse', labelKey: 'chipGrpHouse', options: [
+        { value: '1', labelKey: 'chipStatusAssigned' },
+        { value: '0', labelKey: 'chipStatusFree'     },
       ]},
     ]);
     onAltSearch();
@@ -5210,13 +5210,13 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'hashouse', label: t('chipGrpHouse'), options: [
-        { value: '1', label: t('chipHasHouse') },
-        { value: '0', label: t('chipNoHouse')  },
+      { key: 'hashouse', labelKey: 'chipGrpHouse', options: [
+        { value: '1', labelKey: 'chipHasHouse' },
+        { value: '0', labelKey: 'chipNoHouse'  },
       ]},
-      { key: 'hasmembers', label: t('chipGrpMembers'), options: [
-        { value: '1', label: t('chipHasMembers') },
-        { value: '0', label: t('chipEmpty')      },
+      { key: 'hasmembers', labelKey: 'chipGrpMembers', options: [
+        { value: '1', labelKey: 'chipHasMembers' },
+        { value: '0', labelKey: 'chipEmpty'      },
       ]},
     ]);
     onAltSearch();
@@ -5628,12 +5628,12 @@
         </table>
       </div>`;
     buildChipBar([
-      { key: 'status', label: t('chipGrpStatus'), options: [
-        { value: 'PENDING',    label: t('chipOrderPending')   },
-        { value: 'APPROVED',   label: t('chipOrderApproved')  },
-        { value: 'ORDERED',    label: t('chipOrderOrdered')   },
-        { value: 'IN_TRANSIT', label: t('chipOrderInTransit') },
-        { value: 'DELIVERED',  label: t('chipOrderDelivered') },
+      { key: 'status', labelKey: 'chipGrpStatus', options: [
+        { value: 'PENDING',    labelKey: 'chipOrderPending'   },
+        { value: 'APPROVED',   labelKey: 'chipOrderApproved'  },
+        { value: 'ORDERED',    labelKey: 'chipOrderOrdered'   },
+        { value: 'IN_TRANSIT', labelKey: 'chipOrderInTransit' },
+        { value: 'DELIVERED',  labelKey: 'chipOrderDelivered' },
       ]},
     ]);
     onAltSearch();
@@ -6058,9 +6058,11 @@
     let html = '<div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.45rem 0.75rem;background:var(--surface);border-radius:10px;margin-bottom:0.75rem">';
     groups.forEach((g, gi) => {
       if (gi > 0) html += '<div style="width:1px;height:16px;background:var(--border);flex-shrink:0;align-self:center"></div>';
-      html += `<div style="display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap"><span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${g.label}</span>`;
+      const gLabel = g.labelKey ? t(g.labelKey) : g.label;
+      html += `<div style="display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap"><span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${gLabel}</span>`;
       g.options.forEach(o => {
-        html += `<button class="chip-btn" data-group="${g.key}" data-value="${o.value}" onclick="chipToggle('${g.key}','${o.value}',this)" style="${cs}">${o.label}</button>`;
+        const oLabel = o.labelKey ? t(o.labelKey) : o.label;
+        html += `<button class="chip-btn" data-group="${g.key}" data-value="${o.value}" onclick="chipToggle('${g.key}','${o.value}',this)" style="${cs}">${oLabel}</button>`;
       });
       html += '</div>';
     });
@@ -7211,13 +7213,13 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'hascrew', label: t('chipGrpCrew'), options: [
-        { value: '1', label: t('chipHasCrew') },
-        { value: '0', label: t('chipNoCrew')  },
+      { key: 'hascrew', labelKey: 'chipGrpCrew', options: [
+        { value: '1', labelKey: 'chipHasCrew' },
+        { value: '0', labelKey: 'chipNoCrew'  },
       ]},
-      { key: 'hasphase', label: t('chipGrpPhase'), options: [
-        { value: '1', label: t('chipHasActivePhase') },
-        { value: '0', label: t('chipNoPhase')        },
+      { key: 'hasphase', labelKey: 'chipGrpPhase', options: [
+        { value: '1', labelKey: 'chipHasActivePhase' },
+        { value: '0', labelKey: 'chipNoPhase'        },
       ]},
     ]);
     buildSearchBar('houses');
