@@ -3156,8 +3156,9 @@
         DONE:        { bg:'#bbf7d0', text:'#14532d' },
       };
       const foundationDone = (stages.find(s => s.stageOrder === 0)?.status === 'DONE');
+      const isEn = currentLang === 'en';
       const thCells = columns.map(col =>
-        `<th style="min-width:120px;padding:0.4rem 0.5rem;text-align:center;font-size:0.62rem;color:#9aa3be;text-transform:uppercase;white-space:nowrap;border-right:1px solid #2e3250">${col.stageName}</th>`
+        `<th style="min-width:120px;padding:0.4rem 0.5rem;text-align:center;font-size:0.62rem;color:#9aa3be;text-transform:uppercase;white-space:nowrap;border-right:1px solid #2e3250">${isEn && col.stageNameEn ? col.stageNameEn : col.stageName}</th>`
       ).join('');
       const hdStatusLabel = (v) => {
         if (v === 'IN_PROGRESS') return ' ' + (currentLang === 'bg' ? 'В процес' : 'In Progress');
