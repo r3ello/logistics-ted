@@ -1300,7 +1300,7 @@
       <span id="workerModalTitle">Add Worker</span>
       <button class="modal-close" onclick="closeWorkerModal()">✕</button>
     </div>
-    <div class="field"><label>Name</label><input id="wName" type="text" placeholder="Worker name" /></div>
+    <div class="field"><label>Name</label><input id="wName" type="text" placeholder="Worker name" data-i18n-placeholder="phWorkerName" /></div>
     <div class="field"><label id="wRoleLbl">Role</label>
       <select id="wRole" onchange="onWorkerRoleChange()" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
         <option value="CREW_MEMBER">Crew Member</option>
@@ -1485,11 +1485,11 @@
     </div>
     <div class="modal-field">
       <label id="facNameLabel">Name</label>
-      <input id="facName" type="text" placeholder="Name" />
+      <input id="facName" type="text" placeholder="Name" data-i18n-placeholder="phFacName" />
     </div>
     <div class="modal-field">
       <label id="facLocationLabel">Location</label>
-      <input id="facLocation" type="text" placeholder="City, region…" />
+      <input id="facLocation" type="text" placeholder="City, region…" data-i18n-placeholder="phFacLocation" />
     </div>
     <div class="modal-field">
       <label id="facCoordLabel">Coordinates <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
@@ -1869,7 +1869,7 @@
         <span id="crewModalTitle">Add Crew</span>
         <button class="modal-close" onclick="closeCrewModal()">✕</button>
       </div>
-      <div class="field"><label>Crew Name</label><input id="cName" type="text" placeholder="Crew name" /></div>
+      <div class="field"><label>Crew Name</label><input id="cName" type="text" placeholder="Crew name" data-i18n-placeholder="phCrewName" /></div>
       <div class="field"><label>Manager</label>
         <select id="cManager" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
           <option value="">— No manager —</option>
@@ -1895,7 +1895,7 @@
       </div>
       <div class="field"><label>Members</label>
         <div style="position:relative">
-          <input id="cMemberSearch" type="text" placeholder="Search by name or trade…"
+          <input id="cMemberSearch" type="text" placeholder="Search by name or trade…" data-i18n-placeholder="phMemberSearch"
             autocomplete="off"
             oninput="filterMemberDropdown()"
             onfocus="showMemberDropdown()"
@@ -1968,7 +1968,7 @@
       <p class="section-label" style="margin:0" id="whTitle">🏬 Warehouses</p>
       <button class="btn btn-primary" id="whAddBtn" onclick="openFacilityModal('warehouse', null)">+ Add warehouse</button>
     </div>
-    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="whSearchInput" type="text" placeholder="Search warehouses..." autocomplete="off" oninput="filterFacilityList('warehouse')" /></div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="whSearchInput" type="text" placeholder="Search warehouses..." data-i18n-placeholder="phSearchWarehouses" autocomplete="off" oninput="filterFacilityList('warehouse')" /></div>
     <div id="warehousesList"></div>
   </div>
 
@@ -1978,7 +1978,7 @@
       <p class="section-label" style="margin:0" id="supTitle">🏭 Suppliers</p>
       <button class="btn btn-primary" id="supAddBtn" onclick="openFacilityModal('supplier', null)">+ Add supplier</button>
     </div>
-    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="supSearchInput" type="text" placeholder="Search suppliers..." autocomplete="off" oninput="filterFacilityList('supplier')" /></div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="supSearchInput" type="text" placeholder="Search suppliers..." data-i18n-placeholder="phSearchSuppliers" autocomplete="off" oninput="filterFacilityList('supplier')" /></div>
     <div id="suppliersList"></div>
   </div>
 
@@ -1988,7 +1988,7 @@
       <p class="section-label" style="margin:0" id="ebManagerTitle">⚡ Electric Box Manager</p>
       <button class="btn btn-primary" onclick="ebOpenNew()" id="ebBtnNewBox">+ New Box</button>
     </div>
-    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="ebSearchInput" type="text" placeholder="Search electric boxes..." autocomplete="off" oninput="filterElectricBoxes()" /></div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="ebSearchInput" type="text" placeholder="Search electric boxes..." data-i18n-placeholder="phSearchElectric" autocomplete="off" oninput="filterElectricBoxes()" /></div>
 
     <!-- House list (left) + Panel builder (right) -->
     <div class="eb-layout">
@@ -2104,7 +2104,7 @@
       <p class="section-label" style="margin:0">🔲 House QR Codes</p>
       <button class="btn btn-ghost" onclick="window.print()" style="gap:.4rem">🖨️ Print All</button>
     </div>
-    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="qrSearchInput" type="text" placeholder="Search houses..." autocomplete="off" oninput="filterQrCodes()" /></div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="qrSearchInput" type="text" placeholder="Search houses..." data-i18n-placeholder="phSearchHouses" autocomplete="off" oninput="filterQrCodes()" /></div>
 
     <div id="qrGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem"></div>
 
@@ -2411,7 +2411,7 @@
       workerRole:'Role', workerTrade:'Trade', workerTradeSelect:'— Select trade —',
       roleCrewMember:'Crew Member', roleCrewLeader:'Crew Leader', roleCrewManager:'Crew Manager',
       // crews view
-      navOrgChartGroup:'Org Chart', navCrews:'Crews', navClientServicesGroup:'Client Services',
+      navOrgChartGroup:'Org Chart', navCrews:'Crews', navCrewManager:'Crew Manager', navClientServicesGroup:'Client Services',
       navStageMatrix:'Project Stages', pageTitle_stagematrix:'Project Stages', pageSub_stagematrix:'All houses × all construction stages',
       pageTitle_crews:'Crew Organisation', pageSub_crews:'Manage crews, leaders, and members',
       crewsSectionLabel:'Crew Organisation Chart', crewAddBtn:'＋ Add Crew',
@@ -2443,6 +2443,10 @@
       // worker card
       workerSearchPlaceholder:'Search workers by name, crew or house...',
       scaffoldSearchPlaceholder:'Search by status or house...',
+      phWorkerName:'Worker name', phCrewName:'Crew name', phMemberSearch:'Search by name or trade…',
+      phSearchWarehouses:'Search warehouses...', phSearchSuppliers:'Search suppliers...',
+      phSearchElectric:'Search electric boxes...', phSearchHouses:'Search houses...',
+      phFacName:'Name', phFacLocation:'City, region…',
       // scaffold chip labels on house cards
       chipScaffoldAvailable:'Available', chipScaffoldInUse:'In Use', chipScaffoldNone:'No Scaffold',
       // scaffold start location label on scaffold view
@@ -2673,7 +2677,7 @@
       workerRole:'Роля', workerTrade:'Специалност', workerTradeSelect:'— Изберете специалност —',
       roleCrewMember:'Член на екип', roleCrewLeader:'Ръководител екип', roleCrewManager:'Мениджър екип',
       // crews view
-      navOrgChartGroup:'Орг. схема', navCrews:'Екипи', navClientServicesGroup:'Клиентски услуги',
+      navOrgChartGroup:'Орг. схема', navCrews:'Екипи', navCrewManager:'Мениджър на екипи', navClientServicesGroup:'Клиентски услуги',
       navStageMatrix:'Етапи на проект', pageTitle_stagematrix:'Етапи на проект', pageSub_stagematrix:'Всички обекти × всички строителни етапи',
       pageTitle_crews:'Организация на екипи', pageSub_crews:'Управление на екипи, лидери и членове',
       crewsSectionLabel:'Организационна схема на екипи', crewAddBtn:'＋ Добави екип',
@@ -2705,6 +2709,10 @@
       // worker card
       workerSearchPlaceholder:'Търси работник по име, екип или къща...',
       scaffoldSearchPlaceholder:'Търси по статус или къща...',
+      phWorkerName:'Име на работник', phCrewName:'Наименование на екип', phMemberSearch:'Търси по име или специалност…',
+      phSearchWarehouses:'Търси складове...', phSearchSuppliers:'Търси доставчици...',
+      phSearchElectric:'Търси електрически табла...', phSearchHouses:'Търси обекти...',
+      phFacName:'Наименование', phFacLocation:'Град, регион…',
       // scaffold chip labels on house cards
       chipScaffoldAvailable:'Налично', chipScaffoldInUse:'В употреба', chipScaffoldNone:'Без скеле',
       // scaffold start location label on scaffold view
@@ -2828,7 +2836,8 @@
     document.getElementById('navTravelAllowanceLabel').textContent   = t('navTravelAllowance');
     document.getElementById('navOrgChartGroupLabel').textContent       = t('navOrgChartGroup');
     document.getElementById('navClientServicesGroupLabel').textContent = t('navClientServicesGroup');
-    facM('navCrewsLabel','navCrews');
+    facM('navCrewsDashLabel','navCrews');
+    facM('navCrewsLabel','navCrewManager');
     facM('navStageMatrixLabel','navStageMatrix');
     const eb = id => document.getElementById(id);
     const ebt = (id, key) => { const el = eb(id); if (el) el.textContent = t(key); };
@@ -2893,7 +2902,8 @@
     facS('fuelConsLbl','fuelConsLbl');
     facS('fuelPriceLbl','fuelPriceLbl');
     facS('navScaffoldLabel','navScaffold');
-    facS('navCrewsLabel','navCrews');
+    facS('navCrewsDashLabel','navCrews');
+    facS('navCrewsLabel','navCrewManager');
     const csl = document.getElementById('crewsSectionLabel'); if (csl) csl.textContent = t('crewsSectionLabel');
     const sft = document.getElementById('scaffoldFormTitle');   if (sft) sft.textContent = t('scaffoldFormTitle');
     const sfd = document.getElementById('scaffoldFormDesc');    if (sfd) sfd.textContent = t('scaffoldFormDesc');
