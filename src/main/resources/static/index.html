@@ -4821,13 +4821,21 @@
       sep.style.cssText = 'border:none;border-top:1px solid var(--border);margin:0.1rem 0';
       picker.appendChild(sep);
 
+      // Find best crew = fewest assigned houses
+      const houseCount = c => c.assignedHouses ? c.assignedHouses.split(', ').length : 0;
+      const minHouses  = Math.min(...crews.map(houseCount));
+
       crews.forEach(c => {
         const row = document.createElement('div');
         row.style.cssText = 'display:flex;align-items:center;gap:0.3rem';
         const b = document.createElement('button');
         const alreadyAssigned = !!c.assignedHouses;
-        b.textContent = (c.leader || c.crewName || '—') + (alreadyAssigned ? ' ⚠️' : '');
-        b.title = alreadyAssigned ? (currentLang === 'bg' ? `Вече назначен на: ${c.assignedHouses}` : `Already assigned to: ${c.assignedHouses}`) : '';
+        const isBest = houseCount(c) === minHouses;
+        const bestIcon = isBest ? ' ✅' : '';
+        b.textContent = (c.leader || c.crewName || '—') + (alreadyAssigned ? ' ⚠️' : '') + bestIcon;
+        b.title = alreadyAssigned
+          ? (currentLang === 'bg' ? `Вече назначен на: ${c.assignedHouses}` : `Already assigned to: ${c.assignedHouses}`)
+          : isBest ? (currentLang === 'bg' ? 'Най-добър избор – най-малко обекти' : 'Best choice – fewest houses') : '';
         b.style.cssText = 'flex:1;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:20px;padding:0.28rem 0.75rem;font-size:0.78rem;font-weight:600;cursor:pointer;text-align:center;white-space:nowrap';
         // eye icon for leader info
         const eye = document.createElement('span');
