@@ -20,13 +20,17 @@ public record HouseDto(
     @JsonProperty("scaffold_status") ScaffoldStatus scaffoldStatus,
     @JsonProperty("scaffold_start_date") String scaffoldStartDate,
     @JsonProperty("scaffold_end_date") String scaffoldEndDate,
-    @JsonProperty("checkin_token") String checkinToken
+    @JsonProperty("checkin_token") String checkinToken,
+    List<CrewRefDto> crews
 ) {
+
+    public record CrewRefDto(Integer id, String name) {}
 
     /** Accumulator used while joining a house with its inventory rows. */
     public static final class Builder {
         private final House source;
         public final List<MaterialLineDto> materials = new ArrayList<>();
+        public final List<CrewRefDto> crews = new ArrayList<>();
         public BigDecimal totalValue = BigDecimal.ZERO;
 
         public Builder(House source) {
@@ -47,7 +51,8 @@ public record HouseDto(
                 source.getScaffoldStatus(),
                 source.getScaffoldStartDate() == null ? null : source.getScaffoldStartDate().toString(),
                 source.getScaffoldEndDate()   == null ? null : source.getScaffoldEndDate().toString(),
-                source.getCheckinToken()
+                source.getCheckinToken(),
+                crews
             );
         }
     }

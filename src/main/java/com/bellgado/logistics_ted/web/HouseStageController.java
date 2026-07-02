@@ -6,6 +6,7 @@ import com.bellgado.logistics_ted.domain.HouseStage;
 import com.bellgado.logistics_ted.repository.CrewRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
+import com.bellgado.logistics_ted.repository.WorkerRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -23,11 +24,14 @@ public class HouseStageController {
     private final HouseStageRepository stages;
     private final HouseRepository houses;
     private final CrewRepository crews;
+    private final WorkerRepository workers;
 
-    public HouseStageController(HouseStageRepository stages, HouseRepository houses, CrewRepository crews) {
-        this.stages = stages;
-        this.houses = houses;
-        this.crews  = crews;
+    public HouseStageController(HouseStageRepository stages, HouseRepository houses,
+                                CrewRepository crews, WorkerRepository workers) {
+        this.stages  = stages;
+        this.houses  = houses;
+        this.crews   = crews;
+        this.workers = workers;
     }
 
     // ── Stage type definitions ────────────────────────────────────────────────
@@ -144,7 +148,8 @@ public class HouseStageController {
                 }).toList();
                 row.put("stages", cells);
                 return row;
-            }).toList();
+            })
+            .toList();
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("columns", columns);
@@ -170,22 +175,14 @@ public class HouseStageController {
                 Integer newCrewId = body.get("crewId") != null ? Integer.valueOf(body.get("crewId").toString()) : null;
                 s.setCrewId(newCrewId);
 
-                // Assign crew → house when crew is selected
+                // Assign new crew → house and sync all their workers
                 if (newCrewId != null) {
-                    crews.findById(newCrewId).ifPresent(crew -> {
-                        crew.setHouse(s.getHouse());
-                        crews.save(crew);
-                    });
+                    syncCrewHouse(newCrewId, s.getHouse());
                 }
 
-                // Clear old crew's house if it has no other stage assignments
+                // Clear old crew's house if they have no remaining assignments on any house
                 if (oldCrewId != null && !oldCrewId.equals(newCrewId)) {
-                    if (stages.countOtherAssignments(oldCrewId, id) == 0) {
-                        crews.findById(oldCrewId).ifPresent(crew -> {
-                            crew.setHouse(null);
-                            crews.save(crew);
-                        });
-                    }
+                    resyncCrewHouseAfterRemoval(oldCrewId, id);
                 }
             }
             if (body.containsKey("workerName"))
@@ -205,6 +202,26 @@ public class HouseStageController {
 
             return ResponseEntity.ok(toDto(saved));
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    private void syncCrewHouse(Integer crewId, House house) {
+        crews.findById(crewId).ifPresent(crew -> {
+            crew.setHouse(house);
+            crews.save(crew);
+            workers.findByCrewId(crewId).forEach(w -> {
+                w.setHouse(house);
+                workers.save(w);
+            });
+        });
+    }
+
+    private void resyncCrewHouseAfterRemoval(Integer crewId, Integer excludeStageId) {
+        // Find remaining assignments for this crew (excluding the just-removed one)
+        List<HouseStage> remaining = stages.findAll().stream()
+            .filter(hs -> crewId.equals(hs.getCrewId()) && !hs.getId().equals(excludeStageId))
+            .toList();
+        House newHouse = remaining.isEmpty() ? null : remaining.get(0).getHouse();
+        syncCrewHouse(crewId, newHouse);
     }
 
     private Map<String, Object> toDto(HouseStage s) {

@@ -1,11 +1,13 @@
 package com.bellgado.logistics_ted.service;
 
 import com.bellgado.logistics_ted.domain.House;
+import com.bellgado.logistics_ted.domain.HouseStage;
 import com.bellgado.logistics_ted.domain.Inventory;
 import com.bellgado.logistics_ted.domain.Material;
 import com.bellgado.logistics_ted.domain.ScaffoldStatus;
 import com.bellgado.logistics_ted.domain.Warehouse;
 import com.bellgado.logistics_ted.repository.HouseRepository;
+import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.InventoryRepository;
 import com.bellgado.logistics_ted.repository.WarehouseRepository;
 import com.bellgado.logistics_ted.web.dto.HouseDto;
@@ -18,6 +20,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HexFormat;
@@ -35,11 +38,14 @@ public class HouseService {
     private final HouseRepository houses;
     private final WarehouseRepository warehouses;
     private final InventoryRepository inventories;
+    private final HouseStageRepository houseStages;
 
-    public HouseService(HouseRepository houses, WarehouseRepository warehouses, InventoryRepository inventories) {
+    public HouseService(HouseRepository houses, WarehouseRepository warehouses,
+                        InventoryRepository inventories, HouseStageRepository houseStages) {
         this.houses = houses;
         this.warehouses = warehouses;
         this.inventories = inventories;
+        this.houseStages = houseStages;
     }
 
     @Transactional(readOnly = true)
@@ -49,6 +55,13 @@ public class HouseService {
         Map<Integer, HouseDto.Builder> byId = new LinkedHashMap<>();
         for (House h : houses.findAllByOrderByIdAsc()) {
             byId.put(h.getId(), new HouseDto.Builder(h));
+        }
+        for (Object[] row : houseStages.findAllHouseCrewMappings()) {
+            Integer houseId = ((Number) row[0]).intValue();
+            Integer crewId  = ((Number) row[1]).intValue();
+            String  crewName = (String) row[2];
+            HouseDto.Builder b = byId.get(houseId);
+            if (b != null) b.crews.add(new HouseDto.CrewRefDto(crewId, crewName));
         }
         for (Inventory inv : inventories.findAllWithJoins()) {
             House h = inv.getWarehouse().getHouse();
@@ -94,6 +107,20 @@ public class HouseService {
         Warehouse w = new Warehouse();
         w.setHouse(h);
         warehouses.save(w);
+        // Seed house_stage rows for every existing stage type
+        final House savedHouse = h;
+        List<HouseStage> stageRows = new ArrayList<>();
+        for (Object[] st : houseStages.findDistinctStageTypes()) {
+            HouseStage hs = new HouseStage();
+            hs.setHouse(savedHouse);
+            hs.setStageOrder((Integer) st[0]);
+            hs.setStageName((String) st[1]);
+            hs.setStageNameEn((String) st[2]);
+            hs.setStatus("NOT_STARTED");
+            hs.setUpdatedAt(LocalDateTime.now());
+            stageRows.add(hs);
+        }
+        houseStages.saveAll(stageRows);
         return toResponse(h);
     }
 

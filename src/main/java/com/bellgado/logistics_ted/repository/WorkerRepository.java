@@ -12,13 +12,14 @@ public interface WorkerRepository extends JpaRepository<Worker, Integer> {
     List<Worker> findByCrewIdAndRole(Integer crewId, WorkerRole role);
     List<Worker> findByRole(WorkerRole role);
 
-    /** Workers assigned to the crew that is working this house (eager-loads crew+house). */
-    @Query("""
-        SELECT w FROM Worker w
-        JOIN FETCH w.crew c
-        JOIN FETCH c.house h
-        WHERE h.id = :houseId
+    java.util.Optional<Worker> findByUsername(String username);
+
+    /** Workers whose crew is assigned to any stage on this house (via house_stage). */
+    @Query(value = """
+        SELECT DISTINCT w.* FROM worker w
+        JOIN crew c ON c.id = w.crew_id
+        JOIN house_stage hs ON hs.crew_id = c.id AND hs.house_id = :houseId
         ORDER BY w.name
-        """)
+        """, nativeQuery = true)
     List<Worker> findByHouseId(@Param("houseId") Integer houseId);
 }

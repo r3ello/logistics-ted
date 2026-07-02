@@ -120,6 +120,18 @@ public class WorkerController {
                     ()  -> { m.put("leaderId", null);        m.put("leaderName", null); }
                 );
             m.put("crewStages", houseStages.findStageNamesForCrew(w.getCrew().getId()));
+            // all houses this crew is assigned to in the stage matrix
+            List<Map<String, Object>> houses = houseStages.findAssignedHousesForCrew(w.getCrew().getId())
+                .stream().map(row -> {
+                    Map<String, Object> h = new LinkedHashMap<>();
+                    h.put("houseId",   ((Number) row[0]).intValue());
+                    h.put("houseName", row[1]);
+                    return h;
+                }).toList();
+            m.put("houses", houses);
+            // keep legacy single fields for backwards compat
+            m.put("houseId",   houses.isEmpty() ? null : houses.get(0).get("houseId"));
+            m.put("houseName", houses.isEmpty() ? null : houses.get(0).get("houseName"));
         } else {
             m.put("crewStages",  null);
             m.put("crewId",      null);
@@ -128,11 +140,10 @@ public class WorkerController {
             m.put("managerName", null);
             m.put("leaderId",    null);
             m.put("leaderName",  null);
+            m.put("houses",      List.of());
+            m.put("houseId",     null);
+            m.put("houseName",   null);
         }
-        // houseId/houseName come from the crew, not the worker directly
-        House crewHouseForId = w.getCrew() != null ? w.getCrew().getHouse() : null;
-        m.put("houseId",   crewHouseForId != null ? crewHouseForId.getId()   : null);
-        m.put("houseName", crewHouseForId != null ? crewHouseForId.getName() : null);
         return m;
     }
 }

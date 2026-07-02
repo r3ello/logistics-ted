@@ -37,4 +37,8 @@ public class Crew {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_id")
     private House house;
+
+    /** The stage type this crew is responsible for. */
+    @Column(name = "stage_order")
+    private Integer stageOrder;
 }

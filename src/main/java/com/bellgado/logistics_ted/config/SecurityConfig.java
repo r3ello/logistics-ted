@@ -46,6 +46,7 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/worker-login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/logout").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers("/", "/index.html", "/map-picker.html",
