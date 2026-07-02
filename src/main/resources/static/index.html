@@ -2184,18 +2184,18 @@
       <div style="display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;gap:0">
         <span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;border-right:1px solid var(--border)">🔍</span>
         <div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;border-right:1px solid var(--border)">
-          <span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">House</span>
+          <span id="stageMatrixHouseLabel" style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">House</span>
           <input id="stageMatrixSearch" type="text" placeholder="…" oninput="filterMatrixRows(this.value)"
             style="background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.6rem 0;width:140px" />
         </div>
         <div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;border-right:1px solid var(--border)">
-          <span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Crew</span>
+          <span id="stageMatrixCrewLabel" style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Crew</span>
           <input id="stageMatrixCrewSearch" type="text" placeholder="…" oninput="filterMatrixRows(document.getElementById('stageMatrixSearch').value)"
             style="background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.6rem 0;width:140px" />
         </div>
         <label style="display:flex;align-items:center;gap:0.4rem;padding:0 0.75rem;cursor:pointer;font-size:0.72rem;font-weight:600;color:var(--muted);white-space:nowrap;border-right:1px solid var(--border)">
           <input id="stageMatrixHasCrew" type="checkbox" onchange="filterMatrixRows(document.getElementById('stageMatrixSearch').value)" style="accent-color:var(--accent)">
-          Has Crew
+          <span id="stageMatrixHasCrewLabel">Has Crew</span>
         </label>
         <button onclick="document.getElementById('stageMatrixSearch').value='';document.getElementById('stageMatrixCrewSearch').value='';document.getElementById('stageMatrixHasCrew').checked=false;filterMatrixRows('')"
           style="border:none;background:none;color:var(--muted);font-size:0.78rem;cursor:pointer;padding:0 0.65rem">✕</button>
@@ -2276,7 +2276,7 @@
       historyImmutableNote:'Historical record — read-only.',
       historyViews:'views',
       refresh:'⟳ Refresh', langBtn:'🌐 BG', pdfBtn:'⬇ PDF',
-      searchPlaceholder:'Search house...', searchClear:'Clear', matrixSearchPlaceholder:'Search house by name...', stagesSearchPlaceholder:'Search stage by name...',
+      searchPlaceholder:'Search house...', searchClear:'Clear', matrixSearchPlaceholder:'Search house by name...', stagesSearchPlaceholder:'Search stage by name...', matrixHouseLabel:'House', matrixCrewLabel:'Crew', matrixHasCrewLabel:'Has Crew',
       sectionLabel:'Houses — warehouse detail',
       loading:'Loading...', noData:'No data.', connError:'Connection error.',
       totalInventory:'Total inventory value', totalWarehouse:'Remaining materials estimated value',
@@ -2521,7 +2521,7 @@
       historyImmutableNote:'Исторически запис — само за четене.',
       historyViews:'прегл.',
       refresh:'⟳ Опресни', langBtn:'🌐 EN', pdfBtn:'⬇ PDF',
-      searchPlaceholder:'Търси къща...', searchClear:'Изчисти', matrixSearchPlaceholder:'Търси обект по име...', stagesSearchPlaceholder:'Търси етап по име...',
+      searchPlaceholder:'Търси къща...', searchClear:'Изчисти', matrixSearchPlaceholder:'Търси обект по име...', stagesSearchPlaceholder:'Търси етап по име...', matrixHouseLabel:'Обект', matrixCrewLabel:'Екип', matrixHasCrewLabel:'С екип',
       sectionLabel:'Къщи — детайли на склад',
       loading:'Зареждане...', noData:'Няма данни.', connError:'Грешка при свързване.',
       totalInventory:'Обща стойност на инвентара', totalWarehouse:'Прогнозна стойност на оставащи материали',
@@ -2744,8 +2744,9 @@
     else if (activeView === 'warehouses')  renderFacilityList('warehouse');
     else if (activeView === 'suppliers')   renderFacilityList('supplier');
     else if (activeView === 'history')     loadHistory();
-    else if (activeView === 'stagematrix') loadStageMatrix();
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
+    // always re-render stage matrix if it is the active view (column headers come from DB in both languages)
+    if (document.getElementById('view-stagematrix')?.classList.contains('active')) loadStageMatrix(true);
   }
 
   function retranslateMaterials() {
@@ -2761,6 +2762,7 @@
   }
 
   function translateStatic() {
+    try {
     document.getElementById('brandName').textContent    = t('brandName');
     document.getElementById('brandSub').textContent     = t('brandSub');
     document.getElementById('navDashboard').querySelector('span:last-child').textContent = t('navDashboard');
@@ -2837,22 +2839,26 @@
     document.getElementById('searchInput').placeholder  = t('searchPlaceholder');
     document.getElementById('clearBtn').title           = t('searchClear');
     document.getElementById('stageMatrixSearch').placeholder = t('matrixSearchPlaceholder');
+    facM('stageMatrixHouseLabel','matrixHouseLabel');
+    facM('stageMatrixCrewLabel','matrixCrewLabel');
+    facM('stageMatrixHasCrewLabel','matrixHasCrewLabel');
     // Generic data-i18n sweep
     document.querySelectorAll('[data-i18n]').forEach(el => { const v = t(el.dataset.i18n); if (v) el.textContent = v; });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const v = t(el.dataset.i18nPlaceholder); if (v) el.placeholder = v; });
-    document.getElementById('sectionLabel').textContent = t('sectionLabel');
-    document.getElementById('orderFormTitle').textContent = t('orderFormTitle');
-    document.getElementById('orderFormDesc').textContent  = t('orderFormDesc');
+    const facS = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+    facS('sectionLabel','sectionLabel');
+    facS('orderFormTitle','orderFormTitle');
+    facS('orderFormDesc','orderFormDesc');
     const splbl = document.getElementById('startingPointLbl'); if (splbl) splbl.textContent = t('startingPoint');
     const dhlbl = document.getElementById('destHouseLbl');     if (dhlbl) dhlbl.textContent = t('destHouseLabel');
-    document.getElementById('calcBtn').textContent        = t('calcBtn');
-    document.getElementById('formHint').textContent       = t('formHint');
-    document.getElementById('formHintStrong').textContent = t('formHintStrong');
-    document.getElementById('fuelSectionLabel').textContent = t('fuelSectionLabel');
-    document.getElementById('fuelConsLbl').textContent      = t('fuelConsLbl');
-    document.getElementById('fuelPriceLbl').textContent     = t('fuelPriceLbl');
-    document.getElementById('navScaffoldLabel').textContent  = t('navScaffold');
-    document.getElementById('navCrewsLabel').textContent    = t('navCrews');
+    facS('calcBtn','calcBtn');
+    facS('formHint','formHint');
+    facS('formHintStrong','formHintStrong');
+    facS('fuelSectionLabel','fuelSectionLabel');
+    facS('fuelConsLbl','fuelConsLbl');
+    facS('fuelPriceLbl','fuelPriceLbl');
+    facS('navScaffoldLabel','navScaffold');
+    facS('navCrewsLabel','navCrews');
     const csl = document.getElementById('crewsSectionLabel'); if (csl) csl.textContent = t('crewsSectionLabel');
     const sft = document.getElementById('scaffoldFormTitle');   if (sft) sft.textContent = t('scaffoldFormTitle');
     const sfd = document.getElementById('scaffoldFormDesc');    if (sfd) sfd.textContent = t('scaffoldFormDesc');
@@ -2948,44 +2954,43 @@
     if (altIn && _dashMode === 'scaffold') altIn.placeholder = t('scaffoldSearchPlaceholder');
 
     // login screen
-    document.getElementById('loginSubtitle').textContent  = t('loginSubtitle');
-    document.getElementById('loginUserLabel').textContent  = t('loginUserLabel');
-    document.getElementById('loginPassLabel').textContent  = t('loginPassLabel');
-    document.getElementById('loginUser').placeholder       = t('phUsername');
-    document.getElementById('loginPass').placeholder       = t('phPassword');
-    document.getElementById('loginBtn').textContent        = t('signIn');
+    const fts = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+    const ftp = (id, key) => { const el = document.getElementById(id); if (el) el.placeholder  = t(key); };
+    fts('loginSubtitle','loginSubtitle'); fts('loginUserLabel','loginUserLabel');
+    fts('loginPassLabel','loginPassLabel'); fts('loginBtn','signIn');
+    ftp('loginUser','phUsername'); ftp('loginPass','phPassword');
 
     // house modal labels & placeholders
-    document.getElementById('mNameLabel').textContent      = t('fieldName');
-    document.getElementById('mLocationLabel').textContent  = t('fieldLocation');
-    document.getElementById('mCoordLabel').firstChild.textContent = t('fieldCoordinates') + ' ';
-    document.getElementById('mCoordOptional').textContent  = t('fieldOptional');
-    document.getElementById('mStartDateLabel').firstChild.textContent = t('fieldStartDate') + ' ';
-    document.getElementById('mStartOptional').textContent  = t('fieldOptional');
-    document.getElementById('mPhaseLabel').firstChild.textContent = t('fieldPhase') + ' ';
-    document.getElementById('mPhaseOptional').textContent  = t('fieldOptional');
-    document.getElementById('mName').placeholder     = t('phHouseName');
-    document.getElementById('mLocation').placeholder = t('phCityRegion');
-    document.getElementById('mLat').placeholder      = t('phLat');
-    document.getElementById('mLng').placeholder      = t('phLng');
-    document.getElementById('mLocBtn').textContent   = t('useMyLocation');
-    document.getElementById('mPickMapBtn').textContent = t('pickOnMap');
-    document.getElementById('houseCancelBtn').textContent = t('cancel');
-    document.getElementById('houseSaveBtn').textContent   = t('save');
+    fts('mNameLabel','fieldName'); fts('mLocationLabel','fieldLocation');
+    const mCoordLabel = document.getElementById('mCoordLabel'); if (mCoordLabel?.firstChild) mCoordLabel.firstChild.textContent = t('fieldCoordinates') + ' ';
+    fts('mCoordOptional','fieldOptional');
+    const mStartDateLabel = document.getElementById('mStartDateLabel'); if (mStartDateLabel?.firstChild) mStartDateLabel.firstChild.textContent = t('fieldStartDate') + ' ';
+    fts('mStartOptional','fieldOptional');
+    const mPhaseLabel = document.getElementById('mPhaseLabel'); if (mPhaseLabel?.firstChild) mPhaseLabel.firstChild.textContent = t('fieldPhase') + ' ';
+    fts('mPhaseOptional','fieldOptional');
+    ftp('mName','phHouseName'); ftp('mLocation','phCityRegion');
+    ftp('mLat','phLat'); ftp('mLng','phLng');
+    fts('mLocBtn','useMyLocation'); fts('mPickMapBtn','pickOnMap');
+    fts('houseCancelBtn','cancel'); fts('houseSaveBtn','save');
 
     // inventory modal buttons
-    document.getElementById('invCancelBtn').textContent = t('cancel');
-    document.getElementById('invSaveBtn').textContent   = t('save');
+    fts('invCancelBtn','cancel'); fts('invSaveBtn','save');
 
     // phase select options (value stays as English DB key; text is translated)
     const phaseKeys = ['Foundation','Framing','Roofing','Electrical','Plumbing','Insulation','Drywall','Finishing','Landscaping','Completed'];
     const sel = document.getElementById('mPhase');
-    sel.options[0].textContent = t('phaseNone');
-    phaseKeys.forEach((k, i) => { sel.options[i + 1].textContent = t(k); });
+    if (sel && sel.tagName === 'SELECT' && sel.options.length > 0) {
+      sel.options[0].textContent = t('phaseNone');
+      phaseKeys.forEach((k, i) => { if (sel.options[i + 1]) sel.options[i + 1].textContent = t(k); });
+    }
 
-    const activeView = document.querySelector('.view.active')?.id.replace('view-','') || 'dashboard';
+    const activeView = document.querySelector('.view.active')?.id?.replace('view-','') || 'dashboard';
     document.getElementById('pageTitle').textContent = t(`pageTitle_${activeView}`);
     document.getElementById('pageSub').textContent   = t(`pageSub_${activeView}`);
+    // update the inner stage matrix title/subtitle
+    const smt = document.getElementById('stageMatrixTitle'); if (smt) smt.textContent = t('pageTitle_stagematrix');
+    const sms = document.getElementById('stageMatrixSub');   if (sms) sms.textContent = t('pageSub_stagematrix');
+    } catch(e) { console.error('[translateStatic] crashed:', e); }
   }
 
   function resetResults() {
@@ -4603,12 +4608,19 @@
     return '—';
   }
 
-  async function loadStageMatrix() {
+  let _matrixCache = null;
+
+  async function loadStageMatrix(useCache) {
     const wrap = document.getElementById('stageMatrixWrap');
-    wrap.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>${t('matrixLoading')}</div>`;
+    if (!wrap) return;
     let data;
-    try { data = await apiFetch('/api/house-stages/matrix').then(r => r.json()); }
-    catch(e) { wrap.innerHTML = `<div class="state-msg">Failed to load matrix.</div>`; return; }
+    if (useCache && _matrixCache) {
+      data = _matrixCache;
+    } else {
+      wrap.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>${t('matrixLoading')}</div>`;
+      try { data = await apiFetch('/api/house-stages/matrix').then(r => r.json()); _matrixCache = data; }
+      catch(e) { wrap.innerHTML = `<div class="state-msg">Failed to load matrix.</div>`; return; }
+    }
 
     const { columns, rows } = data;
     const isEn = currentLang === 'en';
