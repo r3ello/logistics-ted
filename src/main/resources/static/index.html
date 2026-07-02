@@ -4994,7 +4994,7 @@
     grid.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>Loading...</div>`;
     let wList = [];
     try { wList = await apiFetch('/api/workers').then(r => r.json()); } catch(e) {}
-    if (!wList.length) { grid.innerHTML = `<div class="state-msg">No workers found. <button class="btn btn-primary admin-only" style="margin-top:1rem" onclick="openWorkerModal()">＋ Add worker</button></div>`; return; }
+    if (!wList.length) { grid.innerHTML = `<div class="state-msg">No workers found. <button class="btn btn-primary admin-only" style="margin-top:1rem" onclick="openWorkerModal()">${t('workerAddBtn')}</button></div>`; return; }
     const rows = wList.map(w => {
       const roleCfg = {
         CREW_MEMBER:  { label: t('roleCrewMember'),  icon: '👷', color: '#9aa3be' },
