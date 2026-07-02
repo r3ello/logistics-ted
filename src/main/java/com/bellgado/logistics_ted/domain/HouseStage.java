@@ -1,6 +1,7 @@
 package com.bellgado.logistics_ted.domain;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,12 @@ public class HouseStage {
 
     @Column(nullable = false, length = 30)
     private String status = "NOT_STARTED";
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
     @Column(columnDefinition = "TEXT")
     private String notes;

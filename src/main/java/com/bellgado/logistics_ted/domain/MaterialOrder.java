@@ -21,6 +21,11 @@ public class MaterialOrder {
     @JoinColumn(name = "house_id", nullable = false)
     private House house;
 
+    /** The specific house stage (matrix cell) this order is for. Null for legacy/admin house-only orders. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "house_stage_id")
+    private HouseStage houseStage;
+
     @Column(nullable = false, length = 20)
     private String status = "DRAFT";
 

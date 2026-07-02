@@ -9,6 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 public interface HouseStageRepository extends JpaRepository<HouseStage, Integer> {
     List<HouseStage> findByHouseIdOrderByStageOrder(Integer houseId);
 
+    /** Every (house) stage cell assigned to a crew — what its leader may raise a material order for. */
+    @Query("SELECT s FROM HouseStage s JOIN FETCH s.house WHERE s.crewId = :crewId ORDER BY s.house.name, s.stageOrder")
+    List<HouseStage> findByCrewIdWithHouse(Integer crewId);
+
     @Query(value = "SELECT DISTINCT ON (stage_order) stage_order, stage_name, stage_name_en FROM house_stage ORDER BY stage_order", nativeQuery = true)
     List<Object[]> findDistinctStageTypes();
 
