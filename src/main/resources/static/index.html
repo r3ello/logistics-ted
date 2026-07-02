@@ -2779,15 +2779,16 @@
     retranslateMaterials();
     const activeView = document.querySelector('.view.active')?.id?.replace('view-','') || 'dashboard';
     if (activeView === 'dashboard') {
-      if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash(); else setDashMode(_dashMode);
+      if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash();
+      else { retranslateChipBar(); retranslateSearchBar(_dashMode); }
     }
     else if (activeView === 'scaffold')    setDashMode('scaffold');
-    else if (activeView === 'crews')       renderCrewCards();
+    else if (activeView === 'crews')       { retranslateChipBar(); retranslateSearchBar('crews'); }
     else if (activeView === 'warehouses')  renderFacilityList('warehouse');
     else if (activeView === 'suppliers')   renderFacilityList('supplier');
     else if (activeView === 'history')     loadHistory();
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
-    else if (activeView === 'workeraccess') waBuildChipBar();
+    else if (activeView === 'workeraccess') { waBuildChipBar(); }
     // always re-render stage matrix if it is the active view (column headers come from DB in both languages)
     if (document.getElementById('view-stagematrix')?.classList.contains('active')) loadStageMatrix(true);
   }
@@ -5999,6 +6000,15 @@
     houses:     [{ key:'name', label:'sfName' }, { key:'location', label:'sfLocation' }],
   };
 
+  function retranslateSearchBar(mode) {
+    const wrap = document.getElementById('altSearchWrap');
+    if (!wrap) return;
+    const fields = _sfConfigs[mode];
+    if (!fields || !fields.length) return;
+    const spans = wrap.querySelectorAll('.sf-label');
+    spans.forEach((span, i) => { if (fields[i]) span.textContent = t(fields[i].label); });
+  }
+
   function buildSearchBar(mode) {
     const wrap = document.getElementById('altSearchWrap');
     if (!wrap) return;
@@ -6021,7 +6031,7 @@
       `<span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;flex-shrink:0;border-right:1px solid var(--border)">🔍</span>` +
       fields.map((f, i) =>
         `<div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;flex:1;min-width:0;${i < fields.length-1 ? 'border-right:1px solid var(--border);' : ''}">` +
-        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${t(f.label)}</span>` +
+        `<span class="sf-label" style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${t(f.label)}</span>` +
         `<input class="sf-field" data-field="${f.key}" type="text" autocomplete="off" oninput="onAltSearch()" ` +
         `style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.65rem 0;min-width:50px"></div>`
       ).join('') +
@@ -6036,8 +6046,10 @@
 
   // ── Chip filter system ───────────────────────────────────────────────────────
   let _chipFilters = {};
+  let _lastChipGroups = null;
 
   function buildChipBar(groups) {
+    _lastChipGroups = groups;
     _chipFilters = {};
     const wrap = document.getElementById('chipBarWrap');
     if (!wrap) return;
@@ -6055,6 +6067,25 @@
     html += '<button onclick="chipBarClear()" id="chipClearBtn" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;white-space:nowrap;display:none">✕ Clear filters</button></div>';
     wrap.innerHTML = html;
     wrap.style.display = '';
+  }
+
+  // Retranslate chip labels without clearing filters or re-fetching data
+  function retranslateChipBar() {
+    if (!_lastChipGroups) return;
+    const savedFilters = _chipFilters;
+    buildChipBar(_lastChipGroups);
+    // restore active filter visual state
+    _chipFilters = savedFilters;
+    document.querySelectorAll('.chip-btn').forEach(btn => {
+      const g = btn.dataset.group, v = btn.dataset.value;
+      if (_chipFilters[g] && _chipFilters[g].has(v)) {
+        btn.style.background = 'var(--accent)';
+        btn.style.color = '#fff';
+        btn.style.borderColor = 'var(--accent)';
+      }
+    });
+    const cb = document.getElementById('chipClearBtn');
+    if (cb) cb.style.display = Object.keys(_chipFilters).length ? '' : 'none';
   }
 
   function chipToggle(group, value, btn) {
