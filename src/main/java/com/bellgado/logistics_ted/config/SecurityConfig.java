@@ -59,7 +59,17 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT,  "/api/public/**").permitAll()
                 .requestMatchers("/electric-box/**").permitAll()
                 .requestMatchers("/checkin/**").permitAll()
-                .requestMatchers("/api/**").authenticated()
+                // Crew leaders: their own workspace (all methods) + the read-only reference data a
+                // material order is built from — their assignments/orders live under /api/my, plus the
+                // material catalog and house list. Everything else under /api is the admin/dispatcher
+                // app and a crew-leader token must NOT reach it (real BE guard, not just a hidden nav).
+                .requestMatchers("/api/my/**").hasRole("CREW_LEADER")
+                .requestMatchers(HttpMethod.GET, "/api/me").authenticated()
+                .requestMatchers(HttpMethod.GET,
+                        "/api/materials", "/api/materials/**",
+                        "/api/houses", "/api/houses/**")
+                    .hasAnyRole("ADMIN", "USER", "CREW_LEADER")
+                .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().permitAll()
             )
             .formLogin(AbstractHttpConfigurer::disable)
