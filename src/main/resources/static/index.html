@@ -2999,6 +2999,7 @@
     const altIn = document.getElementById('altSearchInput');
     if (altIn && _dashMode === 'workers')  altIn.placeholder = t('workerSearchPlaceholder');
     if (altIn && _dashMode === 'scaffold') altIn.placeholder = t('scaffoldSearchPlaceholder');
+    if (altIn && _dashMode === 'stages')   altIn.placeholder = t('stagesSearchPlaceholder');
 
     // login screen
     const fts = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
