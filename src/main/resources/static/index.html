@@ -8483,13 +8483,17 @@
     currentUser = user;
     document.getElementById('userBadgeName').textContent = user.username;
     const roleTag = document.getElementById('userBadgeRole');
-    roleTag.textContent = user.role;
+    roleTag.textContent = user.role === 'crew_leader' ? 'Leader' : user.role;
     roleTag.className = 'role-tag ' + (user.role === 'admin' ? 'role-admin' : 'role-user');
     document.getElementById('userBadge').style.display  = '';
     document.getElementById('logoutBtn').style.display  = '';
     document.getElementById('addHouseBtn').style.display = user.role === 'admin' ? '' : 'none';
     const histAllWrap = document.getElementById('historyFilterAllUsersWrap');
     if (histAllWrap) histAllWrap.style.display = user.role === 'admin' ? '' : 'none';
+    // Hide nav sections not relevant for crew leaders
+    if (user.role === 'crew_leader') {
+      document.querySelectorAll('.nav-group[data-restrict-admin]').forEach(el => el.style.display = 'none');
+    }
   }
 
   async function doLogin() {
@@ -8530,7 +8534,24 @@
     document.getElementById('loginScreen').classList.remove('hidden');
   }
 
+  async function initCrewLeader() {
+    applyStoredTheme();
+    // Load workers to find this leader's crew and house
+    try {
+      const workers = await apiFetch('/api/workers').then(r => r.json());
+      const me = workers.find(w => w.username === currentUser.username);
+      if (me && me.houses && me.houses.length) {
+        openHouseDetail(me.houses[0].houseId);
+      } else {
+        showView('stagematrix');
+      }
+    } catch(e) {
+      showView('stagematrix');
+    }
+  }
+
   function initApp() {
+    if (currentUser?.role === 'crew_leader') { initCrewLeader(); return; }
     applyStoredTheme();
     loadDashboard();
     loadMaterialFields().then(applyPendingMapPin);
