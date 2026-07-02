@@ -2276,7 +2276,7 @@
       historyImmutableNote:'Historical record — read-only.',
       historyViews:'views',
       refresh:'⟳ Refresh', langBtn:'🌐 BG', pdfBtn:'⬇ PDF',
-      searchPlaceholder:'Search house...', searchClear:'Clear', matrixSearchPlaceholder:'Search house by name...', stagesSearchPlaceholder:'Search stage by name...', matrixHouseLabel:'House', matrixCrewLabel:'Crew', matrixHasCrewLabel:'Has Crew',
+      searchPlaceholder:'Search house...', searchClear:'Clear', matrixSearchPlaceholder:'Search house by name...', matrixCrewSearchPlaceholder:'Search crew...', stagesSearchPlaceholder:'Search stage by name...', matrixHouseLabel:'House', matrixCrewLabel:'Crew', matrixHasCrewLabel:'Has Crew',
       sectionLabel:'Houses — warehouse detail',
       loading:'Loading...', noData:'No data.', connError:'Connection error.',
       totalInventory:'Total inventory value', totalWarehouse:'Remaining materials estimated value',
@@ -2542,7 +2542,7 @@
       historyImmutableNote:'Исторически запис — само за четене.',
       historyViews:'прегл.',
       refresh:'⟳ Опресни', langBtn:'🌐 EN', pdfBtn:'⬇ PDF',
-      searchPlaceholder:'Търси къща...', searchClear:'Изчисти', matrixSearchPlaceholder:'Търси обект по име...', stagesSearchPlaceholder:'Търси етап по име...', matrixHouseLabel:'Обект', matrixCrewLabel:'Екип', matrixHasCrewLabel:'С екип',
+      searchPlaceholder:'Търси къща...', searchClear:'Изчисти', matrixSearchPlaceholder:'Търси обект по име...', matrixCrewSearchPlaceholder:'Търси екип...', stagesSearchPlaceholder:'Търси етап по име...', matrixHouseLabel:'Обект', matrixCrewLabel:'Екип', matrixHasCrewLabel:'С екип',
       sectionLabel:'Къщи — детайли на склад',
       loading:'Зареждане...', noData:'Няма данни.', connError:'Грешка при свързване.',
       totalInventory:'Обща стойност на инвентара', totalWarehouse:'Прогнозна стойност на оставащи материали',
@@ -2884,6 +2884,7 @@
     document.getElementById('searchInput').placeholder  = t('searchPlaceholder');
     document.getElementById('clearBtn').title           = t('searchClear');
     document.getElementById('stageMatrixSearch').placeholder = t('matrixSearchPlaceholder');
+    document.getElementById('stageMatrixCrewSearch').placeholder = t('matrixCrewSearchPlaceholder');
     facM('stageMatrixHouseLabel','matrixHouseLabel');
     facM('stageMatrixCrewLabel','matrixCrewLabel');
     facM('stageMatrixHasCrewLabel','matrixHasCrewLabel');
