@@ -12,6 +12,8 @@ public interface WorkerRepository extends JpaRepository<Worker, Integer> {
     List<Worker> findByCrewIdAndRole(Integer crewId, WorkerRole role);
     List<Worker> findByRole(WorkerRole role);
 
+    java.util.Optional<Worker> findByUsername(String username);
+
     /** Workers whose crew is assigned to any stage on this house (via house_stage). */
     @Query(value = """
         SELECT DISTINCT w.* FROM worker w

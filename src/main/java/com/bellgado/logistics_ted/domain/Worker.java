@@ -54,4 +54,13 @@ public class Worker {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crew_id")
     private Crew crew;
+
+    @Column(unique = true, length = 60)
+    private String username;
+
+    @Column(name = "password_hash", length = 255)
+    private String passwordHash;
+
+    @Column(name = "password_plain", length = 100)
+    private String passwordPlain;
 }

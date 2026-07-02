@@ -20,34 +20,33 @@
       padding:1.5rem;width:100%;max-width:420px}
     label{display:block;font-size:.75rem;font-weight:700;text-transform:uppercase;
       letter-spacing:.07em;color:var(--gray);margin-bottom:.5rem}
-    .ss-wrap{position:relative;width:100%}
-    .ss-inp{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;
-      color:var(--text);font-size:1rem;padding:.75rem 1rem;outline:none;cursor:pointer;text-overflow:ellipsis}
-    .ss-inp.ss-open{border-color:var(--accent);border-radius:8px 8px 0 0}
-    .ss-drop{position:absolute;z-index:200;width:100%;background:var(--card);border:1px solid var(--accent);
-      border-top:none;border-radius:0 0 10px 10px;max-height:240px;overflow-y:auto;display:none}
-    .ss-drop.open{display:block}
-    .ss-item{padding:.7rem 1rem;cursor:pointer;font-size:.95rem;color:var(--text)}
-    .ss-item:hover,.ss-item.ss-sel{background:rgba(79,142,247,.12);color:var(--accent)}
+    input[type=text],input[type=password]{
+      width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;
+      color:var(--text);font-size:1rem;padding:.75rem 1rem;outline:none;margin-bottom:1rem}
+    input[type=text]:focus,input[type=password]:focus{border-color:var(--accent)}
     .btn{width:100%;padding:1.4rem;border:none;border-radius:12px;font-size:1.25rem;font-weight:700;
-      cursor:pointer;margin-top:1.25rem;transition:opacity .15s}
+      cursor:pointer;margin-top:0.5rem;transition:opacity .15s}
     .btn:disabled{opacity:.4;cursor:not-allowed}
     .btn-in {background:var(--green);color:#0f1117}
     .btn-out{background:var(--yellow);color:#0f1117}
+    .btn-logout{width:auto;padding:0.5rem 1.2rem;font-size:0.82rem;font-weight:600;
+      background:transparent;border:1px solid var(--border);color:var(--gray);
+      border-radius:8px;cursor:pointer;margin-top:0}
     .status-box{background:var(--card);border:1px solid var(--border);border-radius:10px;
       padding:1rem;margin:1rem 0;text-align:center}
     .status-box .time{font-size:1.4rem;font-weight:700;color:var(--accent);margin:.3rem 0}
     .status-box .label{font-size:.78rem;color:var(--gray);text-transform:uppercase;letter-spacing:.07em}
     .msg{text-align:center;padding:.75rem 1rem;border-radius:8px;margin-top:1rem;font-size:.88rem;font-weight:600}
-    .msg-ok {background:rgba(62,207,110,.12);color:var(--green);border:1px solid rgba(62,207,110,.3)}
-    .msg-err{background:rgba(247,111,111,.12);color:var(--red); border:1px solid rgba(247,111,111,.3)}
+    .msg-ok  {background:rgba(62,207,110,.12);color:var(--green);border:1px solid rgba(62,207,110,.3)}
+    .msg-err {background:rgba(247,111,111,.12);color:var(--red);border:1px solid rgba(247,111,111,.3)}
     .msg-info{background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.25)}
-    #loading,#error-page{text-align:center;padding:3rem;color:var(--gray)}
-    #error-page{color:var(--red)}
-    .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
     .session-done{text-align:center}
     .session-done .hours{font-size:2rem;font-weight:700;color:var(--green);margin:.5rem 0}
     .session-done .sub{font-size:.82rem;color:var(--gray)}
+    .worker-bar{display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border)}
+    .worker-bar .name{font-weight:700;font-size:0.95rem}
+    .worker-bar .role{font-size:0.75rem;color:var(--gray);margin-top:0.1rem}
   </style>
 </head>
 <body>
@@ -57,163 +56,152 @@
   <p id="houseName">Loading…</p>
 </div>
 
-<div id="loading" style="color:var(--gray);text-align:center;padding:2rem">Loading…</div>
-<div id="error-page" style="display:none"></div>
-
-<div id="mainCard" class="card" style="display:none">
-
-  <!-- Step 1: worker selector (hidden once worker selected) -->
-  <div id="stepSelect">
-    <label>Who are you?</label>
-    <div class="ss-wrap">
-      <input class="ss-inp" id="ss-worker-inp" type="text" placeholder="— Select your name —" autocomplete="off" readonly>
-      <div class="ss-drop" id="ss-worker-drop"></div>
-      <input type="hidden" id="workerSelect" value="">
-    </div>
+<div id="mainCard" class="card">
+  <div id="screenLogin">
+    <div id="loginMsg" style="display:none" class="msg"></div>
+    <label>Username</label>
+    <input id="loginUser" type="text" autocomplete="username" placeholder="your.username">
+    <label>Password</label>
+    <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••">
+    <button class="btn btn-in" onclick="doLogin()">🔑 Login</button>
   </div>
 
-  <hr class="divider" id="divider" style="display:none"/>
-
-  <!-- Step 2: action area -->
-  <div id="stepAction" style="display:none"></div>
-
-  <div id="msgBox" style="display:none" class="msg"></div>
-
-  <div style="margin-top:1.25rem;display:flex;align-items:center;gap:.5rem;opacity:.55">
-    <input type="checkbox" id="skipGps" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
-    <label for="skipGps" style="font-size:.72rem;margin:0;text-transform:none;letter-spacing:0;cursor:pointer">Skip location check (testing only)</label>
+  <div id="screenAction" style="display:none">
+    <div class="worker-bar">
+      <div>
+        <div class="name" id="workerName"></div>
+        <div class="role" id="workerRole"></div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+    </div>
+    <div id="actionArea"></div>
+    <div id="msgBox" style="display:none" class="msg"></div>
+    <div style="margin-top:1.25rem;display:flex;align-items:center;gap:.5rem;opacity:.55">
+      <input type="checkbox" id="skipGps" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+      <label for="skipGps" style="font-size:.72rem;margin:0;text-transform:none;letter-spacing:0;cursor:pointer">Skip location check (testing only)</label>
+    </div>
   </div>
 </div>
 
 <script>
-const token    = location.pathname.split('/').filter(Boolean).pop();
-let   houseData = null;
-let   deviceId  = null;
+const houseToken = location.pathname.split('/').filter(Boolean).pop();
+let deviceId = null;
+let currentWorkerId = null;
 
-// ── Searchable select ─────────────────────────────────────────────────────────
-function ssSetup(inpId, dropId, hiddenId, items, onChange) {
-  const inp    = document.getElementById(inpId);
-  const drop   = document.getElementById(dropId);
-  const hidden = document.getElementById(hiddenId);
-  const _items = items;
-  function render(q) {
-    const lq = q.toLowerCase();
-    drop.innerHTML = '';
-    (lq ? _items.filter(i => i.label.toLowerCase().includes(lq)) : _items).forEach(item => {
-      const d = document.createElement('div');
-      d.className = 'ss-item' + (String(hidden.value) === String(item.value) ? ' ss-sel' : '');
-      d.textContent = item.label;
-      d.onmousedown = e => {
-        e.preventDefault();
-        hidden.value = item.value;
-        inp.value    = item.label;
-        inp.readOnly = true;
-        inp.classList.remove('ss-open');
-        drop.classList.remove('open');
-        if (onChange) onChange();
-      };
-      drop.appendChild(d);
-    });
-  }
-  inp.addEventListener('click', () => {
-    inp.readOnly = false; inp.select();
-    inp.classList.add('ss-open'); drop.classList.add('open'); render('');
-  });
-  inp.addEventListener('input', () => render(inp.value));
-  inp.addEventListener('blur', () => setTimeout(() => {
-    inp.readOnly = true;
-    inp.classList.remove('ss-open'); drop.classList.remove('open');
-    const cur = _items.find(i => String(i.value) === String(hidden.value));
-    inp.value = cur ? cur.label : '';
-  }, 160));
-}
-
-// ── device fingerprint ───────────────────────────────────────────────────────
 function getDeviceId() {
   let id = localStorage.getItem('tdhDeviceId');
   if (!id) { id = crypto.randomUUID(); localStorage.setItem('tdhDeviceId', id); }
   return id;
 }
 
-// ── init ─────────────────────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   deviceId = getDeviceId();
   try {
-    const res = await fetch(`/api/public/checkin/${token}`);
-    if (!res.ok) throw new Error(res.status === 404 ? 'Check-in point not found.' : 'Server error.');
-    houseData = await res.json();
-    document.getElementById('houseName').textContent = '📍 ' + houseData.houseName;
-    document.getElementById('loading').style.display = 'none';
-    if (!houseData.workers || houseData.workers.length === 0) {
-      const ep = document.getElementById('error-page');
-      ep.style.display = 'block';
-      ep.textContent = '⚠️ No workers are assigned to this house yet. Contact your manager.';
+    const res = await fetch(`/api/public/checkin/${houseToken}`);
+    if (!res.ok) {
+      document.getElementById('houseName').textContent = '⚠️ Invalid check-in point';
+      document.getElementById('mainCard').style.display = 'none';
       return;
     }
-    ssSetup('ss-worker-inp', 'ss-worker-drop', 'workerSelect',
-      houseData.workers.map(w => ({ value: w.id, label: w.name })),
-      onWorkerSelect);
-    document.getElementById('mainCard').style.display = 'block';
+    const data = await res.json();
+    document.getElementById('houseName').textContent = '📍 ' + data.houseName;
   } catch(e) {
-    document.getElementById('loading').style.display = 'none';
-    const ep = document.getElementById('error-page');
-    ep.style.display = 'block';
-    ep.textContent = e.message;
+    document.getElementById('houseName').textContent = '⚠️ Connection error';
   }
+  document.getElementById('loginUser').focus();
 }
 
-// ── worker selected ───────────────────────────────────────────────────────────
-async function onWorkerSelect() {
-  const workerId = parseInt(document.getElementById('workerSelect').value);
-  if (!workerId) { hideAction(); return; }
-  const res  = await fetch(`/api/public/checkin/${token}/worker/${workerId}/today`);
-  const data = await res.json();
-  showAction(workerId, data);
+// ── Login ─────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const msgEl = document.getElementById('loginMsg');
+
+  const showErr = (txt) => {
+    msgEl.textContent = txt; msgEl.className = 'msg msg-err'; msgEl.style.display = 'block';
+  };
+
+  if (!username || !password) { showErr('Please enter your username and password.'); return; }
+  msgEl.textContent = 'Logging in…'; msgEl.className = 'msg msg-info'; msgEl.style.display = 'block';
+
+  try {
+    const res = await fetch('/api/worker-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, houseToken })
+    });
+    const data = await res.json();
+    if (!res.ok) { showErr('❌ ' + (data.error || 'Login failed.')); return; }
+
+    currentWorkerId = data.workerId;
+    document.getElementById('workerName').textContent = '👷 ' + data.workerName;
+    document.getElementById('workerRole').textContent = data.houseName ? '📍 ' + data.houseName : '';
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    msgEl.style.display = 'none';
+
+    document.getElementById('screenLogin').style.display = 'none';
+    document.getElementById('screenAction').style.display = 'block';
+
+    await loadTodayStatus();
+  } catch(e) { showErr('❌ ' + e.message); }
 }
 
-function hideAction() {
-  document.getElementById('divider').style.display    = 'none';
-  document.getElementById('stepAction').style.display = 'none';
+document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+function doLogout() {
+  currentWorkerId = null;
+  document.getElementById('actionArea').innerHTML = '';
   hideMsg();
+  document.getElementById('screenAction').style.display = 'none';
+  document.getElementById('screenLogin').style.display = 'block';
+  document.getElementById('loginUser').focus();
 }
 
-function showAction(workerId, data) {
-  document.getElementById('divider').style.display    = '';
-  const area = document.getElementById('stepAction');
-  area.style.display = 'block';
+// ── Today status ──────────────────────────────────────────────────────────────
+async function loadTodayStatus() {
+  try {
+    const res  = await fetch(`/api/public/checkin/${houseToken}/worker/${currentWorkerId}/today`);
+    const data = await res.json();
+    renderAction(data);
+  } catch(e) { showMsg('❌ Failed to load status: ' + e.message, 'err'); }
+}
+
+function renderAction(data) {
+  const area = document.getElementById('actionArea');
   hideMsg();
 
   if (data.status === 'NONE') {
     area.innerHTML = `
-      <div class="status-box">
-        <div class="label">Not checked in today</div>
-      </div>
-      <button class="btn btn-in" onclick="doCheckIn(${workerId})">✅ Check In</button>`;
+      <div class="status-box"><div class="label">Not checked in today</div></div>
+      <button class="btn btn-in" onclick="doCheckIn()">✅ Check In</button>`;
 
   } else if (data.status === 'CHECKED_IN') {
-    const t = fmtTime(data.checkedInAt);
     area.innerHTML = `
       <div class="status-box">
         <div class="label">Checked in at</div>
-        <div class="time">${t}</div>
+        <div class="time">${fmtTime(data.checkedInAt)}</div>
       </div>
-      <button class="btn btn-out" onclick="doCheckOut(${workerId}, ${data.sessionId})">🚪 Check Out</button>`;
+      <button class="btn btn-out" onclick="doCheckOut(${data.sessionId})">🚪 Check Out</button>`;
 
-  } else { // CHECKED_OUT — last session done, but can start another
-    const mins = data.durationMinutes;
+  } else {
     const count = data.sessionCount || 1;
     area.innerHTML = `
       <div class="session-done">
-        <div class="label" style="color:var(--green);font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem">Last session complete${count > 1 ? ' (session ' + count + ')' : ''}</div>
-        <div class="hours">${fmtDuration(mins)}</div>
+        <div class="label" style="color:var(--green);font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem">
+          Session complete${count > 1 ? ' (' + count + ' today)' : ''}</div>
+        <div class="hours">${fmtDuration(data.durationMinutes)}</div>
         <div class="sub">${fmtTime(data.checkedInAt)} → ${fmtTime(data.checkedOutAt)}</div>
       </div>
-      <button class="btn btn-in" onclick="doCheckIn(${workerId})">✅ Check In Again</button>`;
+      <button class="btn btn-in" style="margin-top:1rem" onclick="doCheckIn()">✅ Check In Again</button>`;
   }
 }
 
-// ── check in ─────────────────────────────────────────────────────────────────
-async function doCheckIn(workerId) {
+// ── Check In ──────────────────────────────────────────────────────────────────
+async function doCheckIn() {
   let lat = null, lng = null;
   if (!document.getElementById('skipGps').checked) {
     showMsg('📍 Getting your location…', 'info');
@@ -221,26 +209,25 @@ async function doCheckIn(workerId) {
       const pos = await getPosition();
       lat = pos.coords.latitude; lng = pos.coords.longitude;
     } catch(e) {
-      showMsg('❌ Location access is required to check in. Please allow location and try again.', 'err');
+      showMsg('❌ Location access is required. Please allow location and try again.', 'err');
       return;
     }
   }
   showMsg('Checking in…', 'info');
   try {
-    const res  = await fetch(`/api/public/checkin/${token}/session`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ workerId, deviceId, lat, lng })
+    const res  = await fetch(`/api/public/checkin/${houseToken}/session`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ workerId: currentWorkerId, deviceId, lat, lng })
     });
     const data = await res.json();
     if (!res.ok) { showMsg('❌ ' + data.error, 'err'); return; }
     showMsg('✅ Checked in at ' + fmtTime(data.checkedInAt), 'ok');
-    await onWorkerSelect();
+    await loadTodayStatus();
   } catch(e) { showMsg('❌ ' + e.message, 'err'); }
 }
 
-// ── check out ─────────────────────────────────────────────────────────────────
-async function doCheckOut(workerId, sessionId) {
+// ── Check Out ─────────────────────────────────────────────────────────────────
+async function doCheckOut(sessionId) {
   let lat = null, lng = null;
   if (!document.getElementById('skipGps').checked) {
     showMsg('📍 Getting your location…', 'info');
@@ -248,46 +235,40 @@ async function doCheckOut(workerId, sessionId) {
       const pos = await getPosition();
       lat = pos.coords.latitude; lng = pos.coords.longitude;
     } catch(e) {
-      showMsg('❌ Location access is required to check out. Please allow location and try again.', 'err');
+      showMsg('❌ Location access is required. Please allow location and try again.', 'err');
       return;
     }
   }
   showMsg('Checking out…', 'info');
   try {
-    const res  = await fetch(`/api/public/checkin/${token}/session/${sessionId}/checkout`, {
-      method: 'PUT',
-      headers: {'Content-Type':'application/json'},
+    const res  = await fetch(`/api/public/checkin/${houseToken}/session/${sessionId}/checkout`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ deviceId, lat, lng })
     });
     const data = await res.json();
     if (!res.ok) { showMsg('❌ ' + data.error, 'err'); return; }
     showMsg('✅ Checked out — ' + fmtDuration(data.durationMinutes) + ' today', 'ok');
-    await onWorkerSelect();
+    await loadTodayStatus();
   } catch(e) { showMsg('❌ ' + e.message, 'err'); }
 }
 
-// ── helpers ───────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function getPosition() {
   return new Promise((resolve, reject) =>
     navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, maximumAge: 0 }));
 }
-
 function fmtTime(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
 }
-
 function fmtDuration(mins) {
   if (mins == null) return '—';
   const h = Math.floor(mins / 60), m = mins % 60;
   return h > 0 ? `${h}h ${m.toString().padStart(2,'0')}m` : `${m}m`;
 }
-
 function showMsg(text, type) {
   const el = document.getElementById('msgBox');
-  el.textContent = text;
-  el.className = 'msg msg-' + type;
-  el.style.display = 'block';
+  el.textContent = text; el.className = 'msg msg-' + type; el.style.display = 'block';
 }
 function hideMsg() { document.getElementById('msgBox').style.display = 'none'; }
 

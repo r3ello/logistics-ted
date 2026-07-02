@@ -1648,6 +1648,9 @@
     <div class="nav-item nav-sub" id="navQrcodes" onclick="showView('qrcodes')">
       <span class="nav-icon">🔲</span> <span id="navQrcodesLabel">House QR Codes</span>
     </div>
+    <div class="nav-item nav-sub" id="navWorkerAccess" onclick="showView('workeraccess')">
+      <span class="nav-icon">🔑</span> <span id="navWorkerAccessLabel">Worker Access</span>
+    </div>
     </div>
     <div class="nav-item" id="navTravelAllowance" onclick="setDashMode('travelpay');showView('dashboard');setNavActive('navTravelAllowance')">
       <span class="nav-icon">💰</span> <span id="navTravelAllowanceLabel">Travel Allowance</span>
@@ -2109,6 +2112,12 @@
 
   </div><!-- /view-qrcodes -->
 
+  <!-- ── WORKER ACCESS VIEW ───────────────────────────────────────────────── -->
+  <div class="view" id="view-workeraccess">
+    <div id="waLoading" style="text-align:center;padding:2rem;color:var(--muted)">Loading…</div>
+    <div id="waContent" style="display:none"></div>
+  </div><!-- /view-workeraccess -->
+
   <!-- ── ATTENDANCE VIEW ─────────────────────────────────────────────────── -->
   <div class="view" id="view-attendance">
 
@@ -2174,11 +2183,34 @@
         <h2 id="stageMatrixTitle" style="margin:0;font-size:1.25rem;font-weight:700">Project Stages</h2>
         <p id="stageMatrixSub" style="margin:0.25rem 0 0;color:var(--muted);font-size:0.85rem">All houses × all construction stages</p>
       </div>
-      <input id="stageMatrixSearch" type="text" placeholder="Search house by name..."
-        oninput="filterMatrixRows(this.value)"
-        style="background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:0.45rem 0.9rem;font-size:0.85rem;color:var(--text);width:220px;outline:none" />
+      <div style="display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;gap:0">
+        <span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;border-right:1px solid var(--border)">🔍</span>
+        <div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;border-right:1px solid var(--border)">
+          <span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">House</span>
+          <input id="stageMatrixSearch" type="text" placeholder="…" oninput="filterMatrixRows(this.value)"
+            style="background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.6rem 0;width:140px" />
+        </div>
+        <div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;border-right:1px solid var(--border)">
+          <span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Crew</span>
+          <input id="stageMatrixCrewSearch" type="text" placeholder="…" oninput="filterMatrixRows(document.getElementById('stageMatrixSearch').value)"
+            style="background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.6rem 0;width:140px" />
+        </div>
+        <label style="display:flex;align-items:center;gap:0.4rem;padding:0 0.75rem;cursor:pointer;font-size:0.72rem;font-weight:600;color:var(--muted);white-space:nowrap;border-right:1px solid var(--border)">
+          <input id="stageMatrixHasCrew" type="checkbox" onchange="filterMatrixRows(document.getElementById('stageMatrixSearch').value)" style="accent-color:var(--accent)">
+          Has Crew
+        </label>
+        <button onclick="document.getElementById('stageMatrixSearch').value='';document.getElementById('stageMatrixCrewSearch').value='';document.getElementById('stageMatrixHasCrew').checked=false;filterMatrixRows('')"
+          style="border:none;background:none;color:var(--muted);font-size:0.78rem;cursor:pointer;padding:0 0.65rem">✕</button>
+      </div>
     </div>
     <div id="stageMatrixWrap" style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
+      <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
+    </div>
+  </div>
+
+  <!-- VIEW: HOUSE DETAIL -->
+  <div class="view" id="view-housedetail">
+    <div id="houseDetailContent">
       <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
     </div>
   </div>
@@ -2201,6 +2233,8 @@
       navAttendance:'Check-in Log',
       pageTitle_qrcodes:'House QR Codes', pageSub_qrcodes:'Print and attach QR codes to each house',
       navQrcodes:'House QR Codes',
+      pageTitle_workeraccess:'Worker Access', pageSub_workeraccess:'Manage check-in/out credentials per worker',
+      navWorkerAccess:'Worker Access',
       ebManagerTitle:'⚡ Electric Box Manager',
       ebNewBox:'+ New Box', ebEditorTitleNew:'New Electric Box',
       ebLblHouse:'House', ebHouseSelectDefault:'— select —',
@@ -2444,6 +2478,8 @@
       navAttendance:'Дневник присъствия',
       pageTitle_qrcodes:'QR кодове на обекти', pageSub_qrcodes:'Принтирай и залепи QR кодовете по обектите',
       navQrcodes:'QR кодове',
+      pageTitle_workeraccess:'Достъп на работници', pageSub_workeraccess:'Управление на данни за вход/изход',
+      navWorkerAccess:'Достъп на работници',
       ebManagerTitle:'⚡ Мениджър на табла',
       ebNewBox:'+ Ново табло', ebEditorTitleNew:'Ново електрическо табло',
       ebLblHouse:'Къща', ebHouseSelectDefault:'— избери —',
@@ -2753,6 +2789,7 @@
     document.getElementById('navElectricLabel').textContent          = t('navElectric');
     document.getElementById('navAttendanceLabel').textContent        = t('navAttendance');
     document.getElementById('navQrcodesLabel').textContent           = t('navQrcodes');
+    document.getElementById('navWorkerAccessLabel').textContent       = t('navWorkerAccess');
     document.getElementById('navTravelAllowanceLabel').textContent   = t('navTravelAllowance');
     document.getElementById('navOrgChartGroupLabel').textContent       = t('navOrgChartGroup');
     document.getElementById('navClientServicesGroupLabel').textContent = t('navClientServicesGroup');
@@ -2987,7 +3024,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'electric', 'attendance', 'qrcodes', 'stagematrix'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false };
   const _navGroupConfig = {
@@ -3037,6 +3074,8 @@
     if (name === 'attendance')  attInit();
     if (name === 'qrcodes')     qrInit();
     if (name === 'stagematrix') loadStageMatrix();
+    if (name === 'workeraccess') waInit();
+    if (name === 'housedetail') loadHouseDetail();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -3047,6 +3086,188 @@
           ${materials.map(m => { const meta = MAT_META[m.name] || { icon: '📦' }; return `<div class="field"><label>${meta.icon} ${mn(m.name)}</label><input type="number" id="mat_${m.id}" min="0" step="1" placeholder="0" /><p class="unit">${t('unitLabel')} ${mu(m.unit)}</p></div>`; }).join('')}
         </div>`;
       materials.forEach(m => { const el = document.getElementById(`mat_${m.id}`); if (el && saved[m.id]) el.value = saved[m.id]; });
+    }
+  }
+
+  // ── HOUSE DETAIL ─────────────────────────────────────────────────────────────
+  let _houseDetailId = null;
+  let _houseDetailPrevView = 'dashboard';
+
+  function openHouseDetail(houseId) {
+    _houseDetailPrevView = location.hash.replace('#', '') || 'dashboard';
+    _houseDetailId = houseId;
+    localStorage.setItem('houseDetailId', houseId);
+    localStorage.setItem('houseDetailPrevView', _houseDetailPrevView);
+    showView('housedetail');
+  }
+
+  async function loadHouseDetail() {
+    if (!_houseDetailId) {
+      _houseDetailId = localStorage.getItem('houseDetailId');
+      _houseDetailPrevView = localStorage.getItem('houseDetailPrevView') || 'dashboard';
+    }
+    const el = document.getElementById('houseDetailContent');
+    if (!_houseDetailId) { el.innerHTML = '<div class="state-msg">No house selected.</div>'; return; }
+    el.innerHTML = '<div class="state-msg"><div class="spinner"></div><br>Loading…</div>';
+    try {
+      const [houses, stageMatrix, workers] = await Promise.all([
+        apiFetch('/api/houses').then(r => r.json()),
+        apiFetch('/api/house-stages/matrix').then(r => r.json()),
+        apiFetch('/api/workers').then(r => r.json()),
+      ]);
+      const h = houses.find(x => x.id == _houseDetailId);
+      if (!h) { el.innerHTML = '<div class="state-msg">House not found.</div>'; return; }
+
+      const matrixRow = (stageMatrix.rows || []).find(r => r.houseId == _houseDetailId || r.houseName === h.name);
+      const columns = stageMatrix.columns || [];
+      // Build stages array: each column + status from matrixRow
+      const stages = columns.map(col => {
+        const cell = matrixRow ? (matrixRow.stages || []).find(s => s.stageOrder === col.stageOrder) : null;
+        const crew = (cell && cell.crewId) ? (col.crews || []).find(c => c.crewId == cell.crewId) : null;
+        return {
+          stageOrder: col.stageOrder,
+          stageName: col.stageName,
+          status: cell ? cell.status : null,
+          crewId: cell ? cell.crewId : null,
+          crewName: crew?.crewName || null,
+          leaderName: cell?.workerName || crew?.leaderName || null,
+        };
+      }).filter(s => s.crewId || s.status);
+
+      // Build crew->workers map
+      const workersByCrewId = {};
+      workers.forEach(w => {
+        if (w.crewId) {
+          if (!workersByCrewId[w.crewId]) workersByCrewId[w.crewId] = [];
+          workersByCrewId[w.crewId].push(w);
+        }
+      });
+
+      // Crews assigned to this house (from stages) — track all stages per crew
+      const assignedCrews = {};
+      stages.forEach(s => {
+        if (s.crewId && s.crewName) {
+          if (!assignedCrews[s.crewId]) assignedCrews[s.crewId] = { crewName: s.crewName, stages: [] };
+          assignedCrews[s.crewId].stages.push({ stageOrder: s.stageOrder, stageName: s.stageName, status: s.status });
+        }
+      });
+
+      const HD_PILL = {
+        ASSIGNED:    { bg:'#fde68a', text:'#78350f' },
+        IN_PROGRESS: { bg:'#fca5a5', text:'#7f1d1d' },
+        DONE:        { bg:'#bbf7d0', text:'#14532d' },
+      };
+      const foundationDone = (stages.find(s => s.stageOrder === 0)?.status === 'DONE');
+      const thCells = columns.map(col =>
+        `<th style="min-width:120px;padding:0.4rem 0.5rem;text-align:center;font-size:0.62rem;color:#9aa3be;text-transform:uppercase;white-space:nowrap;border-right:1px solid #2e3250">${col.stageName}</th>`
+      ).join('');
+      const hdStatusLabel = (v) => {
+        if (v === 'IN_PROGRESS') return ' ' + (currentLang === 'bg' ? 'В процес' : 'In Progress');
+        if (v === 'DONE')        return ' ' + (currentLang === 'bg' ? 'Завършен' : 'Done');
+        return '';
+      };
+      const tdCells = columns.map(col => {
+        const s = stages.find(x => x.stageOrder === col.stageOrder);
+        const status = s?.status || 'NOT_STARTED';
+        const isLocked = col.stageOrder !== 0 && !foundationDone;
+        const hasCrew = !!s?.crewId;
+        const pc = HD_PILL[status];
+        const leader = s?.leaderName || '';
+        const label = pc ? `${leader}${hdStatusLabel(status)}` : hasCrew ? (s?.crewName || leader || '—') : '—';
+        const pillStyle = isLocked
+          ? (hasCrew ? 'background:rgba(79,142,247,0.08);color:#5a6080;border:1px dashed #4060a0' : 'background:transparent;color:#3a4060;border:1px dashed #2a2f4a')
+          : pc ? `background:${pc.bg};color:${pc.text};border:none`
+               : 'background:transparent;color:var(--muted);border:1px dashed var(--border)';
+        return `<td style="padding:0.2rem 0.3rem;border-right:1px solid #1a1d27;min-width:120px">
+          <div title="${isLocked ? '' : label}" style="${pillStyle};border-radius:20px;padding:0.28rem 0.6rem;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            ${isLocked ? '🔒' : label}
+          </div>
+        </td>`;
+      }).join('');
+
+      const crewCards = Object.entries(assignedCrews).map(([crewId, { crewName, stages: crewStages }]) => {
+        const rawMembers = workersByCrewId[crewId] || [];
+        // Leader first, then rest alphabetically
+        const members = [
+          ...rawMembers.filter(w => w.role === 'CREW_LEADER'),
+          ...rawMembers.filter(w => w.role !== 'CREW_LEADER'),
+        ];
+        const stagesHtml = crewStages.map(s => {
+          const pillBg = s.status === 'ASSIGNED' ? '#fde68a' : s.status === 'IN_PROGRESS' ? '#fca5a5' : s.status === 'DONE' ? '#bbf7d0' : 'var(--surface)';
+          const pillTxt = s.status === 'ASSIGNED' ? '#78350f' : s.status === 'IN_PROGRESS' ? '#7f1d1d' : s.status === 'DONE' ? '#14532d' : 'var(--muted)';
+          return `<span style="background:${pillBg};color:${pillTxt};border-radius:20px;padding:0.15rem 0.55rem;font-size:0.68rem;font-weight:700;white-space:nowrap">${s.stageOrder}. ${s.stageName}</span>`;
+        }).join(' ');
+        const uid = `crew-workers-${crewId}`;
+        const memberList = members.length
+          ? members.map(w => {
+              const isLeader = w.role === 'CREW_LEADER';
+              return `<div style="padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;display:flex;align-items:center;gap:0.4rem">
+                ${isLeader ? '<span style="font-size:0.65rem;background:rgba(167,139,250,.2);color:#a78bfa;border-radius:4px;padding:0.1rem 0.35rem;font-weight:700">★</span>' : '<span style="width:1.1rem"></span>'}
+                <span style="font-weight:600">${w.name}</span>
+                <span style="color:var(--muted);font-size:0.72rem;margin-left:auto">${w.role === 'CREW_LEADER' ? 'Leader' : w.role === 'CREW_MEMBER' ? 'Member' : w.role || ''}</span>
+              </div>`;
+            }).join('')
+          : '<div style="color:var(--muted);font-size:0.85rem;padding:0.3rem 0">No workers</div>';
+        return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.65rem 0.85rem;align-self:start">
+          <div style="display:flex;flex-wrap:wrap;gap:0.25rem;margin-bottom:0.4rem">${stagesHtml}</div>
+          <div onclick="(function(el){const w=document.getElementById('${uid}');const open=w.style.display==='none';w.style.display=open?'':'none';el.querySelector('.crew-arrow').textContent=open?'▾':'▸';})(this)" style="cursor:pointer;display:flex;align-items:center;gap:0.4rem;user-select:none">
+            <span style="font-weight:700;color:#a78bfa;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">👥 ${crewName}</span>
+            <span class="crew-arrow" style="color:var(--muted);font-size:0.75rem;flex-shrink:0">▸</span>
+          </div>
+          <div id="${uid}" style="margin-top:0.4rem;display:none">${memberList}</div>
+        </div>`;
+      }).join('');
+
+      el.innerHTML = `
+        <div style="padding:0.75rem 1rem">
+          <button onclick="showView('${_houseDetailPrevView}')" style="background:rgba(79,142,247,.12);border:none;color:#4f8ef7;padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-weight:600;margin-bottom:1rem">← Back</button>
+
+          <!-- Info cards -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.6rem;margin-bottom:1.2rem">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">House</div>
+              <div style="font-size:1.05rem;font-weight:800">🏠 ${h.name}</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">Location</div>
+              <div style="font-weight:600;font-size:0.9rem">📍 ${h.location || '—'}</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">Start Date</div>
+              <div style="font-weight:600;font-size:0.9rem">${h.start_date ? '📅 ' + h.start_date : '—'}</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">Active Stage</div>
+              <div style="font-weight:600;font-size:0.9rem;color:var(--purple)">${h.current_phase || '—'}</div>
+            </div>
+          </div>
+
+          <!-- Stage matrix row -->
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">Stages</div>
+          ${columns.length ? `
+          <div style="overflow-x:auto;border-radius:10px;border:1px solid #2e3250;margin-bottom:1.2rem">
+            <table style="border-collapse:collapse;background:var(--card)">
+              <thead>
+                <tr style="background:#1a1d27;border-bottom:2px solid #2e3250">
+                  ${thCells}
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid #2e3250">
+                  ${tdCells}
+                </tr>
+              </tbody>
+            </table>
+          </div>` : '<div style="color:var(--muted);margin-bottom:1.2rem">No stages assigned.</div>'}
+
+          <!-- Crews & workers -->
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">Crews & Workers</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.6rem;align-items:start">
+            ${crewCards || '<div style="color:var(--muted)">No crews assigned.</div>'}
+          </div>
+        </div>`;
+    } catch(e) {
+      el.innerHTML = `<div class="state-msg">Error loading house details.</div>`;
     }
   }
 
@@ -3697,7 +3918,10 @@
               <span style="font-size:0.68rem;color:#9aa3be;text-transform:uppercase;font-weight:700;letter-spacing:0.05em">Crew</span>
               <span style="font-size:0.82rem;color:#3ecf6e;font-weight:600">👥 ${w.crewName}</span>
             </div>` : ''}
-            ${w.crewHouseName ? `<div style="display:flex;justify-content:space-between;align-items:center">
+            ${w.houses && w.houses.length > 0 ? `<div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <span style="font-size:0.68rem;color:#9aa3be;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;margin-top:0.2rem">Working On</span>
+              <span style="font-size:0.82rem;color:#4f8ef7;font-weight:600;text-align:right">${w.houses.map(h => '🏠 ' + h.houseName).join('<br>')}</span>
+            </div>` : w.crewHouseName ? `<div style="display:flex;justify-content:space-between;align-items:center">
               <span style="font-size:0.68rem;color:#9aa3be;text-transform:uppercase;font-weight:700;letter-spacing:0.05em">Working On</span>
               <span style="font-size:0.82rem;color:#4f8ef7;font-weight:600">🏠 ${w.crewHouseName}</span>
             </div>` : ''}
@@ -4154,6 +4378,7 @@
 
   function setDashMode(mode) {
     _dashMode = mode;
+    buildChipBar([]); // clear chip bar; render functions rebuild it if their mode uses chips
     const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa', orders:'#00c9b1', deliveries:'#f97316', dashWarehouses:'#38bdf8', dashSuppliers:'#fb7185', stages:'#e879f9' };
     const darkText   = new Set(['scaffold']);
     ['houses','workers','scaffold','crews','travelpay','orders','deliveries','dashWarehouses','dashSuppliers','stages'].forEach(m => {
@@ -4174,6 +4399,13 @@
       altSearch.innerHTML = '<span class="search-icon">🔍</span><input id="altSearchInput" type="text" placeholder="Search..." autocomplete="off" oninput="onAltSearch()" /><button class="search-clear" onclick="document.getElementById(\'altSearchInput\').value=\'\';onAltSearch()" title="Clear">✕</button>';
       const grid = document.getElementById('grid');
       grid.parentNode.insertBefore(altSearch, grid);
+      let chipBarWrap = document.getElementById('chipBarWrap');
+      if (!chipBarWrap) {
+        chipBarWrap = document.createElement('div');
+        chipBarWrap.id = 'chipBarWrap';
+        chipBarWrap.style.display = 'none';
+        grid.parentNode.insertBefore(chipBarWrap, grid);
+      }
     }
 
     const grid = document.getElementById('grid');
@@ -4185,31 +4417,29 @@
       if (searchWrap) searchWrap.style.display = '';
       if (crudBar)    crudBar.style.display    = '';
       if (totals)     totals.style.display     = '';
-      altSearch.style.display = 'none';
+      altSearch.style.display = '';
+      buildSearchBar('houses');
       renderHouses(dashHouses);
     } else if (mode === 'workers') {
       if (searchWrap) searchWrap.style.display = 'none';
       if (crudBar)    crudBar.style.display    = 'none';
       if (totals)     totals.style.display     = 'none';
       altSearch.style.display = '';
-      document.getElementById('altSearchInput').placeholder = t('workerSearchPlaceholder') || 'Search workers by name, crew or house...';
-      document.getElementById('altSearchInput').value = '';
+      buildSearchBar('workers');
       renderWorkerCards();
     } else if (mode === 'scaffold') {
       if (searchWrap) searchWrap.style.display = 'none';
       if (crudBar)    crudBar.style.display    = 'none';
       if (totals)     totals.style.display     = 'none';
       altSearch.style.display = '';
-      document.getElementById('altSearchInput').placeholder = t('scaffoldSearchPlaceholder') || 'Search by status or house...';
-      document.getElementById('altSearchInput').value = '';
+      buildSearchBar('scaffold');
       renderScaffoldCards();
     } else if (mode === 'crews') {
       if (searchWrap) searchWrap.style.display = 'none';
       if (crudBar)    crudBar.style.display    = 'none';
       if (totals)     totals.style.display     = 'none';
       altSearch.style.display = '';
-      document.getElementById('altSearchInput').placeholder = 'Search crews by name, manager or leader...';
-      document.getElementById('altSearchInput').value = '';
+      buildSearchBar('crews');
       renderCrewCards();
     } else if (mode === 'travelpay') {
       if (searchWrap) searchWrap.style.display = 'none';
@@ -4222,40 +4452,38 @@
       if (crudBar)    crudBar.style.display    = 'none';
       if (totals)     totals.style.display     = 'none';
       altSearch.style.display = '';
-      document.getElementById('altSearchInput').placeholder = 'Search orders by house, status or material...';
-      document.getElementById('altSearchInput').value = '';
+      buildSearchBar('orders');
       renderOrdersDash();
     } else if (mode === 'deliveries') {
       if (searchWrap) searchWrap.style.display = 'none';
       if (crudBar)    crudBar.style.display    = 'none';
       if (totals)     totals.style.display     = 'none';
       altSearch.style.display = '';
-      document.getElementById('altSearchInput').placeholder = 'Search deliveries by house, order or notes...';
-      document.getElementById('altSearchInput').value = '';
+      buildSearchBar('deliveries');
       renderDeliveriesDash();
     } else if (mode === 'dashWarehouses') {
       if (searchWrap) searchWrap.style.display = 'none';
       if (crudBar)    crudBar.style.display    = 'none';
       if (totals)     totals.style.display     = 'none';
       altSearch.style.display = '';
+      buildSearchBar(null);
       document.getElementById('altSearchInput').placeholder = 'Search warehouses by name or location...';
-      document.getElementById('altSearchInput').value = '';
       renderFacilityDash('warehouse');
     } else if (mode === 'dashSuppliers') {
       if (searchWrap) searchWrap.style.display = 'none';
       if (crudBar)    crudBar.style.display    = 'none';
       if (totals)     totals.style.display     = 'none';
       altSearch.style.display = '';
+      buildSearchBar(null);
       document.getElementById('altSearchInput').placeholder = 'Search suppliers by name or location...';
-      document.getElementById('altSearchInput').value = '';
       renderFacilityDash('supplier');
     } else if (mode === 'stages') {
       if (searchWrap) searchWrap.style.display = 'none';
       if (crudBar)    crudBar.style.display    = 'none';
       if (totals)     totals.style.display     = 'none';
       altSearch.style.display = '';
+      buildSearchBar(null);
       document.getElementById('altSearchInput').placeholder = t('stagesSearchPlaceholder') || 'Search stage by name...';
-      document.getElementById('altSearchInput').value = '';
       renderStagesDash();
     }
   }
@@ -4432,9 +4660,12 @@
         const currentCrew = crews.find(c => c.crewId == s.crewId);
         const currentLeader = s.workerName || currentCrew?.leaderName || '';
         const pc = s.status && s.status !== 'NOT_STARTED' ? PILL_COLOR[s.status] : null;
-        const pillLabel = pc ? `${currentLeader}${statusLabel(s.status)}` : '—';
+        const hasCrew = !!s.crewId;
+        const pillLabel = pc ? `${currentLeader}${statusLabel(s.status)}` : hasCrew ? (currentCrew?.crewName || currentLeader || '—') : '—';
         const pillStyle = isLocked
-          ? `background:transparent;color:#3a4060;border:1px dashed #2a2f4a;cursor:not-allowed`
+          ? hasCrew
+            ? `background:rgba(79,142,247,0.08);color:#5a6080;border:1px dashed #4060a0;cursor:not-allowed`
+            : `background:transparent;color:#3a4060;border:1px dashed #2a2f4a;cursor:not-allowed`
           : pc
             ? `background:${pc.bg};color:${pc.text};border:none;cursor:pointer`
             : `background:transparent;color:var(--muted);border:1px dashed var(--border);cursor:pointer`;
@@ -4459,8 +4690,13 @@
           </div>
         </td>`;
       }).join('');
-      return `<tr style="border-bottom:1px solid #2e3250">
-        <td style="padding:0.5rem 0.75rem;font-size:0.85rem;font-weight:600;white-space:nowrap;position:sticky;left:0;background:var(--card);z-index:1;border-right:2px solid #2e3250">${row.houseName}</td>
+      const allCrewNames = row.stages
+        .map(s => { const c = (crewsByStage[s.stageOrder]||[]).find(cr => cr.crewId == s.crewId); return c ? c.crewName : ''; })
+        .filter(Boolean).join(' ').toLowerCase();
+      return `<tr data-house="${row.houseName.toLowerCase()}" data-crews="${allCrewNames}" style="border-bottom:1px solid #2e3250">
+        <td style="padding:0.5rem 0.75rem;font-size:0.85rem;font-weight:600;white-space:nowrap;position:sticky;left:0;background:var(--card);z-index:1;border-right:2px solid #2e3250">
+          <span onclick="openHouseDetail(${row.houseId})" style="cursor:pointer;color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">${row.houseName}</span>
+        </td>
         ${cells}
       </tr>`;
     }).join('');
@@ -4478,10 +4714,16 @@
   }
 
   function filterMatrixRows(q) {
-    const term = q.trim().toLowerCase();
+    const houseTerm = q.trim().toLowerCase();
+    const crewTerm  = (document.getElementById('stageMatrixCrewSearch')?.value || '').trim().toLowerCase();
+    const hasCrew   = document.getElementById('stageMatrixHasCrew')?.checked;
     document.querySelectorAll('#stageMatrixWrap tbody tr').forEach(tr => {
-      const name = tr.querySelector('td')?.textContent.toLowerCase() || '';
-      tr.style.display = (!term || name.includes(term)) ? '' : 'none';
+      const house = (tr.dataset.house || tr.querySelector('td')?.textContent || '').toLowerCase();
+      const crews = (tr.dataset.crews || '').toLowerCase();
+      const houseOk = !houseTerm || house.includes(houseTerm);
+      const crewOk  = !crewTerm  || crews.includes(crewTerm);
+      const hasCrewOk = !hasCrew || crews.length > 0;
+      tr.style.display = (houseOk && crewOk && hasCrewOk) ? '' : 'none';
     });
   }
 
@@ -4692,14 +4934,19 @@
         CREW_LEADER:  { label: t('roleCrewLeader'),  icon: '🦺', color: '#f5a623' },
         CREW_MANAGER: { label: t('roleCrewManager'), icon: '👔', color: '#a78bfa' },
       }[w.role || 'CREW_MEMBER'];
-      return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+      const hasHouse = w.houses && w.houses.length > 0 ? '1' : '0';
+      const hasCrew  = w.crewId ? '1' : '0';
+      const wName    = (w.name||'').toLowerCase();
+      const wCrew    = (w.crewName||'').toLowerCase();
+      const wHouse   = (w.houses||[]).map(h => h.houseName).join(' ').toLowerCase();
+      return `<tr data-role="${w.role||'CREW_MEMBER'}" data-hashouse="${hasHouse}" data-hascrew="${hasCrew}" data-name="${wName}" data-crew="${wCrew}" data-house="${wHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
           <span style="margin-right:0.3rem">${roleCfg.icon}</span>${w.name}
         </td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${roleCfg.color};font-weight:700">${roleCfg.icon} ${roleCfg.label}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#a78bfa;font-weight:600">${w.crewStages ? '🔧 ' + w.crewStages : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewName ? '👥 ' + w.crewName : '<span style="color:var(--muted)">—</span>'}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.crewHouseName ? '🏠 ' + w.crewHouseName : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.houses && w.houses.length > 0 ? w.houses.map(h => '🏠 ' + h.houseName).join('<br>') : w.crewHouseName ? '🏠 ' + w.crewHouseName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.82rem;color:var(--muted)">${w.location || (w.lat && w.lng ? `${parseFloat(w.lat).toFixed(4)}, ${parseFloat(w.lng).toFixed(4)}` : '—')}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
           <div style="display:flex;gap:0.4rem">
@@ -4731,6 +4978,21 @@
           </table>
         </div>
       </div>`;
+    buildChipBar([
+      { key: 'role', label: 'Role', options: [
+        { value: 'CREW_LEADER',  label: '⭐ Leader'  },
+        { value: 'CREW_MEMBER',  label: '👷 Member'  },
+        { value: 'CREW_MANAGER', label: '👔 Manager' },
+      ]},
+      { key: 'hascrew', label: 'Crew', options: [
+        { value: '1', label: '✓ Has Crew' },
+        { value: '0', label: '✗ No Crew'  },
+      ]},
+      { key: 'hashouse', label: 'House', options: [
+        { value: '1', label: '✓ Has House' },
+        { value: '0', label: '✗ No House'  },
+      ]},
+    ]);
     onAltSearch();
   }
 
@@ -4755,7 +5017,7 @@
     }
     const rows = sList.map(s => {
       const c = statusCfg[s.status] || statusCfg.NONE;
-      return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+      return `<tr data-status="${s.status||'NONE'}" data-hashouse="${s.houseName ? '1' : '0'}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--muted)">#${s.id}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${c.color};font-weight:700">🏗️ ${c.label}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${s.houseName ? '🏠 ' + s.houseName : '<span style="color:var(--muted)">—</span>'}</td>
@@ -4790,6 +5052,18 @@
           </table>
         </div>
       </div>`;
+    buildChipBar([
+      { key: 'status', label: 'Status', options: [
+        { value: 'AVAILABLE', label: '✓ Available' },
+        { value: 'IN_USE',    label: '🏗 In Use'   },
+        { value: 'NONE',      label: '— None'      },
+      ]},
+      { key: 'hashouse', label: 'House', options: [
+        { value: '1', label: '✓ Assigned' },
+        { value: '0', label: '✗ Free'     },
+      ]},
+    ]);
+    onAltSearch();
   }
 
   async function renderCrewCards() {
@@ -4824,7 +5098,12 @@
       const housesHtml = c.assignedHouses && c.assignedHouses.length
         ? c.assignedHouses.map(h => `<div style="font-size:0.8rem;color:#4f8ef7;font-weight:600">🏠 ${h.name}</div>`).join('')
         : `<span style="color:var(--muted);font-size:0.8rem">—</span>`;
-      return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+      const crewHasHouse = c.assignedHouses && c.assignedHouses.length ? '1' : '0';
+      const crewHasMembers = members.length ? '1' : '0';
+      const cName  = (c.name||'').toLowerCase();
+      const cStage = (c.stageNames||'').toLowerCase();
+      const cHouse = (c.assignedHouses||[]).map(h => h.name).join(' ').toLowerCase();
+      return `<tr data-hashouse="${crewHasHouse}" data-hasmembers="${crewHasMembers}" data-name="${cName}" data-stage="${cStage}" data-house="${cHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
           <span style="color:#a78bfa;margin-right:0.3rem">👥</span>${c.name}
           <span style="font-size:0.7rem;color:var(--muted);margin-left:0.3rem">#${c.id}</span>
@@ -4865,6 +5144,17 @@
           </table>
         </div>
       </div>`;
+    buildChipBar([
+      { key: 'hashouse', label: 'House', options: [
+        { value: '1', label: '✓ Has House' },
+        { value: '0', label: '✗ No House'  },
+      ]},
+      { key: 'hasmembers', label: 'Members', options: [
+        { value: '1', label: '✓ Has Members' },
+        { value: '0', label: '✗ Empty'       },
+      ]},
+    ]);
+    onAltSearch();
   }
 
   function toggleCrewMembers(btn) {
@@ -5247,7 +5537,8 @@
                 return `${i.materialName}: ${delStr}${i.quantity} ${i.unit}`;
               }).join(', ');
               const date = new Date(o.createdAt).toLocaleDateString();
-              return `<tr style="cursor:pointer" onclick="toggleOrderDeliveries(${o.id}, this)">
+              const oMaterial = o.items.map(i => i.materialName).join(' ').toLowerCase();
+              return `<tr data-status="${o.status||'PENDING'}" data-house="${(o.houseName||'').toLowerCase()}" data-material="${oMaterial}" style="cursor:pointer" onclick="toggleOrderDeliveries(${o.id}, this)">
                 <td style="color:var(--text);text-align:center;font-size:0.75rem" id="order-toggle-${o.id}">▶</td>
                 <td style="color:var(--text)">${o.id}</td>
                 <td style="font-weight:600;color:#4f8ef7">🏠 ${o.houseName}</td>
@@ -5271,6 +5562,15 @@
           </tbody>
         </table>
       </div>`;
+    buildChipBar([
+      { key: 'status', label: 'Status', options: [
+        { value: 'PENDING',    label: '⏳ Pending'    },
+        { value: 'APPROVED',   label: '✓ Approved'   },
+        { value: 'ORDERED',    label: '📦 Ordered'   },
+        { value: 'IN_TRANSIT', label: '🚚 In Transit' },
+        { value: 'DELIVERED',  label: '✅ Delivered'  },
+      ]},
+    ]);
     onAltSearch();
   }
 
@@ -5625,14 +5925,145 @@
   }
   // ── End Orders & Deliveries Dashboard ────────────────────────────────────────
 
+  // ── Multi-field search bar ───────────────────────────────────────────────────
+  const _sfConfigs = {
+    workers:    [{ key:'name', label:'Name' }, { key:'crew', label:'Crew' }, { key:'house', label:'House' }],
+    crews:      [{ key:'name', label:'Name' }, { key:'stage', label:'Stage' }, { key:'house', label:'House' }],
+    scaffold:   [{ key:'house', label:'House' }],
+    orders:     [{ key:'house', label:'House' }, { key:'material', label:'Material' }],
+    deliveries: [{ key:'house', label:'House' }],
+    houses:     [],
+  };
+
+  function buildSearchBar(mode) {
+    const wrap = document.getElementById('altSearchWrap');
+    if (!wrap) return;
+    const fields = _sfConfigs[mode];
+    if (fields === undefined) {
+      wrap.className = 'search-wrap';
+      wrap.style.cssText = 'margin-bottom:1rem;max-width:420px';
+      wrap.innerHTML = '<span class="search-icon">🔍</span><input id="altSearchInput" type="text" placeholder="Search..." autocomplete="off" oninput="onAltSearch()"><button class="search-clear" onclick="clearSearchBar()" title="Clear">✕</button>';
+      return;
+    }
+    if (!fields.length) {
+      wrap.className = '';
+      wrap.style.cssText = 'margin-bottom:0.5rem';
+      wrap.innerHTML = '';
+      return;
+    }
+    wrap.className = '';
+    wrap.style.cssText = 'display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem';
+    wrap.innerHTML =
+      `<span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;flex-shrink:0;border-right:1px solid var(--border)">🔍</span>` +
+      fields.map((f, i) =>
+        `<div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;flex:1;min-width:0;${i < fields.length-1 ? 'border-right:1px solid var(--border);' : ''}">` +
+        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${f.label}</span>` +
+        `<input class="sf-field" data-field="${f.key}" type="text" autocomplete="off" oninput="onAltSearch()" ` +
+        `style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.65rem 0;min-width:50px"></div>`
+      ).join('') +
+      `<button onclick="clearSearchBar()" title="Clear" style="flex-shrink:0;border:none;background:none;color:var(--muted);font-size:0.78rem;cursor:pointer;border-left:1px solid var(--border);padding:0 0.65rem">✕</button>`;
+  }
+
+  function clearSearchBar() {
+    document.querySelectorAll('.sf-field, #altSearchInput').forEach(el => el.value = '');
+    chipBarClear();
+  }
+  // ── End multi-field search bar ────────────────────────────────────────────────
+
+  // ── Chip filter system ───────────────────────────────────────────────────────
+  let _chipFilters = {};
+
+  function buildChipBar(groups) {
+    _chipFilters = {};
+    const wrap = document.getElementById('chipBarWrap');
+    if (!wrap) return;
+    if (!groups || !groups.length) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+    const cs = 'background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:0.18rem 0.6rem;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1.5';
+    let html = '<div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.45rem 0.75rem;background:var(--surface);border-radius:10px;margin-bottom:0.75rem">';
+    groups.forEach((g, gi) => {
+      if (gi > 0) html += '<div style="width:1px;height:16px;background:var(--border);flex-shrink:0;align-self:center"></div>';
+      html += `<div style="display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap"><span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${g.label}</span>`;
+      g.options.forEach(o => {
+        html += `<button class="chip-btn" data-group="${g.key}" data-value="${o.value}" onclick="chipToggle('${g.key}','${o.value}',this)" style="${cs}">${o.label}</button>`;
+      });
+      html += '</div>';
+    });
+    html += '<button onclick="chipBarClear()" id="chipClearBtn" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;white-space:nowrap;display:none">✕ Clear filters</button></div>';
+    wrap.innerHTML = html;
+    wrap.style.display = '';
+  }
+
+  function chipToggle(group, value, btn) {
+    if (!_chipFilters[group]) _chipFilters[group] = new Set();
+    const s = _chipFilters[group];
+    if (s.has(value)) {
+      s.delete(value);
+      btn.style.background = 'transparent';
+      btn.style.color = 'var(--muted)';
+      btn.style.borderColor = 'var(--border)';
+    } else {
+      s.add(value);
+      btn.style.background = 'var(--accent)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'var(--accent)';
+    }
+    if (!s.size) delete _chipFilters[group];
+    const cb = document.getElementById('chipClearBtn');
+    if (cb) cb.style.display = Object.keys(_chipFilters).length ? '' : 'none';
+    onAltSearch();
+  }
+
+  function chipBarClear() {
+    _chipFilters = {};
+    document.querySelectorAll('.chip-btn').forEach(btn => {
+      btn.style.background = 'transparent';
+      btn.style.color = 'var(--muted)';
+      btn.style.borderColor = 'var(--border)';
+    });
+    const cb = document.getElementById('chipClearBtn');
+    if (cb) cb.style.display = 'none';
+    onAltSearch();
+    waChipBarClear();
+  }
+
+  function chipRowMatch(row) {
+    const keys = Object.keys(_chipFilters);
+    if (!keys.length) return true;
+    for (const group of keys) {
+      const vals = _chipFilters[group];
+      if (!vals || !vals.size) continue;
+      const rowAttr = row.dataset[group] || '';
+      const rowVals = rowAttr.split('|').filter(Boolean);
+      if (![...vals].some(v => rowVals.includes(v))) return false;
+    }
+    return true;
+  }
+  // ── End chip filter system ───────────────────────────────────────────────────
+
   function onAltSearch() {
-    const q = (document.getElementById('altSearchInput')?.value || '').toLowerCase();
-    if (_dashMode === 'orders' || _dashMode === 'deliveries' || _dashMode === 'crews' || _dashMode === 'workers' || _dashMode === 'scaffold') {
+    const sfFields = [...document.querySelectorAll('.sf-field')];
+    const singleInput = document.getElementById('altSearchInput');
+    const tableModes = ['orders', 'deliveries', 'crews', 'workers', 'scaffold', 'houses'];
+    if (tableModes.includes(_dashMode)) {
       document.querySelectorAll('#grid table tbody tr').forEach(row => {
         if (row.id && row.id.startsWith('order-deliveries-row-')) return;
-        row.style.display = (!q || row.textContent.toLowerCase().includes(q)) ? '' : 'none';
+        let visible = true;
+        if (sfFields.length) {
+          for (const f of sfFields) {
+            const q = f.value.trim().toLowerCase();
+            if (!q) continue;
+            const attr = row.dataset[f.dataset.field];
+            const haystack = attr !== undefined ? attr : row.textContent.toLowerCase();
+            if (!haystack.toLowerCase().includes(q)) { visible = false; break; }
+          }
+        } else if (singleInput?.value) {
+          if (!row.textContent.toLowerCase().includes(singleInput.value.toLowerCase())) visible = false;
+        }
+        if (visible) visible = chipRowMatch(row);
+        row.style.display = visible ? '' : 'none';
       });
     } else {
+      const q = singleInput?.value?.toLowerCase() || '';
       document.querySelectorAll('#grid .house-card').forEach(card => {
         const search = card.dataset.search || card.textContent.toLowerCase();
         card.style.display = (!q || search.includes(q)) ? '' : 'none';
@@ -6645,16 +7076,15 @@
       const crewsHtml = h.crews && h.crews.length
         ? h.crews.map(c => `<div style="font-size:0.78rem;color:#a78bfa;font-weight:600">👥 ${c.name}</div>`).join('')
         : '<span style="color:var(--muted)">—</span>';
-      return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+      return `<tr data-name="${(h.name||'').toLowerCase()}" data-location="${(h.location||'').toLowerCase()}" data-scaffold="${h.scaffold_status||'NONE'}" data-hascrew="${h.crews&&h.crews.length?'1':'0'}" data-hasphase="${h.current_phase?'1':'0'}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
-          🏠 ${h.name}
+          <span onclick="openHouseDetail(${h.id})" style="cursor:pointer;color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">🏠 ${h.name}</span>
           <span style="font-size:0.7rem;color:var(--muted);margin-left:0.3rem">#${h.id}</span>
         </td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.location}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${h.start_date ? '📅 ' + h.start_date : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem">${stageHtml}</td>
         <td style="padding:0.7rem 1rem">${crewsHtml}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${sc.color};font-weight:700">🏗️ ${sc.label}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.location}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${h.start_date ? '📅 ' + h.start_date : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap;position:relative" class="admin-only">${actionsHtml}</td>
       </tr>`;
     }).join('');
@@ -6665,11 +7095,10 @@
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
                 <th data-i18n="colHouse" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
-                <th data-i18n="colLocation" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
-                <th data-i18n="colStartDate" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStartDate')}</th>
                 <th data-i18n="colStage" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
                 <th data-i18n="colCrews" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrews')}</th>
-                <th data-i18n="colScaffold" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colScaffold')}</th>
+                <th data-i18n="colLocation" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
+                <th data-i18n="colStartDate" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStartDate')}</th>
                 <th data-i18n="colActions" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
               </tr>
             </thead>
@@ -6677,6 +7106,31 @@
           </table>
         </div>
       </div>`;
+    buildChipBar([
+      { key: 'hascrew', label: 'Crew', options: [
+        { value: '1', label: '✓ Has Crew' },
+        { value: '0', label: '✗ No Crew'  },
+      ]},
+      { key: 'hasphase', label: 'Phase', options: [
+        { value: '1', label: '✓ Active Phase' },
+        { value: '0', label: '✗ No Phase'     },
+      ]},
+    ]);
+    // add Name + Location text search inputs for houses
+    const altSearchWrap = document.getElementById('altSearchWrap');
+    if (altSearchWrap && !altSearchWrap.querySelector('.sf-field')) {
+      altSearchWrap.style.cssText = 'display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem';
+      altSearchWrap.innerHTML =
+        `<span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;flex-shrink:0;border-right:1px solid var(--border)">🔍</span>` +
+        `<div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;flex:1;min-width:0;border-right:1px solid var(--border)">` +
+        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">Name</span>` +
+        `<input class="sf-field" data-field="name" type="text" autocomplete="off" oninput="onAltSearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.65rem 0;min-width:50px"></div>` +
+        `<div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;flex:1;min-width:0">` +
+        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">Location</span>` +
+        `<input class="sf-field" data-field="location" type="text" autocomplete="off" oninput="onAltSearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.65rem 0;min-width:50px"></div>` +
+        `<button onclick="clearSearchBar()" title="Clear" style="flex-shrink:0;border:none;background:none;color:var(--muted);font-size:0.78rem;cursor:pointer;border-left:1px solid var(--border);padding:0 0.65rem">✕</button>`;
+    }
+    onAltSearch();
   }
 
   // ── ORDER FORM ───────────────────────────────────────────────────────────────
@@ -8227,6 +8681,302 @@
     link.click();
   }
 
+  // ── WORKER ACCESS ────────────────────────────────────────────────────────────
+  async function waInit() {
+    document.getElementById('waLoading').style.display = '';
+    document.getElementById('waContent').style.display = 'none';
+    try {
+      const groups = await apiFetch('/api/workers/credentials').then(r => r.json());
+      waRender(groups);
+    } catch(e) {
+      document.getElementById('waLoading').textContent = '⚠ ' + e.message;
+    }
+  }
+
+  let _waGroups = [];
+  let _waVisibleGroups = [];
+
+  function waRender(groups) {
+    _waGroups = groups;
+    const content = document.getElementById('waContent');
+    content.innerHTML = '';
+    content.style.paddingTop = '1.5rem';
+
+    // Top bar: search + export all
+    const topBar = document.createElement('div');
+    topBar.style.cssText = 'display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap';
+    topBar.innerHTML = `
+      <input id="waSearch" type="text" placeholder="Search by name, crew or stage…"
+        oninput="waApplySearch()"
+        style="flex:1;min-width:200px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;padding:0.55rem 0.85rem;outline:none">
+      <button onclick="waExportAll()"
+        style="background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.5rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap">⬇ Export All PDF</button>`;
+    content.appendChild(topBar);
+
+    // Chip bar
+    const chipBar = document.createElement('div');
+    chipBar.id = 'waChipBar';
+    content.appendChild(chipBar);
+    waBuildChipBar();
+
+    // Groups container
+    const groupsDiv = document.createElement('div');
+    groupsDiv.id = 'waGroups';
+    content.appendChild(groupsDiv);
+
+    waRenderGroups(groups);
+
+    document.getElementById('waLoading').style.display = 'none';
+    content.style.display = '';
+  }
+
+  function waRenderGroups(groups) {
+    _waVisibleGroups = groups;
+    const groupsDiv = document.getElementById('waGroups');
+    groupsDiv.innerHTML = '';
+
+    let anyVisible = false;
+    groups.forEach(group => {
+      if (!group.members || group.members.length === 0) return;
+
+      const section = document.createElement('div');
+      section.className = 'wa-section';
+      section.style.cssText = 'margin-bottom:1.5rem';
+
+      const stageTag = group.stageName ? ` <span style="font-size:0.72rem;font-weight:400;color:var(--accent);margin-left:0.5rem">${group.stageName}</span>` : '';
+      const heading = document.createElement('div');
+      heading.style.cssText = 'font-size:0.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.5rem;padding:0 0.25rem;display:flex;align-items:center';
+      heading.innerHTML = `<span>👥 ${group.crewName}</span>${stageTag}`;
+      section.appendChild(heading);
+
+      const table = document.createElement('table');
+      table.style.cssText = 'width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden';
+      table.innerHTML = `<thead><tr style="border-bottom:1px solid var(--border)">
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Name</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Role</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Houses</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Username</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Password</th>
+        <th style="padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600;text-align:right">Actions</th>
+      </tr></thead>`;
+      const tbody = document.createElement('tbody');
+
+      group.members.forEach((m, i) => {
+        const tr = document.createElement('tr');
+        tr.id = `wa-row-${m.id}`;
+        tr.style.cssText = `border-bottom:${i < group.members.length-1 ? '1px solid var(--border)' : 'none'}`;
+        const roleLabel = m.role === 'CREW_LEADER' ? '⭐ Leader' : m.role === 'CREW_MANAGER' ? '🏢 Manager' : 'Member';
+        const btnStyle = 'background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.25rem 0.55rem;font-size:0.75rem;cursor:pointer';
+        const housesHtml = m.houses && m.houses.length
+          ? m.houses.map(h => `<div style="font-size:0.78rem;color:#4f8ef7;font-weight:600;white-space:nowrap">🏠 ${h.houseName}</div>`).join('')
+          : `<span style="color:var(--muted);font-size:0.78rem">—</span>`;
+        tr.innerHTML = `
+          <td style="padding:0.55rem 0.75rem;font-size:0.85rem;font-weight:600">${m.name}</td>
+          <td style="padding:0.55rem 0.75rem;font-size:0.78rem;color:var(--muted)">${roleLabel}</td>
+          <td style="padding:0.55rem 0.75rem">${housesHtml}</td>
+          <td style="padding:0.55rem 0.75rem;font-size:0.85rem;color:${m.username ? 'var(--text)' : 'var(--muted)'}">${m.username || '—'}</td>
+          <td style="padding:0.55rem 0.75rem;font-size:0.85rem">
+            <span id="wp-${m.id}" style="color:${m.hasPassword ? 'var(--green)' : 'var(--muted)'}">${m.hasPassword ? '••••' : '—'}</span>
+            ${m.passwordPlain ? `<span onclick="(function(el,p){el.textContent===p?el.textContent='••••':el.textContent=p})(document.getElementById('wp-${m.id}'),'${m.passwordPlain}')" style="cursor:pointer;margin-left:6px;opacity:0.5;font-size:0.8rem">👁</span>` : ''}
+          </td>
+          <td style="padding:0.55rem 0.75rem;text-align:right;white-space:nowrap;display:flex;gap:0.4rem;justify-content:flex-end">
+            <button onclick="waOpenReset(${m.id},'${m.name.replace(/'/g,"\\'")}','${m.username||''}')" style="${btnStyle}">🔑 Reset</button>
+            <button onclick="waExportWorker(${m.id},'${m.name.replace(/'/g,"\\'")}','${m.username||''}','${group.crewName.replace(/'/g,"\\'")}','${(group.stageName||'').replace(/'/g,"\\'")}','${roleLabel}','${(m.passwordPlain||'').replace(/'/g,"\\'")}')" style="${btnStyle}">⬇ PDF</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+      section.appendChild(table);
+      groupsDiv.appendChild(section);
+      anyVisible = true;
+    });
+
+    if (!anyVisible) {
+      groupsDiv.innerHTML = '<div style="color:var(--muted);padding:1.5rem;text-align:center">No results found.</div>';
+    }
+  }
+
+  // ── Worker Access chip filters ────────────────────────────────────────────────
+  let _waChipFilters = {};
+
+  function waBuildChipBar() {
+    _waChipFilters = {};
+    const wrap = document.getElementById('waChipBar');
+    if (!wrap) return;
+    const cs = 'background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:0.18rem 0.6rem;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1.5';
+    wrap.innerHTML = `<div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.45rem 0.75rem;background:var(--surface);border-radius:10px;margin-bottom:1rem">
+      <span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Role</span>
+      <button class="wa-chip" data-group="role" data-value="CREW_LEADER"  onclick="waChipToggle('role','CREW_LEADER',this)"  style="${cs}">⭐ Leader</button>
+      <button class="wa-chip" data-group="role" data-value="CREW_MEMBER"  onclick="waChipToggle('role','CREW_MEMBER',this)"  style="${cs}">👷 Member</button>
+      <button class="wa-chip" data-group="role" data-value="CREW_MANAGER" onclick="waChipToggle('role','CREW_MANAGER',this)" style="${cs}">👔 Manager</button>
+      <div style="width:1px;height:16px;background:var(--border);flex-shrink:0;align-self:center"></div>
+      <span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Password</span>
+      <button class="wa-chip" data-group="haspw" data-value="1" onclick="waChipToggle('haspw','1',this)" style="${cs}">✓ Has Password</button>
+      <button class="wa-chip" data-group="haspw" data-value="0" onclick="waChipToggle('haspw','0',this)" style="${cs}">✗ No Password</button>
+      <button onclick="waChipBarClear()" id="waChipClearBtn" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;white-space:nowrap;display:none">✕ Clear</button>
+    </div>`;
+    wrap.style.display = '';
+  }
+
+  function waChipToggle(group, value, btn) {
+    if (!_waChipFilters[group]) _waChipFilters[group] = new Set();
+    const s = _waChipFilters[group];
+    if (s.has(value)) {
+      s.delete(value);
+      btn.style.background = 'transparent'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'var(--border)';
+    } else {
+      s.add(value);
+      btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--accent)';
+    }
+    if (!s.size) delete _waChipFilters[group];
+    const cb = document.getElementById('waChipClearBtn');
+    if (cb) cb.style.display = Object.keys(_waChipFilters).length ? '' : 'none';
+    waApplySearch();
+  }
+
+  function waChipBarClear() {
+    _waChipFilters = {};
+    document.querySelectorAll('.wa-chip').forEach(btn => {
+      btn.style.background = 'transparent'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'var(--border)';
+    });
+    const cb = document.getElementById('waChipClearBtn');
+    if (cb) cb.style.display = 'none';
+    waApplySearch();
+  }
+
+  function waChipMemberMatch(m) {
+    const keys = Object.keys(_waChipFilters);
+    if (!keys.length) return true;
+    for (const group of keys) {
+      const vals = _waChipFilters[group];
+      if (!vals || !vals.size) continue;
+      let rowVal;
+      if (group === 'role') rowVal = m.role || '';
+      else if (group === 'haspw') rowVal = m.hasPassword ? '1' : '0';
+      else rowVal = '';
+      if (![...vals].includes(rowVal)) return false;
+    }
+    return true;
+  }
+  // ── End Worker Access chip filters ────────────────────────────────────────────
+
+  function waApplySearch() {
+    const q = document.getElementById('waSearch')?.value.toLowerCase().trim() || '';
+    const filtered = _waGroups.map(g => {
+      const crewMatch  = g.crewName.toLowerCase().includes(q);
+      const stageMatch = (g.stageName || '').toLowerCase().includes(q);
+      const textMembers = (crewMatch || stageMatch || !q)
+        ? g.members
+        : g.members.filter(m => m.name.toLowerCase().includes(q) || (m.username||'').toLowerCase().includes(q));
+      return { ...g, members: textMembers.filter(m => waChipMemberMatch(m)) };
+    }).filter(g => g.members.length > 0);
+    waRenderGroups(filtered);
+  }
+
+  function waPrintHtml(html, title) {
+    const w = window.open('', '_blank', 'width=800,height=600');
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
+    <style>
+      body{font-family:Arial,sans-serif;font-size:12px;color:#111;margin:2rem}
+      h1{font-size:18px;margin-bottom:0.25rem}
+      .sub{font-size:11px;color:#666;margin-bottom:1.5rem}
+      table{width:100%;border-collapse:collapse;margin-top:1rem}
+      th{background:#4f8ef7;color:#fff;text-align:left;padding:6px 10px;font-size:11px}
+      td{padding:6px 10px;border-bottom:1px solid #ddd;font-size:12px}
+      tr:last-child td{border-bottom:none}
+      .card{border:1px solid #ccc;border-radius:8px;padding:1.2rem;max-width:380px}
+      .row{display:flex;gap:1rem;margin-bottom:0.6rem}
+      .label{font-weight:700;width:90px;flex-shrink:0;color:#555}
+      @media print{body{margin:1rem}}
+    </style></head><body>${html}
+    <script>window.onload=function(){window.print();}<\/script></body></html>`);
+    w.document.close();
+  }
+
+  function waExportWorker(workerId, workerName, username, crewName, stageName, role, passwordPlain) {
+    const rows = [
+      ['Име', workerName],
+      ['Потребител', username || '—'],
+      ['Роля', role],
+      ['Екип', crewName],
+      ['Етап', stageName || '—'],
+      ['Парола', passwordPlain || '—'],
+    ];
+    const rowsHtml = rows.map(([l,v]) => `<tr><td style="font-weight:700;color:#555;padding:7px 12px;white-space:nowrap;border-bottom:1px solid #eee">${l}</td><td style="padding:7px 12px;border-bottom:1px solid #eee">${v}</td></tr>`).join('');
+    waPrintHtml(`
+      <h1 style="font-size:20px;margin-bottom:4px">Worker Access Card</h1>
+      <p style="color:#888;font-size:12px;margin-bottom:20px">TEDHOUSE &middot; ${new Date().toLocaleDateString()}</p>
+      <table style="border-collapse:collapse;border:1px solid #ccc;border-radius:8px;overflow:hidden;min-width:320px">
+        <tbody>${rowsHtml}</tbody>
+      </table>`, 'Access Card – ' + workerName);
+  }
+
+  function waExportAll() {
+    const rows = [];
+    _waVisibleGroups.forEach(g => {
+      g.members.forEach(m => {
+        const role = m.role === 'CREW_LEADER' ? 'Лидер' : m.role === 'CREW_MANAGER' ? 'Мениджър' : 'Член';
+        rows.push(`<tr><td>${m.name}</td><td>${m.username||'—'}</td><td>${role}</td><td>${g.crewName}</td><td>${g.stageName||'—'}</td><td>${m.passwordPlain||'—'}</td></tr>`);
+      });
+    });
+    waPrintHtml(`
+      <h1>Списък достъп / Worker Access List</h1>
+      <div class="sub">TEDHOUSE · ${new Date().toLocaleDateString()}</div>
+      <table>
+        <thead><tr><th>Име</th><th>Потребител</th><th>Роля</th><th>Екип</th><th>Етап</th><th>Парола</th></tr></thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>`, 'Worker Access List');
+  }
+
+  function waOpenReset(workerId, workerName, currentUsername) {
+    document.getElementById('waEditOverlay')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'waEditOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:1rem';
+    overlay.innerHTML = `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:100%;max-width:360px;position:relative">
+        <button onclick="document.getElementById('waEditOverlay').remove()"
+          style="position:absolute;top:0.75rem;right:0.75rem;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer">✕</button>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:0.25rem">🔑 Reset Password</div>
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem">${workerName} · <span style="color:var(--accent)">${currentUsername || '—'}</span></div>
+        <label style="display:block;font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem">New Password</label>
+        <input id="waPassword" type="text" autocomplete="off"
+          style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:1.1rem;padding:0.6rem 0.75rem;outline:none;margin-bottom:1.1rem;letter-spacing:0.05em"
+          placeholder="e.g. 1234">
+        <div id="waEditMsg" style="display:none;margin-bottom:0.75rem;font-size:0.83rem;padding:0.5rem 0.75rem;border-radius:7px"></div>
+        <button onclick="waSaveReset(${workerId})"
+          style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:0.75rem;font-size:0.95rem;font-weight:700;cursor:pointer">Reset Password</button>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    document.getElementById('waPassword').focus();
+  }
+
+  async function waSaveReset(workerId) {
+    const password = document.getElementById('waPassword').value.trim();
+    const msg = document.getElementById('waEditMsg');
+
+    const showMsg = (text, ok) => {
+      msg.textContent = text;
+      msg.style.cssText = `display:block;font-size:0.83rem;padding:0.5rem 0.75rem;border-radius:7px;margin-bottom:0.75rem;background:${ok ? 'rgba(62,207,110,.12)' : 'rgba(247,111,111,.12)'};color:${ok ? 'var(--green)' : 'var(--red)'};border:1px solid ${ok ? 'rgba(62,207,110,.3)' : 'rgba(247,111,111,.3)'}`;
+    };
+
+    if (!password) { showMsg('⚠ Enter a new password.', false); return; }
+
+    try {
+      const res = await apiFetch(`/api/workers/${workerId}/password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (!res.ok) { showMsg('⚠ ' + (data.error || 'Error'), false); return; }
+      showMsg('✅ Password reset!', true);
+      setTimeout(() => { document.getElementById('waEditOverlay')?.remove(); waInit(); }, 800);
+    } catch(e) { showMsg('⚠ ' + e.message, false); }
+  }
+
   // ── ATTENDANCE ───────────────────────────────────────────────────────────────
   // ── Searchable select helper ─────────────────────────────────────────────────
   function ssSetup(inpId, dropId, hiddenId, items, onChange) {
@@ -8402,95 +9152,89 @@
     } catch(e) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${e.message}</p>`; }
   }
 
+  function attPrintHtml(html) {
+    const w = window.open('', '_blank', 'width=900,height=700');
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>TEDHOUSE Attendance</title>
+    <style>
+      body{font-family:Arial,sans-serif;font-size:12px;color:#111;margin:2rem}
+      h2{font-size:18px;color:#1e3264;margin-bottom:4px}
+      .meta{font-size:11px;color:#555;margin-bottom:1rem;line-height:1.7}
+      hr{border:none;border-top:1px solid #ccc;margin-bottom:1rem}
+      table{width:100%;border-collapse:collapse;margin-bottom:1.5rem}
+      th{background:#1e3264;color:#fff;text-align:left;padding:7px 10px;font-size:11px}
+      td{padding:6px 10px;border-bottom:1px solid #e0e0e0;font-size:12px}
+      tr:nth-child(even) td{background:#f5f7fc}
+      .total-row td{background:#e6ebf5;color:#1e3264;font-weight:700}
+      .date-header td{background:#3252a0;color:#fff;font-weight:700}
+      @media print{body{margin:1rem}}
+    </style></head><body>${html}
+    <script>window.onload=function(){window.print();}<\/script></body></html>`);
+    w.document.close();
+  }
+
   function attExportCrewPdf() {
     if (!_attCrewLastData) return;
     const { crewName, date, list } = _attCrewLastData;
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-    // Header
-    doc.setFontSize(18); doc.setTextColor(40, 60, 120);
-    doc.text('TEDHOUSE — Attendance Report', 14, 18);
-    doc.setFontSize(11); doc.setTextColor(80, 80, 80);
-    doc.text(`Crew: ${crewName}`, 14, 27);
-    doc.text(`Date: ${date}`, 14, 33);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 39);
-    doc.setDrawColor(200, 200, 200); doc.line(14, 43, 196, 43);
-
-    // Table
     const totalMins = list.reduce((s, r) => s + (r.durationMinutes || 0), 0);
-    doc.autoTable({
-      startY: 47,
-      head: [['Worker', 'Check In', 'Check Out', 'Duration', 'Status']],
-      body: list.map(s => [
-        s.workerName,
-        attFmtTime(s.checkedInAt),
-        s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—',
-        s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—',
-        s.checkedOutAt ? 'Done' : 'Working'
-      ]),
-      foot: [['', '', 'Total', attFmtDur(totalMins), '']],
-      styles: { fontSize: 10, cellPadding: 3 },
-      headStyles: { fillColor: [30, 50, 100], textColor: 255, fontStyle: 'bold' },
-      footStyles: { fillColor: [230, 235, 245], textColor: [40, 60, 120], fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: [245, 247, 252] },
-    });
-
-    doc.save(`attendance-crew-${crewName.replace(/\s+/g,'-')}-${date}.pdf`);
+    const rows = list.map(s => `<tr>
+      <td>${s.workerName}</td>
+      <td>${attFmtTime(s.checkedInAt)}</td>
+      <td>${s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—'}</td>
+      <td>${s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'}</td>
+      <td>${s.checkedOutAt ? 'Завършен' : 'Работи'}</td>
+    </tr>`).join('');
+    attPrintHtml(`
+      <h2>TEDHOUSE — Отчет присъствие</h2>
+      <div class="meta">
+        Екип: <b>${crewName}</b><br>
+        Дата: <b>${date}</b><br>
+        Генериран: ${new Date().toLocaleString()}
+      </div>
+      <hr>
+      <table>
+        <thead><tr><th>Работник</th><th>Вход</th><th>Изход</th><th>Продължителност</th><th>Статус</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr class="total-row"><td></td><td></td><td>Общо</td><td>${attFmtDur(totalMins)}</td><td></td></tr></tfoot>
+      </table>`);
   }
 
   function attExportWorkerPdf() {
     if (!_attWorkerLastData) return;
     const { workerName, from, to, list } = _attWorkerLastData;
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-    // Header
-    doc.setFontSize(18); doc.setTextColor(40, 60, 120);
-    doc.text('TEDHOUSE — Attendance Report', 14, 18);
-    doc.setFontSize(11); doc.setTextColor(80, 80, 80);
-    doc.text(`Worker: ${workerName}`, 14, 27);
-    doc.text(`Period: ${from}${from !== to ? ' → ' + to : ''}`, 14, 33);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 39);
-    doc.setDrawColor(200, 200, 200); doc.line(14, 43, 196, 43);
-
-    // Group by date and render one table per date
+    const totalMins = list.reduce((s, r) => s + (r.durationMinutes || 0), 0);
     const byDate = {};
     list.forEach(s => {
       const d = s.checkedInAt.slice(0,10);
       if (!byDate[d]) byDate[d] = [];
       byDate[d].push(s);
     });
-
-    let y = 47;
-    const totalMins = list.reduce((s, r) => s + (r.durationMinutes || 0), 0);
-    Object.keys(byDate).sort().reverse().forEach(d => {
+    const tables = Object.keys(byDate).sort().reverse().map(d => {
       const rows = byDate[d];
       const dayMins = rows.reduce((s, r) => s + (r.durationMinutes || 0), 0);
-      doc.autoTable({
-        startY: y,
-        head: [[{ content: d, colSpan: 4, styles: { fillColor: [50, 80, 150], textColor: 255, fontStyle: 'bold' } }],
-               ['House', 'Check In', 'Check Out', 'Duration']],
-        body: rows.map(s => [
-          s.houseName,
-          attFmtTime(s.checkedInAt),
-          s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—',
-          s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'
-        ]),
-        foot: [['', '', 'Day total', attFmtDur(dayMins)]],
-        styles: { fontSize: 10, cellPadding: 3 },
-        headStyles: { fillColor: [30, 50, 100], textColor: 255, fontStyle: 'bold' },
-        footStyles: { fillColor: [230, 235, 245], textColor: [40, 60, 120], fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [245, 247, 252] },
-      });
-      y = doc.lastAutoTable.finalY + 6;
-    });
-
-    // Grand total
-    doc.setFontSize(11); doc.setTextColor(40, 60, 120);
-    doc.text(`Total hours: ${attFmtDur(totalMins)}`, 14, y + 4);
-
-    doc.save(`attendance-worker-${workerName.replace(/\s+/g,'-')}-${from}${from !== to ? '_'+to : ''}.pdf`);
+      return `<table>
+        <thead>
+          <tr class="date-header"><td colspan="4">${d}</td></tr>
+          <tr><th>Обект</th><th>Вход</th><th>Изход</th><th>Продължителност</th></tr>
+        </thead>
+        <tbody>${rows.map(s => `<tr>
+          <td>${s.houseName}</td>
+          <td>${attFmtTime(s.checkedInAt)}</td>
+          <td>${s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—'}</td>
+          <td>${s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'}</td>
+        </tr>`).join('')}</tbody>
+        <tfoot><tr class="total-row"><td></td><td></td><td>За деня</td><td>${attFmtDur(dayMins)}</td></tr></tfoot>
+      </table>`;
+    }).join('');
+    attPrintHtml(`
+      <h2>TEDHOUSE — Отчет присъствие</h2>
+      <div class="meta">
+        Работник: <b>${workerName}</b><br>
+        Период: <b>${from}${from !== to ? ' → ' + to : ''}</b><br>
+        Общо часове: <b>${attFmtDur(totalMins)}</b><br>
+        Генериран: ${new Date().toLocaleString()}
+      </div>
+      <hr>
+      ${tables}`);
   }
 
   function attFmtTime(iso) {
