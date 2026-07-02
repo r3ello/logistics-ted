@@ -6058,11 +6058,13 @@
     let html = '<div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.45rem 0.75rem;background:var(--surface);border-radius:10px;margin-bottom:0.75rem">';
     groups.forEach((g, gi) => {
       if (gi > 0) html += '<div style="width:1px;height:16px;background:var(--border);flex-shrink:0;align-self:center"></div>';
-      const gLabel = g.labelKey ? t(g.labelKey) : g.label;
-      html += `<div style="display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap"><span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${gLabel}</span>`;
+      const gLabelKey = g.labelKey || '';
+      const gLabel = gLabelKey ? t(gLabelKey) : (g.label || '');
+      html += `<div style="display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap"><span class="chip-grp-label" data-labelkey="${gLabelKey}" style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${gLabel}</span>`;
       g.options.forEach(o => {
-        const oLabel = o.labelKey ? t(o.labelKey) : o.label;
-        html += `<button class="chip-btn" data-group="${g.key}" data-value="${o.value}" onclick="chipToggle('${g.key}','${o.value}',this)" style="${cs}">${oLabel}</button>`;
+        const oLabelKey = o.labelKey || '';
+        const oLabel = oLabelKey ? t(oLabelKey) : (o.label || '');
+        html += `<button class="chip-btn" data-group="${g.key}" data-value="${o.value}" data-labelkey="${oLabelKey}" onclick="chipToggle('${g.key}','${o.value}',this)" style="${cs}">${oLabel}</button>`;
       });
       html += '</div>';
     });
@@ -6071,23 +6073,16 @@
     wrap.style.display = '';
   }
 
-  // Retranslate chip labels without clearing filters or re-fetching data
+  // Retranslate chip labels in-place using stored data-labelkey attributes
   function retranslateChipBar() {
-    if (!_lastChipGroups) return;
-    const savedFilters = _chipFilters;
-    buildChipBar(_lastChipGroups);
-    // restore active filter visual state
-    _chipFilters = savedFilters;
-    document.querySelectorAll('.chip-btn').forEach(btn => {
-      const g = btn.dataset.group, v = btn.dataset.value;
-      if (_chipFilters[g] && _chipFilters[g].has(v)) {
-        btn.style.background = 'var(--accent)';
-        btn.style.color = '#fff';
-        btn.style.borderColor = 'var(--accent)';
-      }
+    document.querySelectorAll('.chip-grp-label[data-labelkey]').forEach(el => {
+      const k = el.dataset.labelkey; if (k) el.textContent = t(k);
     });
-    const cb = document.getElementById('chipClearBtn');
-    if (cb) cb.style.display = Object.keys(_chipFilters).length ? '' : 'none';
+    document.querySelectorAll('.chip-btn[data-labelkey]').forEach(btn => {
+      const k = btn.dataset.labelkey; if (k) btn.textContent = t(k);
+    });
+    const wrap = document.getElementById('waChipBar');
+    if (wrap && wrap.offsetParent !== null) waBuildChipBar();
   }
 
   function chipToggle(group, value, btn) {
