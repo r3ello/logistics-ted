@@ -5026,7 +5026,7 @@
     grid.innerHTML = `
       <div style="grid-column:1/-1">
         <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
-          <button class="btn btn-primary admin-only" onclick="openWorkerModal()">${t('workerAddBtn')}</button>
+          <button class="btn btn-primary admin-only" data-i18n="workerAddBtn" onclick="openWorkerModal()">${t('workerAddBtn')}</button>
         </div>
         <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)">
           <table style="width:100%;border-collapse:collapse;background:var(--card)">
@@ -5076,7 +5076,7 @@
     if (!sList.length) {
       grid.innerHTML = `<div style="grid-column:1/-1">
         <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
-          <button class="btn btn-primary admin-only" onclick="openScaffoldEditModal()">${t('scaffoldAddBtn')}</button>
+          <button class="btn btn-primary admin-only" data-i18n="scaffoldAddBtn" onclick="openScaffoldEditModal()">${t('scaffoldAddBtn')}</button>
         </div>
         <div class="state-msg">No scaffolds found.</div>
       </div>`;
@@ -5101,7 +5101,7 @@
     grid.innerHTML = `
       <div style="grid-column:1/-1">
         <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
-          <button class="btn btn-primary admin-only" onclick="openScaffoldEditModal()">${t('scaffoldAddBtn')}</button>
+          <button class="btn btn-primary admin-only" data-i18n="scaffoldAddBtn" onclick="openScaffoldEditModal()">${t('scaffoldAddBtn')}</button>
         </div>
         <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)">
           <table style="width:100%;border-collapse:collapse;background:var(--card)">
@@ -5192,7 +5192,7 @@
     grid.innerHTML = `
       <div style="grid-column:1/-1">
         <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
-          <button class="btn btn-primary admin-only" onclick="openCrewModal()">${t('crewAddBtn') || '＋ Add Crew'}</button>
+          <button class="btn btn-primary admin-only" data-i18n="crewAddBtn" onclick="openCrewModal()">${t('crewAddBtn') || '＋ Add Crew'}</button>
         </div>
         <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)">
           <table style="width:100%;border-collapse:collapse;background:var(--card)">
@@ -5578,7 +5578,7 @@
     const statusBadge = s => `<span style="background:${ORDER_STATUS_COLORS[s]}22;color:${ORDER_STATUS_COLORS[s]};border:1px solid ${ORDER_STATUS_COLORS[s]}55;border-radius:5px;padding:2px 9px;font-size:0.72rem;font-weight:700">${orderStatusLabel(s)}</span>`;
     grid.innerHTML = `
       <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
-        <button class="btn btn-primary admin-only" onclick="openOrderModal()" style="background:#00c9b1;color:#0f1117;border:none">${t('ordersAddBtn')}</button>
+        <button class="btn btn-primary admin-only" data-i18n="ordersAddBtn" onclick="openOrderModal()" style="background:#00c9b1;color:#0f1117;border:none">${t('ordersAddBtn')}</button>
       </div>
       <div style="overflow-x:auto">
         <table class="att-table" id="ordersTable">
