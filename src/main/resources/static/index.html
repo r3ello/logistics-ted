@@ -1300,7 +1300,7 @@
       <span id="workerModalTitle">Add Worker</span>
       <button class="modal-close" onclick="closeWorkerModal()">✕</button>
     </div>
-    <div class="field"><label>Name</label><input id="wName" type="text" placeholder="Worker name" /></div>
+    <div class="field"><label>Name</label><input id="wName" type="text" placeholder="Worker name" data-i18n-placeholder="phWorkerName" /></div>
     <div class="field"><label id="wRoleLbl">Role</label>
       <select id="wRole" onchange="onWorkerRoleChange()" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
         <option value="CREW_MEMBER">Crew Member</option>
@@ -1320,8 +1320,6 @@
     <div class="field" id="wCrewField"><label id="wCrewLbl">Trade</label>
       <select id="wCrew" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
         <option value="">— Select trade —</option>
-        <option>Roofing</option><option>Plumbing</option><option>Electricity</option>
-        <option>Framing</option><option>Finishing</option>
       </select>
     </div>
     <!-- House is derived from the worker's crew, not assigned directly -->
@@ -1487,11 +1485,11 @@
     </div>
     <div class="modal-field">
       <label id="facNameLabel">Name</label>
-      <input id="facName" type="text" placeholder="Name" />
+      <input id="facName" type="text" placeholder="Name" data-i18n-placeholder="phFacName" />
     </div>
     <div class="modal-field">
       <label id="facLocationLabel">Location</label>
-      <input id="facLocation" type="text" placeholder="City, region…" />
+      <input id="facLocation" type="text" placeholder="City, region…" data-i18n-placeholder="phFacLocation" />
     </div>
     <div class="modal-field">
       <label id="facCoordLabel">Coordinates <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
@@ -1871,7 +1869,7 @@
         <span id="crewModalTitle">Add Crew</span>
         <button class="modal-close" onclick="closeCrewModal()">✕</button>
       </div>
-      <div class="field"><label>Crew Name</label><input id="cName" type="text" placeholder="Crew name" /></div>
+      <div class="field"><label>Crew Name</label><input id="cName" type="text" placeholder="Crew name" data-i18n-placeholder="phCrewName" /></div>
       <div class="field"><label>Manager</label>
         <select id="cManager" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
           <option value="">— No manager —</option>
@@ -1897,7 +1895,7 @@
       </div>
       <div class="field"><label>Members</label>
         <div style="position:relative">
-          <input id="cMemberSearch" type="text" placeholder="Search by name or trade…"
+          <input id="cMemberSearch" type="text" placeholder="Search by name or trade…" data-i18n-placeholder="phMemberSearch"
             autocomplete="off"
             oninput="filterMemberDropdown()"
             onfocus="showMemberDropdown()"
@@ -1970,7 +1968,7 @@
       <p class="section-label" style="margin:0" id="whTitle">🏬 Warehouses</p>
       <button class="btn btn-primary" id="whAddBtn" onclick="openFacilityModal('warehouse', null)">+ Add warehouse</button>
     </div>
-    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="whSearchInput" type="text" placeholder="Search warehouses..." autocomplete="off" oninput="filterFacilityList('warehouse')" /></div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="whSearchInput" type="text" placeholder="Search warehouses..." data-i18n-placeholder="phSearchWarehouses" autocomplete="off" oninput="filterFacilityList('warehouse')" /></div>
     <div id="warehousesList"></div>
   </div>
 
@@ -1980,7 +1978,7 @@
       <p class="section-label" style="margin:0" id="supTitle">🏭 Suppliers</p>
       <button class="btn btn-primary" id="supAddBtn" onclick="openFacilityModal('supplier', null)">+ Add supplier</button>
     </div>
-    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="supSearchInput" type="text" placeholder="Search suppliers..." autocomplete="off" oninput="filterFacilityList('supplier')" /></div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="supSearchInput" type="text" placeholder="Search suppliers..." data-i18n-placeholder="phSearchSuppliers" autocomplete="off" oninput="filterFacilityList('supplier')" /></div>
     <div id="suppliersList"></div>
   </div>
 
@@ -1990,7 +1988,7 @@
       <p class="section-label" style="margin:0" id="ebManagerTitle">⚡ Electric Box Manager</p>
       <button class="btn btn-primary" onclick="ebOpenNew()" id="ebBtnNewBox">+ New Box</button>
     </div>
-    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="ebSearchInput" type="text" placeholder="Search electric boxes..." autocomplete="off" oninput="filterElectricBoxes()" /></div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="ebSearchInput" type="text" placeholder="Search electric boxes..." data-i18n-placeholder="phSearchElectric" autocomplete="off" oninput="filterElectricBoxes()" /></div>
 
     <!-- House list (left) + Panel builder (right) -->
     <div class="eb-layout">
@@ -2106,7 +2104,7 @@
       <p class="section-label" style="margin:0">🔲 House QR Codes</p>
       <button class="btn btn-ghost" onclick="window.print()" style="gap:.4rem">🖨️ Print All</button>
     </div>
-    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="qrSearchInput" type="text" placeholder="Search houses..." autocomplete="off" oninput="filterQrCodes()" /></div>
+    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="qrSearchInput" type="text" placeholder="Search houses..." data-i18n-placeholder="phSearchHouses" autocomplete="off" oninput="filterQrCodes()" /></div>
 
     <div id="qrGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem"></div>
 
@@ -2186,18 +2184,18 @@
       <div style="display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;gap:0">
         <span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;border-right:1px solid var(--border)">🔍</span>
         <div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;border-right:1px solid var(--border)">
-          <span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">House</span>
+          <span id="stageMatrixHouseLabel" style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">House</span>
           <input id="stageMatrixSearch" type="text" placeholder="…" oninput="filterMatrixRows(this.value)"
             style="background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.6rem 0;width:140px" />
         </div>
         <div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;border-right:1px solid var(--border)">
-          <span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Crew</span>
+          <span id="stageMatrixCrewLabel" style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Crew</span>
           <input id="stageMatrixCrewSearch" type="text" placeholder="…" oninput="filterMatrixRows(document.getElementById('stageMatrixSearch').value)"
             style="background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.6rem 0;width:140px" />
         </div>
         <label style="display:flex;align-items:center;gap:0.4rem;padding:0 0.75rem;cursor:pointer;font-size:0.72rem;font-weight:600;color:var(--muted);white-space:nowrap;border-right:1px solid var(--border)">
           <input id="stageMatrixHasCrew" type="checkbox" onchange="filterMatrixRows(document.getElementById('stageMatrixSearch').value)" style="accent-color:var(--accent)">
-          Has Crew
+          <span id="stageMatrixHasCrewLabel">Has Crew</span>
         </label>
         <button onclick="document.getElementById('stageMatrixSearch').value='';document.getElementById('stageMatrixCrewSearch').value='';document.getElementById('stageMatrixHasCrew').checked=false;filterMatrixRows('')"
           style="border:none;background:none;color:var(--muted);font-size:0.78rem;cursor:pointer;padding:0 0.65rem">✕</button>
@@ -2278,7 +2276,7 @@
       historyImmutableNote:'Historical record — read-only.',
       historyViews:'views',
       refresh:'⟳ Refresh', langBtn:'🌐 BG', pdfBtn:'⬇ PDF',
-      searchPlaceholder:'Search house...', searchClear:'Clear', matrixSearchPlaceholder:'Search house by name...', stagesSearchPlaceholder:'Search stage by name...',
+      searchPlaceholder:'Search house...', searchClear:'Clear', matrixSearchPlaceholder:'Search house by name...', matrixCrewSearchPlaceholder:'Search crew...', stagesSearchPlaceholder:'Search stage by name...', matrixHouseLabel:'House', matrixCrewLabel:'Crew', matrixHasCrewLabel:'Has Crew',
       sectionLabel:'Houses — warehouse detail',
       loading:'Loading...', noData:'No data.', connError:'Connection error.',
       totalInventory:'Total inventory value', totalWarehouse:'Remaining materials estimated value',
@@ -2413,7 +2411,7 @@
       workerRole:'Role', workerTrade:'Trade', workerTradeSelect:'— Select trade —',
       roleCrewMember:'Crew Member', roleCrewLeader:'Crew Leader', roleCrewManager:'Crew Manager',
       // crews view
-      navOrgChartGroup:'Org Chart', navCrews:'Crews', navClientServicesGroup:'Client Services',
+      navOrgChartGroup:'Org Chart', navCrews:'Crews', navCrewManager:'Crew Manager', navClientServicesGroup:'Client Services',
       navStageMatrix:'Project Stages', pageTitle_stagematrix:'Project Stages', pageSub_stagematrix:'All houses × all construction stages',
       pageTitle_crews:'Crew Organisation', pageSub_crews:'Manage crews, leaders, and members',
       crewsSectionLabel:'Crew Organisation Chart', crewAddBtn:'＋ Add Crew',
@@ -2445,6 +2443,10 @@
       // worker card
       workerSearchPlaceholder:'Search workers by name, crew or house...',
       scaffoldSearchPlaceholder:'Search by status or house...',
+      phWorkerName:'Worker name', phCrewName:'Crew name', phMemberSearch:'Search by name or trade…',
+      phSearchWarehouses:'Search warehouses...', phSearchSuppliers:'Search suppliers...',
+      phSearchElectric:'Search electric boxes...', phSearchHouses:'Search houses...',
+      phFacName:'Name', phFacLocation:'City, region…',
       // scaffold chip labels on house cards
       chipScaffoldAvailable:'Available', chipScaffoldInUse:'In Use', chipScaffoldNone:'No Scaffold',
       // scaffold start location label on scaffold view
@@ -2464,6 +2466,23 @@
       stageFoundationFirst:'Foundation must be completed first',
       stageFoundationRequired:'Foundation required',
       matrixLoading:'Loading…',
+      // search field labels
+      sfName:'Name', sfCrew:'Crew', sfHouse:'House', sfStage:'Stage', sfMaterial:'Material', sfLocation:'Location',
+      // chip group labels
+      chipGrpRole:'Role', chipGrpCrew:'Crew', chipGrpHouse:'House', chipGrpMembers:'Members',
+      chipGrpPassword:'Password', chipGrpStatus:'Status', chipGrpPhase:'Phase',
+      // chip option labels
+      chipRoleLeader:'⭐ Leader', chipRoleMember:'👷 Member', chipRoleManager:'👔 Manager',
+      chipHasCrew:'✓ Has Crew', chipNoCrew:'✗ No Crew',
+      chipHasHouse:'✓ Has House', chipNoHouse:'✗ No House',
+      chipHasMembers:'✓ Has Members', chipEmpty:'✗ Empty',
+      chipHasPassword:'✓ Has Password', chipNoPassword:'✗ No Password',
+      chipStatusAvailable:'✓ Available', chipStatusInUse:'🏗 In Use', chipStatusNone:'— None',
+      chipStatusAssigned:'✓ Assigned', chipStatusFree:'✗ Free',
+      chipHasActivePhase:'✓ Active Phase', chipNoPhase:'✗ No Phase',
+      chipOrderPending:'⏳ Pending', chipOrderApproved:'✓ Approved', chipOrderOrdered:'📦 Ordered',
+      chipOrderInTransit:'🚚 In Transit', chipOrderDelivered:'✅ Delivered',
+      chipClearFilters:'✕ Clear',
     },
     bg: {
       brandName:'Теодор Логистика', brandSub:'Управление на материали',
@@ -2523,7 +2542,7 @@
       historyImmutableNote:'Исторически запис — само за четене.',
       historyViews:'прегл.',
       refresh:'⟳ Опресни', langBtn:'🌐 EN', pdfBtn:'⬇ PDF',
-      searchPlaceholder:'Търси къща...', searchClear:'Изчисти', matrixSearchPlaceholder:'Търси обект по име...', stagesSearchPlaceholder:'Търси етап по име...',
+      searchPlaceholder:'Търси къща...', searchClear:'Изчисти', matrixSearchPlaceholder:'Търси обект по име...', matrixCrewSearchPlaceholder:'Търси екип...', stagesSearchPlaceholder:'Търси етап по име...', matrixHouseLabel:'Обект', matrixCrewLabel:'Екип', matrixHasCrewLabel:'С екип',
       sectionLabel:'Къщи — детайли на склад',
       loading:'Зареждане...', noData:'Няма данни.', connError:'Грешка при свързване.',
       totalInventory:'Обща стойност на инвентара', totalWarehouse:'Прогнозна стойност на оставащи материали',
@@ -2658,7 +2677,7 @@
       workerRole:'Роля', workerTrade:'Специалност', workerTradeSelect:'— Изберете специалност —',
       roleCrewMember:'Член на екип', roleCrewLeader:'Ръководител екип', roleCrewManager:'Мениджър екип',
       // crews view
-      navOrgChartGroup:'Орг. схема', navCrews:'Екипи', navClientServicesGroup:'Клиентски услуги',
+      navOrgChartGroup:'Орг. схема', navCrews:'Екипи', navCrewManager:'Мениджър на екипи', navClientServicesGroup:'Клиентски услуги',
       navStageMatrix:'Етапи на проект', pageTitle_stagematrix:'Етапи на проект', pageSub_stagematrix:'Всички обекти × всички строителни етапи',
       pageTitle_crews:'Организация на екипи', pageSub_crews:'Управление на екипи, лидери и членове',
       crewsSectionLabel:'Организационна схема на екипи', crewAddBtn:'＋ Добави екип',
@@ -2690,6 +2709,10 @@
       // worker card
       workerSearchPlaceholder:'Търси работник по име, екип или къща...',
       scaffoldSearchPlaceholder:'Търси по статус или къща...',
+      phWorkerName:'Име на работник', phCrewName:'Наименование на екип', phMemberSearch:'Търси по име или специалност…',
+      phSearchWarehouses:'Търси складове...', phSearchSuppliers:'Търси доставчици...',
+      phSearchElectric:'Търси електрически табла...', phSearchHouses:'Търси обекти...',
+      phFacName:'Наименование', phFacLocation:'Град, регион…',
       // scaffold chip labels on house cards
       chipScaffoldAvailable:'Налично', chipScaffoldInUse:'В употреба', chipScaffoldNone:'Без скеле',
       // scaffold start location label on scaffold view
@@ -2709,6 +2732,23 @@
       stageFoundationFirst:'Фундаментът трябва да е завършен първо',
       stageFoundationRequired:'Необходим фундамент',
       matrixLoading:'Зареждане…',
+      // search field labels
+      sfName:'Наименование', sfCrew:'Екип', sfHouse:'Обект', sfStage:'Етап', sfMaterial:'Материал', sfLocation:'Локация',
+      // chip group labels
+      chipGrpRole:'Роля', chipGrpCrew:'Екип', chipGrpHouse:'Обект', chipGrpMembers:'Членове',
+      chipGrpPassword:'Парола', chipGrpStatus:'Статус', chipGrpPhase:'Фаза',
+      // chip option labels
+      chipRoleLeader:'⭐ Лидер', chipRoleMember:'👷 Член', chipRoleManager:'👔 Мениджър',
+      chipHasCrew:'✓ С екип', chipNoCrew:'✗ Без екип',
+      chipHasHouse:'✓ С обект', chipNoHouse:'✗ Без обект',
+      chipHasMembers:'✓ С членове', chipEmpty:'✗ Без членове',
+      chipHasPassword:'✓ С парола', chipNoPassword:'✗ Без парола',
+      chipStatusAvailable:'✓ Налично', chipStatusInUse:'🏗 Заето', chipStatusNone:'— Без',
+      chipStatusAssigned:'✓ Назначено', chipStatusFree:'✗ Свободно',
+      chipHasActivePhase:'✓ Активна фаза', chipNoPhase:'✗ Без фаза',
+      chipOrderPending:'⏳ Чакащ', chipOrderApproved:'✓ Одобрен', chipOrderOrdered:'📦 Поръчан',
+      chipOrderInTransit:'🚚 В транзит', chipOrderDelivered:'✅ Доставен',
+      chipClearFilters:'✕ Изчисти',
     },
   };
 
@@ -2739,15 +2779,18 @@
     retranslateMaterials();
     const activeView = document.querySelector('.view.active')?.id?.replace('view-','') || 'dashboard';
     if (activeView === 'dashboard') {
-      if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash(); else setDashMode(_dashMode);
+      if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash();
+      else { retranslateChipBar(); retranslateSearchBar(_dashMode); }
     }
     else if (activeView === 'scaffold')    setDashMode('scaffold');
-    else if (activeView === 'crews')       renderCrewCards();
+    else if (activeView === 'crews')       { retranslateChipBar(); retranslateSearchBar('crews'); }
     else if (activeView === 'warehouses')  renderFacilityList('warehouse');
     else if (activeView === 'suppliers')   renderFacilityList('supplier');
     else if (activeView === 'history')     loadHistory();
-    else if (activeView === 'stagematrix') loadStageMatrix();
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
+    else if (activeView === 'workeraccess') { waBuildChipBar(); }
+    // always re-render stage matrix if it is the active view (column headers come from DB in both languages)
+    if (document.getElementById('view-stagematrix')?.classList.contains('active')) loadStageMatrix(true);
   }
 
   function retranslateMaterials() {
@@ -2763,6 +2806,7 @@
   }
 
   function translateStatic() {
+    try {
     document.getElementById('brandName').textContent    = t('brandName');
     document.getElementById('brandSub').textContent     = t('brandSub');
     document.getElementById('navDashboard').querySelector('span:last-child').textContent = t('navDashboard');
@@ -2793,7 +2837,8 @@
     document.getElementById('navTravelAllowanceLabel').textContent   = t('navTravelAllowance');
     document.getElementById('navOrgChartGroupLabel').textContent       = t('navOrgChartGroup');
     document.getElementById('navClientServicesGroupLabel').textContent = t('navClientServicesGroup');
-    facM('navCrewsLabel','navCrews');
+    facM('navCrewsDashLabel','navCrews');
+    facM('navCrewsLabel','navCrewManager');
     facM('navStageMatrixLabel','navStageMatrix');
     const eb = id => document.getElementById(id);
     const ebt = (id, key) => { const el = eb(id); if (el) el.textContent = t(key); };
@@ -2839,22 +2884,28 @@
     document.getElementById('searchInput').placeholder  = t('searchPlaceholder');
     document.getElementById('clearBtn').title           = t('searchClear');
     document.getElementById('stageMatrixSearch').placeholder = t('matrixSearchPlaceholder');
+    document.getElementById('stageMatrixCrewSearch').placeholder = t('matrixCrewSearchPlaceholder');
+    facM('stageMatrixHouseLabel','matrixHouseLabel');
+    facM('stageMatrixCrewLabel','matrixCrewLabel');
+    facM('stageMatrixHasCrewLabel','matrixHasCrewLabel');
     // Generic data-i18n sweep
     document.querySelectorAll('[data-i18n]').forEach(el => { const v = t(el.dataset.i18n); if (v) el.textContent = v; });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const v = t(el.dataset.i18nPlaceholder); if (v) el.placeholder = v; });
-    document.getElementById('sectionLabel').textContent = t('sectionLabel');
-    document.getElementById('orderFormTitle').textContent = t('orderFormTitle');
-    document.getElementById('orderFormDesc').textContent  = t('orderFormDesc');
+    const facS = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+    facS('sectionLabel','sectionLabel');
+    facS('orderFormTitle','orderFormTitle');
+    facS('orderFormDesc','orderFormDesc');
     const splbl = document.getElementById('startingPointLbl'); if (splbl) splbl.textContent = t('startingPoint');
     const dhlbl = document.getElementById('destHouseLbl');     if (dhlbl) dhlbl.textContent = t('destHouseLabel');
-    document.getElementById('calcBtn').textContent        = t('calcBtn');
-    document.getElementById('formHint').textContent       = t('formHint');
-    document.getElementById('formHintStrong').textContent = t('formHintStrong');
-    document.getElementById('fuelSectionLabel').textContent = t('fuelSectionLabel');
-    document.getElementById('fuelConsLbl').textContent      = t('fuelConsLbl');
-    document.getElementById('fuelPriceLbl').textContent     = t('fuelPriceLbl');
-    document.getElementById('navScaffoldLabel').textContent  = t('navScaffold');
-    document.getElementById('navCrewsLabel').textContent    = t('navCrews');
+    facS('calcBtn','calcBtn');
+    facS('formHint','formHint');
+    facS('formHintStrong','formHintStrong');
+    facS('fuelSectionLabel','fuelSectionLabel');
+    facS('fuelConsLbl','fuelConsLbl');
+    facS('fuelPriceLbl','fuelPriceLbl');
+    facS('navScaffoldLabel','navScaffold');
+    facS('navCrewsDashLabel','navCrews');
+    facS('navCrewsLabel','navCrewManager');
     const csl = document.getElementById('crewsSectionLabel'); if (csl) csl.textContent = t('crewsSectionLabel');
     const sft = document.getElementById('scaffoldFormTitle');   if (sft) sft.textContent = t('scaffoldFormTitle');
     const sfd = document.getElementById('scaffoldFormDesc');    if (sfd) sfd.textContent = t('scaffoldFormDesc');
@@ -2948,46 +2999,46 @@
     const altIn = document.getElementById('altSearchInput');
     if (altIn && _dashMode === 'workers')  altIn.placeholder = t('workerSearchPlaceholder');
     if (altIn && _dashMode === 'scaffold') altIn.placeholder = t('scaffoldSearchPlaceholder');
+    if (altIn && _dashMode === 'stages')   altIn.placeholder = t('stagesSearchPlaceholder');
 
     // login screen
-    document.getElementById('loginSubtitle').textContent  = t('loginSubtitle');
-    document.getElementById('loginUserLabel').textContent  = t('loginUserLabel');
-    document.getElementById('loginPassLabel').textContent  = t('loginPassLabel');
-    document.getElementById('loginUser').placeholder       = t('phUsername');
-    document.getElementById('loginPass').placeholder       = t('phPassword');
-    document.getElementById('loginBtn').textContent        = t('signIn');
+    const fts = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+    const ftp = (id, key) => { const el = document.getElementById(id); if (el) el.placeholder  = t(key); };
+    fts('loginSubtitle','loginSubtitle'); fts('loginUserLabel','loginUserLabel');
+    fts('loginPassLabel','loginPassLabel'); fts('loginBtn','signIn');
+    ftp('loginUser','phUsername'); ftp('loginPass','phPassword');
 
     // house modal labels & placeholders
-    document.getElementById('mNameLabel').textContent      = t('fieldName');
-    document.getElementById('mLocationLabel').textContent  = t('fieldLocation');
-    document.getElementById('mCoordLabel').firstChild.textContent = t('fieldCoordinates') + ' ';
-    document.getElementById('mCoordOptional').textContent  = t('fieldOptional');
-    document.getElementById('mStartDateLabel').firstChild.textContent = t('fieldStartDate') + ' ';
-    document.getElementById('mStartOptional').textContent  = t('fieldOptional');
-    document.getElementById('mPhaseLabel').firstChild.textContent = t('fieldPhase') + ' ';
-    document.getElementById('mPhaseOptional').textContent  = t('fieldOptional');
-    document.getElementById('mName').placeholder     = t('phHouseName');
-    document.getElementById('mLocation').placeholder = t('phCityRegion');
-    document.getElementById('mLat').placeholder      = t('phLat');
-    document.getElementById('mLng').placeholder      = t('phLng');
-    document.getElementById('mLocBtn').textContent   = t('useMyLocation');
-    document.getElementById('mPickMapBtn').textContent = t('pickOnMap');
-    document.getElementById('houseCancelBtn').textContent = t('cancel');
-    document.getElementById('houseSaveBtn').textContent   = t('save');
+    fts('mNameLabel','fieldName'); fts('mLocationLabel','fieldLocation');
+    const mCoordLabel = document.getElementById('mCoordLabel'); if (mCoordLabel?.firstChild) mCoordLabel.firstChild.textContent = t('fieldCoordinates') + ' ';
+    fts('mCoordOptional','fieldOptional');
+    const mStartDateLabel = document.getElementById('mStartDateLabel'); if (mStartDateLabel?.firstChild) mStartDateLabel.firstChild.textContent = t('fieldStartDate') + ' ';
+    fts('mStartOptional','fieldOptional');
+    const mPhaseLabel = document.getElementById('mPhaseLabel'); if (mPhaseLabel?.firstChild) mPhaseLabel.firstChild.textContent = t('fieldPhase') + ' ';
+    fts('mPhaseOptional','fieldOptional');
+    ftp('mName','phHouseName'); ftp('mLocation','phCityRegion');
+    ftp('mLat','phLat'); ftp('mLng','phLng');
+    fts('mLocBtn','useMyLocation'); fts('mPickMapBtn','pickOnMap');
+    fts('houseCancelBtn','cancel'); fts('houseSaveBtn','save');
 
     // inventory modal buttons
-    document.getElementById('invCancelBtn').textContent = t('cancel');
-    document.getElementById('invSaveBtn').textContent   = t('save');
+    fts('invCancelBtn','cancel'); fts('invSaveBtn','save');
 
     // phase select options (value stays as English DB key; text is translated)
     const phaseKeys = ['Foundation','Framing','Roofing','Electrical','Plumbing','Insulation','Drywall','Finishing','Landscaping','Completed'];
     const sel = document.getElementById('mPhase');
-    sel.options[0].textContent = t('phaseNone');
-    phaseKeys.forEach((k, i) => { sel.options[i + 1].textContent = t(k); });
+    if (sel && sel.tagName === 'SELECT' && sel.options.length > 0) {
+      sel.options[0].textContent = t('phaseNone');
+      phaseKeys.forEach((k, i) => { if (sel.options[i + 1]) sel.options[i + 1].textContent = t(k); });
+    }
 
-    const activeView = document.querySelector('.view.active')?.id.replace('view-','') || 'dashboard';
+    const activeView = document.querySelector('.view.active')?.id?.replace('view-','') || 'dashboard';
     document.getElementById('pageTitle').textContent = t(`pageTitle_${activeView}`);
     document.getElementById('pageSub').textContent   = t(`pageSub_${activeView}`);
+    // update the inner stage matrix title/subtitle
+    const smt = document.getElementById('stageMatrixTitle'); if (smt) smt.textContent = t('pageTitle_stagematrix');
+    const sms = document.getElementById('stageMatrixSub');   if (sms) sms.textContent = t('pageSub_stagematrix');
+    } catch(e) { console.error('[translateStatic] crashed:', e); }
   }
 
   function resetResults() {
@@ -3158,8 +3209,9 @@
         DONE:        { bg:'#bbf7d0', text:'#14532d' },
       };
       const foundationDone = (stages.find(s => s.stageOrder === 0)?.status === 'DONE');
+      const isEn = currentLang === 'en';
       const thCells = columns.map(col =>
-        `<th style="min-width:120px;padding:0.4rem 0.5rem;text-align:center;font-size:0.62rem;color:#9aa3be;text-transform:uppercase;white-space:nowrap;border-right:1px solid #2e3250">${col.stageName}</th>`
+        `<th style="min-width:120px;padding:0.4rem 0.5rem;text-align:center;font-size:0.62rem;color:#9aa3be;text-transform:uppercase;white-space:nowrap;border-right:1px solid #2e3250">${isEn && col.stageNameEn ? col.stageNameEn : col.stageName}</th>`
       ).join('');
       const hdStatusLabel = (v) => {
         if (v === 'IN_PROGRESS') return ' ' + (currentLang === 'bg' ? 'В процес' : 'In Progress');
@@ -4604,12 +4656,19 @@
     return '—';
   }
 
-  async function loadStageMatrix() {
+  let _matrixCache = null;
+
+  async function loadStageMatrix(useCache) {
     const wrap = document.getElementById('stageMatrixWrap');
-    wrap.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>${t('matrixLoading')}</div>`;
+    if (!wrap) return;
     let data;
-    try { data = await apiFetch('/api/house-stages/matrix').then(r => r.json()); }
-    catch(e) { wrap.innerHTML = `<div class="state-msg">Failed to load matrix.</div>`; return; }
+    if (useCache && _matrixCache) {
+      data = _matrixCache;
+    } else {
+      wrap.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>${t('matrixLoading')}</div>`;
+      try { data = await apiFetch('/api/house-stages/matrix').then(r => r.json()); _matrixCache = data; }
+      catch(e) { wrap.innerHTML = `<div class="state-msg">Failed to load matrix.</div>`; return; }
+    }
 
     const { columns, rows } = data;
     const isEn = currentLang === 'en';
@@ -4987,18 +5046,18 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'role', label: 'Role', options: [
-        { value: 'CREW_LEADER',  label: '⭐ Leader'  },
-        { value: 'CREW_MEMBER',  label: '👷 Member'  },
-        { value: 'CREW_MANAGER', label: '👔 Manager' },
+      { key: 'role', labelKey: 'chipGrpRole', options: [
+        { value: 'CREW_LEADER',  labelKey: 'chipRoleLeader'  },
+        { value: 'CREW_MEMBER',  labelKey: 'chipRoleMember'  },
+        { value: 'CREW_MANAGER', labelKey: 'chipRoleManager' },
       ]},
-      { key: 'hascrew', label: 'Crew', options: [
-        { value: '1', label: '✓ Has Crew' },
-        { value: '0', label: '✗ No Crew'  },
+      { key: 'hascrew', labelKey: 'chipGrpCrew', options: [
+        { value: '1', labelKey: 'chipHasCrew' },
+        { value: '0', labelKey: 'chipNoCrew'  },
       ]},
-      { key: 'hashouse', label: 'House', options: [
-        { value: '1', label: '✓ Has House' },
-        { value: '0', label: '✗ No House'  },
+      { key: 'hashouse', labelKey: 'chipGrpHouse', options: [
+        { value: '1', labelKey: 'chipHasHouse' },
+        { value: '0', labelKey: 'chipNoHouse'  },
       ]},
     ]);
     onAltSearch();
@@ -5061,14 +5120,14 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'status', label: 'Status', options: [
-        { value: 'AVAILABLE', label: '✓ Available' },
-        { value: 'IN_USE',    label: '🏗 In Use'   },
-        { value: 'NONE',      label: '— None'      },
+      { key: 'status', labelKey: 'chipGrpStatus', options: [
+        { value: 'AVAILABLE', labelKey: 'chipStatusAvailable' },
+        { value: 'IN_USE',    labelKey: 'chipStatusInUse'     },
+        { value: 'NONE',      labelKey: 'chipStatusNone'      },
       ]},
-      { key: 'hashouse', label: 'House', options: [
-        { value: '1', label: '✓ Assigned' },
-        { value: '0', label: '✗ Free'     },
+      { key: 'hashouse', labelKey: 'chipGrpHouse', options: [
+        { value: '1', labelKey: 'chipStatusAssigned' },
+        { value: '0', labelKey: 'chipStatusFree'     },
       ]},
     ]);
     onAltSearch();
@@ -5153,13 +5212,13 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'hashouse', label: 'House', options: [
-        { value: '1', label: '✓ Has House' },
-        { value: '0', label: '✗ No House'  },
+      { key: 'hashouse', labelKey: 'chipGrpHouse', options: [
+        { value: '1', labelKey: 'chipHasHouse' },
+        { value: '0', labelKey: 'chipNoHouse'  },
       ]},
-      { key: 'hasmembers', label: 'Members', options: [
-        { value: '1', label: '✓ Has Members' },
-        { value: '0', label: '✗ Empty'       },
+      { key: 'hasmembers', labelKey: 'chipGrpMembers', options: [
+        { value: '1', labelKey: 'chipHasMembers' },
+        { value: '0', labelKey: 'chipEmpty'      },
       ]},
     ]);
     onAltSearch();
@@ -5571,12 +5630,12 @@
         </table>
       </div>`;
     buildChipBar([
-      { key: 'status', label: 'Status', options: [
-        { value: 'PENDING',    label: '⏳ Pending'    },
-        { value: 'APPROVED',   label: '✓ Approved'   },
-        { value: 'ORDERED',    label: '📦 Ordered'   },
-        { value: 'IN_TRANSIT', label: '🚚 In Transit' },
-        { value: 'DELIVERED',  label: '✅ Delivered'  },
+      { key: 'status', labelKey: 'chipGrpStatus', options: [
+        { value: 'PENDING',    labelKey: 'chipOrderPending'   },
+        { value: 'APPROVED',   labelKey: 'chipOrderApproved'  },
+        { value: 'ORDERED',    labelKey: 'chipOrderOrdered'   },
+        { value: 'IN_TRANSIT', labelKey: 'chipOrderInTransit' },
+        { value: 'DELIVERED',  labelKey: 'chipOrderDelivered' },
       ]},
     ]);
     onAltSearch();
@@ -5935,13 +5994,22 @@
 
   // ── Multi-field search bar ───────────────────────────────────────────────────
   const _sfConfigs = {
-    workers:    [{ key:'name', label:'Name' }, { key:'crew', label:'Crew' }, { key:'house', label:'House' }],
-    crews:      [{ key:'name', label:'Name' }, { key:'stage', label:'Stage' }, { key:'house', label:'House' }],
-    scaffold:   [{ key:'house', label:'House' }],
-    orders:     [{ key:'house', label:'House' }, { key:'material', label:'Material' }],
-    deliveries: [{ key:'house', label:'House' }],
-    houses:     [],
+    workers:    [{ key:'name', label:'sfName' }, { key:'crew', label:'sfCrew' }, { key:'house', label:'sfHouse' }],
+    crews:      [{ key:'name', label:'sfName' }, { key:'stage', label:'sfStage' }, { key:'house', label:'sfHouse' }],
+    scaffold:   [{ key:'house', label:'sfHouse' }],
+    orders:     [{ key:'house', label:'sfHouse' }, { key:'material', label:'sfMaterial' }],
+    deliveries: [{ key:'house', label:'sfHouse' }],
+    houses:     [{ key:'name', label:'sfName' }, { key:'location', label:'sfLocation' }],
   };
+
+  function retranslateSearchBar(mode) {
+    const wrap = document.getElementById('altSearchWrap');
+    if (!wrap) return;
+    const fields = _sfConfigs[mode];
+    if (!fields || !fields.length) return;
+    const spans = wrap.querySelectorAll('.sf-label');
+    spans.forEach((span, i) => { if (fields[i]) span.textContent = t(fields[i].label); });
+  }
 
   function buildSearchBar(mode) {
     const wrap = document.getElementById('altSearchWrap');
@@ -5965,7 +6033,7 @@
       `<span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;flex-shrink:0;border-right:1px solid var(--border)">🔍</span>` +
       fields.map((f, i) =>
         `<div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;flex:1;min-width:0;${i < fields.length-1 ? 'border-right:1px solid var(--border);' : ''}">` +
-        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${f.label}</span>` +
+        `<span class="sf-label" style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${t(f.label)}</span>` +
         `<input class="sf-field" data-field="${f.key}" type="text" autocomplete="off" oninput="onAltSearch()" ` +
         `style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.65rem 0;min-width:50px"></div>`
       ).join('') +
@@ -5980,8 +6048,10 @@
 
   // ── Chip filter system ───────────────────────────────────────────────────────
   let _chipFilters = {};
+  let _lastChipGroups = null;
 
   function buildChipBar(groups) {
+    _lastChipGroups = groups;
     _chipFilters = {};
     const wrap = document.getElementById('chipBarWrap');
     if (!wrap) return;
@@ -5990,15 +6060,31 @@
     let html = '<div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.45rem 0.75rem;background:var(--surface);border-radius:10px;margin-bottom:0.75rem">';
     groups.forEach((g, gi) => {
       if (gi > 0) html += '<div style="width:1px;height:16px;background:var(--border);flex-shrink:0;align-self:center"></div>';
-      html += `<div style="display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap"><span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${g.label}</span>`;
+      const gLabelKey = g.labelKey || '';
+      const gLabel = gLabelKey ? t(gLabelKey) : (g.label || '');
+      html += `<div style="display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap"><span class="chip-grp-label" data-labelkey="${gLabelKey}" style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">${gLabel}</span>`;
       g.options.forEach(o => {
-        html += `<button class="chip-btn" data-group="${g.key}" data-value="${o.value}" onclick="chipToggle('${g.key}','${o.value}',this)" style="${cs}">${o.label}</button>`;
+        const oLabelKey = o.labelKey || '';
+        const oLabel = oLabelKey ? t(oLabelKey) : (o.label || '');
+        html += `<button class="chip-btn" data-group="${g.key}" data-value="${o.value}" data-labelkey="${oLabelKey}" onclick="chipToggle('${g.key}','${o.value}',this)" style="${cs}">${oLabel}</button>`;
       });
       html += '</div>';
     });
     html += '<button onclick="chipBarClear()" id="chipClearBtn" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;white-space:nowrap;display:none">✕ Clear filters</button></div>';
     wrap.innerHTML = html;
     wrap.style.display = '';
+  }
+
+  // Retranslate chip labels in-place using stored data-labelkey attributes
+  function retranslateChipBar() {
+    document.querySelectorAll('.chip-grp-label[data-labelkey]').forEach(el => {
+      const k = el.dataset.labelkey; if (k) el.textContent = t(k);
+    });
+    document.querySelectorAll('.chip-btn[data-labelkey]').forEach(btn => {
+      const k = btn.dataset.labelkey; if (k) btn.textContent = t(k);
+    });
+    const wrap = document.getElementById('waChipBar');
+    if (wrap && wrap.offsetParent !== null) waBuildChipBar();
   }
 
   function chipToggle(group, value, btn) {
@@ -6124,6 +6210,15 @@
     _editingWorkerId = id || null;
     document.getElementById('workerModalTitle').textContent = id ? 'Edit Worker' : 'Add Worker';
     document.getElementById('workerModalErr').textContent = '';
+    // populate trade dropdown from live stage types
+    try {
+      const stageTypes = await apiFetch('/api/stage-types').then(r => r.json());
+      const sel = document.getElementById('wCrew');
+      const current = sel.value;
+      sel.innerHTML = '<option value="">— Select trade —</option>' +
+        stageTypes.map(s => `<option value="${s.stageName}">${s.stageName}</option>`).join('');
+      if (current) sel.value = current;
+    } catch(e) {}
     if (savedState) {
       document.getElementById('wName').value     = savedState.name     || '';
       document.getElementById('wRole').value     = savedState.role     || 'CREW_MEMBER';
@@ -7115,29 +7210,16 @@
         </div>
       </div>`;
     buildChipBar([
-      { key: 'hascrew', label: 'Crew', options: [
-        { value: '1', label: '✓ Has Crew' },
-        { value: '0', label: '✗ No Crew'  },
+      { key: 'hascrew', labelKey: 'chipGrpCrew', options: [
+        { value: '1', labelKey: 'chipHasCrew' },
+        { value: '0', labelKey: 'chipNoCrew'  },
       ]},
-      { key: 'hasphase', label: 'Phase', options: [
-        { value: '1', label: '✓ Active Phase' },
-        { value: '0', label: '✗ No Phase'     },
+      { key: 'hasphase', labelKey: 'chipGrpPhase', options: [
+        { value: '1', labelKey: 'chipHasActivePhase' },
+        { value: '0', labelKey: 'chipNoPhase'        },
       ]},
     ]);
-    // add Name + Location text search inputs for houses
-    const altSearchWrap = document.getElementById('altSearchWrap');
-    if (altSearchWrap && !altSearchWrap.querySelector('.sf-field')) {
-      altSearchWrap.style.cssText = 'display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem';
-      altSearchWrap.innerHTML =
-        `<span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;flex-shrink:0;border-right:1px solid var(--border)">🔍</span>` +
-        `<div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;flex:1;min-width:0;border-right:1px solid var(--border)">` +
-        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">Name</span>` +
-        `<input class="sf-field" data-field="name" type="text" autocomplete="off" oninput="onAltSearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.65rem 0;min-width:50px"></div>` +
-        `<div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;flex:1;min-width:0">` +
-        `<span style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0">Location</span>` +
-        `<input class="sf-field" data-field="location" type="text" autocomplete="off" oninput="onAltSearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.65rem 0;min-width:50px"></div>` +
-        `<button onclick="clearSearchBar()" title="Clear" style="flex-shrink:0;border:none;background:none;color:var(--muted);font-size:0.78rem;cursor:pointer;border-left:1px solid var(--border);padding:0 0.65rem">✕</button>`;
-    }
+    buildSearchBar('houses');
     onAltSearch();
   }
 
@@ -8848,15 +8930,15 @@
     if (!wrap) return;
     const cs = 'background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:0.18rem 0.6rem;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1.5';
     wrap.innerHTML = `<div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.45rem 0.75rem;background:var(--surface);border-radius:10px;margin-bottom:1rem">
-      <span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Role</span>
-      <button class="wa-chip" data-group="role" data-value="CREW_LEADER"  onclick="waChipToggle('role','CREW_LEADER',this)"  style="${cs}">⭐ Leader</button>
-      <button class="wa-chip" data-group="role" data-value="CREW_MEMBER"  onclick="waChipToggle('role','CREW_MEMBER',this)"  style="${cs}">👷 Member</button>
-      <button class="wa-chip" data-group="role" data-value="CREW_MANAGER" onclick="waChipToggle('role','CREW_MANAGER',this)" style="${cs}">👔 Manager</button>
+      <span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">${t('chipGrpRole')}</span>
+      <button class="wa-chip" data-group="role" data-value="CREW_LEADER"  onclick="waChipToggle('role','CREW_LEADER',this)"  style="${cs}">${t('chipRoleLeader')}</button>
+      <button class="wa-chip" data-group="role" data-value="CREW_MEMBER"  onclick="waChipToggle('role','CREW_MEMBER',this)"  style="${cs}">${t('chipRoleMember')}</button>
+      <button class="wa-chip" data-group="role" data-value="CREW_MANAGER" onclick="waChipToggle('role','CREW_MANAGER',this)" style="${cs}">${t('chipRoleManager')}</button>
       <div style="width:1px;height:16px;background:var(--border);flex-shrink:0;align-self:center"></div>
-      <span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">Password</span>
-      <button class="wa-chip" data-group="haspw" data-value="1" onclick="waChipToggle('haspw','1',this)" style="${cs}">✓ Has Password</button>
-      <button class="wa-chip" data-group="haspw" data-value="0" onclick="waChipToggle('haspw','0',this)" style="${cs}">✗ No Password</button>
-      <button onclick="waChipBarClear()" id="waChipClearBtn" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;white-space:nowrap;display:none">✕ Clear</button>
+      <span style="font-size:0.63rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">${t('chipGrpPassword')}</span>
+      <button class="wa-chip" data-group="haspw" data-value="1" onclick="waChipToggle('haspw','1',this)" style="${cs}">${t('chipHasPassword')}</button>
+      <button class="wa-chip" data-group="haspw" data-value="0" onclick="waChipToggle('haspw','0',this)" style="${cs}">${t('chipNoPassword')}</button>
+      <button onclick="waChipBarClear()" id="waChipClearBtn" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;white-space:nowrap;display:none">${t('chipClearFilters')}</button>
     </div>`;
     wrap.style.display = '';
   }
