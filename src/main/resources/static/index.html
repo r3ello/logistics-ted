@@ -1320,8 +1320,6 @@
     <div class="field" id="wCrewField"><label id="wCrewLbl">Trade</label>
       <select id="wCrew" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
         <option value="">— Select trade —</option>
-        <option>Roofing</option><option>Plumbing</option><option>Electricity</option>
-        <option>Framing</option><option>Finishing</option>
       </select>
     </div>
     <!-- House is derived from the worker's crew, not assigned directly -->
@@ -6124,6 +6122,15 @@
     _editingWorkerId = id || null;
     document.getElementById('workerModalTitle').textContent = id ? 'Edit Worker' : 'Add Worker';
     document.getElementById('workerModalErr').textContent = '';
+    // populate trade dropdown from live stage types
+    try {
+      const stageTypes = await apiFetch('/api/stage-types').then(r => r.json());
+      const sel = document.getElementById('wCrew');
+      const current = sel.value;
+      sel.innerHTML = '<option value="">— Select trade —</option>' +
+        stageTypes.map(s => `<option value="${s.stageName}">${s.stageName}</option>`).join('');
+      if (current) sel.value = current;
+    } catch(e) {}
     if (savedState) {
       document.getElementById('wName').value     = savedState.name     || '';
       document.getElementById('wRole').value     = savedState.role     || 'CREW_MEMBER';
