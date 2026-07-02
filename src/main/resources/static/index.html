@@ -133,9 +133,9 @@
 
     /* ── SIDEBAR ── */
     nav {
-      width: var(--nav-w); min-height: 100vh; background: var(--surface);
+      width: var(--nav-w); height: 100vh; background: var(--surface);
       border-right: 1px solid var(--border); display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; z-index: 200;
+      position: fixed; top: 0; left: 0; z-index: 200; overflow: hidden;
     }
     .nav-brand {
       padding: 1.4rem 1.25rem 1rem;
