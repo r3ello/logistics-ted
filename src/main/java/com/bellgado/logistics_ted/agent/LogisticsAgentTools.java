@@ -25,6 +25,7 @@ import com.bellgado.logistics_ted.repository.SupplierInventoryRepository;
 import com.bellgado.logistics_ted.repository.SupplierRepository;
 import com.bellgado.logistics_ted.repository.WarehouseRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
+import com.bellgado.logistics_ted.service.AuditLogService;
 import com.bellgado.logistics_ted.service.OrderHistoryService;
 import com.bellgado.logistics_ted.service.OrderHistoryService.RecordResult;
 import com.bellgado.logistics_ted.service.OrderHistoryService.Source;
@@ -80,6 +81,7 @@ public class LogisticsAgentTools {
     private final RoutingProperties routingProperties;
     private final ObjectMapper objectMapper;
     private final OrderHistoryService orderHistory;
+    private final AuditLogService audit;
 
     // ========================================================================
     // LOOKUP TOOLS
@@ -274,6 +276,9 @@ public class LogisticsAgentTools {
             long elapsed = System.currentTimeMillis() - t0;
 
             OrderResponse decorated = persistFromAgent(req, resp, elapsed);
+            auditFromAgent("calculate",
+                decorated.orderId() != null ? decorated.orderId().toString() : null,
+                Map.<String, Object>of("destinationHouseId", destId, "materialsCount", materialsMap.size()));
             return formatOrderResponse(decorated);
         } catch (RouteOptimizationService.OrderValidationException e) {
             return "Error: " + e.getMessage();
@@ -297,6 +302,7 @@ public class LogisticsAgentTools {
         try {
             UUID id = UUID.fromString(orderId.trim());
             orderHistory.recordChoice(id, objective.trim(), null);
+            auditFromAgent("choose", id.toString(), Map.<String, Object>of("objective", objective.trim()));
             return "Recorded choice: order " + id + " → " + objective + ".";
         } catch (IllegalArgumentException e) {
             return "Error: orderId must be a UUID string (got: " + orderId + ").";
@@ -646,6 +652,15 @@ public class LogisticsAgentTools {
         } catch (RuntimeException ex) {
             log.warn("agent: history persist failed — returning result without IDs", ex);
             return resp;
+        }
+    }
+
+    /** Bitácora entry for an agent-triggered write. Failures degrade silently (warn only). */
+    private void auditFromAgent(String action, String entityId, Map<String, Object> details) {
+        try {
+            audit.recordTelegramAction(AgentContext.getTelegramChatId(), action, "order", entityId, details);
+        } catch (RuntimeException ex) {
+            log.warn("agent: audit record failed for action {}", action, ex);
         }
     }
 

@@ -269,7 +269,7 @@
       display: flex; flex-direction: column; gap: 0.2rem;
       font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;
     }
-    .history-filter select {
+    .history-filter select, .history-filter input[type="text"], .history-filter input[type="date"] {
       background: var(--surface); color: var(--text);
       border: 1px solid var(--border); border-radius: 6px;
       padding: 0.35rem 0.5rem; font-size: 0.85rem;
@@ -1580,6 +1580,9 @@
       <div class="nav-item nav-sub" id="navHistory" onclick="showView('history')">
         <span class="nav-icon">📜</span> <span id="navHistoryLabel">Route History</span>
       </div>
+      <div class="nav-item nav-sub" id="navAuditLog" onclick="showView('auditlog')" style="display:none">
+        <span class="nav-icon">🧾</span> <span id="navAuditLogLabel">Audit Log</span>
+      </div>
     </div>
     <div class="nav-item" id="navManagementGroup" onclick="toggleNavGroup('management')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
       <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">⚙️</span><span id="navManagementGroupLabel">Management</span></span>
@@ -1962,6 +1965,53 @@
     </div>
   </div>
 
+  <!-- VIEW: AUDIT LOG (bitácora) — append-only record of who executed what. Read-only, admin only. -->
+  <div class="view" id="view-auditlog">
+    <div class="history-list-card">
+      <div class="history-filter-bar">
+        <label class="history-filter">
+          <span id="auditFilterUserLbl">User</span>
+          <input type="text" id="auditFilterUser" autocomplete="off">
+        </label>
+        <label class="history-filter">
+          <span id="auditFilterActionLbl">Action</span>
+          <select id="auditFilterAction">
+            <option value="">— all —</option>
+            <option value="create">create</option>
+            <option value="update">update</option>
+            <option value="delete">delete</option>
+            <option value="login_success">login_success</option>
+            <option value="login_failure">login_failure</option>
+            <option value="calculate">calculate</option>
+            <option value="choose">choose</option>
+            <option value="view">view</option>
+            <option value="check_in">check_in</option>
+            <option value="check_out">check_out</option>
+            <option value="start">start</option>
+            <option value="finish">finish</option>
+          </select>
+        </label>
+        <label class="history-filter">
+          <span id="auditFilterEntityLbl">Entity</span>
+          <input type="text" id="auditFilterEntity" autocomplete="off">
+        </label>
+        <label class="history-filter">
+          <span id="auditFilterFromLbl">From</span>
+          <input type="date" id="auditFilterFrom">
+        </label>
+        <label class="history-filter">
+          <span id="auditFilterToLbl">To</span>
+          <input type="date" id="auditFilterTo">
+        </label>
+        <button class="btn btn-ghost history-refresh-btn" id="auditRefreshBtn" title="Refresh">⟳</button>
+      </div>
+      <div id="auditList" style="overflow-x:auto">
+        <div class="state-msg" style="padding:2rem"><div class="spinner"></div></div>
+      </div>
+      <div class="history-pager" id="auditPager"></div>
+    </div>
+  </div>
+
   <!-- VIEW: WAREHOUSES (company depots — tier 2) -->
   <div class="view" id="view-warehouses">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem">
@@ -2231,6 +2281,10 @@
       pageTitle_order:'Route Calculator', pageSub_order:'Calculate optimal pickup route',
       pageTitle_map:'Location Overview', pageSub_map:'Houses on map',
       pageTitle_history:'Order Route History', pageSub_history:'Past route recommendations — immutable record',
+      pageTitle_auditlog:'Audit Log', pageSub_auditlog:'Who did what — append-only record', navAuditLog:'Audit Log',
+      auditFilterUser:'User', auditFilterAction:'Action', auditFilterEntity:'Entity', auditFilterFrom:'From', auditFilterTo:'To',
+      auditColWhen:'When', auditColWho:'Who', auditColAction:'Action', auditColEntity:'Entity', auditColEndpoint:'Endpoint', auditColStatus:'Status', auditColIp:'IP',
+      auditNoResults:'No audit entries for this filter.', auditAnonymous:'anonymous',
       pageTitle_scaffold:'Scaffold Route', pageSub_scaffold:'Find closest available scaffold for a destination house',
       pageTitle_electric:'Electric Boxes', pageSub_electric:'Manage electrical panel layouts per house',
       pageTitle_attendance:'Check-in Log', pageSub_attendance:'Worker check-in / check-out times per day',
@@ -2498,6 +2552,10 @@
       pageTitle_order:'Калкулатор на маршрут', pageSub_order:'Изчисли оптимален маршрут',
       pageTitle_map:'Преглед на локации', pageSub_map:'Къщи на картата',
       pageTitle_history:'История на маршрута на поръчката', pageSub_history:'Минали препоръки за маршрут — неизменен запис',
+      pageTitle_auditlog:'Одит дневник', pageSub_auditlog:'Кой какво е направил — неизменен запис', navAuditLog:'Одит дневник',
+      auditFilterUser:'Потребител', auditFilterAction:'Действие', auditFilterEntity:'Обект', auditFilterFrom:'От', auditFilterTo:'До',
+      auditColWhen:'Кога', auditColWho:'Кой', auditColAction:'Действие', auditColEntity:'Обект', auditColEndpoint:'Ендпойнт', auditColStatus:'Статус', auditColIp:'IP',
+      auditNoResults:'Няма записи за този филтър.', auditAnonymous:'анонимен',
       pageTitle_scaffold:'Маршрут за скеле', pageSub_scaffold:'Намери най-близко налично скеле за дестинация',
       pageTitle_electric:'Електрически табла', pageSub_electric:'Управление на електрически инсталации по къщи',
       pageTitle_attendance:'Дневник присъствия', pageSub_attendance:'Влизане и излизане на работници по дни',
@@ -2794,6 +2852,7 @@
     else if (activeView === 'warehouses')  renderFacilityList('warehouse');
     else if (activeView === 'suppliers')   renderFacilityList('supplier');
     else if (activeView === 'history')     loadHistory();
+    else if (activeView === 'auditlog')    loadAuditLog(_alState.page);
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
     else if (activeView === 'workeraccess') { waBuildChipBar(); }
     // always re-render stage matrix if it is the active view (column headers come from DB in both languages)
@@ -2830,6 +2889,10 @@
     document.getElementById('navMap').querySelector('span:last-child').textContent       = t('navMap');
     document.getElementById('navHistoryLabel').textContent  = t('navHistory');
     const facT = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+    facT('navAuditLogLabel','navAuditLog');
+    facT('auditFilterUserLbl','auditFilterUser'); facT('auditFilterActionLbl','auditFilterAction');
+    facT('auditFilterEntityLbl','auditFilterEntity'); facT('auditFilterFromLbl','auditFilterFrom');
+    facT('auditFilterToLbl','auditFilterTo');
     facT('navWarehousesLabel','navWarehouses'); facT('navSuppliersLabel','navSuppliers');
     facT('whTitle','whTitle'); facT('supTitle','supTitle');
     facT('whAddBtn','whAdd'); facT('supAddBtn','supAdd');
@@ -3082,7 +3145,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false };
   const _navGroupConfig = {
@@ -3110,11 +3173,13 @@
   function showView(name) {
     // Crew leaders are confined to their own workspace, even via hash / back button.
     if (currentUser?.role === 'crew_leader') name = 'myorders';
+    // Audit log is admin-only — bounce anyone else, even via hash.
+    if (name === 'auditlog' && currentUser?.role !== 'admin') name = 'dashboard';
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     document.getElementById(`view-${name}`).classList.add('active');
-    const navIdMap = { stagematrix: 'navStageMatrix' };
+    const navIdMap = { stagematrix: 'navStageMatrix', auditlog: 'navAuditLog' };
     const navId = navIdMap[name] || `nav${name.charAt(0).toUpperCase() + name.slice(1)}`;
     const navEl = document.getElementById(navId); if (navEl) navEl.classList.add('active');
 
@@ -3128,6 +3193,7 @@
     if (name === 'warehouses')  loadWarehouses();
     if (name === 'suppliers')   loadSuppliers();
     if (name === 'history')     loadHistory();
+    if (name === 'auditlog')    loadAuditLog();
     if (name === 'scaffold')    loadScaffoldHouses();
     if (name === 'crews')       loadOrgChart();
     if (name === 'electric')    ebInit();
@@ -8590,6 +8656,8 @@
     document.getElementById('addHouseBtn').style.display = user.role === 'admin' ? '' : 'none';
     const histAllWrap = document.getElementById('historyFilterAllUsersWrap');
     if (histAllWrap) histAllWrap.style.display = user.role === 'admin' ? '' : 'none';
+    const navAudit = document.getElementById('navAuditLog');
+    if (navAudit) navAudit.style.display = user.role === 'admin' ? '' : 'none';
     // Hide nav sections not relevant for crew leaders
     // Nav visibility by role, set explicitly every login so it's restored for admin/user after a
     // crew-leader session (inline display would otherwise stick). Crew leaders get only their workspace.
@@ -9722,6 +9790,96 @@
   function escapeHtml(s) {
     if (s == null) return '';
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ── AUDIT LOG VIEW (bitácora) ────────────────────────────────────────────────
+  // Admin-only, read-only browsing of the append-only audit_log table. Filters are
+  // server-side (GET /api/audit) because audit volume grows much faster than orders.
+  const AUDIT_PAGE_SIZE = 20;
+  let _alState = { page: 0, total: 0, totalPages: 0 };
+  let _alWired = false;
+
+  function wireAuditFilters() {
+    if (_alWired) return;
+    _alWired = true;
+    ['auditFilterAction', 'auditFilterFrom', 'auditFilterTo'].forEach(id =>
+      document.getElementById(id).addEventListener('change', () => loadAuditLog(0)));
+    ['auditFilterUser', 'auditFilterEntity'].forEach(id =>
+      document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') loadAuditLog(0); }));
+    document.getElementById('auditRefreshBtn').addEventListener('click', () => loadAuditLog(_alState.page));
+  }
+
+  async function loadAuditLog(page = 0) {
+    wireAuditFilters();
+    const list = document.getElementById('auditList');
+    list.innerHTML = `<div class="state-msg" style="padding:2rem"><div class="spinner"></div></div>`;
+    try {
+      const params = new URLSearchParams({ page, size: AUDIT_PAGE_SIZE });
+      const username = document.getElementById('auditFilterUser').value.trim();
+      const action   = document.getElementById('auditFilterAction').value;
+      const entity   = document.getElementById('auditFilterEntity').value.trim();
+      const from     = document.getElementById('auditFilterFrom').value;
+      const to       = document.getElementById('auditFilterTo').value;
+      if (username) params.set('username', username);
+      if (action)   params.set('action', action);
+      if (entity)   params.set('entity', entity);
+      if (from)     params.set('from', from);
+      if (to)       params.set('to', to);
+      const res = await apiFetch(`/api/audit?${params.toString()}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      _alState = { page: data.page, total: data.total, totalPages: data.totalPages };
+      renderAuditList(data.items || []);
+    } catch (e) {
+      list.innerHTML = `<div class="state-msg" style="padding:2rem;color:var(--red)">${t('errorPrefix')} ${escapeHtml(e.message)}</div>`;
+    }
+  }
+
+  function renderAuditList(items) {
+    const list = document.getElementById('auditList');
+    if (items.length === 0) {
+      list.innerHTML = `<div class="state-msg" style="padding:2rem;color:var(--muted)">${t('auditNoResults')}</div>`;
+    } else {
+      list.innerHTML = `
+        <table class="att-table">
+          <thead><tr>
+            <th>${t('auditColWhen')}</th><th>${t('auditColWho')}</th><th>${t('auditColAction')}</th>
+            <th>${t('auditColEntity')}</th><th>${t('auditColEndpoint')}</th><th>${t('auditColStatus')}</th>
+            <th>${t('auditColIp')}</th>
+          </tr></thead>
+          <tbody>${items.map(renderAuditRow).join('')}</tbody>
+        </table>`;
+    }
+    const { page, totalPages, total } = _alState;
+    const pager = document.getElementById('auditPager');
+    pager.innerHTML = `
+      <button id="auditPrev" ${page === 0 ? 'disabled' : ''}>← prev</button>
+      <span>page ${page + 1} / ${Math.max(totalPages, 1)} · ${total} total</span>
+      <button id="auditNext" ${page + 1 >= totalPages ? 'disabled' : ''}>next →</button>`;
+    pager.querySelector('#auditPrev').addEventListener('click', () => loadAuditLog(_alState.page - 1));
+    pager.querySelector('#auditNext').addEventListener('click', () => loadAuditLog(_alState.page + 1));
+  }
+
+  function renderAuditRow(a) {
+    const who = a.username ? a.username : (a.telegramChatId ? `tg-${a.telegramChatId}` : t('auditAnonymous'));
+    const roleTag = a.role ? ` <span class="history-tag">${escapeHtml(a.role)}</span>` : '';
+    const entity = a.entityType
+      ? `${escapeHtml(a.entityType)}${a.entityId ? ' #' + escapeHtml(a.entityId) : ''}` : '—';
+    const endpoint = a.httpPath
+      ? `${escapeHtml(a.httpMethod || '')} ${escapeHtml(a.httpPath)}`
+      : (a.source === 'telegram' ? 'telegram' : '—');
+    const st = a.httpStatus;
+    const stColor = st == null ? 'var(--muted)' : st < 400 ? 'var(--green)' : st < 500 ? '#e8a13c' : 'var(--red)';
+    return `
+      <tr>
+        <td style="white-space:nowrap">${fmtWhen(a.at)}</td>
+        <td>${escapeHtml(who)}${roleTag}</td>
+        <td>${escapeHtml(a.action || '')}</td>
+        <td>${entity}</td>
+        <td style="font-family:monospace;font-size:.78rem">${endpoint}</td>
+        <td style="color:${stColor};font-weight:600">${st ?? '—'}</td>
+        <td style="white-space:nowrap">${escapeHtml(a.clientIp || '—')}</td>
+      </tr>`;
   }
 
   async function loadOrderDetail(orderId) {
