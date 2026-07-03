@@ -3,12 +3,17 @@ package com.bellgado.logistics_ted.web;
 import com.bellgado.logistics_ted.security.AppUserDetailsService.AuthenticatedUser;
 import com.bellgado.logistics_ted.security.JwtService;
 import com.bellgado.logistics_ted.security.JwtService.IssuedToken;
+import com.bellgado.logistics_ted.service.AuditLogService;
 import com.bellgado.logistics_ted.web.dto.LoginRequest;
 import com.bellgado.logistics_ted.web.dto.LoginResponse;
 import com.bellgado.logistics_ted.web.dto.UserResponse;
+import com.bellgado.logistics_ted.web.logging.RequestCorrelationFilter;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,12 +30,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
+    private final AuditLogService audit;
 
-    public AuthController(AuthenticationManager authManager, JwtService jwtService) {
+    public AuthController(AuthenticationManager authManager, JwtService jwtService,
+                          AuditLogService audit) {
         this.authManager = authManager;
         this.jwtService = jwtService;
+        this.audit = audit;
     }
 
     @PostMapping("/login")
@@ -45,10 +55,12 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(body.username().trim(), body.password())
             );
         } catch (BadCredentialsException | org.springframework.security.core.userdetails.UsernameNotFoundException ex) {
+            auditLoginFailure("/api/login", body.username().trim(), "bad_credentials", 401);
             return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials."));
         }
 
         AuthenticatedUser user = (AuthenticatedUser) auth.getPrincipal();
+        auditLoginSuccess(AuditLogService.actorOf(user), "/api/login");
         IssuedToken issued = jwtService.issue(user.getUserId(), user.getUsername(), user.getRoleLabel());
         UserResponse userPayload = new UserResponse(user.getUserId(), user.getUsername(), user.getRoleLabel());
         return ResponseEntity.ok(LoginResponse.bearer(issued.token(), issued.expiresInSeconds(), userPayload));
@@ -75,5 +87,24 @@ public class AuthController {
         return (body == null
                 || StringUtils.isBlank(body.username())
                 || StringUtils.isBlank(body.password()));
+    }
+
+    // Audit failures must never break the login flow — swallow and warn.
+    private void auditLoginSuccess(AuditLogService.Actor actor, String endpoint) {
+        try {
+            audit.recordLoginSuccess(actor, endpoint,
+                MDC.get(RequestCorrelationFilter.CLIENT_IP), MDC.get(RequestCorrelationFilter.REQUEST_ID));
+        } catch (RuntimeException ex) {
+            log.warn("audit: failed to record login success on {}", endpoint, ex);
+        }
+    }
+
+    private void auditLoginFailure(String endpoint, String attemptedUsername, String reason, int status) {
+        try {
+            audit.recordLoginFailure(endpoint, attemptedUsername, reason, status,
+                MDC.get(RequestCorrelationFilter.CLIENT_IP), MDC.get(RequestCorrelationFilter.REQUEST_ID));
+        } catch (RuntimeException ex) {
+            log.warn("audit: failed to record login failure on {}", endpoint, ex);
+        }
     }
 }

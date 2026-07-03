@@ -32,10 +32,11 @@ public class RequestCorrelationFilter extends OncePerRequestFilter {
     /** MDC key for the per-request correlation id. Read by {@code GlobalExceptionHandler}. */
     public static final String REQUEST_ID = "requestId";
     public static final String REQUEST_ID_HEADER = "X-Request-Id";
+    /** MDC key for the caller IP (X-Forwarded-For aware). Read by the audit-log layer. */
+    public static final String CLIENT_IP = "clientIp";
 
     private static final String METHOD = "httpMethod";
     private static final String PATH = "httpPath";
-    private static final String CLIENT_IP = "clientIp";
     private static final String STATUS = "httpStatus";
     private static final String DURATION = "durationMs";
 

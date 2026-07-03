@@ -7,9 +7,14 @@ import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import com.bellgado.logistics_ted.security.JwtService;
+import com.bellgado.logistics_ted.service.AuditLogService;
+import com.bellgado.logistics_ted.web.logging.RequestCorrelationFilter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,22 +23,27 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class WorkerCredentialController {
 
+    private static final Logger log = LoggerFactory.getLogger(WorkerCredentialController.class);
+
     private final WorkerRepository     workers;
     private final CrewRepository       crews;
     private final HouseStageRepository houseStages;
     private final HouseRepository      houses;
     private final PasswordEncoder      encoder;
     private final JwtService           jwt;
+    private final AuditLogService      audit;
 
     public WorkerCredentialController(WorkerRepository workers, CrewRepository crews,
                                       HouseStageRepository houseStages, HouseRepository houses,
-                                      PasswordEncoder encoder, JwtService jwt) {
+                                      PasswordEncoder encoder, JwtService jwt,
+                                      AuditLogService audit) {
         this.workers     = workers;
         this.crews       = crews;
         this.houseStages = houseStages;
         this.houses      = houses;
         this.encoder     = encoder;
         this.jwt         = jwt;
+        this.audit       = audit;
     }
 
     /** List all workers (grouped by crew) with credential status — no password exposed. */
@@ -142,25 +152,32 @@ public class WorkerCredentialController {
             return ResponseEntity.badRequest().body(Map.of("error", "Username and password required."));
 
         Worker w = workers.findByUsername(username).orElse(null);
-        if (w == null || w.getPasswordHash() == null || !encoder.matches(password, w.getPasswordHash()))
+        if (w == null || w.getPasswordHash() == null || !encoder.matches(password, w.getPasswordHash())) {
+            auditLoginFailure(username, "bad_credentials", 401);
             return ResponseEntity.status(401).body(Map.of("error", "Invalid username or password."));
+        }
 
         // validate that the worker's crew is assigned to the scanned house
         String scannedToken = body.get("houseToken") != null ? body.get("houseToken").toString() : null;
         if (scannedToken != null && !scannedToken.isBlank()) {
             var house = houses.findByCheckinToken(scannedToken).orElse(null);
-            if (house == null)
+            if (house == null) {
+                auditLoginFailure(username, "invalid_checkin_token", 403);
                 return ResponseEntity.status(403).body(Map.of("error", "Invalid check-in point."));
+            }
             if (w.getCrew() != null) {
                 List<Object[]> assigned = houseStages.findAssignedHousesForCrew(w.getCrew().getId());
                 boolean assignedToHouse = assigned.stream()
                     .anyMatch(row -> house.getId().equals(((Number) row[0]).intValue()));
-                if (!assignedToHouse)
+                if (!assignedToHouse) {
+                    auditLoginFailure(username, "house_mismatch", 403);
                     return ResponseEntity.status(403).body(Map.of("error",
                         "Не сте назначен на тази обект. / You are not assigned to this house."));
+                }
             }
         }
 
+        auditLoginSuccess(w);
         var issued = jwt.issue(w.getId(), w.getUsername(), "worker");
 
         // resolve house via crew
@@ -179,5 +196,26 @@ public class WorkerCredentialController {
         res.put("houseToken", houseToken);
         res.put("houseName",  houseName);
         return ResponseEntity.ok(res);
+    }
+
+    // Audit failures must never break the login flow — swallow and warn.
+    private void auditLoginSuccess(Worker w) {
+        try {
+            audit.recordLoginSuccess(
+                new AuditLogService.Actor("worker", null, w.getId(), null, w.getUsername(), "worker"),
+                "/api/worker-login",
+                MDC.get(RequestCorrelationFilter.CLIENT_IP), MDC.get(RequestCorrelationFilter.REQUEST_ID));
+        } catch (RuntimeException ex) {
+            log.warn("audit: failed to record worker-login success", ex);
+        }
+    }
+
+    private void auditLoginFailure(String attemptedUsername, String reason, int status) {
+        try {
+            audit.recordLoginFailure("/api/worker-login", attemptedUsername, reason, status,
+                MDC.get(RequestCorrelationFilter.CLIENT_IP), MDC.get(RequestCorrelationFilter.REQUEST_ID));
+        } catch (RuntimeException ex) {
+            log.warn("audit: failed to record worker-login failure", ex);
+        }
     }
 }
