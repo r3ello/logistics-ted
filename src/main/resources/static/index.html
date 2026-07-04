@@ -4111,28 +4111,47 @@
     hSel.innerHTML = '<option value="">🏠 Select a house…</option>' +
       houses.map(h => `<option value="${h.id}">🏠 ${h.name} — ${h.location}</option>`).join('');
     cSel.innerHTML = '<option value="">👥 Select a crew…</option>' +
-      crews.map(c => `<option value="${c.id}">👥 ${c.name}${c.houseName ? ' · 🏠 ' + c.houseName : ''}</option>`).join('');
+      crews.map(c => `<option value="${c.id}">👥 ${c.name}</option>`).join('');
 
+    _chAllCrews = crews;
     _hMap.invalidateSize();
   }
 
-  async function onMapHouseSelectChange() {
+  let _chAllCrews = [];
+
+  function onMapHouseSelectChange() {
     const houseId = document.getElementById('mapChHouseSelect').value;
     const statusEl = document.getElementById('mapChStatus');
+    const cSel = document.getElementById('mapChCrewSelect');
+    const membersEl = document.getElementById('mapChMembers');
+
+    if (membersEl) { membersEl.innerHTML = ''; membersEl.style.display = 'none'; }
     if (!houseId) {
       if (statusEl) statusEl.textContent = '';
+      cSel.innerHTML = '<option value="">👥 Select a crew…</option>' +
+        _chAllCrews.map(c => `<option value="${c.id}">👥 ${c.name}</option>`).join('');
       renderCrewHouseMap(null, null);
       return;
     }
-    const allCrews = await apiFetch('/api/crews').then(r => r.json()).catch(() => []);
-    const auto = Array.isArray(allCrews) ? allCrews.find(c => c.houseId === parseInt(houseId)) : null;
-    if (auto) {
-      document.getElementById('mapChCrewSelect').value = String(auto.id);
-      if (statusEl) statusEl.innerHTML = `<span onclick="renderCrewHouseMap('${houseId}','${auto.id}')" style="color:#3ecf6e;cursor:pointer;text-decoration:underline dotted" title="Click to re-show crew">👥 ${auto.name}</span>`;
-      renderCrewHouseMap(houseId, String(auto.id));
+
+    const hid = parseInt(houseId);
+    const assigned = _chAllCrews.filter(c =>
+      (Array.isArray(c.assignedHouses) && c.assignedHouses.some(h => h.id === hid)) ||
+      c.houseId === hid
+    );
+
+    cSel.innerHTML = '<option value="">👥 Select a crew…</option>' +
+      assigned.map(c => `<option value="${c.id}">👥 ${c.name}</option>`).join('');
+
+    if (assigned.length === 0) {
+      if (statusEl) statusEl.innerHTML = `<span style="color:#9aa3be">ℹ️ No crews assigned to this house</span>`;
+      renderCrewHouseMap(houseId, null);
+    } else if (assigned.length === 1) {
+      cSel.value = String(assigned[0].id);
+      if (statusEl) statusEl.textContent = '';
+      renderCrewHouseMap(houseId, String(assigned[0].id));
     } else {
-      document.getElementById('mapChCrewSelect').value = '';
-      if (statusEl) statusEl.innerHTML = `<span style="color:#9aa3be">ℹ️ No crew assigned to this house</span>`;
+      if (statusEl) statusEl.innerHTML = `<span style="color:#f5a623">${assigned.length} crews on this house — pick one</span>`;
       renderCrewHouseMap(houseId, null);
     }
   }
