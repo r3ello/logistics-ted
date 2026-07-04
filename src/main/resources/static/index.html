@@ -1387,7 +1387,10 @@
         <option value="">👥 Select a crew…</option>
       </select>
       <div id="mapChStatus" style="font-size:0.75rem;color:#9aa3be;text-align:center;min-height:1rem"></div>
-      <div id="mapChMembers" style="display:none;max-height:220px;overflow-y:auto;border-top:1px solid #2e3250;padding-top:6px;margin-top:2px"></div>
+      <div id="mapChMembersToggle" onclick="const m=document.getElementById('mapChMembers');const a=document.getElementById('mapChMembersArrow');const vis=m.style.display!=='none';m.style.display=vis?'none':'block';a.textContent=vis?'▶':'▼'" style="display:none;cursor:pointer;font-size:0.72rem;color:#9aa3be;padding:4px 2px;border-top:1px solid #2e3250;margin-top:2px;user-select:none">
+        <span id="mapChMembersArrow">▶</span> <span id="mapChMembersLabel">Members</span>
+      </div>
+      <div id="mapChMembers" style="display:none;max-height:180px;overflow-y:auto;padding-top:4px"></div>
     </div>
     <!-- Travel Pay panel -->
     <div id="mapTravelPayPanel" style="display:none;position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:1000;background:#1a1d27;border:1px solid #3ecf6e;border-radius:10px;padding:10px 14px;box-shadow:0 2px 16px rgba(0,0,0,0.5);min-width:300px;display:none;flex-direction:column;gap:8px">
@@ -4124,8 +4127,10 @@
     const statusEl = document.getElementById('mapChStatus');
     const cSel = document.getElementById('mapChCrewSelect');
     const membersEl = document.getElementById('mapChMembers');
+    const toggleEl  = document.getElementById('mapChMembersToggle');
 
     if (membersEl) { membersEl.innerHTML = ''; membersEl.style.display = 'none'; }
+    if (toggleEl)  { toggleEl.style.display = 'none'; }
     if (!houseId) {
       if (statusEl) statusEl.textContent = '';
       cSel.innerHTML = '<option value="">👥 Select a crew…</option>' +
@@ -4199,7 +4204,12 @@
 
     // — Crew member markers + list panel —
     const membersEl = document.getElementById('mapChMembers');
-    if (membersEl) { membersEl.innerHTML = ''; membersEl.style.display = 'none'; }
+    const toggleEl2 = document.getElementById('mapChMembersToggle');
+    const arrowEl   = document.getElementById('mapChMembersArrow');
+    const labelEl   = document.getElementById('mapChMembersLabel');
+    if (membersEl)  { membersEl.innerHTML = ''; membersEl.style.display = 'none'; }
+    if (toggleEl2)  { toggleEl2.style.display = 'none'; }
+    if (arrowEl)    arrowEl.textContent = '▶';
     if (crewId) {
       const roleIcon  = { CREW_MANAGER:'👔', CREW_LEADER:'🦺', CREW_MEMBER:'👷' };
       const roleColor = { CREW_MANAGER:'#a78bfa', CREW_LEADER:'#f5a623', CREW_MEMBER:'#e2e8f0' };
@@ -4241,9 +4251,11 @@
         bounds.push([w.lat, w.lng]);
       });
 
-      // always show member list in the panel
+      // always show member list in the panel (collapsed by default)
       if (membersEl && members.length) {
-        membersEl.style.display = 'block';
+        membersEl.style.display = 'none';
+        if (toggleEl2) { toggleEl2.style.display = 'block'; }
+        if (labelEl)   { labelEl.textContent = `Members (${members.length})`; }
         membersEl.innerHTML = members.map(w => {
           const icon  = roleIcon[w.role]  || '👷';
           const color = roleColor[w.role] || '#e2e8f0';
@@ -4257,7 +4269,8 @@
           </div>`;
         }).join('');
       } else if (membersEl) {
-        membersEl.style.display = 'block';
+        if (toggleEl2) { toggleEl2.style.display = 'block'; }
+        if (labelEl)   { labelEl.textContent = 'Members (0)'; }
         membersEl.innerHTML = `<div style="font-size:0.75rem;color:#9aa3be;text-align:center;padding:6px">No members in this crew</div>`;
       }
     }
