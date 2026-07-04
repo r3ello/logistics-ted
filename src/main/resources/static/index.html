@@ -1912,6 +1912,14 @@
         </div>
         <div id="cMembersList" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.3rem"></div>
       </div>
+      <div class="field">
+        <label>Crew Location</label>
+        <a id="cMapPickBtn" href="/map-picker.html" onclick="saveCrewModalState();localStorage.setItem('mapPinSource','crew');localStorage.setItem('returnToView','crews')" style="display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%">
+          🗺 Pin on map
+        </a>
+        <div id="cLocArea" style="display:none;margin-top:0.5rem;padding:0.5rem 0.75rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:0.82rem;color:var(--text)"></div>
+        <input type="hidden" id="cLat" /><input type="hidden" id="cLng" /><input type="hidden" id="cLocation" />
+      </div>
       <p class="modal-err" id="crewModalErr"></p>
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeCrewModal()">Cancel</button>
@@ -6842,7 +6850,65 @@
   let _memberSearchList = [];
   let _leaderSearchList = [];
 
-  async function openCrewModal(id) {
+  function _updateCrewMapBtn(lat, lng) {
+    const btn     = document.getElementById('cMapPickBtn');
+    const locArea = document.getElementById('cLocArea');
+    const btnStyle = 'display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%';
+    if (lat && lng) {
+      btn.style.background  = 'rgba(62,207,110,0.08)';
+      btn.style.borderColor = '#3ecf6e';
+      btn.style.color       = '#3ecf6e';
+      btn.textContent = '🗺 ✓ ' + parseFloat(lat).toFixed(5) + ', ' + parseFloat(lng).toFixed(5);
+      btn.href = '#';
+      btn.onclick = function(e) {
+        e.preventDefault();
+        document.getElementById('cLat').value = '';
+        document.getElementById('cLng').value = '';
+        document.getElementById('cLocation').value = '';
+        btn.style.cssText = btnStyle;
+        btn.textContent = '🗺 Pin on map';
+        btn.href = '/map-picker.html';
+        btn.onclick = function() { saveCrewModalState(); localStorage.setItem('mapPinSource','crew'); localStorage.setItem('returnToView','crews'); };
+        if (locArea) locArea.style.display = 'none';
+      };
+      if (locArea) { locArea.style.display = 'block'; locArea.textContent = '📍 ' + parseFloat(lat).toFixed(5) + ', ' + parseFloat(lng).toFixed(5); }
+    } else {
+      btn.style.cssText = btnStyle;
+      btn.textContent = '🗺 Pin on map';
+      btn.href = '/map-picker.html';
+      btn.onclick = function() { saveCrewModalState(); localStorage.setItem('mapPinSource','crew'); localStorage.setItem('returnToView','crews'); };
+      if (locArea) locArea.style.display = 'none';
+    }
+  }
+
+  function saveCrewModalState() {
+    const state = {
+      id:       _editingCrewId,
+      name:     document.getElementById('cName').value,
+      managerId: document.getElementById('cManager').value,
+      leaderId:  document.getElementById('cLeader').value,
+      houseId:   document.getElementById('cHouse').value,
+      stageOrder: document.getElementById('cStage').value,
+      members:  _crewMembers,
+      lat:      document.getElementById('cLat').value,
+      lng:      document.getElementById('cLng').value,
+      location: document.getElementById('cLocation').value,
+    };
+    localStorage.setItem('crewModalState', JSON.stringify(state));
+  }
+
+  async function restoreCrewModalState(coords) {
+    const raw = localStorage.getItem('crewModalState');
+    localStorage.removeItem('crewModalState');
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    _editingCrewId = state.id || null;
+    await loadDashboard();
+    setDashMode('crews');
+    await openCrewModal(_editingCrewId, state, coords);
+  }
+
+  async function openCrewModal(id, savedState, mapCoords) {
     _editingCrewId = id || null;
     _crewMembers = [];
     document.getElementById('crewModalTitle').textContent = id ? t('crewModalEdit') : t('crewModalAdd');
@@ -6892,7 +6958,20 @@
     document.getElementById('cMemberSearch').value = '';
     renderMemberDropdown('');
 
-    if (id) {
+    if (savedState) {
+      document.getElementById('cName').value = savedState.name || '';
+      mgrSel.value   = savedState.managerId  || '';
+      ldrSel.value   = savedState.leaderId   || '';
+      houseSel.value = savedState.houseId    || '';
+      stageSel.value = savedState.stageOrder || '';
+      _crewMembers   = savedState.members    || [];
+      const lat = mapCoords ? mapCoords.lat : (savedState.lat || '');
+      const lng = mapCoords ? mapCoords.lng : (savedState.lng || '');
+      document.getElementById('cLat').value      = lat;
+      document.getElementById('cLng').value      = lng;
+      document.getElementById('cLocation').value = savedState.location || '';
+      _updateCrewMapBtn(lat || null, lng || null);
+    } else if (id) {
       const crew = await apiFetch(`/api/crews/${id}`).then(r => r.json());
       document.getElementById('cName').value = crew.name || '';
       mgrSel.value   = crew.managerId  || '';
@@ -6900,6 +6979,10 @@
       houseSel.value = crew.houseId    || '';
       stageSel.value = crew.stageOrder || '';
       _crewMembers = (crew.members || []).map(m => m.id);
+      document.getElementById('cLat').value      = crew.lat  || '';
+      document.getElementById('cLng').value      = crew.lng  || '';
+      document.getElementById('cLocation').value = crew.location || '';
+      _updateCrewMapBtn(crew.lat, crew.lng);
     } else {
       document.getElementById('cName').value = '';
       mgrSel.value   = '';
@@ -6907,6 +6990,10 @@
       houseSel.value = '';
       stageSel.value = '';
       _crewMembers = [];
+      document.getElementById('cLat').value      = '';
+      document.getElementById('cLng').value      = '';
+      document.getElementById('cLocation').value = '';
+      _updateCrewMapBtn(null, null);
     }
     renderCrewMembers();
     document.getElementById('crewModal').classList.add('open');
@@ -7070,7 +7157,18 @@
     if (!name) { document.getElementById('crewModalErr').textContent = t('crewSaveFail') + ': name required.'; return; }
 
     const stageOrder = document.getElementById('cStage').value || null;
-    const body = { name, managerId: managerId ? parseInt(managerId) : null, houseId: houseId ? parseInt(houseId) : null, stageOrder: stageOrder ? parseInt(stageOrder) : null };
+    const cLat = document.getElementById('cLat').value;
+    const cLng = document.getElementById('cLng').value;
+    const cLoc = document.getElementById('cLocation').value;
+    const body = {
+      name,
+      managerId:  managerId  ? parseInt(managerId)  : null,
+      houseId:    houseId    ? parseInt(houseId)    : null,
+      stageOrder: stageOrder ? parseInt(stageOrder) : null,
+      location: cLoc || '',
+      lat: cLat ? parseFloat(cLat) : null,
+      lng: cLng ? parseFloat(cLng) : null,
+    };
     try {
       let res;
       if (_editingCrewId) {
@@ -8288,6 +8386,11 @@
 
       if (source === 'worker') {
         restoreWorkerModalState({ lat: coords.lat, lng: coords.lng });
+        return;
+      }
+
+      if (source === 'crew') {
+        restoreCrewModalState({ lat: coords.lat, lng: coords.lng });
         return;
       }
 

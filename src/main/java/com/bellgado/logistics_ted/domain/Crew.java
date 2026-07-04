@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "crew")
@@ -41,4 +42,13 @@ public class Crew {
     /** The stage type this crew is responsible for. */
     @Column(name = "stage_order")
     private Integer stageOrder;
+
+    @Column(nullable = false, length = 255, columnDefinition = "varchar(255) default ''")
+    private String location = "";
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal lat;
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal lng;
 }

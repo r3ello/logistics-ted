@@ -155,6 +155,15 @@ public class CrewController {
         if (body.containsKey("stageOrder")) {
             c.setStageOrder(body.get("stageOrder") == null ? null : Integer.parseInt(body.get("stageOrder").toString()));
         }
+        if (body.containsKey("location")) {
+            c.setLocation(body.get("location") == null ? "" : body.get("location").toString());
+        }
+        if (body.containsKey("lat")) {
+            c.setLat(body.get("lat") == null ? null : new java.math.BigDecimal(body.get("lat").toString()));
+        }
+        if (body.containsKey("lng")) {
+            c.setLng(body.get("lng") == null ? null : new java.math.BigDecimal(body.get("lng").toString()));
+        }
         return c;
     }
 
@@ -213,6 +222,9 @@ public class CrewController {
             m.put("houseId",   null);
             m.put("houseName", null);
         }
+        m.put("location", c.getLocation() != null ? c.getLocation() : "");
+        m.put("lat",      c.getLat());
+        m.put("lng",      c.getLng());
         return m;
     }
 }
