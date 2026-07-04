@@ -1387,6 +1387,7 @@
         <option value="">👥 Select a crew…</option>
       </select>
       <div id="mapChStatus" style="font-size:0.75rem;color:#9aa3be;text-align:center;min-height:1rem"></div>
+      <div id="mapChMembers" style="display:none;max-height:220px;overflow-y:auto;border-top:1px solid #2e3250;padding-top:6px;margin-top:2px"></div>
     </div>
     <!-- Travel Pay panel -->
     <div id="mapTravelPayPanel" style="display:none;position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:1000;background:#1a1d27;border:1px solid #3ecf6e;border-radius:10px;padding:10px 14px;box-shadow:0 2px 16px rgba(0,0,0,0.5);min-width:300px;display:none;flex-direction:column;gap:8px">
@@ -4169,13 +4170,17 @@
       }
     }
 
-    // — Crew member markers —
+    // — Crew member markers + list panel —
+    const membersEl = document.getElementById('mapChMembers');
+    if (membersEl) { membersEl.innerHTML = ''; membersEl.style.display = 'none'; }
     if (crewId) {
       const roleIcon  = { CREW_MANAGER:'👔', CREW_LEADER:'🦺', CREW_MEMBER:'👷' };
       const roleColor = { CREW_MANAGER:'#a78bfa', CREW_LEADER:'#f5a623', CREW_MEMBER:'#e2e8f0' };
       const crew = await apiFetch(`/api/crews/${crewId}`).then(r => r.json()).catch(() => null);
+      const members = allWorkers.filter(w => w.crewId === parseInt(crewId));
 
-      allWorkers.filter(w => w.crewId === parseInt(crewId) && w.lat && w.lng).forEach(w => {
+      // map markers for workers with coordinates
+      members.filter(w => w.lat && w.lng).forEach(w => {
         const icon  = roleIcon[w.role]  || '👷';
         const color = roleColor[w.role] || '#e2e8f0';
         const mIcon = L.divIcon({ html: `<div style="font-size:1.4rem;line-height:1">${icon}</div>`, className:'', iconAnchor:[12,12], popupAnchor:[0,-14] });
@@ -4208,6 +4213,26 @@
         _hMapMarkers.push(marker);
         bounds.push([w.lat, w.lng]);
       });
+
+      // always show member list in the panel
+      if (membersEl && members.length) {
+        membersEl.style.display = 'block';
+        membersEl.innerHTML = members.map(w => {
+          const icon  = roleIcon[w.role]  || '👷';
+          const color = roleColor[w.role] || '#e2e8f0';
+          return `<div style="display:flex;align-items:center;gap:8px;padding:4px 2px;border-bottom:1px solid #1a1d27">
+            <span style="font-size:1rem;line-height:1">${icon}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.82rem;font-weight:600;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${w.name}</div>
+              ${w.trade ? `<div style="font-size:0.7rem;color:#9aa3be">🔧 ${w.trade}</div>` : ''}
+            </div>
+            ${w.location ? `<div style="font-size:0.7rem;color:#7a85a3;white-space:nowrap">📍 ${w.location}</div>` : ''}
+          </div>`;
+        }).join('');
+      } else if (membersEl) {
+        membersEl.style.display = 'block';
+        membersEl.innerHTML = `<div style="font-size:0.75rem;color:#9aa3be;text-align:center;padding:6px">No members in this crew</div>`;
+      }
     }
 
     if (bounds.length) _hMap.fitBounds(L.latLngBounds(bounds), { padding:[60,60] });
