@@ -1654,6 +1654,9 @@
       <div class="nav-item nav-sub" id="navHistory" onclick="showView('history')">
         <span class="nav-icon">📜</span> <span id="navHistoryLabel">Route History</span>
       </div>
+      <div class="nav-item nav-sub" id="navAuditLog" onclick="showView('auditlog')" style="display:none">
+        <span class="nav-icon">🧾</span> <span id="navAuditLogLabel">Audit Log</span>
+      </div>
     </div>
     <div class="nav-item" id="navOrgChartGroup" onclick="toggleNavGroup('orgchart')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
       <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🏢</span><span id="navOrgChartGroupLabel">Org Chart</span></span>
@@ -9363,7 +9366,8 @@
   function initApp() {
     if (currentUser?.role === 'crew_leader') { initCrewLeader(); return; }
     applyStoredTheme();
-    loadDashboard();
+    showView('stagematrix');
+    setNavActive('navStageMatrix');
     loadMaterialFields().then(applyPendingMapPin);
 
     if (localStorage.getItem('returnToHouseModal')) {
