@@ -38,6 +38,10 @@ ENV SERVER_PORT=8080
 # JVM container ergonomics: cap heap at 75% of cgroup memory, lower idle CPU usage.
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom"
 
+# Emit one ECS-JSON log object per line to stdout (Spring Boot 3.4+ structured logging) so a log
+# shipper can ingest it. Local `mvnw spring-boot:run` leaves this unset and stays human-readable.
+ENV LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs
+
 EXPOSE 8080
 
 # Spring Boot + Flyway can take 30-60s on a cold container; give it 90s grace before

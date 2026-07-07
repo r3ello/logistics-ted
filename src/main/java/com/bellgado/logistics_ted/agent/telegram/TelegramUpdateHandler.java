@@ -4,8 +4,10 @@ import com.bellgado.logistics_ted.agent.AgentContext;
 import com.bellgado.logistics_ted.agent.AgentProperties;
 import com.bellgado.logistics_ted.agent.AgentService;
 import com.bellgado.logistics_ted.agent.VoiceTranscriptionService;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
@@ -38,56 +40,65 @@ public class TelegramUpdateHandler {
         }
 
         long chatId = message.getChatId();
-        log.info("Telegram update from chatId {}", chatId);
+        // Correlate every log line for this update (bot runs off the web filter chain, so it sets
+        // its own MDC). Mirrors AgentContext but for logging. Cleared in the finally below.
+        MDC.put("requestId", UUID.randomUUID().toString());
+        MDC.put("source", "telegram");
+        MDC.put("chatId", Long.toString(chatId));
+        try {
+            log.info("Telegram update from chatId {}", chatId);
 
-        if (!agentProperties.getTelegram().getAllowedChatIds().isEmpty()
-                && !agentProperties.getTelegram().getAllowedChatIds().contains(chatId)) {
-            log.warn("Unauthorized access attempt from chatId: {}", chatId);
-            sendMessage(telegramClient, chatId, "Sorry, you are not authorized to use this bot.");
-            return;
-        }
-
-        if (hasText && "/start".equals(message.getText())) {
-            sendMessage(telegramClient, chatId,
-                "Hello! I'm your Tedhouse logistics assistant.\n\n" +
-                "Tell me what materials you need at which house, e.g.:\n" +
-                "  \"I need 150 m2 of plywood for house 25, truck starts at house 12\"\n\n" +
-                "I can also list houses, list materials, check inventory at a house, " +
-                "or check global stock totals.");
-            return;
-        }
-
-        String userText;
-        if (hasVoice) {
-            userText = transcribeVoice(message, telegramClient, chatId);
-            if (userText == null) {
+            if (!agentProperties.getTelegram().getAllowedChatIds().isEmpty()
+                    && !agentProperties.getTelegram().getAllowedChatIds().contains(chatId)) {
+                log.warn("Unauthorized access attempt from chatId: {}", chatId);
+                sendMessage(telegramClient, chatId, "Sorry, you are not authorized to use this bot.");
                 return;
             }
-        } else {
-            userText = message.getText();
-        }
 
-        try {
-            telegramClient.execute(SendChatAction.builder()
-                .chatId(chatId)
-                .action("typing")
-                .build());
-
-            String conversationId = "tg-" + chatId;
-            String response;
-            AgentContext.setTelegramChatId(chatId);
-            try {
-                response = agentService.chat(conversationId, userText);
-            } finally {
-                AgentContext.clear();
+            if (hasText && "/start".equals(message.getText())) {
+                sendMessage(telegramClient, chatId,
+                    "Hello! I'm your Tedhouse logistics assistant.\n\n" +
+                    "Tell me what materials you need at which house, e.g.:\n" +
+                    "  \"I need 150 m2 of plywood for house 25, truck starts at house 12\"\n\n" +
+                    "I can also list houses, list materials, check inventory at a house, " +
+                    "or check global stock totals.");
+                return;
             }
 
-            sendLongMessage(telegramClient, chatId, response);
+            String userText;
+            if (hasVoice) {
+                userText = transcribeVoice(message, telegramClient, chatId);
+                if (userText == null) {
+                    return;
+                }
+            } else {
+                userText = message.getText();
+            }
 
-        } catch (TelegramApiException e) {
-            log.error("Telegram API error for chatId {}: {}", chatId, e.getMessage(), e);
-            sendMessage(telegramClient, chatId,
-                "Sorry, something went wrong processing your request. Please try again.");
+            try {
+                telegramClient.execute(SendChatAction.builder()
+                    .chatId(chatId)
+                    .action("typing")
+                    .build());
+
+                String conversationId = "tg-" + chatId;
+                String response;
+                AgentContext.setTelegramChatId(chatId);
+                try {
+                    response = agentService.chat(conversationId, userText);
+                } finally {
+                    AgentContext.clear();
+                }
+
+                sendLongMessage(telegramClient, chatId, response);
+
+            } catch (TelegramApiException e) {
+                log.error("Telegram API error for chatId {}: {}", chatId, e.getMessage(), e);
+                sendMessage(telegramClient, chatId,
+                    "Sorry, something went wrong processing your request. Please try again.");
+            }
+        } finally {
+            MDC.clear();
         }
     }
 
