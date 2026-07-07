@@ -1614,6 +1614,9 @@
       <div class="nav-item nav-sub" id="navSuppliers" onclick="showView('suppliers')">
         <span class="nav-icon">🏭</span> <span id="navSuppliersLabel">Suppliers</span>
       </div>
+      <div class="nav-item nav-sub" id="navDocs" onclick="showView('dashboard');setDashMode('docs');setNavActive('navDocs')">
+        <span class="nav-icon">📁</span> <span id="navDocsLabel">Documentation</span>
+      </div>
       <div class="nav-item nav-sub" id="navScaffold" onclick="showView('dashboard');setDashMode('scaffold');setNavActive('navScaffold')">
         <span class="nav-icon">🏗️</span> <span id="navScaffoldLabel">Scaffold</span>
       </div>
@@ -1700,6 +1703,7 @@
       <button onclick="setDashMode('scaffold')"       id="dashModeScaffold"       style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏗️ Scaffold</button>
       <button onclick="setDashMode('travelpay')"      id="dashModeTravelpay"      style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 Travel Allowance</button>
       <button onclick="setDashMode('stages')"          id="dashModeStages"          style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🔢 House Stages</button>
+      <button onclick="setDashMode('docs')"            id="dashModeDocs"            style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">📁 Documentation</button>
     </div>
     <div class="totals" id="totals"></div>
     <div class="search-wrap">
@@ -4496,9 +4500,9 @@
   function setDashMode(mode) {
     _dashMode = mode;
     buildChipBar([]); // clear chip bar; render functions rebuild it if their mode uses chips
-    const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa', orders:'#00c9b1', deliveries:'#f97316', dashWarehouses:'#38bdf8', dashSuppliers:'#fb7185', stages:'#e879f9' };
+    const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa', orders:'#00c9b1', deliveries:'#f97316', dashWarehouses:'#38bdf8', dashSuppliers:'#fb7185', stages:'#e879f9', docs:'#f59e0b' };
     const darkText   = new Set(['scaffold']);
-    ['houses','workers','scaffold','crews','travelpay','orders','deliveries','dashWarehouses','dashSuppliers','stages'].forEach(m => {
+    ['houses','workers','scaffold','crews','travelpay','orders','deliveries','dashWarehouses','dashSuppliers','stages','docs'].forEach(m => {
       const btn = document.getElementById('dashMode' + m.charAt(0).toUpperCase() + m.slice(1));
       if (!btn) return;
       if (m === mode) { btn.style.background = modeColors[m]; btn.style.color = darkText.has(m) ? '#0f1117' : '#fff'; }
@@ -4602,7 +4606,89 @@
       buildSearchBar(null);
       document.getElementById('altSearchInput').placeholder = t('stagesSearchPlaceholder') || 'Search stage by name...';
       renderStagesDash();
+    } else if (mode === 'docs') {
+      if (searchWrap) searchWrap.style.display = 'none';
+      if (crudBar)    crudBar.style.display    = 'none';
+      if (totals)     totals.style.display     = 'none';
+      altSearch.style.display = 'none';
+      renderDocsDash();
     }
+  }
+
+  // ── DOCUMENTATION ────────────────────────────────────────────────────────────
+  const _docStructure = [
+    { id:'00', label:'Контрол', icon:'🛡️', color:'#4f8ef7', subs:[
+      '01_КОНТРОЛ_ОБЕКТИ','02_КОНТРОЛ_РАЗХОДИ','03_КОНТРОЛ_КЛИЕНТИ',
+      '04_КОНТРОЛ_ДОСТАВЧИЦИ','05_КОНТРОЛ_БРИГАДИ','06_КОНТРОЛ_АВТОПАРК','07_КОНТРОЛ_МАТЕРИАЛИ'
+    ]},
+    { id:'01', label:'Продажби', icon:'📈', color:'#3ecf6e', subs:[
+      '00_CRM','00_НОВИ_КЛИЕНТИ','01_ПРИ_АРХИТЕКТИ','02_ЗА_ОФЕРТА',
+      '03_ОФЕРТИ_ЗА_ПОТВЪРЖДЕНИЕ','04_ИЗПРАТЕНИ_ОФЕРТИ','05_ЗА_ДОГОВОР',
+      '06_ДОГОВОРИ_ЗА_ПОТВЪРЖДЕНИЕ','07_ИЗПРАТЕНИ_ДОГОВОРИ','08_ДОГОВОР_ПОДПИСАН',
+      '09_АУДИО','10_CRM_АРХИВ'
+    ]},
+    { id:'03', label:'Финанси', icon:'🧮', color:'#a78bfa', subs:[
+      'Счетоводство'
+    ]},
+    { id:'04', label:'Администрация и HR', icon:'👥', color:'#fb7185', subs:[
+      '01_ФИРМЕНИ_ДОКУМЕНТИ','02_HR','03_ДОГОВОРИ','07_ПЕРСОНАЛ'
+    ]},
+    { id:'05', label:'Стандарти и Шаблони', icon:'📋', color:'#00c9b1', subs:[
+      'Технически стандарти','ШАБЛОН_БРИГАДА_МАСТЪР','ШАБЛОН_ИЗДАВАНЕ_ФАКТУРИ',
+      'ШАБЛОН_МАТЕРИАЛИ','ШАБЛОН_ОТЧЕТИ','ШАБЛОН_РАЗПИСКА','ШАБЛОН_ДОГОВОРИ',
+      'ШАБЛОН_ЗАЯВКА','ШАБЛОН_ОФЕРТИ','ШАБЛОН_ПАПКИ','ШАБЛОН_ПРИКЛЮЧВАНЕ'
+    ]},
+    { id:'06', label:'Маркетинг', icon:'📣', color:'#f59e0b', subs:[] },
+    { id:'08', label:'Покупки', icon:'🛒', color:'#f97316', subs:[] },
+  ];
+
+  let _docOpenId = null;
+
+  function renderDocsDash() {
+    const grid = document.getElementById('grid');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+    grid.style.gap = '1rem';
+    grid.style.alignItems = 'start';
+    grid.innerHTML = _docStructure.map(dept => _docDeptCard(dept)).join('');
+    if (_docOpenId) {
+      const el = document.getElementById('docSubs_' + _docOpenId);
+      if (el) el.style.display = 'block';
+    }
+  }
+
+  function _docDeptCard(dept) {
+    const hasSubs = dept.subs.length > 0;
+    return `
+      <div style="background:#1a1d27;border:1px solid #2e3250;border-radius:12px;overflow:hidden;transition:box-shadow .2s"
+           onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.4)'" onmouseout="this.style.boxShadow=''">
+        <div onclick="_docToggle('${dept.id}')" style="display:flex;align-items:center;gap:12px;padding:1rem 1.1rem;cursor:pointer;background:#21253a;border-bottom:2px solid ${dept.color}20">
+          <div style="width:38px;height:38px;border-radius:10px;background:${dept.color}20;border:1.5px solid ${dept.color}40;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${dept.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.7rem;color:${dept.color};font-weight:700;letter-spacing:0.08em">${dept.id}</div>
+            <div style="font-size:0.92rem;font-weight:700;color:#e2e8f0;margin-top:1px">${dept.label}</div>
+          </div>
+          <div id="docArrow_${dept.id}" style="font-size:0.75rem;color:#9aa3be;transition:transform .2s">${hasSubs ? '▶' : ''}</div>
+        </div>
+        <div id="docSubs_${dept.id}" style="display:none;padding:0.5rem 0">
+          ${hasSubs ? dept.subs.map(s => `
+            <div style="display:flex;align-items:center;gap:10px;padding:0.5rem 1.1rem;cursor:default;transition:background .15s"
+                 onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background=''">
+              <span style="font-size:0.95rem">📄</span>
+              <span style="font-size:0.82rem;color:#c8d0e0;font-weight:500">${s}</span>
+            </div>`).join('') : `<div style="padding:0.75rem 1.1rem;font-size:0.8rem;color:#9aa3be">— Coming soon —</div>`}
+        </div>
+      </div>`;
+  }
+
+  function _docToggle(id) {
+    const subs  = document.getElementById('docSubs_'  + id);
+    const arrow = document.getElementById('docArrow_' + id);
+    if (!subs) return;
+    const open = subs.style.display !== 'none';
+    subs.style.display  = open ? 'none'  : 'block';
+    if (arrow) arrow.textContent = open ? '▶' : '▼';
+    _docOpenId = open ? null : id;
   }
 
   async function renderFacilityDash(kind) {
