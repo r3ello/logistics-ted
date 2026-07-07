@@ -29,6 +29,10 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query("SELECT MAX(s.stageOrder) FROM HouseStage s")
     Integer maxStageOrder();
 
+    @Modifying
+    @Query("UPDATE HouseStage s SET s.workerName = :leaderName WHERE s.crewId = :crewId")
+    void syncLeaderNameForCrew(Integer crewId, String leaderName);
+
     @Query("SELECT COUNT(s) FROM HouseStage s WHERE s.crewId = :crewId AND s.id <> :excludeId")
     long countOtherAssignments(Integer crewId, Integer excludeId);
 

@@ -86,6 +86,7 @@ public class WorkerController {
                 }
                 crew.setLeader(w);
                 crews.save(crew);
+                houseStages.syncLeaderNameForCrew(crew.getId(), w.getName());
             }
             return ResponseEntity.ok(toDto(workers.save(w)));
         }).orElse(ResponseEntity.notFound().build());

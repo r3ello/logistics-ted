@@ -129,6 +129,7 @@ public class CrewController {
             }
             crew.setLeader(w);
             crews.save(crew);
+            houseStages.syncLeaderNameForCrew(id, w.getName());
         }
         w.setCrew(crew);
         workers.save(w);
@@ -147,6 +148,7 @@ public class CrewController {
                 crew.getLeader() != null && crew.getLeader().getId().equals(workerId)) {
             crew.setLeader(null);
             crews.save(crew);
+            houseStages.syncLeaderNameForCrew(id, null);
         }
         w.setCrew(null);
         workers.save(w);
