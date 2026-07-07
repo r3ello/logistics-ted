@@ -37,6 +37,14 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query("UPDATE HouseStage s SET s.workerName = :leaderName WHERE s.crewId = :crewId")
     void syncLeaderNameForCrew(Integer crewId, String leaderName);
 
+    @Modifying
+    @Query(value = "DELETE FROM stage_type_crew WHERE crew_id = :crewId", nativeQuery = true)
+    void deleteStageTypeCrewByCrewId(Integer crewId);
+
+    @Modifying
+    @Query(value = "INSERT INTO stage_type_crew (stage_order, crew_id) VALUES (:stageOrder, :crewId) ON CONFLICT DO NOTHING", nativeQuery = true)
+    void insertStageTypeCrew(Integer stageOrder, Integer crewId);
+
     @Query("SELECT COUNT(s) FROM HouseStage s WHERE s.crewId = :crewId AND s.id <> :excludeId")
     long countOtherAssignments(Integer crewId, Integer excludeId);
 

@@ -179,7 +179,13 @@ public class CrewController {
             else c.setHouse(houses.findById(Integer.parseInt(body.get("houseId").toString())).orElse(null));
         }
         if (body.containsKey("stageOrder")) {
-            c.setStageOrder(body.get("stageOrder") == null ? null : Integer.parseInt(body.get("stageOrder").toString()));
+            Integer newStageOrder = body.get("stageOrder") == null ? null : Integer.parseInt(body.get("stageOrder").toString());
+            c.setStageOrder(newStageOrder);
+            // Keep stage_type_crew in sync
+            if (c.getId() != null) {
+                houseStages.deleteStageTypeCrewByCrewId(c.getId());
+                if (newStageOrder != null) houseStages.insertStageTypeCrew(newStageOrder, c.getId());
+            }
         }
         if (body.containsKey("location")) {
             c.setLocation(body.get("location") == null ? "" : body.get("location").toString());
