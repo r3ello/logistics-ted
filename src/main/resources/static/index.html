@@ -2828,6 +2828,7 @@
     const activeView = document.querySelector('.view.active')?.id?.replace('view-','') || 'dashboard';
     if (activeView === 'dashboard') {
       if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash();
+      else if (_dashMode === 'docs') renderDocsDash();
       else { retranslateChipBar(); retranslateSearchBar(_dashMode); }
     }
     else if (activeView === 'scaffold')    setDashMode('scaffold');
