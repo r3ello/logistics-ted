@@ -2404,7 +2404,7 @@
       // house card chips
       chipStart:'Start', chipPhase:'Phase', chipStage:'Stage', chipDestination:'Destination',
       // delete confirm
-      deleteConfirmPrefix:'Delete ', btnNo:'No', btnYesDelete:'Yes, delete',
+      deleteConfirmPrefix:'Delete ', btnNo:'Cancel', btnYesDelete:'Yes, delete', confirmTitle:'Are you sure?',
       // validation / errors
       nameLocationRequired:'Name and location are required.', errorPrefix:'Error:',
       // route reasons
@@ -2683,7 +2683,7 @@
       // house card chips
       chipStart:'Начало', chipPhase:'Фаза', chipStage:'Етап', chipDestination:'Дестинация',
       // delete confirm
-      deleteConfirmPrefix:'Изтрий ', btnNo:'Не', btnYesDelete:'Да, изтрий',
+      deleteConfirmPrefix:'Изтрий ', btnNo:'Отказ', btnYesDelete:'Да, изтрий', confirmTitle:'Сигурни ли?',
       // validation / errors
       nameLocationRequired:'Необходими са Ime и Locация.', errorPrefix:'Грешка:',
       // route reasons
@@ -4729,7 +4729,8 @@
   }
 
   // ── DOCUMENTATION ────────────────────────────────────────────────────────────
-  let _docTree    = [];   // loaded from API
+  let _docTree    = [];   // loaded from API (recursive tree)
+  let _docFlat    = [];   // flat list for parent dropdowns
   let _docOpenId  = null;
 
   async function renderDocsDash() {
@@ -4740,88 +4741,104 @@
     grid.style.alignItems = 'start';
     grid.innerHTML = `<div class="state-msg"><div class="spinner"></div></div>`;
     try {
-      _docTree = await apiFetch('/api/doc-folders').then(r => r.json());
+      [_docTree, _docFlat] = await Promise.all([
+        apiFetch('/api/doc-folders').then(r => r.json()),
+        apiFetch('/api/doc-folders/flat').then(r => r.json()),
+      ]);
     } catch(e) { grid.innerHTML = `<div class="state-msg">Failed to load documentation.</div>`; return; }
-    grid.innerHTML = _docTree.map(dept => _docDeptCard(dept)).join('');
+    const addBtn = currentUser?.role === 'admin'
+      ? `<div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-bottom:0.25rem">
+           <button class="btn btn-primary" onclick="_docNewFolder(null)">＋ New folder</button>
+         </div>`
+      : '';
+    grid.innerHTML = addBtn + _docTree.map(f => _docFolderCard(f, 0)).join('');
     if (_docOpenId) {
       const el = document.getElementById('docSubs_' + _docOpenId);
       if (el) el.style.display = 'block';
     }
   }
 
-  function _docLabel(dept) {
-    return currentLang === 'bg' ? dept.labelBg : dept.labelEn;
+  function _docLabel(f) {
+    return currentLang === 'bg' ? f.labelBg : f.labelEn;
   }
 
-  function _docDeptCard(dept) {
-    const hasSubs = dept.children && dept.children.length > 0;
-    const hasDocs = dept.documents && dept.documents.length > 0;
-    const label   = _docLabel(dept);
-    const linkBtn = dept.linkUrl
-      ? `<a href="${dept.linkUrl}" target="_blank" title="Open link" onclick="event.stopPropagation()" style="color:${dept.color};font-size:1rem;text-decoration:none;padding:2px 4px">🔗</a>`
+  /** Recursive card renderer — depth 0 = top-level card, depth 1+ = indented row inside a card. */
+  function _docFolderCard(folder, depth) {
+    const hasChildren = folder.children && folder.children.length > 0;
+    const hasDocs     = folder.documents && folder.documents.length > 0;
+    const label       = _docLabel(folder);
+    const color       = folder.color || '#4f8ef7';
+    const linkBtn     = folder.linkUrl
+      ? `<a href="${folder.linkUrl}" target="_blank" onclick="event.stopPropagation()" style="color:${color};font-size:0.85rem;text-decoration:none" title="Open link">🔗</a>`
       : '';
-    return `
-      <div class="doc-card" style="border-radius:12px;overflow:hidden;transition:box-shadow .2s;border:1px solid var(--border)"
-           onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.boxShadow=''">
-        <div onclick="_docToggle(${dept.id})" style="display:flex;align-items:center;gap:12px;padding:1rem 1.1rem;cursor:pointer;background:var(--card);border-bottom:2px solid ${dept.color}33">
-          <div style="width:38px;height:38px;border-radius:10px;background:${dept.color}20;border:1.5px solid ${dept.color}50;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${dept.icon}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:0.7rem;color:${dept.color};font-weight:700;letter-spacing:0.08em">${dept.code}</div>
-            <div style="font-size:0.92rem;font-weight:700;color:var(--text);margin-top:1px">${label}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:4px" onclick="event.stopPropagation()">
-            ${linkBtn}
-            <button title="Edit link" onclick="_docEditFolderLink(${dept.id})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.85rem;padding:2px 4px">✏️</button>
-          </div>
-          <div id="docArrow_${dept.id}" style="font-size:0.75rem;color:var(--muted,#9aa3be);transition:transform .2s;margin-left:4px">${(hasSubs||hasDocs) ? '▶' : ''}</div>
-        </div>
-        <div id="docSubs_${dept.id}" style="display:none;padding:0.4rem 0;background:var(--surface)">
-          ${hasSubs ? dept.children.map(sub => _docSubRow(sub, dept.color)).join('') : ''}
-          ${hasDocs ? dept.documents.map(doc => _docDocRow(doc, dept.color)).join('') : ''}
-          ${(!hasSubs && !hasDocs) ? `<div style="padding:0.75rem 1.1rem;font-size:0.8rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
-          <div class="admin-only" style="padding:0.35rem 1.1rem">
-            <button onclick="_docAddDoc(${dept.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem;width:100%;text-align:left">＋ Add PDF</button>
-          </div>
-        </div>
-      </div>`;
-  }
-
-  function _docSubRow(sub, parentColor) {
-    const label   = _docLabel(sub);
-    const hasDocs = sub.documents && sub.documents.length > 0;
-    const linkBtn = sub.linkUrl
-      ? `<a href="${sub.linkUrl}" target="_blank" onclick="event.stopPropagation()" style="color:${parentColor};font-size:0.85rem;text-decoration:none" title="Open">🔗</a>`
+    const adminBtns = currentUser?.role === 'admin'
+      ? `<button title="Edit folder" onclick="event.stopPropagation();_docEditFolder(${folder.id})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.82rem;padding:1px 3px">✏️</button>
+         <button title="Delete folder" onclick="event.stopPropagation();_docDeleteFolder(${folder.id})" style="background:none;border:none;cursor:pointer;color:#e05;font-size:0.82rem;padding:1px 3px">🗑</button>`
       : '';
-    const houseIdMatch = sub.code && sub.code.match(/^house_(\d+)$/);
-    const folderIcon = houseIdMatch
-      ? `<span style="font-size:0.9rem;cursor:pointer" onclick="event.stopPropagation();openHouseDetail(${houseIdMatch[1]})" title="Go to house page">📂</span>`
-      : `<span style="font-size:0.9rem">📂</span>`;
-    return `
-      <div>
-        <div style="display:flex;align-items:center;gap:10px;padding:0.45rem 1.1rem;transition:background .15s"
-             onmouseover="this.style.background='rgba(128,128,128,0.07)'" onmouseout="this.style.background=''">
-          ${folderIcon}
-          <span style="flex:1;font-size:0.82rem;color:var(--text);opacity:0.85;font-weight:500">${label}</span>
-          <span style="display:flex;align-items:center;gap:3px">
-            ${linkBtn}
-            <button title="Edit link" onclick="_docEditFolderLink(${sub.id})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.78rem;padding:1px 3px">✏️</button>
-          </span>
-        </div>
-        ${hasDocs ? sub.documents.map(doc => _docDocRow(doc, parentColor, true)).join('') : ''}
-        <div class="admin-only" style="padding:0.2rem 1.1rem 0.2rem 2.4rem">
-          <button onclick="_docAddDoc(${sub.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">＋ Add PDF</button>
-        </div>
-      </div>`;
+
+    if (depth === 0) {
+      // Top-level: full card with coloured header
+      return `
+        <div class="doc-card" style="border-radius:12px;overflow:hidden;transition:box-shadow .2s;border:1px solid var(--border)"
+             onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.boxShadow=''">
+          <div onclick="_docToggle(${folder.id})" style="display:flex;align-items:center;gap:12px;padding:1rem 1.1rem;cursor:pointer;background:var(--card);border-bottom:2px solid ${color}33">
+            <div style="width:38px;height:38px;border-radius:10px;background:${color}20;border:1.5px solid ${color}50;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${folder.icon || '📁'}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.7rem;color:${color};font-weight:700;letter-spacing:0.08em">${folder.code}</div>
+              <div style="font-size:0.92rem;font-weight:700;color:var(--text);margin-top:1px">${label}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:3px" onclick="event.stopPropagation()">
+              ${linkBtn}${adminBtns}
+            </div>
+            <div id="docArrow_${folder.id}" style="font-size:0.75rem;color:var(--muted,#9aa3be);transition:transform .2s;margin-left:4px">${(hasChildren||hasDocs) ? '▶' : ''}</div>
+          </div>
+          <div id="docSubs_${folder.id}" style="display:none;padding:0.4rem 0;background:var(--surface)">
+            ${hasChildren ? folder.children.map(c => _docFolderCard(c, 1)).join('') : ''}
+            ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, false)).join('') : ''}
+            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.75rem 1.1rem;font-size:0.8rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
+            <div class="admin-only" style="padding:0.35rem 1.1rem">
+              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem;width:100%;text-align:left">＋ Add PDF</button>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      // Nested: indented row inside a parent card
+      const indent = (depth * 16) + 'px';
+      const houseIdMatch = folder.code && folder.code.match(/^house_(\d+)$/);
+      const folderIcon = houseIdMatch
+        ? `<span style="font-size:0.9rem;cursor:pointer" onclick="event.stopPropagation();openHouseDetail(${houseIdMatch[1]})" title="Go to house page">📂</span>`
+        : `<span style="font-size:0.9rem">📂</span>`;
+      return `
+        <div>
+          <div onclick="_docToggle(${folder.id})" style="display:flex;align-items:center;gap:10px;padding:0.45rem 1.1rem 0.45rem calc(1.1rem + ${indent});transition:background .15s;cursor:pointer"
+               onmouseover="this.style.background='rgba(128,128,128,0.07)'" onmouseout="this.style.background=''">
+            ${folderIcon}
+            <span style="flex:1;font-size:0.82rem;color:var(--text);opacity:0.85;font-weight:500">${label}</span>
+            <span style="display:flex;align-items:center;gap:3px" onclick="event.stopPropagation()">
+              ${linkBtn}${adminBtns}
+            </span>
+            <div id="docArrow_${folder.id}" style="font-size:0.65rem;color:var(--muted,#9aa3be);margin-left:2px">${(hasChildren||hasDocs) ? '▶' : ''}</div>
+          </div>
+          <div id="docSubs_${folder.id}" style="display:none">
+            ${hasChildren ? folder.children.map(c => _docFolderCard(c, depth + 1)).join('') : ''}
+            ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, depth)).join('') : ''}
+            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.5rem 1.1rem 0.5rem calc(1.1rem + ${indent} + 16px);font-size:0.78rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
+            <div class="admin-only" style="padding:0.2rem 1.1rem 0.2rem calc(1.1rem + ${indent} + 16px)">
+              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">＋ PDF</button>
+            </div>
+          </div>
+        </div>`;
+    }
   }
 
-  function _docDocRow(doc, color, indented) {
-    const title   = currentLang === 'bg' && doc.titleBg ? doc.titleBg : doc.titleEn;
-    const indent  = indented ? '2.4rem' : '1.1rem';
+  function _docDocRow(doc, color, depth) {
+    const title    = currentLang === 'bg' && doc.titleBg ? doc.titleBg : doc.titleEn;
+    const indent   = typeof depth === 'number' ? ((depth + 1) * 16) + 'px' : '16px';
     const linkPart = doc.linkUrl
       ? `<a href="${doc.linkUrl}" target="_blank" style="color:${color||'#4f8ef7'};font-size:0.8rem;text-decoration:none" title="Open PDF">🔗</a>`
       : '';
     return `
-      <div style="display:flex;align-items:center;gap:8px;padding:0.35rem 1.1rem 0.35rem ${indent};transition:background .15s"
+      <div style="display:flex;align-items:center;gap:8px;padding:0.35rem 1.1rem 0.35rem calc(1.1rem + ${indent});transition:background .15s"
            onmouseover="this.style.background='rgba(128,128,128,0.06)'" onmouseout="this.style.background=''">
         <span style="font-size:0.82rem">📄</span>
         <span style="flex:1;font-size:0.79rem;color:var(--text);opacity:0.75">${title}</span>
@@ -4843,23 +4860,147 @@
     _docOpenId = open ? null : id;
   }
 
-  // ── Folder link editor ────────────────────────────────────────────────────
-  function _docEditFolderLink(folderId) {
-    const folder = _docFindFolder(folderId);
+  // ── Folder create / edit ──────────────────────────────────────────────────
+  function _docFindFolderFlat(id) {
+    return _docFlat.find(f => f.id === id) || null;
+  }
+
+  function _docNewFolder(parentId) {
+    _docShowFolderModal(null, parentId);
+  }
+
+  function _docEditFolder(folderId) {
+    const folder = _docFindFolderFlat(folderId);
     if (!folder) return;
-    const cur = folder.linkUrl || '';
-    _docShowLinkModal('Edit folder link', cur, async (url) => {
-      await apiFetch(`/api/doc-folders/${folderId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ linkUrl: url }) });
+    _docShowFolderModal(folder, folder.parentId);
+  }
+
+  function _docShowFolderModal(folder, preselectedParentId) {
+    const existing = document.getElementById('_docFolderModal');
+    if (existing) existing.remove();
+
+    // Build parent options from flat list, with depth indentation
+    // Build a depth map first
+    const depthMap = {};
+    function calcDepth(id, visited = new Set()) {
+      if (id == null) return 0;
+      if (depthMap[id] !== undefined) return depthMap[id];
+      if (visited.has(id)) return 0;
+      visited.add(id);
+      const f = _docFlat.find(x => x.id === id);
+      depthMap[id] = f && f.parentId != null ? 1 + calcDepth(f.parentId, visited) : 0;
+      return depthMap[id];
+    }
+    _docFlat.forEach(f => calcDepth(f.id));
+
+    // Depth-first walk to get tree order (parents followed by their children)
+    const _byParent = {};
+    _docFlat.forEach(f => {
+      const pid = f.parentId != null ? f.parentId : 'root';
+      if (!_byParent[pid]) _byParent[pid] = [];
+      _byParent[pid].push(f);
+    });
+    if (_byParent['root']) _byParent['root'].sort((a, b) => { try { return parseInt(a.code) - parseInt(b.code); } catch(e) { return a.code.localeCompare(b.code); } });
+    const orderedFlat = [];
+    function _dfWalk(pid) { (_byParent[pid] || []).forEach(f => { orderedFlat.push(f); _dfWalk(f.id); }); }
+    _dfWalk('root');
+
+    const parentItems = [{ value: '', label: '— No parent (top level) —', depth: -1, code: '' }].concat(
+      orderedFlat
+        .filter(f => folder == null || f.id !== folder.id)
+        .map(f => ({ value: f.id, label: currentLang === 'bg' ? f.labelBg : f.labelEn, depth: depthMap[f.id] || 0, code: f.code }))
+    );
+
+    let _dfSelectedVal = preselectedParentId != null ? preselectedParentId : '';
+    const getSelectedLabel = () => (parentItems.find(p => String(p.value) === String(_dfSelectedVal)) || parentItems[0]).label;
+
+    const renderDropdownItems = () => parentItems.map((item, idx) => {
+      const pl = 'calc(0.75rem + ' + Math.max(0,item.depth)*14 + 'px)';
+      const bg = String(item.value)===String(_dfSelectedVal) ? 'rgba(79,142,247,0.12)' : '';
+      const separator = (item.depth === 0 && idx > 0) ? '<div style="height:1px;background:var(--border);margin:2px 0.75rem"></div>' : '';
+      let inner = '';
+      if (item.depth < 0) inner = '<span style="color:var(--muted,#9aa3be);font-size:0.82rem;font-style:italic">' + item.label + '</span>';
+      else if (item.depth === 0) inner = '<span style="font-size:0.72rem;background:rgba(79,142,247,0.15);border-radius:4px;padding:1px 6px;color:#4f8ef7;font-weight:700;min-width:26px;text-align:center">' + item.code + '</span><span style="font-size:0.88rem;color:var(--text);margin-left:6px;font-weight:700">' + item.label + '</span>';
+      else inner = '<span style="color:var(--muted,#9aa3be);font-size:0.78rem;margin-right:4px">\u2514</span><span style="font-size:0.83rem;color:var(--text);opacity:0.85">' + item.label + '</span>';
+      return separator + '<div class="_dfOpt" data-value="' + item.value + '" style="display:flex;align-items:center;padding:0.4rem 0.75rem 0.4rem ' + pl + ';cursor:pointer;background:' + bg + '" onmouseover="this.style.background=\'rgba(128,128,128,0.12)\'" onmouseout="this.style.background=\'' + bg + '\'">' + inner + '</div>';
+    }).join('');
+
+    const isEdit  = folder != null;
+    const title   = isEdit ? 'Edit folder' : (preselectedParentId ? 'New subfolder' : 'New folder');
+
+    const overlay = document.createElement('div');
+    overlay.id = '_docFolderModal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+      <div class="_doc-modal-box" style="width:440px">
+        <div class="_doc-modal-title">${title}</div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <input id="_dfLabelEn" type="text" placeholder="Name (EN)" value="${isEdit ? folder.labelEn : ''}">
+            <input id="_dfLabelBg" type="text" placeholder="Name (BG)" value="${isEdit ? folder.labelBg : ''}">
+          </div>
+          <div style="position:relative">
+            <div id="_dfTrigger" style="display:flex;align-items:center;justify-content:space-between;padding:0 0.75rem;height:36px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--card)" onclick="(()=>{const d=document.getElementById('_dfDrop');d.style.display=d.style.display==='none'?'block':'none'})()">
+              <span id="_dfSelectedLabel" style="font-size:0.85rem;color:var(--text)">${getSelectedLabel()}</span>
+              <span style="font-size:0.7rem;color:var(--muted,#9aa3be)">&#9662;</span>
+            </div>
+            <div id="_dfDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:8px;z-index:200;max-height:220px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,0.25)">
+              ${renderDropdownItems()}
+            </div>
+          </div>
+          <input id="_dfLink" type="url" placeholder="Link URL (optional)" value="${isEdit && folder.linkUrl ? folder.linkUrl : ''}">
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem">
+          <button onclick="document.getElementById('_docFolderModal').remove()" class="btn btn-ghost" style="padding:0.45rem 1.1rem">Cancel</button>
+          <button id="_dfSave" class="btn btn-primary" style="padding:0.45rem 1.1rem">Save</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    overlay.querySelectorAll('._dfOpt').forEach(el => {
+      el.addEventListener('click', () => {
+        _dfSelectedVal = el.dataset.value === '' ? '' : (isNaN(Number(el.dataset.value)) ? el.dataset.value : parseInt(el.dataset.value));
+        document.getElementById('_dfSelectedLabel').textContent = getSelectedLabel();
+        document.getElementById('_dfDrop').style.display = 'none';
+      });
+    });
+    document.addEventListener('click', function _dfOutside(e) {
+      const trigger = document.getElementById('_dfTrigger');
+      const drop = document.getElementById('_dfDrop');
+      if (trigger && drop && !trigger.contains(e.target) && !drop.contains(e.target)) {
+        drop.style.display = 'none';
+        document.removeEventListener('click', _dfOutside);
+      }
+    });
+
+    overlay.querySelector('#_dfSave').addEventListener('click', async () => {
+      const labelEn = document.getElementById('_dfLabelEn').value.trim();
+      const labelBg = document.getElementById('_dfLabelBg').value.trim();
+      if (!labelEn) { alert('Name (EN) is required'); return; }
+      const parentVal = _dfSelectedVal;
+      const linkUrl   = document.getElementById('_dfLink').value.trim();
+      const body = {
+        labelEn,
+        labelBg: labelBg || labelEn,
+        parentId: parentVal ? parseInt(parentVal) : null,
+        linkUrl:  linkUrl || null,
+      };
+      overlay.remove();
+      if (isEdit) {
+        await apiFetch(`/api/doc-folders/${folder.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      } else {
+        await apiFetch('/api/doc-folders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      }
       renderDocsDash();
     });
   }
 
-  function _docFindFolder(id) {
-    for (const dept of _docTree) {
-      if (dept.id === id) return dept;
-      if (dept.children) for (const sub of dept.children) if (sub.id === id) return sub;
-    }
-    return null;
+  async function _docDeleteFolder(folderId) {
+    const folder = _docFindFolderFlat(folderId);
+    const label  = folder ? _docLabel(folder) : folderId;
+    if (!await showConfirm(`Delete folder "${label}" and all its contents?`)) return;
+    await apiFetch(`/api/doc-folders/${folderId}`, { method:'DELETE' });
+    renderDocsDash();
   }
 
   // ── Document CRUD ─────────────────────────────────────────────────────────
@@ -4880,7 +5021,7 @@
   }
 
   async function _docDeleteDoc(docId) {
-    if (!confirm('Delete this document?')) return;
+    if (!await showConfirm('Delete this document?')) return;
     await apiFetch(`/api/doc-documents/${docId}`, { method:'DELETE' });
     renderDocsDash();
   }
@@ -4891,6 +5032,30 @@
       for (const sub of (dept.children  || [])) for (const doc of (sub.documents || [])) if (doc.id === id) return doc;
     }
     return null;
+  }
+
+  // ── Global styled confirm dialog ─────────────────────────────────────────
+  function showConfirm(message) {
+    return new Promise(resolve => {
+      const existing = document.getElementById('_globalConfirmModal');
+      if (existing) existing.remove();
+      const overlay = document.createElement('div');
+      overlay.id = '_globalConfirmModal';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9500;display:flex;align-items:center;justify-content:center';
+      overlay.innerHTML = `
+        <div class="_doc-modal-box" style="width:380px;text-align:center">
+          <div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:0.5rem">${t('confirmTitle')}</div>
+          <div style="font-size:0.9rem;color:var(--muted,#9aa3be);margin-bottom:1.5rem;line-height:1.5">${message}</div>
+          <div style="display:flex;gap:0.75rem;justify-content:center">
+            <button id="_gcCancel" class="btn btn-ghost" style="padding:0.45rem 1.4rem">${t('btnNo')}</button>
+            <button id="_gcConfirm" class="btn" style="padding:0.45rem 1.4rem;background:#e05252;color:#fff;border-color:#e05252">${t('btnYesDelete')}</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('#_gcCancel').addEventListener('click', () => { overlay.remove(); resolve(false); });
+      overlay.querySelector('#_gcConfirm').addEventListener('click', () => { overlay.remove(); resolve(true); });
+      overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); resolve(false); } });
+    });
   }
 
   // ── Inline modals ─────────────────────────────────────────────────────────
@@ -5050,7 +5215,7 @@
   function editStageType(order, nameBg, nameEn)    { openStageModal(order, nameBg, nameEn); }
 
   async function deleteStageType(order, name) {
-    if (!confirm(t('stagesDeleteConfirm').replace('{name}', name))) return;
+    if (!await showConfirm(t('stagesDeleteConfirm').replace('{name}', name))) return;
     try {
       await apiFetch(`/api/stage-types/${order}`, { method:'DELETE' });
       renderStagesDash();
@@ -5669,7 +5834,7 @@
   }
 
   async function deleteCrewDash(id) {
-    if (!confirm(t('crewDeleteConfirm'))) return;
+    if (!await showConfirm(t('crewDeleteConfirm'))) return;
     await apiFetch(`/api/crews/${id}`, { method: 'DELETE' });
     renderCrewCards();
   }
@@ -6188,7 +6353,7 @@
   }
 
   async function deleteOrder(id) {
-    if (!confirm(t('ordersDeleteConfirm'))) return;
+    if (!await showConfirm(t('ordersDeleteConfirm'))) return;
     await apiFetch(`/api/material-orders/${id}`, { method: 'DELETE' });
     await renderOrdersDash();
   }
@@ -6260,7 +6425,7 @@
   }
 
   async function deleteDelivery(deliveryId, orderId) {
-    if (!confirm(t('deliveriesDeleteConfirm'))) return;
+    if (!await showConfirm(t('deliveriesDeleteConfirm'))) return;
     await apiFetch(`/api/deliveries/${deliveryId}`, { method: 'DELETE' });
     [_ordersList, _ordersDeliveries] = await Promise.all([apiFetch('/api/material-orders').then(r => r.json()), apiFetch('/api/deliveries').then(r => r.json())]);
     renderOrdersTable();
@@ -6398,7 +6563,7 @@
   }
 
   async function deleteDeliveryFromTab(deliveryId) {
-    if (!confirm(t('deliveriesDeleteConfirm'))) return;
+    if (!await showConfirm(t('deliveriesDeleteConfirm'))) return;
     await apiFetch(`/api/deliveries/${deliveryId}`, { method: 'DELETE' });
     renderDeliveriesDash();
   }
@@ -6731,7 +6896,7 @@
   }
 
   async function deleteWorker(id, name) {
-    if (!confirm(`Delete worker "${name}"?`)) return;
+    if (!await showConfirm(`Delete worker "${name}"?`)) return;
     await apiFetch(`/api/workers/${id}`, { method: 'DELETE' });
     setDashMode('workers');
   }
@@ -6800,7 +6965,7 @@
   }
 
   async function deleteScaffold(id) {
-    if (!confirm('Delete this scaffold?')) return;
+    if (!await showConfirm('Delete this scaffold?')) return;
     await apiFetch(`/api/scaffolds/${id}`, { method: 'DELETE' });
     setDashMode('scaffold');
   }
@@ -7601,7 +7766,7 @@
   }
 
   async function deleteCrew(id) {
-    if (!confirm(t('crewDeleteConfirm'))) return;
+    if (!await showConfirm(t('crewDeleteConfirm'))) return;
     await apiFetch(`/api/crews/${id}`, { method: 'DELETE' });
     loadOrgChart();
   }
@@ -8723,7 +8888,7 @@
   }
 
   async function deleteFacility(kind, id) {
-    if (!confirm(t('facConfirmDelete'))) return;
+    if (!await showConfirm(t('facConfirmDelete'))) return;
     const cfg = facCfg(kind);
     try {
       const res  = await apiFetch(`${cfg.base}/${id}`, { method: 'DELETE' });
@@ -9225,7 +9390,7 @@
   }
 
   async function moFinishStage(hsId) {
-    if (!confirm(mot('confirmFinish'))) return;
+    if (!await showConfirm(mot('confirmFinish'))) return;
     try {
       const res = await apiFetch('/api/my/stages/' + hsId + '/finish', { method: 'POST' });
       const data = await res.json(); if (data.error) throw new Error(data.error);
@@ -10803,7 +10968,7 @@
 
   async function ebDelete() {
     if (!_ebCurrent || !_ebCurrent.id) return;
-    if (!confirm(t('ebDeleteConfirm'))) return;
+    if (!await showConfirm(t('ebDeleteConfirm'))) return;
     await apiFetch(`/api/electric-boxes/${_ebCurrent.id}`, { method: 'DELETE' });
     _ebCurrent = null;
     document.getElementById('ebEditor').style.display = 'none';
