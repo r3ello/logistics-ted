@@ -2501,8 +2501,8 @@
       chipClearFilters:'✕ Clear',
       // documentation
       docTab:'Documentation', navDocsLabel:'Documentation',
-      doc00:'Control', doc01:'Sales', doc03:'Finance', doc04:'Administration & HR',
-      doc05:'Standards & Templates', doc06:'Marketing', doc08:'Purchases',
+      doc00:'Control', doc01:'Sales', doc02:'Active Sites', doc03:'Finance', doc04:'Administration & HR',
+      doc05:'Standards & Templates', doc06:'Marketing', doc07:'Completed Sites', doc08:'Purchases',
       doc00_01:'01_OBJECTS_CONTROL', doc00_02:'02_EXPENSES_CONTROL', doc00_03:'03_CLIENTS_CONTROL',
       doc00_04:'04_SUPPLIERS_CONTROL', doc00_05:'05_CREWS_CONTROL', doc00_06:'06_FLEET_CONTROL', doc00_07:'07_MATERIALS_CONTROL',
       doc01_00a:'00_CRM', doc01_00b:'00_NEW_CLIENTS', doc01_01:'01_WITH_ARCHITECTS', doc01_02:'02_FOR_OFFER',
@@ -2783,8 +2783,8 @@
       chipClearFilters:'✕ Изчисти',
       // documentation
       docTab:'Документация', navDocsLabel:'Документация',
-      doc00:'Контрол', doc01:'Продажби', doc03:'Финанси', doc04:'Администрация и ЧР',
-      doc05:'Стандарти и Шаблони', doc06:'Маркетинг', doc08:'Покупки',
+      doc00:'Контрол', doc01:'Продажби', doc02:'Обекти в строеж', doc03:'Финанси', doc04:'Администрация и ЧР',
+      doc05:'Стандарти и Шаблони', doc06:'Маркетинг', doc07:'Обекти завършени', doc08:'Покупки',
       doc00_01:'01_КОНТРОЛ_ОБЕКТИ', doc00_02:'02_КОНТРОЛ_РАЗХОДИ', doc00_03:'03_КОНТРОЛ_КЛИЕНТИ',
       doc00_04:'04_КОНТРОЛ_ДОСТАВЧИЦИ', doc00_05:'05_КОНТРОЛ_БРИГАДИ', doc00_06:'06_КОНТРОЛ_АВТОПАРК', doc00_07:'07_КОНТРОЛ_МАТЕРИАЛИ',
       doc01_00a:'00_CRM', doc01_00b:'00_НОВИ_КЛИЕНТИ', doc01_01:'01_ПРИ_АРХИТЕКТИ', doc01_02:'02_ЗА_ОФЕРТА',
@@ -4671,8 +4671,10 @@
       'doc05_01','doc05_02','doc05_03','doc05_04','doc05_05','doc05_06',
       'doc05_07','doc05_08','doc05_09','doc05_10','doc05_11'
     ]},
+    { id:'02', labelKey:'doc02', icon:'🏗️', color:'#f97316', subKeys:[] },
     { id:'06', labelKey:'doc06', icon:'📣', color:'#f59e0b', subKeys:[] },
-    { id:'08', labelKey:'doc08', icon:'🛒', color:'#f97316', subKeys:[] },
+    { id:'07', labelKey:'doc07', icon:'🏠', color:'#4f8ef7', subKeys:[] },
+    { id:'08', labelKey:'doc08', icon:'🛒', color:'#00c9b1', subKeys:[] },
   ];
 
   let _docOpenId = null;
