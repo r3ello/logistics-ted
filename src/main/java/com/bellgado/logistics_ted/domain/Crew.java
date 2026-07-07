@@ -34,6 +34,11 @@ public class Crew {
     @JoinColumn(name = "manager_id")
     private Worker manager;
 
+    /** The single crew leader — DB-enforced, mirrors manager_id pattern. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "leader_id")
+    private Worker leader;
+
     /** The house this crew is currently working on. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_id")

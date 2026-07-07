@@ -8,6 +8,8 @@ import com.bellgado.logistics_ted.repository.CrewRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +43,20 @@ public class CrewController {
     @GetMapping
     @Transactional(readOnly = true)
     public List<Map<String, Object>> list() {
-        return crews.findAll().stream().map(this::toDto).toList();
+        // Pre-fetch all batch data in 2 queries instead of 2×N
+        Map<Integer, List<Map<String, Object>>> housesPerCrew = new HashMap<>();
+        for (Object[] row : houseStages.findAllAssignedHousesPerCrew()) {
+            int crewId = ((Number) row[0]).intValue();
+            Map<String, Object> h = new LinkedHashMap<>();
+            h.put("id",   ((Number) row[1]).intValue());
+            h.put("name", row[2]);
+            housesPerCrew.computeIfAbsent(crewId, k -> new ArrayList<>()).add(h);
+        }
+        Map<Integer, String> stageNamesPerCrew = new HashMap<>();
+        for (Object[] row : houseStages.findAllStageNamesPerCrew()) {
+            stageNamesPerCrew.put(((Number) row[0]).intValue(), (String) row[1]);
+        }
+        return crews.findAll().stream().map(c -> toDto(c, housesPerCrew, stageNamesPerCrew)).toList();
     }
 
     @GetMapping("/{id}")
@@ -105,12 +120,15 @@ public class CrewController {
         if (w == null) return ResponseEntity.notFound().build();
         if (w.getRole() == WorkerRole.CREW_MANAGER)
             return ResponseEntity.badRequest().body(Map.of("error", "Managers cannot be crew members. Assign them as the crew manager instead."));
-        // one leader per crew
         if (w.getRole() == WorkerRole.CREW_LEADER) {
-            boolean hasLeader = workers.findByCrewIdAndRole(id, WorkerRole.CREW_LEADER).stream()
-                .anyMatch(x -> !x.getId().equals(workerId));
-            if (hasLeader)
-                return ResponseEntity.badRequest().body(Map.of("error", "This crew already has a leader."));
+            // unassign existing leader from this crew if different
+            Worker existing = crew.getLeader();
+            if (existing != null && !existing.getId().equals(workerId)) {
+                existing.setCrew(null);
+                workers.save(existing);
+            }
+            crew.setLeader(w);
+            crews.save(crew);
         }
         w.setCrew(crew);
         workers.save(w);
@@ -121,9 +139,15 @@ public class CrewController {
     @DeleteMapping("/{id}/members/{workerId}")
     @Transactional
     public ResponseEntity<?> removeMember(@PathVariable Integer id, @PathVariable Integer workerId) {
+        Crew crew = crews.findById(id).orElse(null);
         Worker w = workers.findById(workerId).orElse(null);
         if (w == null || w.getCrew() == null || !w.getCrew().getId().equals(id))
             return ResponseEntity.notFound().build();
+        if (w.getRole() == WorkerRole.CREW_LEADER && crew != null &&
+                crew.getLeader() != null && crew.getLeader().getId().equals(workerId)) {
+            crew.setLeader(null);
+            crews.save(crew);
+        }
         w.setCrew(null);
         workers.save(w);
         return ResponseEntity.noContent().build();
@@ -168,6 +192,12 @@ public class CrewController {
     }
 
     private Map<String, Object> toDto(Crew c) {
+        return toDto(c, null, null);
+    }
+
+    private Map<String, Object> toDto(Crew c,
+                                      Map<Integer, List<Map<String, Object>>> housesPerCrew,
+                                      Map<Integer, String> stageNamesPerCrew) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id",   c.getId());
         m.put("name", c.getName());
@@ -178,8 +208,7 @@ public class CrewController {
             m.put("managerId", null);
             m.put("managerName", null);
         }
-        List<Worker> members = workers.findByCrewId(c.getId());
-        Worker leader = members.stream().filter(w -> w.getRole() == WorkerRole.CREW_LEADER).findFirst().orElse(null);
+        Worker leader = c.getLeader();
         if (leader != null) {
             m.put("leaderId",   leader.getId());
             m.put("leaderName", leader.getName());
@@ -187,6 +216,7 @@ public class CrewController {
             m.put("leaderId", null);
             m.put("leaderName", null);
         }
+        List<Worker> members = workers.findByCrewId(c.getId());
         List<Map<String, Object>> memberList = members.stream()
             .filter(w -> w.getRole() == WorkerRole.CREW_MEMBER)
             .map(w -> {
@@ -198,19 +228,21 @@ public class CrewController {
             }).toList();
         m.put("members", memberList);
         m.put("memberCount", memberList.size());
-        List<Map<String, Object>> assignedHouses = houseStages.findAssignedHousesForCrew(c.getId())
-            .stream().map(row -> {
+        List<Map<String, Object>> assignedHouses = housesPerCrew != null
+            ? housesPerCrew.getOrDefault(c.getId(), List.of())
+            : houseStages.findAssignedHousesForCrew(c.getId()).stream().map(row -> {
                 Map<String, Object> h = new LinkedHashMap<>();
                 h.put("id",   row[0]);
                 h.put("name", row[1]);
                 return h;
-            }).toList();
+              }).toList();
         m.put("assignedHouses", assignedHouses);
-        m.put("stageNames", houseStages.findStageNamesForCrew(c.getId()));
+        m.put("stageNames", stageNamesPerCrew != null
+            ? stageNamesPerCrew.get(c.getId())
+            : houseStages.findStageNamesForCrew(c.getId()));
         m.put("stageOrder", c.getStageOrder());
         if (c.getStageOrder() != null) {
-            String stageName = houseStages.findStageNameByOrder(c.getStageOrder());
-            m.put("stageName", stageName);
+            m.put("stageName", houseStages.findStageNameByOrder(c.getStageOrder()));
         } else {
             m.put("stageName", null);
         }

@@ -63,6 +63,10 @@
     body.theme-light .nav-item.active, body.theme-light .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
     body.theme-light .header { background: #ffffff; border-bottom: 1px solid var(--border); }
     body.theme-light .house-map-popup .leaflet-popup-content-wrapper { background: #fff; color: #1a1d27; }
+    .doc-card { background: var(--surface); }
+    ._doc-modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; width: 440px; max-width: 95vw; }
+    ._doc-modal-box input { background: var(--card); border: 1px solid var(--border); border-radius: 7px; color: var(--text); padding: 0.5rem 0.8rem; font-size: 0.85rem; width: 100%; box-sizing: border-box; }
+    ._doc-modal-title { font-weight: 700; color: var(--text); margin-bottom: 1rem; }
     body.theme-light .house-map-label { color: #fff; }
     body.theme-light .house-map-label--red { background: #1e293b; border-color: #475569; }
     body.theme-light input[type="number"], body.theme-light input[type="text"],
@@ -1570,21 +1574,6 @@
     <div class="nav-item active" id="navDashboard" onclick="showView('dashboard')">
       <span class="nav-icon">📊</span> <span>Dashboard</span>
     </div>
-    <div class="nav-item" id="navRoutesGroup" onclick="toggleNavGroup('routes')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
-      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🛣️</span><span id="navRoutesGroupLabel">Routes</span></span>
-      <span id="navRoutesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
-    </div>
-    <div id="navRoutesChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navOrder" onclick="showView('order')">
-        <span class="nav-icon">🗺️</span> <span id="navOrderLabel">Route Recommendation</span>
-      </div>
-      <div class="nav-item nav-sub" id="navScaffoldRoute" onclick="showView('scaffold')">
-        <span class="nav-icon">🏗️</span> <span id="navScaffoldRouteLabel">Scaffold Route</span>
-      </div>
-      <div class="nav-item nav-sub" id="navHistory" onclick="showView('history')">
-        <span class="nav-icon">📜</span> <span id="navHistoryLabel">Route History</span>
-      </div>
-    </div>
     <div class="nav-item" id="navManagementGroup" onclick="toggleNavGroup('management')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
       <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">⚙️</span><span id="navManagementGroupLabel">Management</span></span>
       <span id="navManagementChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
@@ -1614,9 +1603,6 @@
       <div class="nav-item nav-sub" id="navSuppliers" onclick="showView('suppliers')">
         <span class="nav-icon">🏭</span> <span id="navSuppliersLabel">Suppliers</span>
       </div>
-      <div class="nav-item nav-sub" id="navDocs" onclick="showView('dashboard');setDashMode('docs');setNavActive('navDocs')">
-        <span class="nav-icon">📁</span> <span id="navDocsLabel">Documentation</span>
-      </div>
       <div class="nav-item nav-sub" id="navScaffold" onclick="showView('dashboard');setDashMode('scaffold');setNavActive('navScaffold')">
         <span class="nav-icon">🏗️</span> <span id="navScaffoldLabel">Scaffold</span>
       </div>
@@ -1624,22 +1610,13 @@
         <span class="nav-icon">🔢</span> <span id="navStagesLabel">House Stages</span>
       </div>
     </div>
-    <div class="nav-item" id="navOrgChartGroup" onclick="toggleNavGroup('orgchart')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
-      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🏢</span><span id="navOrgChartGroupLabel">Org Chart</span></span>
-      <span id="navOrgChartChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
+    <div class="nav-item" id="navDocsGroup" onclick="toggleNavGroup('docs')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">📁</span><span id="navDocsGroupLabel">Documentation</span></span>
+      <span id="navDocsChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
-    <div id="navOrgChartChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navCrews" onclick="showView('crews')">
-        <span class="nav-icon">🗂️</span> <span id="navCrewsLabel">Crew Manager</span>
-      </div>
-    </div>
-    <div class="nav-item" id="navClientServicesGroup" onclick="toggleNavGroup('clientservices')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
-      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🔌</span><span id="navClientServicesGroupLabel">Client Services</span></span>
-      <span id="navClientServicesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
-    </div>
-    <div id="navClientServicesChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navElectric" onclick="showView('electric')">
-        <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
+    <div id="navDocsChildren" style="display:none">
+      <div class="nav-item nav-sub" id="navDocs" onclick="showView('dashboard');setDashMode('docs');setNavActive('navDocs')">
+        <span class="nav-icon">📂</span> <span id="navDocsLabel">Documentation</span>
       </div>
     </div>
     <div class="nav-item" id="navAttendanceGroup" onclick="toggleNavGroup('attendance')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
@@ -1662,6 +1639,39 @@
     </div>
     <div class="nav-item" id="navMap" onclick="showView('map')">
       <span class="nav-icon">🌍</span> <span id="navMapLabel">Location Overview</span>
+    </div>
+    <div class="nav-item" id="navRoutesGroup" onclick="toggleNavGroup('routes')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🛣️</span><span id="navRoutesGroupLabel">Routes</span></span>
+      <span id="navRoutesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
+    </div>
+    <div id="navRoutesChildren" style="display:none">
+      <div class="nav-item nav-sub" id="navOrder" onclick="showView('order')">
+        <span class="nav-icon">🗺️</span> <span id="navOrderLabel">Route Recommendation</span>
+      </div>
+      <div class="nav-item nav-sub" id="navScaffoldRoute" onclick="showView('scaffold')">
+        <span class="nav-icon">🏗️</span> <span id="navScaffoldRouteLabel">Scaffold Route</span>
+      </div>
+      <div class="nav-item nav-sub" id="navHistory" onclick="showView('history')">
+        <span class="nav-icon">📜</span> <span id="navHistoryLabel">Route History</span>
+      </div>
+    </div>
+    <div class="nav-item" id="navOrgChartGroup" onclick="toggleNavGroup('orgchart')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🏢</span><span id="navOrgChartGroupLabel">Org Chart</span></span>
+      <span id="navOrgChartChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
+    </div>
+    <div id="navOrgChartChildren" style="display:none">
+      <div class="nav-item nav-sub" id="navCrews" onclick="showView('crews')">
+        <span class="nav-icon">🗂️</span> <span id="navCrewsLabel">Crew Manager</span>
+      </div>
+    </div>
+    <div class="nav-item" id="navClientServicesGroup" onclick="toggleNavGroup('clientservices')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🔌</span><span id="navClientServicesGroupLabel">Client Services</span></span>
+      <span id="navClientServicesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
+    </div>
+    <div id="navClientServicesChildren" style="display:none">
+      <div class="nav-item nav-sub" id="navElectric" onclick="showView('electric')">
+        <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
+      </div>
     </div>
   </div>
 </nav>
@@ -1700,9 +1710,7 @@
       <button onclick="setDashMode('deliveries')"     id="dashModeDeliveries"     style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🚚 Deliveries</button>
       <button onclick="setDashMode('dashWarehouses')" id="dashModeDashWarehouses" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏬 Warehouses</button>
       <button onclick="setDashMode('dashSuppliers')"  id="dashModeDashSuppliers"  style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏭 Suppliers</button>
-      <button onclick="setDashMode('scaffold')"       id="dashModeScaffold"       style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏗️ Scaffold</button>
       <button onclick="setDashMode('travelpay')"      id="dashModeTravelpay"      style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 Travel Allowance</button>
-      <button onclick="setDashMode('stages')"          id="dashModeStages"          style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🔢 House Stages</button>
       <button onclick="setDashMode('docs')"            id="dashModeDocs"            style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">📁 Documentation</button>
     </div>
     <div class="totals" id="totals"></div>
@@ -2459,6 +2467,11 @@
       // worker card
       workerSearchPlaceholder:'Search workers by name, crew or house...',
       scaffoldSearchPlaceholder:'Search by status or house...',
+      waColName:'Name', waColRole:'Role', waColHouses:'Houses', waColUsername:'Username', waColPassword:'Password', waColActions:'Actions',
+      waFilterName:'Name', waFilterCrew:'Crew', waFilterHouse:'House',
+      waExportAllBtn:'⬇ Export All PDF', waResetBtn:'🔑 Reset', waPdfBtn:'⬇ PDF',
+      waRoleMember:'Member', waRoleLeader:'⭐ Leader', waRoleManager:'🏢 Manager',
+      waNoResults:'No results found.',
       phWorkerName:'Worker name', phCrewName:'Crew name', phMemberSearch:'Search by name or trade…',
       phSearchWarehouses:'Search warehouses...', phSearchSuppliers:'Search suppliers...',
       phSearchElectric:'Search electric boxes...', phSearchHouses:'Search houses...',
@@ -2500,7 +2513,7 @@
       chipOrderInTransit:'🚚 In Transit', chipOrderDelivered:'✅ Delivered',
       chipClearFilters:'✕ Clear',
       // documentation
-      docTab:'Documentation', navDocsLabel:'Documentation',
+      docTab:'Documentation', navDocsLabel:'Documentation', navDocsGroupLabel:'Documentation',
       doc00:'Control', doc01:'Sales', doc02:'Active Sites', doc03:'Finance', doc04:'Administration & HR',
       doc05:'Standards & Templates', doc06:'Marketing', doc07:'Completed Sites', doc08:'Purchases',
       doc00_01:'01_OBJECTS_CONTROL', doc00_02:'02_EXPENSES_CONTROL', doc00_03:'03_CLIENTS_CONTROL',
@@ -2741,6 +2754,11 @@
       // worker card
       workerSearchPlaceholder:'Търси работник по име, екип или къща...',
       scaffoldSearchPlaceholder:'Търси по статус или къща...',
+      waColName:'Име', waColRole:'Роля', waColHouses:'Къщи', waColUsername:'Потребител', waColPassword:'Парола', waColActions:'Действия',
+      waFilterName:'Име', waFilterCrew:'Екип', waFilterHouse:'Къща',
+      waExportAllBtn:'⬇ Експорт всички PDF', waResetBtn:'🔑 Нулиране', waPdfBtn:'⬇ PDF',
+      waRoleMember:'Член', waRoleLeader:'⭐ Лидер', waRoleManager:'🏢 Мениджър',
+      waNoResults:'Няма намерени резултати.',
       phWorkerName:'Име на работник', phCrewName:'Наименование на екип', phMemberSearch:'Търси по име или специалност…',
       phSearchWarehouses:'Търси складове...', phSearchSuppliers:'Търси доставчици...',
       phSearchElectric:'Търси електрически табла...', phSearchHouses:'Търси обекти...',
@@ -2782,7 +2800,7 @@
       chipOrderInTransit:'🚚 В транзит', chipOrderDelivered:'✅ Доставен',
       chipClearFilters:'✕ Изчисти',
       // documentation
-      docTab:'Документация', navDocsLabel:'Документация',
+      docTab:'Документация', navDocsLabel:'Документация', navDocsGroupLabel:'Документация',
       doc00:'Контрол', doc01:'Продажби', doc02:'Обекти в строеж', doc03:'Финанси', doc04:'Администрация и ЧР',
       doc05:'Стандарти и Шаблони', doc06:'Маркетинг', doc07:'Обекти завършени', doc08:'Покупки',
       doc00_01:'01_КОНТРОЛ_ОБЕКТИ', doc00_02:'02_КОНТРОЛ_РАЗХОДИ', doc00_03:'03_КОНТРОЛ_КЛИЕНТИ',
@@ -2837,7 +2855,7 @@
     else if (activeView === 'suppliers')   renderFacilityList('supplier');
     else if (activeView === 'history')     loadHistory();
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
-    else if (activeView === 'workeraccess') { waBuildChipBar(); }
+    else if (activeView === 'workeraccess') { if (_waGroups) waRender(_waGroups); }
     if (_dashMode === 'docs') {
       document.querySelectorAll('.doc-dept-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
       document.querySelectorAll('.doc-sub-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
@@ -2978,6 +2996,7 @@
     const dd  = document.getElementById('dashModeDeliveries'); if (dd) dd.textContent = t('dashDeliveries');
     const ddocs = document.getElementById('dashModeDocs'); if (ddocs) ddocs.textContent = '📁 ' + t('docTab');
     const ndocs = document.getElementById('navDocsLabel'); if (ndocs) ndocs.textContent = t('navDocsLabel');
+    const ndocsGrp = document.getElementById('navDocsGroupLabel'); if (ndocsGrp) ndocsGrp.textContent = t('navDocsGroupLabel');
 
     // map toggles
     const mh = document.getElementById('mapModeHouses');   if (mh) mh.textContent = t('mapHouses');
@@ -3137,6 +3156,7 @@
     routes:         { children: 'navRoutesChildren',          chevron: 'navRoutesChevron' },
     attendance:     { children: 'navAttendanceChildren',      chevron: 'navAttendanceChevron' },
     management:     { children: 'navManagementChildren',      chevron: 'navManagementChevron' },
+    docs:           { children: 'navDocsChildren',            chevron: 'navDocsChevron' },
     orgchart:       { children: 'navOrgChartChildren',        chevron: 'navOrgChartChevron' },
     clientservices: { children: 'navClientServicesChildren',  chevron: 'navClientServicesChevron' },
   };
@@ -3223,6 +3243,10 @@
       ]);
       const h = houses.find(x => x.id == _houseDetailId);
       if (!h) { el.innerHTML = '<div class="state-msg">House not found.</div>'; return; }
+      const titleEl = document.getElementById('pageTitle');
+      const subEl   = document.getElementById('pageSub');
+      if (titleEl) titleEl.textContent = h.name;
+      if (subEl)   subEl.textContent   = h.location || '';
 
       const matrixRow = (stageMatrix.rows || []).find(r => r.houseId == _houseDetailId || r.houseName === h.name);
       const columns = stageMatrix.columns || [];
@@ -4655,65 +4679,107 @@
   }
 
   // ── DOCUMENTATION ────────────────────────────────────────────────────────────
-  const _docStructure = [
-    { id:'00', labelKey:'doc00', icon:'🛡️', color:'#4f8ef7', subKeys:[
-      'doc00_01','doc00_02','doc00_03','doc00_04','doc00_05','doc00_06','doc00_07'
-    ]},
-    { id:'01', labelKey:'doc01', icon:'📈', color:'#3ecf6e', subKeys:[
-      'doc01_00a','doc01_00b','doc01_01','doc01_02','doc01_03','doc01_04','doc01_05',
-      'doc01_06','doc01_07','doc01_08','doc01_09','doc01_10'
-    ]},
-    { id:'03', labelKey:'doc03', icon:'🧮', color:'#a78bfa', subKeys:['doc03_01'] },
-    { id:'04', labelKey:'doc04', icon:'👥', color:'#fb7185', subKeys:[
-      'doc04_01','doc04_02','doc04_03','doc04_07'
-    ]},
-    { id:'05', labelKey:'doc05', icon:'📋', color:'#00c9b1', subKeys:[
-      'doc05_01','doc05_02','doc05_03','doc05_04','doc05_05','doc05_06',
-      'doc05_07','doc05_08','doc05_09','doc05_10','doc05_11'
-    ]},
-    { id:'02', labelKey:'doc02', icon:'🏗️', color:'#f97316', subKeys:[] },
-    { id:'06', labelKey:'doc06', icon:'📣', color:'#f59e0b', subKeys:[] },
-    { id:'07', labelKey:'doc07', icon:'🏠', color:'#4f8ef7', subKeys:[] },
-    { id:'08', labelKey:'doc08', icon:'🛒', color:'#00c9b1', subKeys:[] },
-  ];
+  let _docTree    = [];   // loaded from API
+  let _docOpenId  = null;
 
-  let _docOpenId = null;
-
-  function renderDocsDash() {
+  async function renderDocsDash() {
     const grid = document.getElementById('grid');
     grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
     grid.style.gap = '1rem';
     grid.style.alignItems = 'start';
-    grid.innerHTML = _docStructure.map(dept => _docDeptCard(dept)).join('');
+    grid.innerHTML = `<div class="state-msg"><div class="spinner"></div></div>`;
+    try {
+      _docTree = await apiFetch('/api/doc-folders').then(r => r.json());
+    } catch(e) { grid.innerHTML = `<div class="state-msg">Failed to load documentation.</div>`; return; }
+    grid.innerHTML = _docTree.map(dept => _docDeptCard(dept)).join('');
     if (_docOpenId) {
       const el = document.getElementById('docSubs_' + _docOpenId);
       if (el) el.style.display = 'block';
     }
   }
 
+  function _docLabel(dept) {
+    return currentLang === 'bg' ? dept.labelBg : dept.labelEn;
+  }
+
   function _docDeptCard(dept) {
-    const hasSubs = dept.subKeys.length > 0;
-    const label   = t(dept.labelKey);
+    const hasSubs = dept.children && dept.children.length > 0;
+    const hasDocs = dept.documents && dept.documents.length > 0;
+    const label   = _docLabel(dept);
+    const linkBtn = dept.linkUrl
+      ? `<a href="${dept.linkUrl}" target="_blank" title="Open link" onclick="event.stopPropagation()" style="color:${dept.color};font-size:1rem;text-decoration:none;padding:2px 4px">🔗</a>`
+      : '';
     return `
-      <div style="background:#1a1d27;border:1px solid #2e3250;border-radius:12px;overflow:hidden;transition:box-shadow .2s"
-           onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.4)'" onmouseout="this.style.boxShadow=''">
-        <div onclick="_docToggle('${dept.id}')" style="display:flex;align-items:center;gap:12px;padding:1rem 1.1rem;cursor:pointer;background:#21253a;border-bottom:2px solid ${dept.color}20">
-          <div style="width:38px;height:38px;border-radius:10px;background:${dept.color}20;border:1.5px solid ${dept.color}40;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${dept.icon}</div>
+      <div class="doc-card" style="border-radius:12px;overflow:hidden;transition:box-shadow .2s;border:1px solid var(--border)"
+           onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.boxShadow=''">
+        <div onclick="_docToggle(${dept.id})" style="display:flex;align-items:center;gap:12px;padding:1rem 1.1rem;cursor:pointer;background:var(--card);border-bottom:2px solid ${dept.color}33">
+          <div style="width:38px;height:38px;border-radius:10px;background:${dept.color}20;border:1.5px solid ${dept.color}50;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${dept.icon}</div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:0.7rem;color:${dept.color};font-weight:700;letter-spacing:0.08em">${dept.id}</div>
-            <div class="doc-dept-label" data-labelkey="${dept.labelKey}" style="font-size:0.92rem;font-weight:700;color:#e2e8f0;margin-top:1px">${label}</div>
+            <div style="font-size:0.7rem;color:${dept.color};font-weight:700;letter-spacing:0.08em">${dept.code}</div>
+            <div style="font-size:0.92rem;font-weight:700;color:var(--text);margin-top:1px">${label}</div>
           </div>
-          <div id="docArrow_${dept.id}" style="font-size:0.75rem;color:#9aa3be;transition:transform .2s">${hasSubs ? '▶' : ''}</div>
+          <div style="display:flex;align-items:center;gap:4px" onclick="event.stopPropagation()">
+            ${linkBtn}
+            <button title="Edit link" onclick="_docEditFolderLink(${dept.id})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.85rem;padding:2px 4px">✏️</button>
+          </div>
+          <div id="docArrow_${dept.id}" style="font-size:0.75rem;color:var(--muted,#9aa3be);transition:transform .2s;margin-left:4px">${(hasSubs||hasDocs) ? '▶' : ''}</div>
         </div>
-        <div id="docSubs_${dept.id}" style="display:none;padding:0.5rem 0">
-          ${hasSubs ? dept.subKeys.map(k => `
-            <div style="display:flex;align-items:center;gap:10px;padding:0.5rem 1.1rem;cursor:default;transition:background .15s"
-                 onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background=''">
-              <span style="font-size:0.95rem">📄</span>
-              <span class="doc-sub-label" data-labelkey="${k}" style="font-size:0.82rem;color:#c8d0e0;font-weight:500">${t(k)}</span>
-            </div>`).join('') : `<div class="doc-sub-label" data-labelkey="docComingSoon" style="padding:0.75rem 1.1rem;font-size:0.8rem;color:#9aa3be">${t('docComingSoon')}</div>`}
+        <div id="docSubs_${dept.id}" style="display:none;padding:0.4rem 0;background:var(--surface)">
+          ${hasSubs ? dept.children.map(sub => _docSubRow(sub, dept.color)).join('') : ''}
+          ${hasDocs ? dept.documents.map(doc => _docDocRow(doc, dept.color)).join('') : ''}
+          ${(!hasSubs && !hasDocs) ? `<div style="padding:0.75rem 1.1rem;font-size:0.8rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
+          <div class="admin-only" style="padding:0.35rem 1.1rem">
+            <button onclick="_docAddDoc(${dept.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem;width:100%;text-align:left">＋ Add PDF</button>
+          </div>
         </div>
+      </div>`;
+  }
+
+  function _docSubRow(sub, parentColor) {
+    const label   = _docLabel(sub);
+    const hasDocs = sub.documents && sub.documents.length > 0;
+    const linkBtn = sub.linkUrl
+      ? `<a href="${sub.linkUrl}" target="_blank" onclick="event.stopPropagation()" style="color:${parentColor};font-size:0.85rem;text-decoration:none" title="Open">🔗</a>`
+      : '';
+    const houseIdMatch = sub.code && sub.code.match(/^house_(\d+)$/);
+    const folderIcon = houseIdMatch
+      ? `<span style="font-size:0.9rem;cursor:pointer" onclick="event.stopPropagation();openHouseDetail(${houseIdMatch[1]})" title="Go to house page">📂</span>`
+      : `<span style="font-size:0.9rem">📂</span>`;
+    return `
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;padding:0.45rem 1.1rem;transition:background .15s"
+             onmouseover="this.style.background='rgba(128,128,128,0.07)'" onmouseout="this.style.background=''">
+          ${folderIcon}
+          <span style="flex:1;font-size:0.82rem;color:var(--text);opacity:0.85;font-weight:500">${label}</span>
+          <span style="display:flex;align-items:center;gap:3px">
+            ${linkBtn}
+            <button title="Edit link" onclick="_docEditFolderLink(${sub.id})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.78rem;padding:1px 3px">✏️</button>
+          </span>
+        </div>
+        ${hasDocs ? sub.documents.map(doc => _docDocRow(doc, parentColor, true)).join('') : ''}
+        <div class="admin-only" style="padding:0.2rem 1.1rem 0.2rem 2.4rem">
+          <button onclick="_docAddDoc(${sub.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">＋ Add PDF</button>
+        </div>
+      </div>`;
+  }
+
+  function _docDocRow(doc, color, indented) {
+    const title   = currentLang === 'bg' && doc.titleBg ? doc.titleBg : doc.titleEn;
+    const indent  = indented ? '2.4rem' : '1.1rem';
+    const linkPart = doc.linkUrl
+      ? `<a href="${doc.linkUrl}" target="_blank" style="color:${color||'#4f8ef7'};font-size:0.8rem;text-decoration:none" title="Open PDF">🔗</a>`
+      : '';
+    return `
+      <div style="display:flex;align-items:center;gap:8px;padding:0.35rem 1.1rem 0.35rem ${indent};transition:background .15s"
+           onmouseover="this.style.background='rgba(128,128,128,0.06)'" onmouseout="this.style.background=''">
+        <span style="font-size:0.82rem">📄</span>
+        <span style="flex:1;font-size:0.79rem;color:var(--text);opacity:0.75">${title}</span>
+        <span style="display:flex;align-items:center;gap:3px">
+          ${linkPart}
+          <button title="Edit" onclick="_docEditDoc(${doc.id})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.75rem;padding:1px 3px">✏️</button>
+          <button title="Delete" onclick="_docDeleteDoc(${doc.id})" style="background:none;border:none;cursor:pointer;color:#e05;font-size:0.75rem;padding:1px 3px">🗑</button>
+        </span>
       </div>`;
   }
 
@@ -4725,6 +4791,115 @@
     subs.style.display  = open ? 'none'  : 'block';
     if (arrow) arrow.textContent = open ? '▶' : '▼';
     _docOpenId = open ? null : id;
+  }
+
+  // ── Folder link editor ────────────────────────────────────────────────────
+  function _docEditFolderLink(folderId) {
+    const folder = _docFindFolder(folderId);
+    if (!folder) return;
+    const cur = folder.linkUrl || '';
+    _docShowLinkModal('Edit folder link', cur, async (url) => {
+      await apiFetch(`/api/doc-folders/${folderId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ linkUrl: url }) });
+      renderDocsDash();
+    });
+  }
+
+  function _docFindFolder(id) {
+    for (const dept of _docTree) {
+      if (dept.id === id) return dept;
+      if (dept.children) for (const sub of dept.children) if (sub.id === id) return sub;
+    }
+    return null;
+  }
+
+  // ── Document CRUD ─────────────────────────────────────────────────────────
+  function _docAddDoc(folderId) {
+    _docShowDocModal(null, folderId, async (data) => {
+      await apiFetch('/api/doc-documents', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ folderId, ...data }) });
+      renderDocsDash();
+    });
+  }
+
+  function _docEditDoc(docId) {
+    const doc = _docFindDoc(docId);
+    if (!doc) return;
+    _docShowDocModal(doc, null, async (data) => {
+      await apiFetch(`/api/doc-documents/${docId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+      renderDocsDash();
+    });
+  }
+
+  async function _docDeleteDoc(docId) {
+    if (!confirm('Delete this document?')) return;
+    await apiFetch(`/api/doc-documents/${docId}`, { method:'DELETE' });
+    renderDocsDash();
+  }
+
+  function _docFindDoc(id) {
+    for (const dept of _docTree) {
+      for (const doc of (dept.documents || [])) if (doc.id === id) return doc;
+      for (const sub of (dept.children  || [])) for (const doc of (sub.documents || [])) if (doc.id === id) return doc;
+    }
+    return null;
+  }
+
+  // ── Inline modals ─────────────────────────────────────────────────────────
+  function _docShowLinkModal(title, currentUrl, onSave) {
+    const existing = document.getElementById('_docLinkModal');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = '_docLinkModal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+      <div class="_doc-modal-box">
+        <div class="_doc-modal-title">${title}</div>
+        <input id="_docLinkInput" type="url" placeholder="https://..." value="${currentUrl}" style="margin-bottom:1rem">
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <button onclick="document.getElementById('_docLinkModal').remove()" class="btn btn-ghost" style="padding:0.45rem 1.1rem">Cancel</button>
+          <button id="_docLinkSave" class="btn btn-primary" style="padding:0.45rem 1.1rem">Save</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#_docLinkSave').addEventListener('click', async () => {
+      const url = document.getElementById('_docLinkInput').value.trim();
+      overlay.remove();
+      await onSave(url);
+    });
+  }
+
+  function _docShowDocModal(doc, folderId, onSave) {
+    const existing = document.getElementById('_docDocModal');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = '_docDocModal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+      <div class="_doc-modal-box">
+        <div class="_doc-modal-title">${doc ? 'Edit document' : 'Add PDF document'}</div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          <input id="_docDtitleEn" type="text" placeholder="Title (EN)" value="${doc ? doc.titleEn : ''}">
+          <input id="_docDtitleBg" type="text" placeholder="Title (BG)" value="${doc ? doc.titleBg : ''}">
+          <input id="_docDlink" type="url" placeholder="Link URL (PDF link)" value="${doc && doc.linkUrl ? doc.linkUrl : ''}">
+          <input id="_docDdesc" type="text" placeholder="Description (optional)" value="${doc && doc.description ? doc.description : ''}">
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem">
+          <button onclick="document.getElementById('_docDocModal').remove()" class="btn btn-ghost" style="padding:0.45rem 1.1rem">Cancel</button>
+          <button id="_docDsave" class="btn btn-primary" style="padding:0.45rem 1.1rem">Save</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#_docDsave').addEventListener('click', async () => {
+      const data = {
+        titleEn:     document.getElementById('_docDtitleEn').value.trim(),
+        titleBg:     document.getElementById('_docDtitleBg').value.trim(),
+        linkUrl:     document.getElementById('_docDlink').value.trim(),
+        description: document.getElementById('_docDdesc').value.trim(),
+        docType:     'PDF',
+      };
+      if (!data.titleEn) { alert('Title (EN) is required'); return; }
+      overlay.remove();
+      await onSave(data);
+    });
   }
 
   async function renderFacilityDash(kind) {
@@ -5198,7 +5373,7 @@
           <span style="margin-right:0.3rem">${roleCfg.icon}</span>${w.name}
         </td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${roleCfg.color};font-weight:700">${roleCfg.icon} ${roleCfg.label}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#a78bfa;font-weight:600">${w.crewStages ? '🔧 ' + w.crewStages : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#a78bfa;font-weight:600">${w.trade ? '🔧 ' + w.trade : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewName ? '👥 ' + w.crewName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.houses && w.houses.length > 0 ? w.houses.map(h => '🏠 ' + h.houseName).join('<br>') : w.crewHouseName ? '🏠 ' + w.crewHouseName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.82rem;color:var(--muted)">${w.location || (w.lat && w.lng ? `${parseFloat(w.lat).toFixed(4)}, ${parseFloat(w.lng).toFixed(4)}` : '—')}</td>
@@ -7185,13 +7360,13 @@
     const dd = document.getElementById('cMemberDropdown');
     if (!dd) return;
     const q = (query || '').toLowerCase().trim();
-    // filter by stage trade if a stage is selected
     const stageSel = document.getElementById('cStage');
-    const stageOpt = stageSel?.options[stageSel.selectedIndex];
-    const stageTrade = stageOpt?.value ? tradeFromStageName(stageOpt.text) : null;
+    const stageOpt = stageSel?.options[stageSel?.selectedIndex];
+    const stageTrade = stageOpt?.value ? stageOpt.text : null;
     const available = _memberSearchList.filter(m =>
       !_crewMembers.includes(m.id) &&
-      (!stageTrade || (m.trade||'') === stageTrade) &&
+      (!m.crewId || m.crewId === _editingCrewId) &&
+      (!stageTrade || !m.trade || m.trade === stageTrade) &&
       (m.name.toLowerCase().includes(q) || (m.trade||'').toLowerCase().includes(q))
     );
     if (!available.length) {
@@ -9102,21 +9277,21 @@
       <div style="flex:1;display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;min-width:0">
         <span style="padding:0 0.6rem;display:flex;align-items:center;color:var(--muted);font-size:0.9rem;border-right:1px solid var(--border)">🔍</span>
         <div style="display:flex;align-items:stretch;border-right:1px solid var(--border);flex:1">
-          <span style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">Name</span>
+          <span id="waLblName" style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">${t('waFilterName')}</span>
           <input id="waSearchName" class="wa-sf" type="text" autocomplete="off" oninput="waApplySearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;padding:0.5rem 0.6rem;outline:none;min-width:60px">
         </div>
         <div style="display:flex;align-items:stretch;border-right:1px solid var(--border);flex:1">
-          <span style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">Crew</span>
+          <span id="waLblCrew" style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">${t('waFilterCrew')}</span>
           <input id="waSearchCrew" class="wa-sf" type="text" autocomplete="off" oninput="waApplySearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;padding:0.5rem 0.6rem;outline:none;min-width:60px">
         </div>
         <div style="display:flex;align-items:stretch;flex:1">
-          <span style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">House</span>
+          <span id="waLblHouse" style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">${t('waFilterHouse')}</span>
           <input id="waSearchHouse" class="wa-sf" type="text" autocomplete="off" oninput="waApplySearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;padding:0.5rem 0.6rem;outline:none;min-width:60px">
         </div>
         <button onclick="document.querySelectorAll('.wa-sf').forEach(i=>i.value='');waChipBarClear();" style="background:none;border:none;color:var(--muted);padding:0 0.7rem;cursor:pointer;font-size:0.8rem" title="Clear">✕</button>
       </div>
       <button onclick="waExportAll()"
-        style="background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.5rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap">⬇ Export All PDF</button>`;
+        style="background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.5rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap">${t('waExportAllBtn')}</button>`;
     content.appendChild(topBar);
 
     // Chip bar
@@ -9158,12 +9333,12 @@
       const table = document.createElement('table');
       table.style.cssText = 'width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden';
       table.innerHTML = `<thead><tr style="border-bottom:1px solid var(--border)">
-        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Name</th>
-        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Role</th>
-        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Houses</th>
-        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Username</th>
-        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Password</th>
-        <th style="padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600;text-align:right">Actions</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">${t('waColName')}</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">${t('waColRole')}</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">${t('waColHouses')}</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">${t('waColUsername')}</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">${t('waColPassword')}</th>
+        <th style="padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600;text-align:right">${t('waColActions')}</th>
       </tr></thead>`;
       const tbody = document.createElement('tbody');
 
@@ -9171,7 +9346,7 @@
         const tr = document.createElement('tr');
         tr.id = `wa-row-${m.id}`;
         tr.style.cssText = `border-bottom:${i < group.members.length-1 ? '1px solid var(--border)' : 'none'}`;
-        const roleLabel = m.role === 'CREW_LEADER' ? '⭐ Leader' : m.role === 'CREW_MANAGER' ? '🏢 Manager' : 'Member';
+        const roleLabel = m.role === 'CREW_LEADER' ? t('waRoleLeader') : m.role === 'CREW_MANAGER' ? t('waRoleManager') : t('waRoleMember');
         const btnStyle = 'background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.25rem 0.55rem;font-size:0.75rem;cursor:pointer';
         const housesHtml = m.houses && m.houses.length
           ? m.houses.map(h => `<div style="font-size:0.78rem;color:#4f8ef7;font-weight:600;white-space:nowrap">🏠 ${h.houseName}</div>`).join('')
@@ -9186,8 +9361,8 @@
             ${m.passwordPlain ? `<span onclick="(function(el,p){el.textContent===p?el.textContent='••••':el.textContent=p})(document.getElementById('wp-${m.id}'),'${m.passwordPlain}')" style="cursor:pointer;margin-left:6px;opacity:0.5;font-size:0.8rem">👁</span>` : ''}
           </td>
           <td style="padding:0.55rem 0.75rem;text-align:right;white-space:nowrap;display:flex;gap:0.4rem;justify-content:flex-end">
-            <button onclick="waOpenReset(${m.id},'${m.name.replace(/'/g,"\\'")}','${m.username||''}')" style="${btnStyle}">🔑 Reset</button>
-            <button onclick="waExportWorker(${m.id},'${m.name.replace(/'/g,"\\'")}','${m.username||''}','${group.crewName.replace(/'/g,"\\'")}','${(group.stageName||'').replace(/'/g,"\\'")}','${roleLabel}','${(m.passwordPlain||'').replace(/'/g,"\\'")}')" style="${btnStyle}">⬇ PDF</button>
+            <button onclick="waOpenReset(${m.id},'${m.name.replace(/'/g,"\\'")}','${m.username||''}')" style="${btnStyle}">${t('waResetBtn')}</button>
+            <button onclick="waExportWorker(${m.id},'${m.name.replace(/'/g,"\\'")}','${m.username||''}','${group.crewName.replace(/'/g,"\\'")}','${(group.stageName||'').replace(/'/g,"\\'")}','${roleLabel}','${(m.passwordPlain||'').replace(/'/g,"\\'")}')" style="${btnStyle}">${t('waPdfBtn')}</button>
           </td>`;
         tbody.appendChild(tr);
       });
@@ -9199,7 +9374,7 @@
     });
 
     if (!anyVisible) {
-      groupsDiv.innerHTML = '<div style="color:var(--muted);padding:1.5rem;text-align:center">No results found.</div>';
+      groupsDiv.innerHTML = `<div style="color:var(--muted);padding:1.5rem;text-align:center">${t('waNoResults')}</div>`;
     }
   }
 

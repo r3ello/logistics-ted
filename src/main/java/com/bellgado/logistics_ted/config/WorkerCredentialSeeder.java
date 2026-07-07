@@ -43,21 +43,34 @@ public class WorkerCredentialSeeder {
                 continue;
             }
             if (w.getUsername() != null) continue;
-
-            String base = firstNameLower(w.getName());
-            String username = base;
-            int suffix = 2;
-            while (usedNames.containsKey(username)) {
-                username = base + suffix++;
-            }
-            usedNames.put(username, 1);
-
-            String pin = String.format("%04d", 1000 + rng.nextInt(9000));
-            w.setUsername(username);
-            w.setPasswordHash(encoder.encode(pin));
-            w.setPasswordPlain(pin);
+            assignCredentials(w, usedNames, rng);
             workers.save(w);
         }
+    }
+
+    /** Assign a unique username + random PIN to a single worker. Safe to call on create. */
+    public void assignCredentials(Worker w, Map<String, Integer> usedNames, Random rng) {
+        String base = firstNameLower(w.getName());
+        String username = base;
+        int suffix = 2;
+        while (usedNames.containsKey(username)) {
+            username = base + suffix++;
+        }
+        usedNames.put(username, 1);
+        String pin = String.format("%04d", 1000 + rng.nextInt(9000));
+        w.setUsername(username);
+        w.setPasswordHash(encoder.encode(pin));
+        w.setPasswordPlain(pin);
+    }
+
+    /** Convenience overload — loads existing usernames from DB automatically. */
+    @Transactional
+    public void assignCredentials(Worker w) {
+        Map<String, Integer> usedNames = new HashMap<>();
+        workers.findAll().stream()
+               .filter(x -> x.getUsername() != null)
+               .forEach(x -> usedNames.put(x.getUsername(), 1));
+        assignCredentials(w, usedNames, new Random());
     }
 
     private String firstNameLower(String fullName) {

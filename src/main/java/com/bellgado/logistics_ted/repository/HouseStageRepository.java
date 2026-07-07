@@ -72,4 +72,46 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
         ORDER BY hs.house_id, c.name
         """, nativeQuery = true)
     List<Object[]> findAllHouseCrewMappings();
+
+    /** Batch: for every crew, the distinct houses it is assigned to (status <> NOT_STARTED).
+     *  Returns [crew_id, house_id, house_name]. */
+    @Query(value = """
+        SELECT DISTINCT hs.crew_id, h.id, h.name
+        FROM house_stage hs
+        JOIN house h ON h.id = hs.house_id
+        WHERE hs.crew_id IS NOT NULL AND hs.status <> 'NOT_STARTED'
+        ORDER BY hs.crew_id, h.name
+        """, nativeQuery = true)
+    List<Object[]> findAllAssignedHousesPerCrew();
+
+    /** Batch: for every crew, the comma-aggregated stage names from stage_type_crew.
+     *  Returns [crew_id, stage_names]. */
+    @Query(value = """
+        SELECT stc.crew_id,
+               string_agg(DISTINCT hs.stage_name, ', ' ORDER BY hs.stage_name) AS stage_names
+        FROM stage_type_crew stc
+        JOIN house_stage hs ON hs.stage_order = stc.stage_order
+        GROUP BY stc.crew_id
+        """, nativeQuery = true)
+    List<Object[]> findAllStageNamesPerCrew();
+
+    /** All house stages with house eagerly fetched — avoids N+1 on house lazy load. */
+    @Query("SELECT s FROM HouseStage s JOIN FETCH s.house ORDER BY s.house.id, s.stageOrder")
+    List<HouseStage> findAllWithHouse();
+
+    /** Batch: all crews per stage type with leader and assigned houses.
+     *  Returns [stage_order, crew_id, crew_name, leader_id, leader_name, assigned_houses]. */
+    @Query(value = """
+        SELECT stc.stage_order, c.id, c.name,
+               w.id AS leader_id, w.name AS leader_name,
+               string_agg(DISTINCT h2.name, ', ' ORDER BY h2.name) AS assigned_houses
+        FROM stage_type_crew stc
+        JOIN crew c ON c.id = stc.crew_id
+        LEFT JOIN worker w ON w.id = c.leader_id
+        LEFT JOIN house_stage hs2 ON hs2.crew_id = c.id AND hs2.status <> 'NOT_STARTED'
+        LEFT JOIN house h2 ON h2.id = hs2.house_id
+        GROUP BY stc.stage_order, c.id, c.name, w.id, w.name
+        ORDER BY stc.stage_order, c.name
+        """, nativeQuery = true)
+    List<Object[]> findAllCrewsPerStage();
 }

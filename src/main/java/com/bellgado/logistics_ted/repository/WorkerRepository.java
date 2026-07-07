@@ -14,6 +14,17 @@ public interface WorkerRepository extends JpaRepository<Worker, Integer> {
 
     java.util.Optional<Worker> findByUsername(String username);
 
+    /** All workers with their crew + crew's house/manager/leader eagerly fetched. */
+    @Query("""
+        SELECT DISTINCT w FROM Worker w
+        LEFT JOIN FETCH w.crew c
+        LEFT JOIN FETCH c.house
+        LEFT JOIN FETCH c.manager
+        LEFT JOIN FETCH c.leader
+        ORDER BY w.name
+        """)
+    List<Worker> findAllWithCrew();
+
     /** Workers whose crew is assigned to any stage on this house (via house_stage). */
     @Query(value = """
         SELECT DISTINCT w.* FROM worker w

@@ -46,10 +46,6 @@ public class Worker {
     @Column(nullable = false, length = 20)
     private WorkerRole role = WorkerRole.CREW_MEMBER;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "house_id")
-    private House house;
-
     /** The crew this worker belongs to (leader or member). Null for managers. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crew_id")

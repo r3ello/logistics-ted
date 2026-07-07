@@ -9,6 +9,7 @@ import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,28 +111,41 @@ public class HouseStageController {
     @Transactional(readOnly = true)
     public Map<String, Object> matrix() {
         List<Object[]> stageTypes = stages.findDistinctStageTypes();
+
+        // Batch: all crews per stage in one query
+        Map<Integer, List<Map<String, Object>>> crewsByStage = new HashMap<>();
+        for (Object[] cr : stages.findAllCrewsPerStage()) {
+            int stageOrder = ((Number) cr[0]).intValue();
+            Map<String, Object> c = new LinkedHashMap<>();
+            c.put("crewId",        cr[1]);
+            c.put("crewName",      cr[2]);
+            c.put("leaderName",    cr[4]);
+            c.put("assignedHouses", cr[5]);
+            crewsByStage.computeIfAbsent(stageOrder, k -> new ArrayList<>()).add(c);
+        }
+
         List<Map<String, Object>> columns = stageTypes.stream().map(row -> {
             Integer order = (Integer) row[0];
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("stageOrder",  order);
             m.put("stageName",   row[1]);
             m.put("stageNameEn", row[2]);
-            m.put("crews", stages.findCrewsForStage(order).stream().map(cr -> {
-                Map<String, Object> c = new LinkedHashMap<>();
-                c.put("crewId",         cr[0]);
-                c.put("crewName",        cr[1]);
-                c.put("leaderName",      cr[3]);
-                c.put("assignedHouses",  cr[4]);
-                return c;
-            }).toList());
+            m.put("crews", crewsByStage.getOrDefault(order, List.of()));
             return m;
         }).toList();
+
+        // Batch: all house stages in one query, grouped by house
+        Map<Integer, Map<Integer, HouseStage>> stagesByHouse = new HashMap<>();
+        for (HouseStage hs : stages.findAllWithHouse()) {
+            stagesByHouse
+                .computeIfAbsent(hs.getHouse().getId(), k -> new HashMap<>())
+                .put(hs.getStageOrder(), hs);
+        }
 
         List<Map<String, Object>> rows = houses.findAll().stream()
             .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
             .map(h -> {
-                Map<Integer, HouseStage> byOrder = stages.findByHouseIdOrderByStageOrder(h.getId())
-                    .stream().collect(Collectors.toMap(HouseStage::getStageOrder, s -> s));
+                Map<Integer, HouseStage> byOrder = stagesByHouse.getOrDefault(h.getId(), Map.of());
                 Map<String, Object> row = new LinkedHashMap<>();
                 row.put("houseId",   h.getId());
                 row.put("houseName", h.getName());
@@ -208,10 +222,7 @@ public class HouseStageController {
         crews.findById(crewId).ifPresent(crew -> {
             crew.setHouse(house);
             crews.save(crew);
-            workers.findByCrewId(crewId).forEach(w -> {
-                w.setHouse(house);
-                workers.save(w);
-            });
+            // worker.house is derived from crew.house — no direct field to sync
         });
     }
 
