@@ -2499,6 +2499,22 @@
       chipOrderPending:'⏳ Pending', chipOrderApproved:'✓ Approved', chipOrderOrdered:'📦 Ordered',
       chipOrderInTransit:'🚚 In Transit', chipOrderDelivered:'✅ Delivered',
       chipClearFilters:'✕ Clear',
+      // documentation
+      docTab:'Documentation', navDocsLabel:'Documentation',
+      doc00:'Контрол', doc01:'Продажби', doc03:'Финанси', doc04:'Администрация и HR',
+      doc05:'Стандарти и Шаблони', doc06:'Маркетинг', doc08:'Покупки',
+      doc00_01:'01_КОНТРОЛ_ОБЕКТИ', doc00_02:'02_КОНТРОЛ_РАЗХОДИ', doc00_03:'03_КОНТРОЛ_КЛИЕНТИ',
+      doc00_04:'04_КОНТРОЛ_ДОСТАВЧИЦИ', doc00_05:'05_КОНТРОЛ_БРИГАДИ', doc00_06:'06_КОНТРОЛ_АВТОПАРК', doc00_07:'07_КОНТРОЛ_МАТЕРИАЛИ',
+      doc01_00a:'00_CRM', doc01_00b:'00_НОВИ_КЛИЕНТИ', doc01_01:'01_ПРИ_АРХИТЕКТИ', doc01_02:'02_ЗА_ОФЕРТА',
+      doc01_03:'03_ОФЕРТИ_ЗА_ПОТВЪРЖДЕНИЕ', doc01_04:'04_ИЗПРАТЕНИ_ОФЕРТИ', doc01_05:'05_ЗА_ДОГОВОР',
+      doc01_06:'06_ДОГОВОРИ_ЗА_ПОТВЪРЖДЕНИЕ', doc01_07:'07_ИЗПРАТЕНИ_ДОГОВОРИ', doc01_08:'08_ДОГОВОР_ПОДПИСАН',
+      doc01_09:'09_АУДИО', doc01_10:'10_CRM_АРХИВ',
+      doc03_01:'Счетоводство',
+      doc04_01:'01_ФИРМЕНИ_ДОКУМЕНТИ', doc04_02:'02_HR', doc04_03:'03_ДОГОВОРИ', doc04_07:'07_ПЕРСОНАЛ',
+      doc05_01:'Технически стандарти', doc05_02:'ШАБЛОН_БРИГАДА_МАСТЪР', doc05_03:'ШАБЛОН_ИЗДАВАНЕ_ФАКТУРИ',
+      doc05_04:'ШАБЛОН_МАТЕРИАЛИ', doc05_05:'ШАБЛОН_ОТЧЕТИ', doc05_06:'ШАБЛОН_РАЗПИСКА', doc05_07:'ШАБЛОН_ДОГОВОРИ',
+      doc05_08:'ШАБЛОН_ЗАЯВКА', doc05_09:'ШАБЛОН_ОФЕРТИ', doc05_10:'ШАБЛОН_ПАПКИ', doc05_11:'ШАБЛОН_ПРИКЛЮЧВАНЕ',
+      docComingSoon:'— Coming soon —',
     },
     bg: {
       brandName:'Теодор Логистика', brandSub:'Управление на материали',
@@ -2765,6 +2781,22 @@
       chipOrderPending:'⏳ Чакащ', chipOrderApproved:'✓ Одобрен', chipOrderOrdered:'📦 Поръчан',
       chipOrderInTransit:'🚚 В транзит', chipOrderDelivered:'✅ Доставен',
       chipClearFilters:'✕ Изчисти',
+      // documentation
+      docTab:'Документация', navDocsLabel:'Документация',
+      doc00:'Контрол', doc01:'Продажби', doc03:'Финанси', doc04:'Администрация и ЧР',
+      doc05:'Стандарти и Шаблони', doc06:'Маркетинг', doc08:'Покупки',
+      doc00_01:'01_КОНТРОЛ_ОБЕКТИ', doc00_02:'02_КОНТРОЛ_РАЗХОДИ', doc00_03:'03_КОНТРОЛ_КЛИЕНТИ',
+      doc00_04:'04_КОНТРОЛ_ДОСТАВЧИЦИ', doc00_05:'05_КОНТРОЛ_БРИГАДИ', doc00_06:'06_КОНТРОЛ_АВТОПАРК', doc00_07:'07_КОНТРОЛ_МАТЕРИАЛИ',
+      doc01_00a:'00_CRM', doc01_00b:'00_НОВИ_КЛИЕНТИ', doc01_01:'01_ПРИ_АРХИТЕКТИ', doc01_02:'02_ЗА_ОФЕРТА',
+      doc01_03:'03_ОФЕРТИ_ЗА_ПОТВЪРЖДЕНИЕ', doc01_04:'04_ИЗПРАТЕНИ_ОФЕРТИ', doc01_05:'05_ЗА_ДОГОВОР',
+      doc01_06:'06_ДОГОВОРИ_ЗА_ПОТВЪРЖДЕНИЕ', doc01_07:'07_ИЗПРАТЕНИ_ДОГОВОРИ', doc01_08:'08_ДОГОВОР_ПОДПИСАН',
+      doc01_09:'09_АУДИО', doc01_10:'10_CRM_АРХИВ',
+      doc03_01:'Счетоводство',
+      doc04_01:'01_ФИРМЕНИ_ДОКУМЕНТИ', doc04_02:'02_HR', doc04_03:'03_ДОГОВОРИ', doc04_07:'07_ПЕРСОНАЛ',
+      doc05_01:'Технически стандарти', doc05_02:'ШАБЛОН_БРИГАДА_МАСТЪР', doc05_03:'ШАБЛОН_ИЗДАВАНЕ_ФАКТУРИ',
+      doc05_04:'ШАБЛОН_МАТЕРИАЛИ', doc05_05:'ШАБЛОН_ОТЧЕТИ', doc05_06:'ШАБЛОН_РАЗПИСКА', doc05_07:'ШАБЛОН_ДОГОВОРИ',
+      doc05_08:'ШАБЛОН_ЗАЯВКА', doc05_09:'ШАБЛОН_ОФЕРТИ', doc05_10:'ШАБЛОН_ПАПКИ', doc05_11:'ШАБЛОН_ПРИКЛЮЧВАНЕ',
+      docComingSoon:'— Очаквайте скоро —',
     },
   };
 
@@ -2805,6 +2837,10 @@
     else if (activeView === 'history')     loadHistory();
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
     else if (activeView === 'workeraccess') { waBuildChipBar(); }
+    if (_dashMode === 'docs') {
+      document.querySelectorAll('.doc-dept-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
+      document.querySelectorAll('.doc-sub-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
+    }
     // always re-render stage matrix if it is the active view (column headers come from DB in both languages)
     if (document.getElementById('view-stagematrix')?.classList.contains('active')) loadStageMatrix(true);
   }
@@ -2939,6 +2975,8 @@
     const dt = document.getElementById('dashModeTravelpay'); if (dt) dt.textContent = t('dashTravelpay');
     const do_ = document.getElementById('dashModeOrders');    if (do_) do_.textContent = t('dashOrders');
     const dd  = document.getElementById('dashModeDeliveries'); if (dd) dd.textContent = t('dashDeliveries');
+    const ddocs = document.getElementById('dashModeDocs'); if (ddocs) ddocs.textContent = '📁 ' + t('docTab');
+    const ndocs = document.getElementById('navDocsLabel'); if (ndocs) ndocs.textContent = t('navDocsLabel');
 
     // map toggles
     const mh = document.getElementById('mapModeHouses');   if (mh) mh.textContent = t('mapHouses');
@@ -4617,29 +4655,23 @@
 
   // ── DOCUMENTATION ────────────────────────────────────────────────────────────
   const _docStructure = [
-    { id:'00', label:'Контрол', icon:'🛡️', color:'#4f8ef7', subs:[
-      '01_КОНТРОЛ_ОБЕКТИ','02_КОНТРОЛ_РАЗХОДИ','03_КОНТРОЛ_КЛИЕНТИ',
-      '04_КОНТРОЛ_ДОСТАВЧИЦИ','05_КОНТРОЛ_БРИГАДИ','06_КОНТРОЛ_АВТОПАРК','07_КОНТРОЛ_МАТЕРИАЛИ'
+    { id:'00', labelKey:'doc00', icon:'🛡️', color:'#4f8ef7', subKeys:[
+      'doc00_01','doc00_02','doc00_03','doc00_04','doc00_05','doc00_06','doc00_07'
     ]},
-    { id:'01', label:'Продажби', icon:'📈', color:'#3ecf6e', subs:[
-      '00_CRM','00_НОВИ_КЛИЕНТИ','01_ПРИ_АРХИТЕКТИ','02_ЗА_ОФЕРТА',
-      '03_ОФЕРТИ_ЗА_ПОТВЪРЖДЕНИЕ','04_ИЗПРАТЕНИ_ОФЕРТИ','05_ЗА_ДОГОВОР',
-      '06_ДОГОВОРИ_ЗА_ПОТВЪРЖДЕНИЕ','07_ИЗПРАТЕНИ_ДОГОВОРИ','08_ДОГОВОР_ПОДПИСАН',
-      '09_АУДИО','10_CRM_АРХИВ'
+    { id:'01', labelKey:'doc01', icon:'📈', color:'#3ecf6e', subKeys:[
+      'doc01_00a','doc01_00b','doc01_01','doc01_02','doc01_03','doc01_04','doc01_05',
+      'doc01_06','doc01_07','doc01_08','doc01_09','doc01_10'
     ]},
-    { id:'03', label:'Финанси', icon:'🧮', color:'#a78bfa', subs:[
-      'Счетоводство'
+    { id:'03', labelKey:'doc03', icon:'🧮', color:'#a78bfa', subKeys:['doc03_01'] },
+    { id:'04', labelKey:'doc04', icon:'👥', color:'#fb7185', subKeys:[
+      'doc04_01','doc04_02','doc04_03','doc04_07'
     ]},
-    { id:'04', label:'Администрация и HR', icon:'👥', color:'#fb7185', subs:[
-      '01_ФИРМЕНИ_ДОКУМЕНТИ','02_HR','03_ДОГОВОРИ','07_ПЕРСОНАЛ'
+    { id:'05', labelKey:'doc05', icon:'📋', color:'#00c9b1', subKeys:[
+      'doc05_01','doc05_02','doc05_03','doc05_04','doc05_05','doc05_06',
+      'doc05_07','doc05_08','doc05_09','doc05_10','doc05_11'
     ]},
-    { id:'05', label:'Стандарти и Шаблони', icon:'📋', color:'#00c9b1', subs:[
-      'Технически стандарти','ШАБЛОН_БРИГАДА_МАСТЪР','ШАБЛОН_ИЗДАВАНЕ_ФАКТУРИ',
-      'ШАБЛОН_МАТЕРИАЛИ','ШАБЛОН_ОТЧЕТИ','ШАБЛОН_РАЗПИСКА','ШАБЛОН_ДОГОВОРИ',
-      'ШАБЛОН_ЗАЯВКА','ШАБЛОН_ОФЕРТИ','ШАБЛОН_ПАПКИ','ШАБЛОН_ПРИКЛЮЧВАНЕ'
-    ]},
-    { id:'06', label:'Маркетинг', icon:'📣', color:'#f59e0b', subs:[] },
-    { id:'08', label:'Покупки', icon:'🛒', color:'#f97316', subs:[] },
+    { id:'06', labelKey:'doc06', icon:'📣', color:'#f59e0b', subKeys:[] },
+    { id:'08', labelKey:'doc08', icon:'🛒', color:'#f97316', subKeys:[] },
   ];
 
   let _docOpenId = null;
@@ -4658,7 +4690,8 @@
   }
 
   function _docDeptCard(dept) {
-    const hasSubs = dept.subs.length > 0;
+    const hasSubs = dept.subKeys.length > 0;
+    const label   = t(dept.labelKey);
     return `
       <div style="background:#1a1d27;border:1px solid #2e3250;border-radius:12px;overflow:hidden;transition:box-shadow .2s"
            onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.4)'" onmouseout="this.style.boxShadow=''">
@@ -4666,17 +4699,17 @@
           <div style="width:38px;height:38px;border-radius:10px;background:${dept.color}20;border:1.5px solid ${dept.color}40;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${dept.icon}</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:0.7rem;color:${dept.color};font-weight:700;letter-spacing:0.08em">${dept.id}</div>
-            <div style="font-size:0.92rem;font-weight:700;color:#e2e8f0;margin-top:1px">${dept.label}</div>
+            <div class="doc-dept-label" data-labelkey="${dept.labelKey}" style="font-size:0.92rem;font-weight:700;color:#e2e8f0;margin-top:1px">${label}</div>
           </div>
           <div id="docArrow_${dept.id}" style="font-size:0.75rem;color:#9aa3be;transition:transform .2s">${hasSubs ? '▶' : ''}</div>
         </div>
         <div id="docSubs_${dept.id}" style="display:none;padding:0.5rem 0">
-          ${hasSubs ? dept.subs.map(s => `
+          ${hasSubs ? dept.subKeys.map(k => `
             <div style="display:flex;align-items:center;gap:10px;padding:0.5rem 1.1rem;cursor:default;transition:background .15s"
                  onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background=''">
               <span style="font-size:0.95rem">📄</span>
-              <span style="font-size:0.82rem;color:#c8d0e0;font-weight:500">${s}</span>
-            </div>`).join('') : `<div style="padding:0.75rem 1.1rem;font-size:0.8rem;color:#9aa3be">— Coming soon —</div>`}
+              <span class="doc-sub-label" data-labelkey="${k}" style="font-size:0.82rem;color:#c8d0e0;font-weight:500">${t(k)}</span>
+            </div>`).join('') : `<div class="doc-sub-label" data-labelkey="docComingSoon" style="padding:0.75rem 1.1rem;font-size:0.8rem;color:#9aa3be">${t('docComingSoon')}</div>`}
         </div>
       </div>`;
   }
