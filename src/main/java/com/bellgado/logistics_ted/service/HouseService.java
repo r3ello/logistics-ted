@@ -42,15 +42,17 @@ public class HouseService {
     private final InventoryRepository inventories;
     private final HouseStageRepository houseStages;
     private final DocFolderRepository docFolders;
+    private final HouseTemplateFolderService houseTemplate;
 
     public HouseService(HouseRepository houses, WarehouseRepository warehouses,
                         InventoryRepository inventories, HouseStageRepository houseStages,
-                        DocFolderRepository docFolders) {
+                        DocFolderRepository docFolders, HouseTemplateFolderService houseTemplate) {
         this.houses = houses;
         this.warehouses = warehouses;
         this.inventories = inventories;
         this.houseStages = houseStages;
         this.docFolders = docFolders;
+        this.houseTemplate = houseTemplate;
     }
 
     @Transactional(readOnly = true)
@@ -126,7 +128,8 @@ public class HouseService {
             stageRows.add(hs);
         }
         houseStages.saveAll(stageRows);
-        createHouseDocFolder(savedHouse);
+        DocFolder houseFolder = createHouseDocFolder(savedHouse);
+        if (houseFolder != null) houseTemplate.seedTemplate(houseFolder);
         return toResponse(h);
     }
 
@@ -212,21 +215,21 @@ public class HouseService {
         );
     }
 
-    private void createHouseDocFolder(House h) {
-        docFolders.findTopLevelByCode("02").ifPresent(dept -> {
-            String code = "house_" + h.getId();
-            if (docFolders.findByCodeAndParentId(code, dept.getId()).isEmpty()) {
-                DocFolder f = new DocFolder();
-                f.setCode(code);
-                f.setLabelEn(h.getName());
-                f.setLabelBg(h.getName());
-                f.setIcon("🏠");
-                f.setColor("#f97316");
-                f.setSortOrder(h.getId());
-                f.setParent(dept);
-                docFolders.save(f);
-            }
-        });
+    private DocFolder createHouseDocFolder(House h) {
+        var dept = docFolders.findTopLevelByCode("02");
+        if (dept.isEmpty()) return null;
+        String code = "house_" + h.getId();
+        var existing = docFolders.findByCodeAndParentId(code, dept.get().getId());
+        if (existing.isPresent()) return existing.get();
+        DocFolder f = new DocFolder();
+        f.setCode(code);
+        f.setLabelEn(h.getName());
+        f.setLabelBg(h.getName());
+        f.setIcon("🏠");
+        f.setColor("#f97316");
+        f.setSortOrder(h.getId());
+        f.setParent(dept.get());
+        return docFolders.save(f);
     }
 
     private void syncHouseDocFolderName(House h) {

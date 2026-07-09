@@ -158,6 +158,7 @@
       margin-bottom: 0.25rem;
     }
     .nav-item:hover { background: rgba(79,142,247,0.08); color: var(--text); }
+    a.nav-item { text-decoration: none; color: inherit; }
     .nav-item.active { background: rgba(79,142,247,0.15); color: var(--accent); }
     .nav-icon { font-size: 1.1rem; width: 22px; text-align: center; }
 
@@ -1571,17 +1572,17 @@
     <p id="brandSub">Materials Management</p>
   </div>
   <div class="nav-menu">
-    <div class="nav-item active" id="navDashboard" onclick="showView('dashboard')">
+    <a class="nav-item active" id="navDashboard" href="#dashboard" onclick="showView('dashboard');return false;">
       <span class="nav-icon">📊</span> <span>Dashboard</span>
-    </div>
+    </a>
     <div class="nav-item" id="navManagementGroup" onclick="toggleNavGroup('management')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
       <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">⚙️</span><span id="navManagementGroupLabel">Management</span></span>
       <span id="navManagementChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
     <div id="navManagementChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navStageMatrix" onclick="showView('stagematrix');setNavActive('navStageMatrix')">
+      <a class="nav-item nav-sub" id="navStageMatrix" href="#stagematrix" onclick="showView('stagematrix');setNavActive('navStageMatrix');return false;">
         <span class="nav-icon">📊</span> <span id="navStageMatrixLabel">Project Stages</span>
-      </div>
+      </a>
       <div class="nav-item nav-sub" id="navHouses" onclick="showView('dashboard');setDashMode('houses');setNavActive('navHouses')">
         <span class="nav-icon">🏠</span> <span id="navHousesLabel">Houses</span>
       </div>
@@ -1597,12 +1598,12 @@
       <div class="nav-item nav-sub" id="navDeliveries" onclick="showView('dashboard');setDashMode('deliveries');setNavActive('navDeliveries')">
         <span class="nav-icon">🚚</span> <span id="navDeliveriesLabel">Deliveries</span>
       </div>
-      <div class="nav-item nav-sub" id="navWarehouses" onclick="showView('warehouses')">
+      <a class="nav-item nav-sub" id="navWarehouses" href="#warehouses" onclick="showView('warehouses');return false;">
         <span class="nav-icon">🏬</span> <span id="navWarehousesLabel">Warehouses</span>
-      </div>
-      <div class="nav-item nav-sub" id="navSuppliers" onclick="showView('suppliers')">
+      </a>
+      <a class="nav-item nav-sub" id="navSuppliers" href="#suppliers" onclick="showView('suppliers');return false;">
         <span class="nav-icon">🏭</span> <span id="navSuppliersLabel">Suppliers</span>
-      </div>
+      </a>
       <div class="nav-item nav-sub" id="navScaffold" onclick="showView('dashboard');setDashMode('scaffold');setNavActive('navScaffold')">
         <span class="nav-icon">🏗️</span> <span id="navScaffoldLabel">Scaffold</span>
       </div>
@@ -1616,7 +1617,7 @@
     </div>
     <div id="navDocsChildren" style="display:none">
       <div class="nav-item nav-sub" id="navDocs" onclick="showView('dashboard');setDashMode('docs');setNavActive('navDocs')">
-        <span class="nav-icon">📂</span> <span id="navDocsLabel">Documentation</span>
+        <span class="nav-icon">📂</span> <span id="navDocsLabel">Company Documentation</span>
       </div>
     </div>
     <div class="nav-item" id="navAttendanceGroup" onclick="toggleNavGroup('attendance')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
@@ -1624,57 +1625,57 @@
       <span id="navAttendanceChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
     <div id="navAttendanceChildren" style="display:none">
-    <div class="nav-item nav-sub" id="navAttendance" onclick="showView('attendance')">
+    <a class="nav-item nav-sub" id="navAttendance" href="#attendance" onclick="showView('attendance');return false;">
       <span class="nav-icon">📋</span> <span id="navAttendanceLabel">Check-in Log</span>
-    </div>
-    <div class="nav-item nav-sub" id="navQrcodes" onclick="showView('qrcodes')">
+    </a>
+    <a class="nav-item nav-sub" id="navQrcodes" href="#qrcodes" onclick="showView('qrcodes');return false;">
       <span class="nav-icon">🔲</span> <span id="navQrcodesLabel">House QR Codes</span>
-    </div>
-    <div class="nav-item nav-sub" id="navWorkerAccess" onclick="showView('workeraccess')">
+    </a>
+    <a class="nav-item nav-sub" id="navWorkerAccess" href="#workeraccess" onclick="showView('workeraccess');return false;">
       <span class="nav-icon">🔑</span> <span id="navWorkerAccessLabel">Worker Access</span>
-    </div>
+    </a>
     </div>
     <div class="nav-item" id="navTravelAllowance" onclick="setDashMode('travelpay');showView('dashboard');setNavActive('navTravelAllowance')">
       <span class="nav-icon">💰</span> <span id="navTravelAllowanceLabel">Travel Allowance</span>
     </div>
-    <div class="nav-item" id="navMap" onclick="showView('map')">
+    <a class="nav-item" id="navMap" href="#map" onclick="showView('map');return false;">
       <span class="nav-icon">🌍</span> <span id="navMapLabel">Location Overview</span>
-    </div>
+    </a>
     <div class="nav-item" id="navRoutesGroup" onclick="toggleNavGroup('routes')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
       <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🛣️</span><span id="navRoutesGroupLabel">Routes</span></span>
       <span id="navRoutesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
     <div id="navRoutesChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navOrder" onclick="showView('order')">
+      <a class="nav-item nav-sub" id="navOrder" href="#order" onclick="showView('order');return false;">
         <span class="nav-icon">🗺️</span> <span id="navOrderLabel">Route Recommendation</span>
-      </div>
-      <div class="nav-item nav-sub" id="navScaffoldRoute" onclick="showView('scaffold')">
+      </a>
+      <a class="nav-item nav-sub" id="navScaffoldRoute" href="#scaffold" onclick="showView('scaffold');return false;">
         <span class="nav-icon">🏗️</span> <span id="navScaffoldRouteLabel">Scaffold Route</span>
-      </div>
-      <div class="nav-item nav-sub" id="navHistory" onclick="showView('history')">
+      </a>
+      <a class="nav-item nav-sub" id="navHistory" href="#history" onclick="showView('history');return false;">
         <span class="nav-icon">📜</span> <span id="navHistoryLabel">Route History</span>
-      </div>
-      <div class="nav-item nav-sub" id="navAuditLog" onclick="showView('auditlog')" style="display:none">
+      </a>
+      <a class="nav-item nav-sub" id="navAuditLog" href="#auditlog" onclick="showView('auditlog');return false;" style="display:none">
         <span class="nav-icon">🧾</span> <span id="navAuditLogLabel">Audit Log</span>
-      </div>
+      </a>
     </div>
     <div class="nav-item" id="navOrgChartGroup" onclick="toggleNavGroup('orgchart')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
       <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🏢</span><span id="navOrgChartGroupLabel">Org Chart</span></span>
       <span id="navOrgChartChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
     <div id="navOrgChartChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navCrews" onclick="showView('crews')">
+      <a class="nav-item nav-sub" id="navCrews" href="#crews" onclick="showView('crews');return false;">
         <span class="nav-icon">🗂️</span> <span id="navCrewsLabel">Crew Manager</span>
-      </div>
+      </a>
     </div>
     <div class="nav-item" id="navClientServicesGroup" onclick="toggleNavGroup('clientservices')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
       <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🔌</span><span id="navClientServicesGroupLabel">Client Services</span></span>
       <span id="navClientServicesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
     <div id="navClientServicesChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navElectric" onclick="showView('electric')">
+      <a class="nav-item nav-sub" id="navElectric" href="#electric" onclick="showView('electric');return false;">
         <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
-      </div>
+      </a>
     </div>
   </div>
 </nav>
@@ -1714,7 +1715,7 @@
       <button onclick="setDashMode('dashWarehouses')" id="dashModeDashWarehouses" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏬 Warehouses</button>
       <button onclick="setDashMode('dashSuppliers')"  id="dashModeDashSuppliers"  style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏭 Suppliers</button>
       <button onclick="setDashMode('travelpay')"      id="dashModeTravelpay"      style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 Travel Allowance</button>
-      <button onclick="setDashMode('docs')"            id="dashModeDocs"            style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">📁 Documentation</button>
+      <button onclick="setDashMode('docs')"            id="dashModeDocs"            style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">📁 Company Documentation</button>
     </div>
     <div class="totals" id="totals"></div>
     <div class="search-wrap">
@@ -2573,7 +2574,7 @@
       chipOrderInTransit:'🚚 In Transit', chipOrderDelivered:'✅ Delivered',
       chipClearFilters:'✕ Clear',
       // documentation
-      docTab:'Documentation', navDocsLabel:'Documentation', navDocsGroupLabel:'Documentation',
+      docTab:'Company Documentation', navDocsLabel:'Company Documentation', navDocsGroupLabel:'Documentation',
       docComingSoon:'— Coming soon —',
     },
     bg: {
@@ -2852,7 +2853,7 @@
       chipOrderInTransit:'🚚 В транзит', chipOrderDelivered:'✅ Доставен',
       chipClearFilters:'✕ Изчисти',
       // documentation
-      docTab:'Документация', navDocsLabel:'Документация', navDocsGroupLabel:'Документация',
+      docTab:'Фирмена документация', navDocsLabel:'Фирмена документация', navDocsGroupLabel:'Документация',
       docComingSoon:'— Очаквайте скоро —',
     },
   };
@@ -2896,6 +2897,7 @@
     else if (activeView === 'auditlog')    loadAuditLog(_alState.page);
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
     else if (activeView === 'workeraccess') { if (_waGroups) waRender(_waGroups); }
+    else if (activeView === 'housedetail') { if (_houseDetailId && _docTree.length) renderHouseDocSection(_houseDetailId); }
     if (_dashMode === 'docs') {
       document.querySelectorAll('.doc-dept-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
       document.querySelectorAll('.doc-sub-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
@@ -3446,9 +3448,131 @@
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.6rem;align-items:start">
             ${crewCards || '<div style="color:var(--muted)">No crews assigned.</div>'}
           </div>
+
+          <!-- House documents -->
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:1.2rem 0 0.5rem">Documents</div>
+          <div id="houseFolderSection">
+            <div class="state-msg" style="padding:0.5rem 0"><div class="spinner" style="width:18px;height:18px"></div></div>
+          </div>
         </div>`;
+      // Load house doc folder section
+      try {
+        [_docTree, _docFlat] = await Promise.all([
+          apiFetch('/api/doc-folders').then(r => r.json()),
+          apiFetch('/api/doc-folders/flat').then(r => r.json()),
+        ]);
+        renderHouseDocSection(_houseDetailId);
+      } catch(e2) {
+        const sec = document.getElementById('houseFolderSection');
+        if (sec) sec.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">Failed to load documents.</div>';
+      }
     } catch(e) {
       el.innerHTML = `<div class="state-msg">Error loading house details.</div>`;
+    }
+  }
+
+  let _hdRootFolderId = null; // house folder id (not house entity id) — set in renderHouseDocSection
+
+  function renderHouseDocSection(houseId) {
+    const sec = document.getElementById('houseFolderSection');
+    if (!sec) return;
+    let houseNode = null;
+    function findHouseNode(nodes) {
+      for (const n of nodes) {
+        if (n.code === 'house_' + houseId) { houseNode = n; return; }
+        if (n.children) findHouseNode(n.children);
+      }
+    }
+    findHouseNode(_docTree);
+    if (!houseNode) { sec.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">No document folder for this house.</div>'; return; }
+
+    _hdRootFolderId = houseNode.id; // store correct folder id for use in _hdFolderCard
+
+    const isAdmin = currentUser?.role === 'admin';
+    const addBtn = isAdmin
+      ? `<div style="display:flex;justify-content:flex-end;margin-bottom:0.5rem">
+           <button class="btn btn-primary" onclick="_houseDocNewFolder(${houseNode.id}, ${houseNode.id})">&#65291; New folder</button>
+         </div>`
+      : '';
+
+    const directDocs = (houseNode.documents || []).map(doc => _docDocRow(doc, '#f97316', 0)).join('');
+    const childCards = (houseNode.children || []).map(c => _hdFolderCard(c, 0)).join('');
+
+    sec.innerHTML = addBtn
+      + (directDocs ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.4rem 0;margin-bottom:0.75rem">${directDocs}</div>` : '')
+      + `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0.75rem;align-items:start">${childCards}</div>`;
+  }
+
+  // Opens folder modal scoped to the house subtree
+  function _houseDocNewFolder(parentId, rootId) {
+    _houseDocRootId = rootId;
+    _docShowFolderModal(null, parentId);
+    _houseDocRootId = null;
+  }
+  function _houseDocEditFolder(folderId, rootId) {
+    _houseDocRootId = rootId;
+    const folder = _docFindFolderFlat(folderId);
+    if (folder) _docShowFolderModal(folder, folder.parentId);
+    _houseDocRootId = null;
+  }
+
+  /** Isolated card renderer for house detail — uses data-hd-* attributes to avoid ID conflicts with docs view. */
+  function _hdFolderCard(folder, depth) {
+    const hasChildren = folder.children && folder.children.length > 0;
+    const hasDocs     = folder.documents && folder.documents.length > 0;
+    const label       = _docLabel(folder);
+    const color       = folder.color || '#4f8ef7';
+    const linkBtn     = folder.linkUrl
+      ? `<a href="${folder.linkUrl}" target="_blank" onclick="event.stopPropagation()" style="color:${color};font-size:0.85rem;text-decoration:none" title="Open link">&#128279;</a>`
+      : '';
+    const houseRootId = _hdRootFolderId;
+    const adminBtns = currentUser?.role === 'admin'
+      ? `<button title="Edit" onclick="event.stopPropagation();_houseDocEditFolder(${folder.id},${houseRootId})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.82rem;padding:1px 3px">&#9999;&#65039;</button>
+         <button title="Delete" onclick="event.stopPropagation();_docDeleteFolder(${folder.id})" style="background:none;border:none;cursor:pointer;color:#e05;font-size:0.82rem;padding:1px 3px">&#128465;</button>`
+      : '';
+
+    if (depth === 0) {
+      return `
+        <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);transition:box-shadow .2s"
+             onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.boxShadow=''">
+          <div onclick="_hdToggle(${folder.id})" style="display:flex;align-items:center;gap:12px;padding:1rem 1.1rem;cursor:pointer;background:var(--card);border-bottom:2px solid ${color}33">
+            <div style="width:38px;height:38px;border-radius:10px;background:${color}20;border:1.5px solid ${color}50;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${folder.icon || '&#128193;'}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.7rem;color:${color};font-weight:700;letter-spacing:0.08em">${folder.code}</div>
+              <div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-top:1px;word-break:break-word">${label}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:3px;flex-shrink:0" onclick="event.stopPropagation()">${linkBtn}${adminBtns}</div>
+            <div data-hd-arrow="${folder.id}" style="font-size:0.75rem;color:var(--muted,#9aa3be);transition:transform .2s;margin-left:4px;flex-shrink:0">${(hasChildren||hasDocs) ? '&#9654;' : '&#9654;'}</div>
+          </div>
+          <div data-hd-subs="${folder.id}" style="display:none;padding:0.4rem 0;background:var(--surface)">
+            ${hasChildren ? folder.children.map(c => _hdFolderCard(c, 1)).join('') : ''}
+            ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, 1)).join('') : ''}
+            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.75rem 1.1rem;font-size:0.8rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
+            <div style="padding:0.35rem 1.1rem">
+              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem;width:100%;text-align:left">&#65291; Add PDF</button>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      const indent = (depth * 16) + 'px';
+      return `
+        <div>
+          <div onclick="_hdToggle(${folder.id})" style="display:flex;align-items:center;gap:10px;padding:0.45rem 1.1rem 0.45rem calc(1.1rem + ${indent});cursor:pointer;transition:background .15s"
+               onmouseover="this.style.background='rgba(128,128,128,0.07)'" onmouseout="this.style.background=''">
+            <span style="font-size:0.9rem">&#128193;</span>
+            <span style="flex:1;font-size:0.82rem;color:var(--text);opacity:0.85;font-weight:500">${label}</span>
+            <span onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:3px">${linkBtn}${adminBtns}</span>
+            <div data-hd-arrow="${folder.id}" style="font-size:0.65rem;color:var(--muted,#9aa3be);margin-left:2px">${(hasChildren||hasDocs) ? '&#9654;' : '&#9654;'}</div>
+          </div>
+          <div data-hd-subs="${folder.id}" style="display:none">
+            ${hasChildren ? folder.children.map(c => _hdFolderCard(c, depth+1)).join('') : ''}
+            ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, depth+1)).join('') : ''}
+            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.5rem 1.1rem;font-size:0.78rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
+            <div style="padding:0.2rem 1.1rem 0.2rem calc(1.1rem + ${indent} + 16px)">
+              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">&#65291; PDF</button>
+            </div>
+          </div>
+        </div>`;
     }
   }
 
@@ -4733,6 +4857,12 @@
   let _docFlat    = [];   // flat list for parent dropdowns
   let _docOpenId  = null;
 
+  function _docRefresh() {
+    const view = document.querySelector('.view.active')?.id?.replace('view-','');
+    if (view === 'housedetail') loadHouseDetail();
+    else renderDocsDash();
+  }
+
   async function renderDocsDash() {
     const grid = document.getElementById('grid');
     grid.style.display = 'grid';
@@ -4860,6 +4990,17 @@
     _docOpenId = open ? null : id;
   }
 
+  function _hdToggle(id) {
+    const sec   = document.getElementById('houseFolderSection');
+    if (!sec) return;
+    const subs  = sec.querySelector('[data-hd-subs="' + id + '"]');
+    const arrow = sec.querySelector('[data-hd-arrow="' + id + '"]');
+    if (!subs) return;
+    const open = subs.style.display !== 'none';
+    subs.style.display = open ? 'none' : 'block';
+    if (arrow) arrow.textContent = open ? '▶' : '▼';
+  }
+
   // ── Folder create / edit ──────────────────────────────────────────────────
   function _docFindFolderFlat(id) {
     return _docFlat.find(f => f.id === id) || null;
@@ -4875,35 +5016,54 @@
     _docShowFolderModal(folder, folder.parentId);
   }
 
+  let _houseDocRootId = null; // set when opening folder modal from house detail
+
   function _docShowFolderModal(folder, preselectedParentId) {
     const existing = document.getElementById('_docFolderModal');
     if (existing) existing.remove();
 
     // Build parent options from flat list, with depth indentation
     // Build a depth map first
+    // If opened from house detail, filter to only that house's folder subtree
+    const modalFlat = _houseDocRootId != null
+      ? (() => {
+          const ids = new Set();
+          const collect = (id) => { ids.add(id); _docFlat.filter(x => x.parentId === id).forEach(c => collect(c.id)); };
+          collect(_houseDocRootId);
+          return _docFlat.filter(f => ids.has(f.id));
+        })()
+      : _docFlat;
+
     const depthMap = {};
     function calcDepth(id, visited = new Set()) {
       if (id == null) return 0;
       if (depthMap[id] !== undefined) return depthMap[id];
       if (visited.has(id)) return 0;
       visited.add(id);
-      const f = _docFlat.find(x => x.id === id);
+      const f = modalFlat.find(x => x.id === id);
       depthMap[id] = f && f.parentId != null ? 1 + calcDepth(f.parentId, visited) : 0;
       return depthMap[id];
     }
-    _docFlat.forEach(f => calcDepth(f.id));
+    modalFlat.forEach(f => calcDepth(f.id));
 
     // Depth-first walk to get tree order (parents followed by their children)
     const _byParent = {};
-    _docFlat.forEach(f => {
+    modalFlat.forEach(f => {
       const pid = f.parentId != null ? f.parentId : 'root';
       if (!_byParent[pid]) _byParent[pid] = [];
       _byParent[pid].push(f);
     });
-    if (_byParent['root']) _byParent['root'].sort((a, b) => { try { return parseInt(a.code) - parseInt(b.code); } catch(e) { return a.code.localeCompare(b.code); } });
     const orderedFlat = [];
     function _dfWalk(pid) { (_byParent[pid] || []).forEach(f => { orderedFlat.push(f); _dfWalk(f.id); }); }
-    _dfWalk('root');
+    if (_houseDocRootId != null) {
+      // House detail context: walk children of the house folder (house folder itself is the "root")
+      const hf = modalFlat.find(f => f.id === _houseDocRootId);
+      if (hf) orderedFlat.push(hf);
+      _dfWalk(_houseDocRootId);
+    } else {
+      if (_byParent['root']) _byParent['root'].sort((a, b) => { try { return parseInt(a.code) - parseInt(b.code); } catch(e) { return a.code.localeCompare(b.code); } });
+      _dfWalk('root');
+    }
 
     const parentItems = [{ value: '', label: '— No parent (top level) —', depth: -1, code: '' }].concat(
       orderedFlat
@@ -4933,7 +5093,10 @@
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;display:flex;align-items:center;justify-content:center';
     overlay.innerHTML = `
       <div class="_doc-modal-box" style="width:440px">
-        <div class="_doc-modal-title">${title}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.1rem">
+          <div class="_doc-modal-title" style="margin-bottom:0">${title}</div>
+          <button onclick="document.getElementById('_docFolderModal').remove()" style="background:none;border:none;color:var(--muted,#9aa3be);font-size:1.1rem;cursor:pointer;padding:0 0.25rem;line-height:1" title="Close">&times;</button>
+        </div>
         <div style="display:flex;flex-direction:column;gap:0.75rem">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
             <input id="_dfLabelEn" type="text" placeholder="Name (EN)" value="${isEdit ? folder.labelEn : ''}">
@@ -4991,7 +5154,7 @@
       } else {
         await apiFetch('/api/doc-folders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
       }
-      renderDocsDash();
+      _docRefresh();
     });
   }
 
@@ -5000,14 +5163,14 @@
     const label  = folder ? _docLabel(folder) : folderId;
     if (!await showConfirm(`Delete folder "${label}" and all its contents?`)) return;
     await apiFetch(`/api/doc-folders/${folderId}`, { method:'DELETE' });
-    renderDocsDash();
+    _docRefresh();
   }
 
   // ── Document CRUD ─────────────────────────────────────────────────────────
   function _docAddDoc(folderId) {
     _docShowDocModal(null, folderId, async (data) => {
       await apiFetch('/api/doc-documents', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ folderId, ...data }) });
-      renderDocsDash();
+      _docRefresh();
     });
   }
 
@@ -5016,14 +5179,14 @@
     if (!doc) return;
     _docShowDocModal(doc, null, async (data) => {
       await apiFetch(`/api/doc-documents/${docId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
-      renderDocsDash();
+      _docRefresh();
     });
   }
 
   async function _docDeleteDoc(docId) {
     if (!await showConfirm('Delete this document?')) return;
     await apiFetch(`/api/doc-documents/${docId}`, { method:'DELETE' });
-    renderDocsDash();
+    _docRefresh();
   }
 
   function _docFindDoc(id) {
@@ -9505,8 +9668,6 @@
   function initApp() {
     if (currentUser?.role === 'crew_leader') { initCrewLeader(); return; }
     applyStoredTheme();
-    showView('stagematrix');
-    setNavActive('navStageMatrix');
     loadMaterialFields().then(applyPendingMapPin);
 
     if (localStorage.getItem('returnToHouseModal')) {
@@ -9555,6 +9716,12 @@
     const hashView = location.hash.replace('#', '');
     showView(VALID_VIEWS.includes(hashView) ? hashView : 'dashboard');
     translateStatic();
+
+    // Browser back/forward support — re-route whenever the hash changes
+    window.addEventListener('hashchange', () => {
+      const v = location.hash.replace('#', '');
+      if (VALID_VIEWS.includes(v)) showView(v);
+    });
   }
 
   // ── APP BASE URL (fetched once, used for all QR codes) ───────────────────────
