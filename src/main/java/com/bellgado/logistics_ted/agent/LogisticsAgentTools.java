@@ -538,8 +538,8 @@ public class LogisticsAgentTools {
                 row.put("trade", w.getTrade());
                 row.put("crewId", w.getCrew() != null ? w.getCrew().getId() : null);
                 row.put("crewName", w.getCrew() != null ? w.getCrew().getName() : null);
-                row.put("houseId", w.getHouse() != null ? w.getHouse().getId() : null);
-                row.put("houseName", w.getHouse() != null ? w.getHouse().getName() : null);
+                row.put("houseId",   w.getCrew() != null && w.getCrew().getHouse() != null ? w.getCrew().getHouse().getId()   : null);
+                row.put("houseName", w.getCrew() != null && w.getCrew().getHouse() != null ? w.getCrew().getHouse().getName() : null);
                 out.add(row);
             }
             if (out.isEmpty() && !needle.isEmpty()) {

@@ -63,6 +63,10 @@
     body.theme-light .nav-item.active, body.theme-light .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
     body.theme-light .header { background: #ffffff; border-bottom: 1px solid var(--border); }
     body.theme-light .house-map-popup .leaflet-popup-content-wrapper { background: #fff; color: #1a1d27; }
+    .doc-card { background: var(--surface); }
+    ._doc-modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; width: 440px; max-width: 95vw; }
+    ._doc-modal-box input { background: var(--card); border: 1px solid var(--border); border-radius: 7px; color: var(--text); padding: 0.5rem 0.8rem; font-size: 0.85rem; width: 100%; box-sizing: border-box; }
+    ._doc-modal-title { font-weight: 700; color: var(--text); margin-bottom: 1rem; }
     body.theme-light .house-map-label { color: #fff; }
     body.theme-light .house-map-label--red { background: #1e293b; border-color: #475569; }
     body.theme-light input[type="number"], body.theme-light input[type="text"],
@@ -154,6 +158,7 @@
       margin-bottom: 0.25rem;
     }
     .nav-item:hover { background: rgba(79,142,247,0.08); color: var(--text); }
+    a.nav-item { text-decoration: none; color: inherit; }
     .nav-item.active { background: rgba(79,142,247,0.15); color: var(--accent); }
     .nav-icon { font-size: 1.1rem; width: 22px; text-align: center; }
 
@@ -1387,6 +1392,10 @@
         <option value="">👥 Select a crew…</option>
       </select>
       <div id="mapChStatus" style="font-size:0.75rem;color:#9aa3be;text-align:center;min-height:1rem"></div>
+      <div id="mapChMembersToggle" onclick="const m=document.getElementById('mapChMembers');const a=document.getElementById('mapChMembersArrow');const vis=m.style.display!=='none';m.style.display=vis?'none':'block';a.textContent=vis?'▶':'▼'" style="display:none;cursor:pointer;font-size:0.72rem;color:#9aa3be;padding:4px 2px;border-top:1px solid #2e3250;margin-top:2px;user-select:none">
+        <span id="mapChMembersArrow">▶</span> <span id="mapChMembersLabel">Members</span>
+      </div>
+      <div id="mapChMembers" style="display:none;max-height:180px;overflow-y:auto;padding-top:4px"></div>
     </div>
     <!-- Travel Pay panel -->
     <div id="mapTravelPayPanel" style="display:none;position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:1000;background:#1a1d27;border:1px solid #3ecf6e;border-radius:10px;padding:10px 14px;box-shadow:0 2px 16px rgba(0,0,0,0.5);min-width:300px;display:none;flex-direction:column;gap:8px">
@@ -1563,35 +1572,17 @@
     <p id="brandSub">Materials Management</p>
   </div>
   <div class="nav-menu">
-    <div class="nav-item active" id="navDashboard" onclick="showView('dashboard')">
+    <a class="nav-item active" id="navDashboard" href="#dashboard" onclick="showView('dashboard');return false;">
       <span class="nav-icon">📊</span> <span>Dashboard</span>
-    </div>
-    <div class="nav-item" id="navRoutesGroup" onclick="toggleNavGroup('routes')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
-      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🛣️</span><span id="navRoutesGroupLabel">Routes</span></span>
-      <span id="navRoutesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
-    </div>
-    <div id="navRoutesChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navOrder" onclick="showView('order')">
-        <span class="nav-icon">🗺️</span> <span id="navOrderLabel">Route Recommendation</span>
-      </div>
-      <div class="nav-item nav-sub" id="navScaffoldRoute" onclick="showView('scaffold')">
-        <span class="nav-icon">🏗️</span> <span id="navScaffoldRouteLabel">Scaffold Route</span>
-      </div>
-      <div class="nav-item nav-sub" id="navHistory" onclick="showView('history')">
-        <span class="nav-icon">📜</span> <span id="navHistoryLabel">Route History</span>
-      </div>
-      <div class="nav-item nav-sub" id="navAuditLog" onclick="showView('auditlog')" style="display:none">
-        <span class="nav-icon">🧾</span> <span id="navAuditLogLabel">Audit Log</span>
-      </div>
-    </div>
+    </a>
     <div class="nav-item" id="navManagementGroup" onclick="toggleNavGroup('management')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
       <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">⚙️</span><span id="navManagementGroupLabel">Management</span></span>
       <span id="navManagementChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
     <div id="navManagementChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navStageMatrix" onclick="showView('stagematrix');setNavActive('navStageMatrix')">
+      <a class="nav-item nav-sub" id="navStageMatrix" href="#stagematrix" onclick="showView('stagematrix');setNavActive('navStageMatrix');return false;">
         <span class="nav-icon">📊</span> <span id="navStageMatrixLabel">Project Stages</span>
-      </div>
+      </a>
       <div class="nav-item nav-sub" id="navHouses" onclick="showView('dashboard');setDashMode('houses');setNavActive('navHouses')">
         <span class="nav-icon">🏠</span> <span id="navHousesLabel">Houses</span>
       </div>
@@ -1607,12 +1598,12 @@
       <div class="nav-item nav-sub" id="navDeliveries" onclick="showView('dashboard');setDashMode('deliveries');setNavActive('navDeliveries')">
         <span class="nav-icon">🚚</span> <span id="navDeliveriesLabel">Deliveries</span>
       </div>
-      <div class="nav-item nav-sub" id="navWarehouses" onclick="showView('warehouses')">
+      <a class="nav-item nav-sub" id="navWarehouses" href="#warehouses" onclick="showView('warehouses');return false;">
         <span class="nav-icon">🏬</span> <span id="navWarehousesLabel">Warehouses</span>
-      </div>
-      <div class="nav-item nav-sub" id="navSuppliers" onclick="showView('suppliers')">
+      </a>
+      <a class="nav-item nav-sub" id="navSuppliers" href="#suppliers" onclick="showView('suppliers');return false;">
         <span class="nav-icon">🏭</span> <span id="navSuppliersLabel">Suppliers</span>
-      </div>
+      </a>
       <div class="nav-item nav-sub" id="navScaffold" onclick="showView('dashboard');setDashMode('scaffold');setNavActive('navScaffold')">
         <span class="nav-icon">🏗️</span> <span id="navScaffoldLabel">Scaffold</span>
       </div>
@@ -1620,22 +1611,13 @@
         <span class="nav-icon">🔢</span> <span id="navStagesLabel">House Stages</span>
       </div>
     </div>
-    <div class="nav-item" id="navOrgChartGroup" onclick="toggleNavGroup('orgchart')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
-      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🏢</span><span id="navOrgChartGroupLabel">Org Chart</span></span>
-      <span id="navOrgChartChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
+    <div class="nav-item" id="navDocsGroup" onclick="toggleNavGroup('docs')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">📁</span><span id="navDocsGroupLabel">Documentation</span></span>
+      <span id="navDocsChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
-    <div id="navOrgChartChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navCrews" onclick="showView('crews')">
-        <span class="nav-icon">🗂️</span> <span id="navCrewsLabel">Crew Manager</span>
-      </div>
-    </div>
-    <div class="nav-item" id="navClientServicesGroup" onclick="toggleNavGroup('clientservices')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
-      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🔌</span><span id="navClientServicesGroupLabel">Client Services</span></span>
-      <span id="navClientServicesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
-    </div>
-    <div id="navClientServicesChildren" style="display:none">
-      <div class="nav-item nav-sub" id="navElectric" onclick="showView('electric')">
-        <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
+    <div id="navDocsChildren" style="display:none">
+      <div class="nav-item nav-sub" id="navDocs" onclick="showView('dashboard');setDashMode('docs');setNavActive('navDocs')">
+        <span class="nav-icon">📂</span> <span id="navDocsLabel">Company Documentation</span>
       </div>
     </div>
     <div class="nav-item" id="navAttendanceGroup" onclick="toggleNavGroup('attendance')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
@@ -1643,21 +1625,57 @@
       <span id="navAttendanceChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
     </div>
     <div id="navAttendanceChildren" style="display:none">
-    <div class="nav-item nav-sub" id="navAttendance" onclick="showView('attendance')">
+    <a class="nav-item nav-sub" id="navAttendance" href="#attendance" onclick="showView('attendance');return false;">
       <span class="nav-icon">📋</span> <span id="navAttendanceLabel">Check-in Log</span>
-    </div>
-    <div class="nav-item nav-sub" id="navQrcodes" onclick="showView('qrcodes')">
+    </a>
+    <a class="nav-item nav-sub" id="navQrcodes" href="#qrcodes" onclick="showView('qrcodes');return false;">
       <span class="nav-icon">🔲</span> <span id="navQrcodesLabel">House QR Codes</span>
-    </div>
-    <div class="nav-item nav-sub" id="navWorkerAccess" onclick="showView('workeraccess')">
+    </a>
+    <a class="nav-item nav-sub" id="navWorkerAccess" href="#workeraccess" onclick="showView('workeraccess');return false;">
       <span class="nav-icon">🔑</span> <span id="navWorkerAccessLabel">Worker Access</span>
-    </div>
+    </a>
     </div>
     <div class="nav-item" id="navTravelAllowance" onclick="setDashMode('travelpay');showView('dashboard');setNavActive('navTravelAllowance')">
       <span class="nav-icon">💰</span> <span id="navTravelAllowanceLabel">Travel Allowance</span>
     </div>
-    <div class="nav-item" id="navMap" onclick="showView('map')">
+    <a class="nav-item" id="navMap" href="#map" onclick="showView('map');return false;">
       <span class="nav-icon">🌍</span> <span id="navMapLabel">Location Overview</span>
+    </a>
+    <div class="nav-item" id="navRoutesGroup" onclick="toggleNavGroup('routes')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🛣️</span><span id="navRoutesGroupLabel">Routes</span></span>
+      <span id="navRoutesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
+    </div>
+    <div id="navRoutesChildren" style="display:none">
+      <a class="nav-item nav-sub" id="navOrder" href="#order" onclick="showView('order');return false;">
+        <span class="nav-icon">🗺️</span> <span id="navOrderLabel">Route Recommendation</span>
+      </a>
+      <a class="nav-item nav-sub" id="navScaffoldRoute" href="#scaffold" onclick="showView('scaffold');return false;">
+        <span class="nav-icon">🏗️</span> <span id="navScaffoldRouteLabel">Scaffold Route</span>
+      </a>
+      <a class="nav-item nav-sub" id="navHistory" href="#history" onclick="showView('history');return false;">
+        <span class="nav-icon">📜</span> <span id="navHistoryLabel">Route History</span>
+      </a>
+      <a class="nav-item nav-sub" id="navAuditLog" href="#auditlog" onclick="showView('auditlog');return false;" style="display:none">
+        <span class="nav-icon">🧾</span> <span id="navAuditLogLabel">Audit Log</span>
+      </a>
+    </div>
+    <div class="nav-item" id="navOrgChartGroup" onclick="toggleNavGroup('orgchart')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🏢</span><span id="navOrgChartGroupLabel">Org Chart</span></span>
+      <span id="navOrgChartChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
+    </div>
+    <div id="navOrgChartChildren" style="display:none">
+      <a class="nav-item nav-sub" id="navCrews" href="#crews" onclick="showView('crews');return false;">
+        <span class="nav-icon">🗂️</span> <span id="navCrewsLabel">Crew Manager</span>
+      </a>
+    </div>
+    <div class="nav-item" id="navClientServicesGroup" onclick="toggleNavGroup('clientservices')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🔌</span><span id="navClientServicesGroupLabel">Client Services</span></span>
+      <span id="navClientServicesChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
+    </div>
+    <div id="navClientServicesChildren" style="display:none">
+      <a class="nav-item nav-sub" id="navElectric" href="#electric" onclick="showView('electric');return false;">
+        <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
+      </a>
     </div>
   </div>
 </nav>
@@ -1696,9 +1714,8 @@
       <button onclick="setDashMode('deliveries')"     id="dashModeDeliveries"     style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🚚 Deliveries</button>
       <button onclick="setDashMode('dashWarehouses')" id="dashModeDashWarehouses" style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏬 Warehouses</button>
       <button onclick="setDashMode('dashSuppliers')"  id="dashModeDashSuppliers"  style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏭 Suppliers</button>
-      <button onclick="setDashMode('scaffold')"       id="dashModeScaffold"       style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🏗️ Scaffold</button>
       <button onclick="setDashMode('travelpay')"      id="dashModeTravelpay"      style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">💰 Travel Allowance</button>
-      <button onclick="setDashMode('stages')"          id="dashModeStages"          style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">🔢 House Stages</button>
+      <button onclick="setDashMode('docs')"            id="dashModeDocs"            style="padding:0.35rem 1rem;border-radius:7px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:#9aa3be">📁 Company Documentation</button>
     </div>
     <div class="totals" id="totals"></div>
     <div class="search-wrap">
@@ -1913,6 +1930,14 @@
           </div>
         </div>
         <div id="cMembersList" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.3rem"></div>
+      </div>
+      <div class="field">
+        <label>Crew Location</label>
+        <a id="cMapPickBtn" href="/map-picker.html" onclick="saveCrewModalState();localStorage.setItem('mapPinSource','crew');localStorage.setItem('returnToView','crews')" style="display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%">
+          🗺 Pin on map
+        </a>
+        <div id="cLocArea" style="display:none;margin-top:0.5rem;padding:0.5rem 0.75rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:0.82rem;color:var(--text)"></div>
+        <input type="hidden" id="cLat" /><input type="hidden" id="cLng" /><input type="hidden" id="cLocation" />
       </div>
       <p class="modal-err" id="crewModalErr"></p>
       <div class="modal-actions">
@@ -2380,7 +2405,7 @@
       // house card chips
       chipStart:'Start', chipPhase:'Phase', chipStage:'Stage', chipDestination:'Destination',
       // delete confirm
-      deleteConfirmPrefix:'Delete ', btnNo:'No', btnYesDelete:'Yes, delete',
+      deleteConfirmPrefix:'Delete ', btnNo:'Cancel', btnYesDelete:'Yes, delete', confirmTitle:'Are you sure?',
       // validation / errors
       nameLocationRequired:'Name and location are required.', errorPrefix:'Error:',
       // route reasons
@@ -2503,6 +2528,11 @@
       // worker card
       workerSearchPlaceholder:'Search workers by name, crew or house...',
       scaffoldSearchPlaceholder:'Search by status or house...',
+      waColName:'Name', waColRole:'Role', waColHouses:'Houses', waColUsername:'Username', waColPassword:'Password', waColActions:'Actions',
+      waFilterName:'Name', waFilterCrew:'Crew', waFilterHouse:'House',
+      waExportAllBtn:'⬇ Export All PDF', waResetBtn:'🔑 Reset', waPdfBtn:'⬇ PDF',
+      waRoleMember:'Member', waRoleLeader:'⭐ Leader', waRoleManager:'🏢 Manager',
+      waNoResults:'No results found.',
       phWorkerName:'Worker name', phCrewName:'Crew name', phMemberSearch:'Search by name or trade…',
       phSearchWarehouses:'Search warehouses...', phSearchSuppliers:'Search suppliers...',
       phSearchElectric:'Search electric boxes...', phSearchHouses:'Search houses...',
@@ -2543,6 +2573,9 @@
       chipOrderPending:'⏳ Pending', chipOrderApproved:'✓ Approved', chipOrderOrdered:'📦 Ordered',
       chipOrderInTransit:'🚚 In Transit', chipOrderDelivered:'✅ Delivered',
       chipClearFilters:'✕ Clear',
+      // documentation
+      docTab:'Company Documentation', navDocsLabel:'Company Documentation', navDocsGroupLabel:'Documentation',
+      docComingSoon:'— Coming soon —',
     },
     bg: {
       brandName:'Теодор Логистика', brandSub:'Управление на материали',
@@ -2651,7 +2684,7 @@
       // house card chips
       chipStart:'Начало', chipPhase:'Фаза', chipStage:'Етап', chipDestination:'Дестинация',
       // delete confirm
-      deleteConfirmPrefix:'Изтрий ', btnNo:'Не', btnYesDelete:'Да, изтрий',
+      deleteConfirmPrefix:'Изтрий ', btnNo:'Отказ', btnYesDelete:'Да, изтрий', confirmTitle:'Сигурни ли?',
       // validation / errors
       nameLocationRequired:'Необходими са Ime и Locация.', errorPrefix:'Грешка:',
       // route reasons
@@ -2774,6 +2807,11 @@
       // worker card
       workerSearchPlaceholder:'Търси работник по име, екип или къща...',
       scaffoldSearchPlaceholder:'Търси по статус или къща...',
+      waColName:'Име', waColRole:'Роля', waColHouses:'Къщи', waColUsername:'Потребител', waColPassword:'Парола', waColActions:'Действия',
+      waFilterName:'Име', waFilterCrew:'Екип', waFilterHouse:'Къща',
+      waExportAllBtn:'⬇ Експорт всички PDF', waResetBtn:'🔑 Нулиране', waPdfBtn:'⬇ PDF',
+      waRoleMember:'Член', waRoleLeader:'⭐ Лидер', waRoleManager:'🏢 Мениджър',
+      waNoResults:'Няма намерени резултати.',
       phWorkerName:'Име на работник', phCrewName:'Наименование на екип', phMemberSearch:'Търси по име или специалност…',
       phSearchWarehouses:'Търси складове...', phSearchSuppliers:'Търси доставчици...',
       phSearchElectric:'Търси електрически табла...', phSearchHouses:'Търси обекти...',
@@ -2814,6 +2852,9 @@
       chipOrderPending:'⏳ Чакащ', chipOrderApproved:'✓ Одобрен', chipOrderOrdered:'📦 Поръчан',
       chipOrderInTransit:'🚚 В транзит', chipOrderDelivered:'✅ Доставен',
       chipClearFilters:'✕ Изчисти',
+      // documentation
+      docTab:'Фирмена документация', navDocsLabel:'Фирмена документация', navDocsGroupLabel:'Документация',
+      docComingSoon:'— Очаквайте скоро —',
     },
   };
 
@@ -2845,6 +2886,7 @@
     const activeView = document.querySelector('.view.active')?.id?.replace('view-','') || 'dashboard';
     if (activeView === 'dashboard') {
       if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash();
+      else if (_dashMode === 'docs') renderDocsDash();
       else { retranslateChipBar(); retranslateSearchBar(_dashMode); }
     }
     else if (activeView === 'scaffold')    setDashMode('scaffold');
@@ -2854,7 +2896,12 @@
     else if (activeView === 'history')     loadHistory();
     else if (activeView === 'auditlog')    loadAuditLog(_alState.page);
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
-    else if (activeView === 'workeraccess') { waBuildChipBar(); }
+    else if (activeView === 'workeraccess') { if (_waGroups) waRender(_waGroups); }
+    else if (activeView === 'housedetail') { if (_houseDetailId && _docTree.length) renderHouseDocSection(_houseDetailId); }
+    if (_dashMode === 'docs') {
+      document.querySelectorAll('.doc-dept-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
+      document.querySelectorAll('.doc-sub-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
+    }
     // always re-render stage matrix if it is the active view (column headers come from DB in both languages)
     if (document.getElementById('view-stagematrix')?.classList.contains('active')) loadStageMatrix(true);
   }
@@ -2993,6 +3040,9 @@
     const dt = document.getElementById('dashModeTravelpay'); if (dt) dt.textContent = t('dashTravelpay');
     const do_ = document.getElementById('dashModeOrders');    if (do_) do_.textContent = t('dashOrders');
     const dd  = document.getElementById('dashModeDeliveries'); if (dd) dd.textContent = t('dashDeliveries');
+    const ddocs = document.getElementById('dashModeDocs'); if (ddocs) ddocs.textContent = '📁 ' + t('docTab');
+    const ndocs = document.getElementById('navDocsLabel'); if (ndocs) ndocs.textContent = t('navDocsLabel');
+    const ndocsGrp = document.getElementById('navDocsGroupLabel'); if (ndocsGrp) ndocsGrp.textContent = t('navDocsGroupLabel');
 
     // map toggles
     const mh = document.getElementById('mapModeHouses');   if (mh) mh.textContent = t('mapHouses');
@@ -3152,6 +3202,7 @@
     routes:         { children: 'navRoutesChildren',          chevron: 'navRoutesChevron' },
     attendance:     { children: 'navAttendanceChildren',      chevron: 'navAttendanceChevron' },
     management:     { children: 'navManagementChildren',      chevron: 'navManagementChevron' },
+    docs:           { children: 'navDocsChildren',            chevron: 'navDocsChevron' },
     orgchart:       { children: 'navOrgChartChildren',        chevron: 'navOrgChartChevron' },
     clientservices: { children: 'navClientServicesChildren',  chevron: 'navClientServicesChevron' },
   };
@@ -3244,6 +3295,10 @@
       ]);
       const h = houses.find(x => x.id == _houseDetailId);
       if (!h) { el.innerHTML = '<div class="state-msg">House not found.</div>'; return; }
+      const titleEl = document.getElementById('pageTitle');
+      const subEl   = document.getElementById('pageSub');
+      if (titleEl) titleEl.textContent = h.name;
+      if (subEl)   subEl.textContent   = h.location || '';
 
       const matrixRow = (stageMatrix.rows || []).find(r => r.houseId == _houseDetailId || r.houseName === h.name);
       const columns = stageMatrix.columns || [];
@@ -3393,9 +3448,131 @@
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.6rem;align-items:start">
             ${crewCards || '<div style="color:var(--muted)">No crews assigned.</div>'}
           </div>
+
+          <!-- House documents -->
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:1.2rem 0 0.5rem">Documents</div>
+          <div id="houseFolderSection">
+            <div class="state-msg" style="padding:0.5rem 0"><div class="spinner" style="width:18px;height:18px"></div></div>
+          </div>
         </div>`;
+      // Load house doc folder section
+      try {
+        [_docTree, _docFlat] = await Promise.all([
+          apiFetch('/api/doc-folders').then(r => r.json()),
+          apiFetch('/api/doc-folders/flat').then(r => r.json()),
+        ]);
+        renderHouseDocSection(_houseDetailId);
+      } catch(e2) {
+        const sec = document.getElementById('houseFolderSection');
+        if (sec) sec.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">Failed to load documents.</div>';
+      }
     } catch(e) {
       el.innerHTML = `<div class="state-msg">Error loading house details.</div>`;
+    }
+  }
+
+  let _hdRootFolderId = null; // house folder id (not house entity id) — set in renderHouseDocSection
+
+  function renderHouseDocSection(houseId) {
+    const sec = document.getElementById('houseFolderSection');
+    if (!sec) return;
+    let houseNode = null;
+    function findHouseNode(nodes) {
+      for (const n of nodes) {
+        if (n.code === 'house_' + houseId) { houseNode = n; return; }
+        if (n.children) findHouseNode(n.children);
+      }
+    }
+    findHouseNode(_docTree);
+    if (!houseNode) { sec.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">No document folder for this house.</div>'; return; }
+
+    _hdRootFolderId = houseNode.id; // store correct folder id for use in _hdFolderCard
+
+    const isAdmin = currentUser?.role === 'admin';
+    const addBtn = isAdmin
+      ? `<div style="display:flex;justify-content:flex-end;margin-bottom:0.5rem">
+           <button class="btn btn-primary" onclick="_houseDocNewFolder(${houseNode.id}, ${houseNode.id})">&#65291; New folder</button>
+         </div>`
+      : '';
+
+    const directDocs = (houseNode.documents || []).map(doc => _docDocRow(doc, '#f97316', 0)).join('');
+    const childCards = (houseNode.children || []).map(c => _hdFolderCard(c, 0)).join('');
+
+    sec.innerHTML = addBtn
+      + (directDocs ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.4rem 0;margin-bottom:0.75rem">${directDocs}</div>` : '')
+      + `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0.75rem;align-items:start">${childCards}</div>`;
+  }
+
+  // Opens folder modal scoped to the house subtree
+  function _houseDocNewFolder(parentId, rootId) {
+    _houseDocRootId = rootId;
+    _docShowFolderModal(null, parentId);
+    _houseDocRootId = null;
+  }
+  function _houseDocEditFolder(folderId, rootId) {
+    _houseDocRootId = rootId;
+    const folder = _docFindFolderFlat(folderId);
+    if (folder) _docShowFolderModal(folder, folder.parentId);
+    _houseDocRootId = null;
+  }
+
+  /** Isolated card renderer for house detail — uses data-hd-* attributes to avoid ID conflicts with docs view. */
+  function _hdFolderCard(folder, depth) {
+    const hasChildren = folder.children && folder.children.length > 0;
+    const hasDocs     = folder.documents && folder.documents.length > 0;
+    const label       = _docLabel(folder);
+    const color       = folder.color || '#4f8ef7';
+    const linkBtn     = folder.linkUrl
+      ? `<a href="${folder.linkUrl}" target="_blank" onclick="event.stopPropagation()" style="color:${color};font-size:0.85rem;text-decoration:none" title="Open link">&#128279;</a>`
+      : '';
+    const houseRootId = _hdRootFolderId;
+    const adminBtns = currentUser?.role === 'admin'
+      ? `<button title="Edit" onclick="event.stopPropagation();_houseDocEditFolder(${folder.id},${houseRootId})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.82rem;padding:1px 3px">&#9999;&#65039;</button>
+         <button title="Delete" onclick="event.stopPropagation();_docDeleteFolder(${folder.id})" style="background:none;border:none;cursor:pointer;color:#e05;font-size:0.82rem;padding:1px 3px">&#128465;</button>`
+      : '';
+
+    if (depth === 0) {
+      return `
+        <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);transition:box-shadow .2s"
+             onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.boxShadow=''">
+          <div onclick="_hdToggle(${folder.id})" style="display:flex;align-items:center;gap:12px;padding:1rem 1.1rem;cursor:pointer;background:var(--card);border-bottom:2px solid ${color}33">
+            <div style="width:38px;height:38px;border-radius:10px;background:${color}20;border:1.5px solid ${color}50;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${folder.icon || '&#128193;'}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.7rem;color:${color};font-weight:700;letter-spacing:0.08em">${folder.code}</div>
+              <div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-top:1px;word-break:break-word">${label}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:3px;flex-shrink:0" onclick="event.stopPropagation()">${linkBtn}${adminBtns}</div>
+            <div data-hd-arrow="${folder.id}" style="font-size:0.75rem;color:var(--muted,#9aa3be);transition:transform .2s;margin-left:4px;flex-shrink:0">${(hasChildren||hasDocs) ? '&#9654;' : '&#9654;'}</div>
+          </div>
+          <div data-hd-subs="${folder.id}" style="display:none;padding:0.4rem 0;background:var(--surface)">
+            ${hasChildren ? folder.children.map(c => _hdFolderCard(c, 1)).join('') : ''}
+            ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, 1)).join('') : ''}
+            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.75rem 1.1rem;font-size:0.8rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
+            <div style="padding:0.35rem 1.1rem">
+              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem;width:100%;text-align:left">&#65291; Add PDF</button>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      const indent = (depth * 16) + 'px';
+      return `
+        <div>
+          <div onclick="_hdToggle(${folder.id})" style="display:flex;align-items:center;gap:10px;padding:0.45rem 1.1rem 0.45rem calc(1.1rem + ${indent});cursor:pointer;transition:background .15s"
+               onmouseover="this.style.background='rgba(128,128,128,0.07)'" onmouseout="this.style.background=''">
+            <span style="font-size:0.9rem">&#128193;</span>
+            <span style="flex:1;font-size:0.82rem;color:var(--text);opacity:0.85;font-weight:500">${label}</span>
+            <span onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:3px">${linkBtn}${adminBtns}</span>
+            <div data-hd-arrow="${folder.id}" style="font-size:0.65rem;color:var(--muted,#9aa3be);margin-left:2px">${(hasChildren||hasDocs) ? '&#9654;' : '&#9654;'}</div>
+          </div>
+          <div data-hd-subs="${folder.id}" style="display:none">
+            ${hasChildren ? folder.children.map(c => _hdFolderCard(c, depth+1)).join('') : ''}
+            ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, depth+1)).join('') : ''}
+            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.5rem 1.1rem;font-size:0.78rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
+            <div style="padding:0.2rem 1.1rem 0.2rem calc(1.1rem + ${indent} + 16px)">
+              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">&#65291; PDF</button>
+            </div>
+          </div>
+        </div>`;
     }
   }
 
@@ -4178,28 +4355,49 @@
     hSel.innerHTML = '<option value="">🏠 Select a house…</option>' +
       houses.map(h => `<option value="${h.id}">🏠 ${h.name} — ${h.location}</option>`).join('');
     cSel.innerHTML = '<option value="">👥 Select a crew…</option>' +
-      crews.map(c => `<option value="${c.id}">👥 ${c.name}${c.houseName ? ' · 🏠 ' + c.houseName : ''}</option>`).join('');
+      crews.map(c => `<option value="${c.id}">👥 ${c.name}</option>`).join('');
 
+    _chAllCrews = crews;
     _hMap.invalidateSize();
   }
 
-  async function onMapHouseSelectChange() {
+  let _chAllCrews = [];
+
+  function onMapHouseSelectChange() {
     const houseId = document.getElementById('mapChHouseSelect').value;
     const statusEl = document.getElementById('mapChStatus');
+    const cSel = document.getElementById('mapChCrewSelect');
+    const membersEl = document.getElementById('mapChMembers');
+    const toggleEl  = document.getElementById('mapChMembersToggle');
+
+    if (membersEl) { membersEl.innerHTML = ''; membersEl.style.display = 'none'; }
+    if (toggleEl)  { toggleEl.style.display = 'none'; }
     if (!houseId) {
       if (statusEl) statusEl.textContent = '';
+      cSel.innerHTML = '<option value="">👥 Select a crew…</option>' +
+        _chAllCrews.map(c => `<option value="${c.id}">👥 ${c.name}</option>`).join('');
       renderCrewHouseMap(null, null);
       return;
     }
-    const allCrews = await apiFetch('/api/crews').then(r => r.json()).catch(() => []);
-    const auto = Array.isArray(allCrews) ? allCrews.find(c => c.houseId === parseInt(houseId)) : null;
-    if (auto) {
-      document.getElementById('mapChCrewSelect').value = String(auto.id);
-      if (statusEl) statusEl.innerHTML = `<span onclick="renderCrewHouseMap('${houseId}','${auto.id}')" style="color:#3ecf6e;cursor:pointer;text-decoration:underline dotted" title="Click to re-show crew">👥 ${auto.name}</span>`;
-      renderCrewHouseMap(houseId, String(auto.id));
+
+    const hid = parseInt(houseId);
+    const assigned = _chAllCrews.filter(c =>
+      (Array.isArray(c.assignedHouses) && c.assignedHouses.some(h => h.id === hid)) ||
+      c.houseId === hid
+    );
+
+    cSel.innerHTML = '<option value="">👥 Select a crew…</option>' +
+      assigned.map(c => `<option value="${c.id}">👥 ${c.name}</option>`).join('');
+
+    if (assigned.length === 0) {
+      if (statusEl) statusEl.innerHTML = `<span style="color:#9aa3be">ℹ️ No crews assigned to this house</span>`;
+      renderCrewHouseMap(houseId, null);
+    } else if (assigned.length === 1) {
+      cSel.value = String(assigned[0].id);
+      if (statusEl) statusEl.textContent = '';
+      renderCrewHouseMap(houseId, String(assigned[0].id));
     } else {
-      document.getElementById('mapChCrewSelect').value = '';
-      if (statusEl) statusEl.innerHTML = `<span style="color:#9aa3be">ℹ️ No crew assigned to this house</span>`;
+      if (statusEl) statusEl.innerHTML = `<span style="color:#f5a623">${assigned.length} crews on this house — pick one</span>`;
       renderCrewHouseMap(houseId, null);
     }
   }
@@ -4245,13 +4443,22 @@
       }
     }
 
-    // — Crew member markers —
+    // — Crew member markers + list panel —
+    const membersEl = document.getElementById('mapChMembers');
+    const toggleEl2 = document.getElementById('mapChMembersToggle');
+    const arrowEl   = document.getElementById('mapChMembersArrow');
+    const labelEl   = document.getElementById('mapChMembersLabel');
+    if (membersEl)  { membersEl.innerHTML = ''; membersEl.style.display = 'none'; }
+    if (toggleEl2)  { toggleEl2.style.display = 'none'; }
+    if (arrowEl)    arrowEl.textContent = '▶';
     if (crewId) {
       const roleIcon  = { CREW_MANAGER:'👔', CREW_LEADER:'🦺', CREW_MEMBER:'👷' };
       const roleColor = { CREW_MANAGER:'#a78bfa', CREW_LEADER:'#f5a623', CREW_MEMBER:'#e2e8f0' };
       const crew = await apiFetch(`/api/crews/${crewId}`).then(r => r.json()).catch(() => null);
+      const members = allWorkers.filter(w => w.crewId === parseInt(crewId));
 
-      allWorkers.filter(w => w.crewId === parseInt(crewId) && w.lat && w.lng).forEach(w => {
+      // map markers for workers with coordinates
+      members.filter(w => w.lat && w.lng).forEach(w => {
         const icon  = roleIcon[w.role]  || '👷';
         const color = roleColor[w.role] || '#e2e8f0';
         const mIcon = L.divIcon({ html: `<div style="font-size:1.4rem;line-height:1">${icon}</div>`, className:'', iconAnchor:[12,12], popupAnchor:[0,-14] });
@@ -4284,6 +4491,29 @@
         _hMapMarkers.push(marker);
         bounds.push([w.lat, w.lng]);
       });
+
+      // always show member list in the panel (collapsed by default)
+      if (membersEl && members.length) {
+        membersEl.style.display = 'none';
+        if (toggleEl2) { toggleEl2.style.display = 'block'; }
+        if (labelEl)   { labelEl.textContent = `Members (${members.length})`; }
+        membersEl.innerHTML = members.map(w => {
+          const icon  = roleIcon[w.role]  || '👷';
+          const color = roleColor[w.role] || '#e2e8f0';
+          return `<div style="display:flex;align-items:center;gap:8px;padding:4px 2px;border-bottom:1px solid #1a1d27">
+            <span style="font-size:1rem;line-height:1">${icon}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.82rem;font-weight:600;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${w.name}</div>
+              ${w.trade ? `<div style="font-size:0.7rem;color:#9aa3be">🔧 ${w.trade}</div>` : ''}
+            </div>
+            ${w.location ? `<div style="font-size:0.7rem;color:#7a85a3;white-space:nowrap">📍 ${w.location}</div>` : ''}
+          </div>`;
+        }).join('');
+      } else if (membersEl) {
+        if (toggleEl2) { toggleEl2.style.display = 'block'; }
+        if (labelEl)   { labelEl.textContent = 'Members (0)'; }
+        membersEl.innerHTML = `<div style="font-size:0.75rem;color:#9aa3be;text-align:center;padding:6px">No members in this crew</div>`;
+      }
     }
 
     if (bounds.length) _hMap.fitBounds(L.latLngBounds(bounds), { padding:[60,60] });
@@ -4507,9 +4737,9 @@
   function setDashMode(mode) {
     _dashMode = mode;
     buildChipBar([]); // clear chip bar; render functions rebuild it if their mode uses chips
-    const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa', orders:'#00c9b1', deliveries:'#f97316', dashWarehouses:'#38bdf8', dashSuppliers:'#fb7185', stages:'#e879f9' };
+    const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa', orders:'#00c9b1', deliveries:'#f97316', dashWarehouses:'#38bdf8', dashSuppliers:'#fb7185', stages:'#e879f9', docs:'#f59e0b' };
     const darkText   = new Set(['scaffold']);
-    ['houses','workers','scaffold','crews','travelpay','orders','deliveries','dashWarehouses','dashSuppliers','stages'].forEach(m => {
+    ['houses','workers','scaffold','crews','travelpay','orders','deliveries','dashWarehouses','dashSuppliers','stages','docs'].forEach(m => {
       const btn = document.getElementById('dashMode' + m.charAt(0).toUpperCase() + m.slice(1));
       if (!btn) return;
       if (m === mode) { btn.style.background = modeColors[m]; btn.style.color = darkText.has(m) ? '#0f1117' : '#fff'; }
@@ -4613,7 +4843,441 @@
       buildSearchBar(null);
       document.getElementById('altSearchInput').placeholder = t('stagesSearchPlaceholder') || 'Search stage by name...';
       renderStagesDash();
+    } else if (mode === 'docs') {
+      if (searchWrap) searchWrap.style.display = 'none';
+      if (crudBar)    crudBar.style.display    = 'none';
+      if (totals)     totals.style.display     = 'none';
+      altSearch.style.display = 'none';
+      renderDocsDash();
     }
+  }
+
+  // ── DOCUMENTATION ────────────────────────────────────────────────────────────
+  let _docTree    = [];   // loaded from API (recursive tree)
+  let _docFlat    = [];   // flat list for parent dropdowns
+  let _docOpenId  = null;
+
+  function _docRefresh() {
+    const view = document.querySelector('.view.active')?.id?.replace('view-','');
+    if (view === 'housedetail') loadHouseDetail();
+    else renderDocsDash();
+  }
+
+  async function renderDocsDash() {
+    const grid = document.getElementById('grid');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+    grid.style.gap = '1rem';
+    grid.style.alignItems = 'start';
+    grid.innerHTML = `<div class="state-msg"><div class="spinner"></div></div>`;
+    try {
+      [_docTree, _docFlat] = await Promise.all([
+        apiFetch('/api/doc-folders').then(r => r.json()),
+        apiFetch('/api/doc-folders/flat').then(r => r.json()),
+      ]);
+    } catch(e) { grid.innerHTML = `<div class="state-msg">Failed to load documentation.</div>`; return; }
+    const addBtn = currentUser?.role === 'admin'
+      ? `<div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-bottom:0.25rem">
+           <button class="btn btn-primary" onclick="_docNewFolder(null)">＋ New folder</button>
+         </div>`
+      : '';
+    grid.innerHTML = addBtn + _docTree.map(f => _docFolderCard(f, 0)).join('');
+    if (_docOpenId) {
+      const el = document.getElementById('docSubs_' + _docOpenId);
+      if (el) el.style.display = 'block';
+    }
+  }
+
+  function _docLabel(f) {
+    return currentLang === 'bg' ? f.labelBg : f.labelEn;
+  }
+
+  /** Recursive card renderer — depth 0 = top-level card, depth 1+ = indented row inside a card. */
+  function _docFolderCard(folder, depth) {
+    const hasChildren = folder.children && folder.children.length > 0;
+    const hasDocs     = folder.documents && folder.documents.length > 0;
+    const label       = _docLabel(folder);
+    const color       = folder.color || '#4f8ef7';
+    const linkBtn     = folder.linkUrl
+      ? `<a href="${folder.linkUrl}" target="_blank" onclick="event.stopPropagation()" style="color:${color};font-size:0.85rem;text-decoration:none" title="Open link">🔗</a>`
+      : '';
+    const adminBtns = currentUser?.role === 'admin'
+      ? `<button title="Edit folder" onclick="event.stopPropagation();_docEditFolder(${folder.id})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.82rem;padding:1px 3px">✏️</button>
+         <button title="Delete folder" onclick="event.stopPropagation();_docDeleteFolder(${folder.id})" style="background:none;border:none;cursor:pointer;color:#e05;font-size:0.82rem;padding:1px 3px">🗑</button>`
+      : '';
+
+    if (depth === 0) {
+      // Top-level: full card with coloured header
+      return `
+        <div class="doc-card" style="border-radius:12px;overflow:hidden;transition:box-shadow .2s;border:1px solid var(--border)"
+             onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.boxShadow=''">
+          <div onclick="_docToggle(${folder.id})" style="display:flex;align-items:center;gap:12px;padding:1rem 1.1rem;cursor:pointer;background:var(--card);border-bottom:2px solid ${color}33">
+            <div style="width:38px;height:38px;border-radius:10px;background:${color}20;border:1.5px solid ${color}50;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${folder.icon || '📁'}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.7rem;color:${color};font-weight:700;letter-spacing:0.08em">${folder.code}</div>
+              <div style="font-size:0.92rem;font-weight:700;color:var(--text);margin-top:1px">${label}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:3px" onclick="event.stopPropagation()">
+              ${linkBtn}${adminBtns}
+            </div>
+            <div id="docArrow_${folder.id}" style="font-size:0.75rem;color:var(--muted,#9aa3be);transition:transform .2s;margin-left:4px">${(hasChildren||hasDocs) ? '▶' : ''}</div>
+          </div>
+          <div id="docSubs_${folder.id}" style="display:none;padding:0.4rem 0;background:var(--surface)">
+            ${hasChildren ? folder.children.map(c => _docFolderCard(c, 1)).join('') : ''}
+            ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, false)).join('') : ''}
+            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.75rem 1.1rem;font-size:0.8rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
+            <div class="admin-only" style="padding:0.35rem 1.1rem">
+              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem;width:100%;text-align:left">＋ Add PDF</button>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      // Nested: indented row inside a parent card
+      const indent = (depth * 16) + 'px';
+      const houseIdMatch = folder.code && folder.code.match(/^house_(\d+)$/);
+      const folderIcon = houseIdMatch
+        ? `<span style="font-size:0.9rem;cursor:pointer" onclick="event.stopPropagation();openHouseDetail(${houseIdMatch[1]})" title="Go to house page">📂</span>`
+        : `<span style="font-size:0.9rem">📂</span>`;
+      return `
+        <div>
+          <div onclick="_docToggle(${folder.id})" style="display:flex;align-items:center;gap:10px;padding:0.45rem 1.1rem 0.45rem calc(1.1rem + ${indent});transition:background .15s;cursor:pointer"
+               onmouseover="this.style.background='rgba(128,128,128,0.07)'" onmouseout="this.style.background=''">
+            ${folderIcon}
+            <span style="flex:1;font-size:0.82rem;color:var(--text);opacity:0.85;font-weight:500">${label}</span>
+            <span style="display:flex;align-items:center;gap:3px" onclick="event.stopPropagation()">
+              ${linkBtn}${adminBtns}
+            </span>
+            <div id="docArrow_${folder.id}" style="font-size:0.65rem;color:var(--muted,#9aa3be);margin-left:2px">${(hasChildren||hasDocs) ? '▶' : ''}</div>
+          </div>
+          <div id="docSubs_${folder.id}" style="display:none">
+            ${hasChildren ? folder.children.map(c => _docFolderCard(c, depth + 1)).join('') : ''}
+            ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, depth)).join('') : ''}
+            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.5rem 1.1rem 0.5rem calc(1.1rem + ${indent} + 16px);font-size:0.78rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
+            <div class="admin-only" style="padding:0.2rem 1.1rem 0.2rem calc(1.1rem + ${indent} + 16px)">
+              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">＋ PDF</button>
+            </div>
+          </div>
+        </div>`;
+    }
+  }
+
+  function _docDocRow(doc, color, depth) {
+    const title    = currentLang === 'bg' && doc.titleBg ? doc.titleBg : doc.titleEn;
+    const indent   = typeof depth === 'number' ? ((depth + 1) * 16) + 'px' : '16px';
+    const linkPart = doc.linkUrl
+      ? `<a href="${doc.linkUrl}" target="_blank" style="color:${color||'#4f8ef7'};font-size:0.8rem;text-decoration:none" title="Open PDF">🔗</a>`
+      : '';
+    return `
+      <div style="display:flex;align-items:center;gap:8px;padding:0.35rem 1.1rem 0.35rem calc(1.1rem + ${indent});transition:background .15s"
+           onmouseover="this.style.background='rgba(128,128,128,0.06)'" onmouseout="this.style.background=''">
+        <span style="font-size:0.82rem">📄</span>
+        <span style="flex:1;font-size:0.79rem;color:var(--text);opacity:0.75">${title}</span>
+        <span style="display:flex;align-items:center;gap:3px">
+          ${linkPart}
+          <button title="Edit" onclick="_docEditDoc(${doc.id})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.75rem;padding:1px 3px">✏️</button>
+          <button title="Delete" onclick="_docDeleteDoc(${doc.id})" style="background:none;border:none;cursor:pointer;color:#e05;font-size:0.75rem;padding:1px 3px">🗑</button>
+        </span>
+      </div>`;
+  }
+
+  function _docToggle(id) {
+    const subs  = document.getElementById('docSubs_'  + id);
+    const arrow = document.getElementById('docArrow_' + id);
+    if (!subs) return;
+    const open = subs.style.display !== 'none';
+    subs.style.display  = open ? 'none'  : 'block';
+    if (arrow) arrow.textContent = open ? '▶' : '▼';
+    _docOpenId = open ? null : id;
+  }
+
+  function _hdToggle(id) {
+    const sec   = document.getElementById('houseFolderSection');
+    if (!sec) return;
+    const subs  = sec.querySelector('[data-hd-subs="' + id + '"]');
+    const arrow = sec.querySelector('[data-hd-arrow="' + id + '"]');
+    if (!subs) return;
+    const open = subs.style.display !== 'none';
+    subs.style.display = open ? 'none' : 'block';
+    if (arrow) arrow.textContent = open ? '▶' : '▼';
+  }
+
+  // ── Folder create / edit ──────────────────────────────────────────────────
+  function _docFindFolderFlat(id) {
+    return _docFlat.find(f => f.id === id) || null;
+  }
+
+  function _docNewFolder(parentId) {
+    _docShowFolderModal(null, parentId);
+  }
+
+  function _docEditFolder(folderId) {
+    const folder = _docFindFolderFlat(folderId);
+    if (!folder) return;
+    _docShowFolderModal(folder, folder.parentId);
+  }
+
+  let _houseDocRootId = null; // set when opening folder modal from house detail
+
+  function _docShowFolderModal(folder, preselectedParentId) {
+    const existing = document.getElementById('_docFolderModal');
+    if (existing) existing.remove();
+
+    // Build parent options from flat list, with depth indentation
+    // Build a depth map first
+    // If opened from house detail, filter to only that house's folder subtree
+    const modalFlat = _houseDocRootId != null
+      ? (() => {
+          const ids = new Set();
+          const collect = (id) => { ids.add(id); _docFlat.filter(x => x.parentId === id).forEach(c => collect(c.id)); };
+          collect(_houseDocRootId);
+          return _docFlat.filter(f => ids.has(f.id));
+        })()
+      : _docFlat;
+
+    const depthMap = {};
+    function calcDepth(id, visited = new Set()) {
+      if (id == null) return 0;
+      if (depthMap[id] !== undefined) return depthMap[id];
+      if (visited.has(id)) return 0;
+      visited.add(id);
+      const f = modalFlat.find(x => x.id === id);
+      depthMap[id] = f && f.parentId != null ? 1 + calcDepth(f.parentId, visited) : 0;
+      return depthMap[id];
+    }
+    modalFlat.forEach(f => calcDepth(f.id));
+
+    // Depth-first walk to get tree order (parents followed by their children)
+    const _byParent = {};
+    modalFlat.forEach(f => {
+      const pid = f.parentId != null ? f.parentId : 'root';
+      if (!_byParent[pid]) _byParent[pid] = [];
+      _byParent[pid].push(f);
+    });
+    const orderedFlat = [];
+    function _dfWalk(pid) { (_byParent[pid] || []).forEach(f => { orderedFlat.push(f); _dfWalk(f.id); }); }
+    if (_houseDocRootId != null) {
+      // House detail context: walk children of the house folder (house folder itself is the "root")
+      const hf = modalFlat.find(f => f.id === _houseDocRootId);
+      if (hf) orderedFlat.push(hf);
+      _dfWalk(_houseDocRootId);
+    } else {
+      if (_byParent['root']) _byParent['root'].sort((a, b) => { try { return parseInt(a.code) - parseInt(b.code); } catch(e) { return a.code.localeCompare(b.code); } });
+      _dfWalk('root');
+    }
+
+    const parentItems = [{ value: '', label: '— No parent (top level) —', depth: -1, code: '' }].concat(
+      orderedFlat
+        .filter(f => folder == null || f.id !== folder.id)
+        .map(f => ({ value: f.id, label: currentLang === 'bg' ? f.labelBg : f.labelEn, depth: depthMap[f.id] || 0, code: f.code }))
+    );
+
+    let _dfSelectedVal = preselectedParentId != null ? preselectedParentId : '';
+    const getSelectedLabel = () => (parentItems.find(p => String(p.value) === String(_dfSelectedVal)) || parentItems[0]).label;
+
+    const renderDropdownItems = () => parentItems.map((item, idx) => {
+      const pl = 'calc(0.75rem + ' + Math.max(0,item.depth)*14 + 'px)';
+      const bg = String(item.value)===String(_dfSelectedVal) ? 'rgba(79,142,247,0.12)' : '';
+      const separator = (item.depth === 0 && idx > 0) ? '<div style="height:1px;background:var(--border);margin:2px 0.75rem"></div>' : '';
+      let inner = '';
+      if (item.depth < 0) inner = '<span style="color:var(--muted,#9aa3be);font-size:0.82rem;font-style:italic">' + item.label + '</span>';
+      else if (item.depth === 0) inner = '<span style="font-size:0.72rem;background:rgba(79,142,247,0.15);border-radius:4px;padding:1px 6px;color:#4f8ef7;font-weight:700;min-width:26px;text-align:center">' + item.code + '</span><span style="font-size:0.88rem;color:var(--text);margin-left:6px;font-weight:700">' + item.label + '</span>';
+      else inner = '<span style="color:var(--muted,#9aa3be);font-size:0.78rem;margin-right:4px">\u2514</span><span style="font-size:0.83rem;color:var(--text);opacity:0.85">' + item.label + '</span>';
+      return separator + '<div class="_dfOpt" data-value="' + item.value + '" style="display:flex;align-items:center;padding:0.4rem 0.75rem 0.4rem ' + pl + ';cursor:pointer;background:' + bg + '" onmouseover="this.style.background=\'rgba(128,128,128,0.12)\'" onmouseout="this.style.background=\'' + bg + '\'">' + inner + '</div>';
+    }).join('');
+
+    const isEdit  = folder != null;
+    const title   = isEdit ? 'Edit folder' : (preselectedParentId ? 'New subfolder' : 'New folder');
+
+    const overlay = document.createElement('div');
+    overlay.id = '_docFolderModal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+      <div class="_doc-modal-box" style="width:440px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.1rem">
+          <div class="_doc-modal-title" style="margin-bottom:0">${title}</div>
+          <button onclick="document.getElementById('_docFolderModal').remove()" style="background:none;border:none;color:var(--muted,#9aa3be);font-size:1.1rem;cursor:pointer;padding:0 0.25rem;line-height:1" title="Close">&times;</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <input id="_dfLabelEn" type="text" placeholder="Name (EN)" value="${isEdit ? folder.labelEn : ''}">
+            <input id="_dfLabelBg" type="text" placeholder="Name (BG)" value="${isEdit ? folder.labelBg : ''}">
+          </div>
+          <div style="position:relative">
+            <div id="_dfTrigger" style="display:flex;align-items:center;justify-content:space-between;padding:0 0.75rem;height:36px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--card)" onclick="(()=>{const d=document.getElementById('_dfDrop');d.style.display=d.style.display==='none'?'block':'none'})()">
+              <span id="_dfSelectedLabel" style="font-size:0.85rem;color:var(--text)">${getSelectedLabel()}</span>
+              <span style="font-size:0.7rem;color:var(--muted,#9aa3be)">&#9662;</span>
+            </div>
+            <div id="_dfDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:8px;z-index:200;max-height:220px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,0.25)">
+              ${renderDropdownItems()}
+            </div>
+          </div>
+          <input id="_dfLink" type="url" placeholder="Link URL (optional)" value="${isEdit && folder.linkUrl ? folder.linkUrl : ''}">
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem">
+          <button onclick="document.getElementById('_docFolderModal').remove()" class="btn btn-ghost" style="padding:0.45rem 1.1rem">Cancel</button>
+          <button id="_dfSave" class="btn btn-primary" style="padding:0.45rem 1.1rem">Save</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    overlay.querySelectorAll('._dfOpt').forEach(el => {
+      el.addEventListener('click', () => {
+        _dfSelectedVal = el.dataset.value === '' ? '' : (isNaN(Number(el.dataset.value)) ? el.dataset.value : parseInt(el.dataset.value));
+        document.getElementById('_dfSelectedLabel').textContent = getSelectedLabel();
+        document.getElementById('_dfDrop').style.display = 'none';
+      });
+    });
+    document.addEventListener('click', function _dfOutside(e) {
+      const trigger = document.getElementById('_dfTrigger');
+      const drop = document.getElementById('_dfDrop');
+      if (trigger && drop && !trigger.contains(e.target) && !drop.contains(e.target)) {
+        drop.style.display = 'none';
+        document.removeEventListener('click', _dfOutside);
+      }
+    });
+
+    overlay.querySelector('#_dfSave').addEventListener('click', async () => {
+      const labelEn = document.getElementById('_dfLabelEn').value.trim();
+      const labelBg = document.getElementById('_dfLabelBg').value.trim();
+      if (!labelEn) { alert('Name (EN) is required'); return; }
+      const parentVal = _dfSelectedVal;
+      const linkUrl   = document.getElementById('_dfLink').value.trim();
+      const body = {
+        labelEn,
+        labelBg: labelBg || labelEn,
+        parentId: parentVal ? parseInt(parentVal) : null,
+        linkUrl:  linkUrl || null,
+      };
+      overlay.remove();
+      if (isEdit) {
+        await apiFetch(`/api/doc-folders/${folder.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      } else {
+        await apiFetch('/api/doc-folders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      }
+      _docRefresh();
+    });
+  }
+
+  async function _docDeleteFolder(folderId) {
+    const folder = _docFindFolderFlat(folderId);
+    const label  = folder ? _docLabel(folder) : folderId;
+    if (!await showConfirm(`Delete folder "${label}" and all its contents?`)) return;
+    await apiFetch(`/api/doc-folders/${folderId}`, { method:'DELETE' });
+    _docRefresh();
+  }
+
+  // ── Document CRUD ─────────────────────────────────────────────────────────
+  function _docAddDoc(folderId) {
+    _docShowDocModal(null, folderId, async (data) => {
+      await apiFetch('/api/doc-documents', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ folderId, ...data }) });
+      _docRefresh();
+    });
+  }
+
+  function _docEditDoc(docId) {
+    const doc = _docFindDoc(docId);
+    if (!doc) return;
+    _docShowDocModal(doc, null, async (data) => {
+      await apiFetch(`/api/doc-documents/${docId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+      _docRefresh();
+    });
+  }
+
+  async function _docDeleteDoc(docId) {
+    if (!await showConfirm('Delete this document?')) return;
+    await apiFetch(`/api/doc-documents/${docId}`, { method:'DELETE' });
+    _docRefresh();
+  }
+
+  function _docFindDoc(id) {
+    for (const dept of _docTree) {
+      for (const doc of (dept.documents || [])) if (doc.id === id) return doc;
+      for (const sub of (dept.children  || [])) for (const doc of (sub.documents || [])) if (doc.id === id) return doc;
+    }
+    return null;
+  }
+
+  // ── Global styled confirm dialog ─────────────────────────────────────────
+  function showConfirm(message) {
+    return new Promise(resolve => {
+      const existing = document.getElementById('_globalConfirmModal');
+      if (existing) existing.remove();
+      const overlay = document.createElement('div');
+      overlay.id = '_globalConfirmModal';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9500;display:flex;align-items:center;justify-content:center';
+      overlay.innerHTML = `
+        <div class="_doc-modal-box" style="width:380px;text-align:center">
+          <div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:0.5rem">${t('confirmTitle')}</div>
+          <div style="font-size:0.9rem;color:var(--muted,#9aa3be);margin-bottom:1.5rem;line-height:1.5">${message}</div>
+          <div style="display:flex;gap:0.75rem;justify-content:center">
+            <button id="_gcCancel" class="btn btn-ghost" style="padding:0.45rem 1.4rem">${t('btnNo')}</button>
+            <button id="_gcConfirm" class="btn" style="padding:0.45rem 1.4rem;background:#e05252;color:#fff;border-color:#e05252">${t('btnYesDelete')}</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('#_gcCancel').addEventListener('click', () => { overlay.remove(); resolve(false); });
+      overlay.querySelector('#_gcConfirm').addEventListener('click', () => { overlay.remove(); resolve(true); });
+      overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); resolve(false); } });
+    });
+  }
+
+  // ── Inline modals ─────────────────────────────────────────────────────────
+  function _docShowLinkModal(title, currentUrl, onSave) {
+    const existing = document.getElementById('_docLinkModal');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = '_docLinkModal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+      <div class="_doc-modal-box">
+        <div class="_doc-modal-title">${title}</div>
+        <input id="_docLinkInput" type="url" placeholder="https://..." value="${currentUrl}" style="margin-bottom:1rem">
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <button onclick="document.getElementById('_docLinkModal').remove()" class="btn btn-ghost" style="padding:0.45rem 1.1rem">Cancel</button>
+          <button id="_docLinkSave" class="btn btn-primary" style="padding:0.45rem 1.1rem">Save</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#_docLinkSave').addEventListener('click', async () => {
+      const url = document.getElementById('_docLinkInput').value.trim();
+      overlay.remove();
+      await onSave(url);
+    });
+  }
+
+  function _docShowDocModal(doc, folderId, onSave) {
+    const existing = document.getElementById('_docDocModal');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = '_docDocModal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+      <div class="_doc-modal-box">
+        <div class="_doc-modal-title">${doc ? 'Edit document' : 'Add PDF document'}</div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          <input id="_docDtitleEn" type="text" placeholder="Title (EN)" value="${doc ? doc.titleEn : ''}">
+          <input id="_docDtitleBg" type="text" placeholder="Title (BG)" value="${doc ? doc.titleBg : ''}">
+          <input id="_docDlink" type="url" placeholder="Link URL (PDF link)" value="${doc && doc.linkUrl ? doc.linkUrl : ''}">
+          <input id="_docDdesc" type="text" placeholder="Description (optional)" value="${doc && doc.description ? doc.description : ''}">
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem">
+          <button onclick="document.getElementById('_docDocModal').remove()" class="btn btn-ghost" style="padding:0.45rem 1.1rem">Cancel</button>
+          <button id="_docDsave" class="btn btn-primary" style="padding:0.45rem 1.1rem">Save</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#_docDsave').addEventListener('click', async () => {
+      const data = {
+        titleEn:     document.getElementById('_docDtitleEn').value.trim(),
+        titleBg:     document.getElementById('_docDtitleBg').value.trim(),
+        linkUrl:     document.getElementById('_docDlink').value.trim(),
+        description: document.getElementById('_docDdesc').value.trim(),
+        docType:     'PDF',
+      };
+      if (!data.titleEn) { alert('Title (EN) is required'); return; }
+      overlay.remove();
+      await onSave(data);
+    });
   }
 
   async function renderFacilityDash(kind) {
@@ -4714,7 +5378,7 @@
   function editStageType(order, nameBg, nameEn)    { openStageModal(order, nameBg, nameEn); }
 
   async function deleteStageType(order, name) {
-    if (!confirm(t('stagesDeleteConfirm').replace('{name}', name))) return;
+    if (!await showConfirm(t('stagesDeleteConfirm').replace('{name}', name))) return;
     try {
       await apiFetch(`/api/stage-types/${order}`, { method:'DELETE' });
       renderStagesDash();
@@ -5087,7 +5751,7 @@
           <span style="margin-right:0.3rem">${roleCfg.icon}</span>${w.name}
         </td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${roleCfg.color};font-weight:700">${roleCfg.icon} ${roleCfg.label}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#a78bfa;font-weight:600">${w.crewStages ? '🔧 ' + w.crewStages : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#a78bfa;font-weight:600">${w.trade ? '🔧 ' + w.trade : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewName ? '👥 ' + w.crewName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.houses && w.houses.length > 0 ? w.houses.map(h => '🏠 ' + h.houseName).join('<br>') : w.crewHouseName ? '🏠 ' + w.crewHouseName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.82rem;color:var(--muted)">${w.location || (w.lat && w.lng ? `${parseFloat(w.lat).toFixed(4)}, ${parseFloat(w.lng).toFixed(4)}` : '—')}</td>
@@ -5333,7 +5997,7 @@
   }
 
   async function deleteCrewDash(id) {
-    if (!confirm(t('crewDeleteConfirm'))) return;
+    if (!await showConfirm(t('crewDeleteConfirm'))) return;
     await apiFetch(`/api/crews/${id}`, { method: 'DELETE' });
     renderCrewCards();
   }
@@ -5852,7 +6516,7 @@
   }
 
   async function deleteOrder(id) {
-    if (!confirm(t('ordersDeleteConfirm'))) return;
+    if (!await showConfirm(t('ordersDeleteConfirm'))) return;
     await apiFetch(`/api/material-orders/${id}`, { method: 'DELETE' });
     await renderOrdersDash();
   }
@@ -5924,7 +6588,7 @@
   }
 
   async function deleteDelivery(deliveryId, orderId) {
-    if (!confirm(t('deliveriesDeleteConfirm'))) return;
+    if (!await showConfirm(t('deliveriesDeleteConfirm'))) return;
     await apiFetch(`/api/deliveries/${deliveryId}`, { method: 'DELETE' });
     [_ordersList, _ordersDeliveries] = await Promise.all([apiFetch('/api/material-orders').then(r => r.json()), apiFetch('/api/deliveries').then(r => r.json())]);
     renderOrdersTable();
@@ -6062,7 +6726,7 @@
   }
 
   async function deleteDeliveryFromTab(deliveryId) {
-    if (!confirm(t('deliveriesDeleteConfirm'))) return;
+    if (!await showConfirm(t('deliveriesDeleteConfirm'))) return;
     await apiFetch(`/api/deliveries/${deliveryId}`, { method: 'DELETE' });
     renderDeliveriesDash();
   }
@@ -6395,7 +7059,7 @@
   }
 
   async function deleteWorker(id, name) {
-    if (!confirm(`Delete worker "${name}"?`)) return;
+    if (!await showConfirm(`Delete worker "${name}"?`)) return;
     await apiFetch(`/api/workers/${id}`, { method: 'DELETE' });
     setDashMode('workers');
   }
@@ -6464,7 +7128,7 @@
   }
 
   async function deleteScaffold(id) {
-    if (!confirm('Delete this scaffold?')) return;
+    if (!await showConfirm('Delete this scaffold?')) return;
     await apiFetch(`/api/scaffolds/${id}`, { method: 'DELETE' });
     setDashMode('scaffold');
   }
@@ -6893,7 +7557,65 @@
   let _memberSearchList = [];
   let _leaderSearchList = [];
 
-  async function openCrewModal(id) {
+  function _updateCrewMapBtn(lat, lng) {
+    const btn     = document.getElementById('cMapPickBtn');
+    const locArea = document.getElementById('cLocArea');
+    const btnStyle = 'display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%';
+    if (lat && lng) {
+      btn.style.background  = 'rgba(62,207,110,0.08)';
+      btn.style.borderColor = '#3ecf6e';
+      btn.style.color       = '#3ecf6e';
+      btn.textContent = '🗺 ✓ ' + parseFloat(lat).toFixed(5) + ', ' + parseFloat(lng).toFixed(5);
+      btn.href = '#';
+      btn.onclick = function(e) {
+        e.preventDefault();
+        document.getElementById('cLat').value = '';
+        document.getElementById('cLng').value = '';
+        document.getElementById('cLocation').value = '';
+        btn.style.cssText = btnStyle;
+        btn.textContent = '🗺 Pin on map';
+        btn.href = '/map-picker.html';
+        btn.onclick = function() { saveCrewModalState(); localStorage.setItem('mapPinSource','crew'); localStorage.setItem('returnToView','crews'); };
+        if (locArea) locArea.style.display = 'none';
+      };
+      if (locArea) { locArea.style.display = 'block'; locArea.textContent = '📍 ' + parseFloat(lat).toFixed(5) + ', ' + parseFloat(lng).toFixed(5); }
+    } else {
+      btn.style.cssText = btnStyle;
+      btn.textContent = '🗺 Pin on map';
+      btn.href = '/map-picker.html';
+      btn.onclick = function() { saveCrewModalState(); localStorage.setItem('mapPinSource','crew'); localStorage.setItem('returnToView','crews'); };
+      if (locArea) locArea.style.display = 'none';
+    }
+  }
+
+  function saveCrewModalState() {
+    const state = {
+      id:       _editingCrewId,
+      name:     document.getElementById('cName').value,
+      managerId: document.getElementById('cManager').value,
+      leaderId:  document.getElementById('cLeader').value,
+      houseId:   document.getElementById('cHouse').value,
+      stageOrder: document.getElementById('cStage').value,
+      members:  _crewMembers,
+      lat:      document.getElementById('cLat').value,
+      lng:      document.getElementById('cLng').value,
+      location: document.getElementById('cLocation').value,
+    };
+    localStorage.setItem('crewModalState', JSON.stringify(state));
+  }
+
+  async function restoreCrewModalState(coords) {
+    const raw = localStorage.getItem('crewModalState');
+    localStorage.removeItem('crewModalState');
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    _editingCrewId = state.id || null;
+    await loadDashboard();
+    setDashMode('crews');
+    await openCrewModal(_editingCrewId, state, coords);
+  }
+
+  async function openCrewModal(id, savedState, mapCoords) {
     _editingCrewId = id || null;
     _crewMembers = [];
     document.getElementById('crewModalTitle').textContent = id ? t('crewModalEdit') : t('crewModalAdd');
@@ -6943,7 +7665,20 @@
     document.getElementById('cMemberSearch').value = '';
     renderMemberDropdown('');
 
-    if (id) {
+    if (savedState) {
+      document.getElementById('cName').value = savedState.name || '';
+      mgrSel.value   = savedState.managerId  || '';
+      ldrSel.value   = savedState.leaderId   || '';
+      houseSel.value = savedState.houseId    || '';
+      stageSel.value = savedState.stageOrder || '';
+      _crewMembers   = savedState.members    || [];
+      const lat = mapCoords ? mapCoords.lat : (savedState.lat || '');
+      const lng = mapCoords ? mapCoords.lng : (savedState.lng || '');
+      document.getElementById('cLat').value      = lat;
+      document.getElementById('cLng').value      = lng;
+      document.getElementById('cLocation').value = savedState.location || '';
+      _updateCrewMapBtn(lat || null, lng || null);
+    } else if (id) {
       const crew = await apiFetch(`/api/crews/${id}`).then(r => r.json());
       document.getElementById('cName').value = crew.name || '';
       mgrSel.value   = crew.managerId  || '';
@@ -6951,6 +7686,10 @@
       houseSel.value = crew.houseId    || '';
       stageSel.value = crew.stageOrder || '';
       _crewMembers = (crew.members || []).map(m => m.id);
+      document.getElementById('cLat').value      = crew.lat  || '';
+      document.getElementById('cLng').value      = crew.lng  || '';
+      document.getElementById('cLocation').value = crew.location || '';
+      _updateCrewMapBtn(crew.lat, crew.lng);
     } else {
       document.getElementById('cName').value = '';
       mgrSel.value   = '';
@@ -6958,6 +7697,10 @@
       houseSel.value = '';
       stageSel.value = '';
       _crewMembers = [];
+      document.getElementById('cLat').value      = '';
+      document.getElementById('cLng').value      = '';
+      document.getElementById('cLocation').value = '';
+      _updateCrewMapBtn(null, null);
     }
     renderCrewMembers();
     document.getElementById('crewModal').classList.add('open');
@@ -6995,13 +7738,13 @@
     const dd = document.getElementById('cMemberDropdown');
     if (!dd) return;
     const q = (query || '').toLowerCase().trim();
-    // filter by stage trade if a stage is selected
     const stageSel = document.getElementById('cStage');
-    const stageOpt = stageSel?.options[stageSel.selectedIndex];
-    const stageTrade = stageOpt?.value ? tradeFromStageName(stageOpt.text) : null;
+    const stageOpt = stageSel?.options[stageSel?.selectedIndex];
+    const stageTrade = stageOpt?.value ? stageOpt.text : null;
     const available = _memberSearchList.filter(m =>
       !_crewMembers.includes(m.id) &&
-      (!stageTrade || (m.trade||'') === stageTrade) &&
+      (!m.crewId || m.crewId === _editingCrewId) &&
+      (!stageTrade || !m.trade || m.trade === stageTrade) &&
       (m.name.toLowerCase().includes(q) || (m.trade||'').toLowerCase().includes(q))
     );
     if (!available.length) {
@@ -7121,7 +7864,18 @@
     if (!name) { document.getElementById('crewModalErr').textContent = t('crewSaveFail') + ': name required.'; return; }
 
     const stageOrder = document.getElementById('cStage').value || null;
-    const body = { name, managerId: managerId ? parseInt(managerId) : null, houseId: houseId ? parseInt(houseId) : null, stageOrder: stageOrder ? parseInt(stageOrder) : null };
+    const cLat = document.getElementById('cLat').value;
+    const cLng = document.getElementById('cLng').value;
+    const cLoc = document.getElementById('cLocation').value;
+    const body = {
+      name,
+      managerId:  managerId  ? parseInt(managerId)  : null,
+      houseId:    houseId    ? parseInt(houseId)    : null,
+      stageOrder: stageOrder ? parseInt(stageOrder) : null,
+      location: cLoc || '',
+      lat: cLat ? parseFloat(cLat) : null,
+      lng: cLng ? parseFloat(cLng) : null,
+    };
     try {
       let res;
       if (_editingCrewId) {
@@ -7175,7 +7929,7 @@
   }
 
   async function deleteCrew(id) {
-    if (!confirm(t('crewDeleteConfirm'))) return;
+    if (!await showConfirm(t('crewDeleteConfirm'))) return;
     await apiFetch(`/api/crews/${id}`, { method: 'DELETE' });
     loadOrgChart();
   }
@@ -8297,7 +9051,7 @@
   }
 
   async function deleteFacility(kind, id) {
-    if (!confirm(t('facConfirmDelete'))) return;
+    if (!await showConfirm(t('facConfirmDelete'))) return;
     const cfg = facCfg(kind);
     try {
       const res  = await apiFetch(`${cfg.base}/${id}`, { method: 'DELETE' });
@@ -8339,6 +9093,11 @@
 
       if (source === 'worker') {
         restoreWorkerModalState({ lat: coords.lat, lng: coords.lng });
+        return;
+      }
+
+      if (source === 'crew') {
+        restoreCrewModalState({ lat: coords.lat, lng: coords.lng });
         return;
       }
 
@@ -8794,7 +9553,7 @@
   }
 
   async function moFinishStage(hsId) {
-    if (!confirm(mot('confirmFinish'))) return;
+    if (!await showConfirm(mot('confirmFinish'))) return;
     try {
       const res = await apiFetch('/api/my/stages/' + hsId + '/finish', { method: 'POST' });
       const data = await res.json(); if (data.error) throw new Error(data.error);
@@ -8909,7 +9668,6 @@
   function initApp() {
     if (currentUser?.role === 'crew_leader') { initCrewLeader(); return; }
     applyStoredTheme();
-    loadDashboard();
     loadMaterialFields().then(applyPendingMapPin);
 
     if (localStorage.getItem('returnToHouseModal')) {
@@ -8958,6 +9716,12 @@
     const hashView = location.hash.replace('#', '');
     showView(VALID_VIEWS.includes(hashView) ? hashView : 'dashboard');
     translateStatic();
+
+    // Browser back/forward support — re-route whenever the hash changes
+    window.addEventListener('hashchange', () => {
+      const v = location.hash.replace('#', '');
+      if (VALID_VIEWS.includes(v)) showView(v);
+    });
   }
 
   // ── APP BASE URL (fetched once, used for all QR codes) ───────────────────────
@@ -9086,21 +9850,21 @@
       <div style="flex:1;display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;min-width:0">
         <span style="padding:0 0.6rem;display:flex;align-items:center;color:var(--muted);font-size:0.9rem;border-right:1px solid var(--border)">🔍</span>
         <div style="display:flex;align-items:stretch;border-right:1px solid var(--border);flex:1">
-          <span style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">Name</span>
+          <span id="waLblName" style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">${t('waFilterName')}</span>
           <input id="waSearchName" class="wa-sf" type="text" autocomplete="off" oninput="waApplySearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;padding:0.5rem 0.6rem;outline:none;min-width:60px">
         </div>
         <div style="display:flex;align-items:stretch;border-right:1px solid var(--border);flex:1">
-          <span style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">Crew</span>
+          <span id="waLblCrew" style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">${t('waFilterCrew')}</span>
           <input id="waSearchCrew" class="wa-sf" type="text" autocomplete="off" oninput="waApplySearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;padding:0.5rem 0.6rem;outline:none;min-width:60px">
         </div>
         <div style="display:flex;align-items:stretch;flex:1">
-          <span style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">House</span>
+          <span id="waLblHouse" style="padding:0 0.5rem;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;border-right:1px solid var(--border);white-space:nowrap">${t('waFilterHouse')}</span>
           <input id="waSearchHouse" class="wa-sf" type="text" autocomplete="off" oninput="waApplySearch()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:0.85rem;padding:0.5rem 0.6rem;outline:none;min-width:60px">
         </div>
         <button onclick="document.querySelectorAll('.wa-sf').forEach(i=>i.value='');waChipBarClear();" style="background:none;border:none;color:var(--muted);padding:0 0.7rem;cursor:pointer;font-size:0.8rem" title="Clear">✕</button>
       </div>
       <button onclick="waExportAll()"
-        style="background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.5rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap">⬇ Export All PDF</button>`;
+        style="background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.5rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap">${t('waExportAllBtn')}</button>`;
     content.appendChild(topBar);
 
     // Chip bar
@@ -9142,12 +9906,12 @@
       const table = document.createElement('table');
       table.style.cssText = 'width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden';
       table.innerHTML = `<thead><tr style="border-bottom:1px solid var(--border)">
-        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Name</th>
-        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Role</th>
-        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Houses</th>
-        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Username</th>
-        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">Password</th>
-        <th style="padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600;text-align:right">Actions</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">${t('waColName')}</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">${t('waColRole')}</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">${t('waColHouses')}</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">${t('waColUsername')}</th>
+        <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600">${t('waColPassword')}</th>
+        <th style="padding:0.6rem 0.75rem;font-size:0.72rem;color:var(--muted);font-weight:600;text-align:right">${t('waColActions')}</th>
       </tr></thead>`;
       const tbody = document.createElement('tbody');
 
@@ -9155,7 +9919,7 @@
         const tr = document.createElement('tr');
         tr.id = `wa-row-${m.id}`;
         tr.style.cssText = `border-bottom:${i < group.members.length-1 ? '1px solid var(--border)' : 'none'}`;
-        const roleLabel = m.role === 'CREW_LEADER' ? '⭐ Leader' : m.role === 'CREW_MANAGER' ? '🏢 Manager' : 'Member';
+        const roleLabel = m.role === 'CREW_LEADER' ? t('waRoleLeader') : m.role === 'CREW_MANAGER' ? t('waRoleManager') : t('waRoleMember');
         const btnStyle = 'background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:0.25rem 0.55rem;font-size:0.75rem;cursor:pointer';
         const housesHtml = m.houses && m.houses.length
           ? m.houses.map(h => `<div style="font-size:0.78rem;color:#4f8ef7;font-weight:600;white-space:nowrap">🏠 ${h.houseName}</div>`).join('')
@@ -9170,8 +9934,8 @@
             ${m.passwordPlain ? `<span onclick="(function(el,p){el.textContent===p?el.textContent='••••':el.textContent=p})(document.getElementById('wp-${m.id}'),'${m.passwordPlain}')" style="cursor:pointer;margin-left:6px;opacity:0.5;font-size:0.8rem">👁</span>` : ''}
           </td>
           <td style="padding:0.55rem 0.75rem;text-align:right;white-space:nowrap;display:flex;gap:0.4rem;justify-content:flex-end">
-            <button onclick="waOpenReset(${m.id},'${m.name.replace(/'/g,"\\'")}','${m.username||''}')" style="${btnStyle}">🔑 Reset</button>
-            <button onclick="waExportWorker(${m.id},'${m.name.replace(/'/g,"\\'")}','${m.username||''}','${group.crewName.replace(/'/g,"\\'")}','${(group.stageName||'').replace(/'/g,"\\'")}','${roleLabel}','${(m.passwordPlain||'').replace(/'/g,"\\'")}')" style="${btnStyle}">⬇ PDF</button>
+            <button onclick="waOpenReset(${m.id},'${m.name.replace(/'/g,"\\'")}','${m.username||''}')" style="${btnStyle}">${t('waResetBtn')}</button>
+            <button onclick="waExportWorker(${m.id},'${m.name.replace(/'/g,"\\'")}','${m.username||''}','${group.crewName.replace(/'/g,"\\'")}','${(group.stageName||'').replace(/'/g,"\\'")}','${roleLabel}','${(m.passwordPlain||'').replace(/'/g,"\\'")}')" style="${btnStyle}">${t('waPdfBtn')}</button>
           </td>`;
         tbody.appendChild(tr);
       });
@@ -9183,7 +9947,7 @@
     });
 
     if (!anyVisible) {
-      groupsDiv.innerHTML = '<div style="color:var(--muted);padding:1.5rem;text-align:center">No results found.</div>';
+      groupsDiv.innerHTML = `<div style="color:var(--muted);padding:1.5rem;text-align:center">${t('waNoResults')}</div>`;
     }
   }
 
@@ -10371,7 +11135,7 @@
 
   async function ebDelete() {
     if (!_ebCurrent || !_ebCurrent.id) return;
-    if (!confirm(t('ebDeleteConfirm'))) return;
+    if (!await showConfirm(t('ebDeleteConfirm'))) return;
     await apiFetch(`/api/electric-boxes/${_ebCurrent.id}`, { method: 'DELETE' });
     _ebCurrent = null;
     document.getElementById('ebEditor').style.display = 'none';

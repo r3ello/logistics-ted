@@ -1,6 +1,7 @@
 package com.bellgado.logistics_ted.web;
 
 import com.bellgado.logistics_ted.service.HouseService;
+import com.bellgado.logistics_ted.service.HouseTemplateFolderService;
 import com.bellgado.logistics_ted.web.dto.HouseDto;
 import com.bellgado.logistics_ted.web.dto.HouseResponse;
 import com.bellgado.logistics_ted.web.dto.HouseUpsertRequest;
@@ -23,9 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class HouseController {
 
     private final HouseService service;
+    private final HouseTemplateFolderService houseTemplate;
 
-    public HouseController(HouseService service) {
+    public HouseController(HouseService service, HouseTemplateFolderService houseTemplate) {
         this.service = service;
+        this.houseTemplate = houseTemplate;
     }
 
     @GetMapping("/houses")
@@ -70,6 +73,13 @@ public class HouseController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
+    }
+
+    @PostMapping("/admin/houses/seed-template-folders")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> seedTemplateFolders() {
+        int count = houseTemplate.seedAllHouses();
+        return ResponseEntity.ok(Map.of("seeded", count));
     }
 
     @DeleteMapping("/houses/{id}")

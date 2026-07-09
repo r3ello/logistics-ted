@@ -1,9 +1,11 @@
 package com.bellgado.logistics_ted.web;
 
-import com.bellgado.logistics_ted.domain.House;
+import com.bellgado.logistics_ted.config.WorkerCredentialSeeder;
 import com.bellgado.logistics_ted.domain.Worker;
+import com.bellgado.logistics_ted.repository.CrewRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,18 +24,39 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/workers")
 public class WorkerController {
 
-    private final WorkerRepository workers;
-    private final HouseStageRepository houseStages;
+    private final WorkerRepository        workers;
+    private final CrewRepository          crews;
+    private final HouseStageRepository    houseStages;
+    private final WorkerCredentialSeeder  credentialSeeder;
 
-    public WorkerController(WorkerRepository workers, HouseStageRepository houseStages) {
-        this.workers = workers;
-        this.houseStages = houseStages;
+    public WorkerController(WorkerRepository workers, CrewRepository crews,
+                            HouseStageRepository houseStages, WorkerCredentialSeeder credentialSeeder) {
+        this.workers          = workers;
+        this.crews            = crews;
+        this.houseStages      = houseStages;
+        this.credentialSeeder = credentialSeeder;
     }
 
     @GetMapping
     @Transactional(readOnly = true)
     public List<Map<String, Object>> list() {
-        return workers.findAll().stream().map(this::toDto).toList();
+        // Pre-fetch all crew associations in one query
+        List<Worker> all = workers.findAllWithCrew();
+
+        // Pre-fetch stage names and assigned houses per crew in 2 batch queries
+        Map<Integer, String> stageNamesPerCrew = new HashMap<>();
+        for (Object[] row : houseStages.findAllStageNamesPerCrew()) {
+            stageNamesPerCrew.put(((Number) row[0]).intValue(), (String) row[1]);
+        }
+        Map<Integer, List<Map<String, Object>>> housesPerCrew = new HashMap<>();
+        for (Object[] row : houseStages.findAllAssignedHousesPerCrew()) {
+            int crewId = ((Number) row[0]).intValue();
+            Map<String, Object> h = new LinkedHashMap<>();
+            h.put("houseId",   ((Number) row[1]).intValue());
+            h.put("houseName", row[2]);
+            housesPerCrew.computeIfAbsent(crewId, k -> new java.util.ArrayList<>()).add(h);
+        }
+        return all.stream().map(w -> toDto(w, stageNamesPerCrew, housesPerCrew)).toList();
     }
 
     @PostMapping
@@ -41,7 +64,9 @@ public class WorkerController {
     public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
         String err = validateBody(body, true);
         if (err != null) return ResponseEntity.badRequest().body(Map.of("error", err));
-        return ResponseEntity.ok(toDto(workers.save(applyBody(new Worker(), body))));
+        Worker w = applyBody(new Worker(), body);
+        credentialSeeder.assignCredentials(w);
+        return ResponseEntity.ok(toDto(workers.save(w)));
     }
 
     @PutMapping("/{id}")
@@ -49,9 +74,22 @@ public class WorkerController {
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         String err = validateBody(body, false);
         if (err != null) return ResponseEntity.badRequest().body(Map.of("error", err));
-        return workers.findById(id)
-            .map(w -> ResponseEntity.ok(toDto(workers.save(applyBody(w, body)))))
-            .orElse(ResponseEntity.notFound().build());
+        return workers.findById(id).map(w -> {
+            applyBody(w, body);
+            // If promoted to leader and belongs to a crew, unassign old leader and update crew.leader_id
+            if (w.getRole() == com.bellgado.logistics_ted.domain.WorkerRole.CREW_LEADER && w.getCrew() != null) {
+                com.bellgado.logistics_ted.domain.Crew crew = w.getCrew();
+                com.bellgado.logistics_ted.domain.Worker oldLeader = crew.getLeader();
+                if (oldLeader != null && !oldLeader.getId().equals(w.getId())) {
+                    oldLeader.setCrew(null);
+                    workers.save(oldLeader);
+                }
+                crew.setLeader(w);
+                crews.save(crew);
+                houseStages.syncLeaderNameForCrew(crew.getId(), w.getName());
+            }
+            return ResponseEntity.ok(toDto(workers.save(w)));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
@@ -97,6 +135,12 @@ public class WorkerController {
     }
 
     private Map<String, Object> toDto(Worker w) {
+        return toDto(w, null, null);
+    }
+
+    private Map<String, Object> toDto(Worker w,
+                                      Map<Integer, String> stageNamesPerCrew,
+                                      Map<Integer, List<Map<String, Object>>> housesPerCrew) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id",       w.getId());
         m.put("name",     w.getName());
@@ -108,28 +152,28 @@ public class WorkerController {
         if (w.getCrew() != null) {
             m.put("crewId",   w.getCrew().getId());
             m.put("crewName", w.getCrew().getName());
-            House crewHouse = w.getCrew().getHouse();
+            com.bellgado.logistics_ted.domain.House crewHouse = w.getCrew().getHouse();
             m.put("crewHouseId",   crewHouse != null ? crewHouse.getId()   : null);
             m.put("crewHouseName", crewHouse != null ? crewHouse.getName() : null);
             Worker mgr = w.getCrew().getManager();
             m.put("managerId",   mgr != null ? mgr.getId()   : null);
             m.put("managerName", mgr != null ? mgr.getName() : null);
-            workers.findByCrewIdAndRole(w.getCrew().getId(), com.bellgado.logistics_ted.domain.WorkerRole.CREW_LEADER)
-                .stream().findFirst().ifPresentOrElse(
-                    ldr -> { m.put("leaderId", ldr.getId()); m.put("leaderName", ldr.getName()); },
-                    ()  -> { m.put("leaderId", null);        m.put("leaderName", null); }
-                );
-            m.put("crewStages", houseStages.findStageNamesForCrew(w.getCrew().getId()));
-            // all houses this crew is assigned to in the stage matrix
-            List<Map<String, Object>> houses = houseStages.findAssignedHousesForCrew(w.getCrew().getId())
-                .stream().map(row -> {
+            com.bellgado.logistics_ted.domain.Worker ldr = w.getCrew().getLeader();
+            m.put("leaderId",   ldr != null ? ldr.getId()   : null);
+            m.put("leaderName", ldr != null ? ldr.getName() : null);
+            int cid = w.getCrew().getId();
+            m.put("crewStages", stageNamesPerCrew != null
+                ? stageNamesPerCrew.get(cid)
+                : houseStages.findStageNamesForCrew(cid));
+            List<Map<String, Object>> houses = housesPerCrew != null
+                ? housesPerCrew.getOrDefault(cid, List.of())
+                : houseStages.findAssignedHousesForCrew(cid).stream().map(row -> {
                     Map<String, Object> h = new LinkedHashMap<>();
                     h.put("houseId",   ((Number) row[0]).intValue());
                     h.put("houseName", row[1]);
                     return h;
-                }).toList();
+                  }).toList();
             m.put("houses", houses);
-            // keep legacy single fields for backwards compat
             m.put("houseId",   houses.isEmpty() ? null : houses.get(0).get("houseId"));
             m.put("houseName", houses.isEmpty() ? null : houses.get(0).get("houseName"));
         } else {

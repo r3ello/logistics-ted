@@ -6,6 +6,8 @@ import com.bellgado.logistics_ted.domain.Inventory;
 import com.bellgado.logistics_ted.domain.Material;
 import com.bellgado.logistics_ted.domain.ScaffoldStatus;
 import com.bellgado.logistics_ted.domain.Warehouse;
+import com.bellgado.logistics_ted.domain.DocFolder;
+import com.bellgado.logistics_ted.repository.DocFolderRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.InventoryRepository;
@@ -39,13 +41,18 @@ public class HouseService {
     private final WarehouseRepository warehouses;
     private final InventoryRepository inventories;
     private final HouseStageRepository houseStages;
+    private final DocFolderRepository docFolders;
+    private final HouseTemplateFolderService houseTemplate;
 
     public HouseService(HouseRepository houses, WarehouseRepository warehouses,
-                        InventoryRepository inventories, HouseStageRepository houseStages) {
+                        InventoryRepository inventories, HouseStageRepository houseStages,
+                        DocFolderRepository docFolders, HouseTemplateFolderService houseTemplate) {
         this.houses = houses;
         this.warehouses = warehouses;
         this.inventories = inventories;
         this.houseStages = houseStages;
+        this.docFolders = docFolders;
+        this.houseTemplate = houseTemplate;
     }
 
     @Transactional(readOnly = true)
@@ -121,6 +128,8 @@ public class HouseService {
             stageRows.add(hs);
         }
         houseStages.saveAll(stageRows);
+        DocFolder houseFolder = createHouseDocFolder(savedHouse);
+        if (houseFolder != null) houseTemplate.seedTemplate(houseFolder);
         return toResponse(h);
     }
 
@@ -141,7 +150,9 @@ public class HouseService {
         validateNameLocation(req);
         House h = houses.findById(id).orElseThrow(() -> new EntityNotFoundException("House not found"));
         applyFields(h, req);
-        return toResponse(houses.save(h));
+        HouseResponse res = toResponse(houses.save(h));
+        syncHouseDocFolderName(h);
+        return res;
     }
 
     public void updateScaffold(Integer id, Map<String, Object> body) {
@@ -158,6 +169,8 @@ public class HouseService {
     public void delete(Integer id) {
         // FK cascades take care of warehouse + inventory rows.
         if (!houses.existsById(id)) throw new EntityNotFoundException("House not found");
+        // Remove matching doc_folder — subfolders + documents cascade automatically via DB
+        docFolders.deleteByCode("house_" + id);
         houses.deleteById(id);
     }
 
@@ -199,6 +212,33 @@ public class HouseService {
             h.getId(), h.getName(), h.getLocation(), h.getLat(), h.getLng(),
             h.getStartDate() == null ? null : h.getStartDate().toString(),
             h.getCurrentPhase()
+        );
+    }
+
+    private DocFolder createHouseDocFolder(House h) {
+        var dept = docFolders.findTopLevelByCode("02");
+        if (dept.isEmpty()) return null;
+        String code = "house_" + h.getId();
+        var existing = docFolders.findByCodeAndParentId(code, dept.get().getId());
+        if (existing.isPresent()) return existing.get();
+        DocFolder f = new DocFolder();
+        f.setCode(code);
+        f.setLabelEn(h.getName());
+        f.setLabelBg(h.getName());
+        f.setIcon("🏠");
+        f.setColor("#f97316");
+        f.setSortOrder(h.getId());
+        f.setParent(dept.get());
+        return docFolders.save(f);
+    }
+
+    private void syncHouseDocFolderName(House h) {
+        docFolders.findTopLevelByCode("02").ifPresent(dept ->
+            docFolders.findByCodeAndParentId("house_" + h.getId(), dept.getId()).ifPresent(f -> {
+                f.setLabelEn(h.getName());
+                f.setLabelBg(h.getName());
+                docFolders.save(f);
+            })
         );
     }
 
