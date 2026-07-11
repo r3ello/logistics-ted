@@ -43,7 +43,7 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query(value = "SELECT stage_name FROM house_stage WHERE house_id = :houseId AND status = 'IN_PROGRESS' ORDER BY stage_order", nativeQuery = true)
     List<String> findAllInProgressStageNames(Integer houseId);
 
-    @Query(value = "SELECT DISTINCT h.id, h.name FROM house_stage hs JOIN house h ON h.id = hs.house_id WHERE hs.crew_id = :crewId AND hs.status <> 'NOT_STARTED' ORDER BY h.name", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT h.id, h.name FROM house_stage hs JOIN house h ON h.id = hs.house_id WHERE hs.crew_id = :crewId AND hs.status = 'IN_PROGRESS' ORDER BY h.name", nativeQuery = true)
     List<Object[]> findAssignedHousesForCrew(Integer crewId);
 
     @Query(value = """
@@ -86,7 +86,7 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
         SELECT DISTINCT hs.crew_id, h.id, h.name
         FROM house_stage hs
         JOIN house h ON h.id = hs.house_id
-        WHERE hs.crew_id IS NOT NULL AND hs.status <> 'NOT_STARTED'
+        WHERE hs.crew_id IS NOT NULL AND hs.status = 'IN_PROGRESS'
         ORDER BY hs.crew_id, h.name
         """, nativeQuery = true)
     List<Object[]> findAllAssignedHousesPerCrew();
@@ -108,14 +108,15 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     List<HouseStage> findAllWithHouse();
 
     /** Batch: all crews per stage type with leader and assigned houses.
-     *  Returns [stage_order, crew_id, crew_name, leader_id, leader_name, assigned_houses]. */
+     *  Returns [stage_order, crew_id, crew_name, leader_id, leader_name, assigned_houses, assigned_houses_json]. */
     @Query(value = """
         SELECT c.stage_order, c.id, c.name,
                w.id AS leader_id, w.name AS leader_name,
-               string_agg(DISTINCT h2.name, ', ' ORDER BY h2.name) AS assigned_houses
+               string_agg(DISTINCT h2.name, ', ' ORDER BY h2.name) AS assigned_houses,
+               COALESCE(json_agg(DISTINCT jsonb_build_object('id', h2.id, 'name', h2.name)) FILTER (WHERE h2.id IS NOT NULL), '[]') AS assigned_houses_json
         FROM crew c
         LEFT JOIN worker w ON w.id = c.leader_id
-        LEFT JOIN house_stage hs2 ON hs2.crew_id = c.id AND hs2.status <> 'NOT_STARTED'
+        LEFT JOIN house_stage hs2 ON hs2.crew_id = c.id AND hs2.status = 'IN_PROGRESS'
         LEFT JOIN house h2 ON h2.id = hs2.house_id
         WHERE c.stage_order IS NOT NULL
         GROUP BY c.stage_order, c.id, c.name, w.id, w.name
