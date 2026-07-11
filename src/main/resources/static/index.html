@@ -2293,6 +2293,19 @@
     <div id="moRoot"></div>
   </div>
 
+  <!-- WORKER JOURNEY -->
+  <div class="view" id="view-workerjourney">
+    <div id="workerJourneyContent" style="max-width:100%;padding:1.5rem 2rem">
+      <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
+    </div>
+  </div>
+
+  <div class="view" id="view-crewhistory">
+    <div id="crewHistoryContent" style="max-width:100%;padding:1.5rem 2rem">
+      <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
+    </div>
+  </div>
+
 </div><!-- /main -->
 
 <script>
@@ -2498,6 +2511,19 @@
       // crews view
       navOrgChartGroup:'Org Chart', navCrews:'Crews', navCrewManager:'Crew Manager', navClientServicesGroup:'Client Services',
       navStageMatrix:'Project Stages', pageTitle_stagematrix:'Project Stages', pageSub_stagematrix:'All houses × all construction stages',
+      pageTitle_housedetail:'House Detail', pageSub_housedetail:'Stages, crews and timeline',
+      hdBack:'← Back', hdLabelHouse:'House', hdLabelLocation:'Location', hdLabelStartDate:'Start Date', hdLabelActiveStage:'Active Stage',
+      hdGanttTitle:'Construction Timeline', hdCrewsTitle:'Assigned Crews', hdNoWorkers:'No workers',
+      pageTitle_workerjourney:'Worker History', pageSub_workerjourney:'Stage history across all houses',
+      pageTitle_crewhistory:'Crew History', pageSub_crewhistory:'Stage history across all houses',
+      chBack:'← Back', chFrom:'From', chTo:'To', chExportPdf:'⬇ Export PDF',
+      chStageHistory:'Stage History by House', chNoHistory:'No stage history recorded yet.',
+      chColHouse:'House', chColStage:'Stage', chColStatus:'Status', chColStarted:'Started', chColFinished:'Finished', chColDays:'Days', chColScore:'Score',
+      chStatusDone:'Done', chStatusInProgress:'In Progress', chStatusNotStarted:'Not Started', chLeader:'Leader',
+      wjBack:'← Back', wjFrom:'From', wjTo:'To', wjExportPdf:'⬇ Export PDF',
+      wjStageHistory:'Stage History by House', wjNoHistory:'No stage history recorded yet.',
+      wjColHouse:'House', wjColStage:'Stage', wjColStatus:'Status', wjColStarted:'Started', wjColFinished:'Finished', wjColDays:'Days', wjColScore:'Score',
+      wjStatusDone:'Done', wjStatusInProgress:'In Progress', wjStatusNotStarted:'Not Started',
       pageTitle_crews:'Crew Organisation', pageSub_crews:'Manage crews, leaders, and members',
       crewsSectionLabel:'Crew Organisation Chart', crewAddBtn:'＋ Add Crew',
       crewModalAdd:'Add Crew', crewModalEdit:'Edit Crew', crewName:'Crew Name',
@@ -2777,6 +2803,19 @@
       // crews view
       navOrgChartGroup:'Орг. схема', navCrews:'Екипи', navCrewManager:'Мениджър на екипи', navClientServicesGroup:'Клиентски услуги',
       navStageMatrix:'Етапи на проект', pageTitle_stagematrix:'Етапи на проект', pageSub_stagematrix:'Всички обекти × всички строителни етапи',
+      pageTitle_housedetail:'Детайли на обект', pageSub_housedetail:'Етапи, екипи и времева линия',
+      hdBack:'← Назад', hdLabelHouse:'Обект', hdLabelLocation:'Локация', hdLabelStartDate:'Начална дата', hdLabelActiveStage:'Активен етап',
+      hdGanttTitle:'График на строителството', hdCrewsTitle:'Назначени екипи', hdNoWorkers:'Няма работници',
+      pageTitle_workerjourney:'История на работник', pageSub_workerjourney:'История на етапите по обекти',
+      pageTitle_crewhistory:'История на екип', pageSub_crewhistory:'История на етапите по обекти',
+      chBack:'← Назад', chFrom:'От', chTo:'До', chExportPdf:'⬇ Експорт PDF',
+      chStageHistory:'История на етапите по обект', chNoHistory:'Няма записана история на етапи.',
+      chColHouse:'Обект', chColStage:'Етап', chColStatus:'Статус', chColStarted:'Начало', chColFinished:'Край', chColDays:'Дни', chColScore:'Оценка',
+      chStatusDone:'Завършен', chStatusInProgress:'В процес', chStatusNotStarted:'Не започнат', chLeader:'Лидер',
+      wjBack:'← Назад', wjFrom:'От', wjTo:'До', wjExportPdf:'⬇ Експорт PDF',
+      wjStageHistory:'История на етапите по обект', wjNoHistory:'Няма записана история на етапи.',
+      wjColHouse:'Обект', wjColStage:'Етап', wjColStatus:'Статус', wjColStarted:'Начало', wjColFinished:'Край', wjColDays:'Дни', wjColScore:'Оценка',
+      wjStatusDone:'Завършен', wjStatusInProgress:'В процес', wjStatusNotStarted:'Не започнат',
       pageTitle_crews:'Организация на екипи', pageSub_crews:'Управление на екипи, лидери и членове',
       crewsSectionLabel:'Организационна схема на екипи', crewAddBtn:'＋ Добави екип',
       crewModalAdd:'Добави екип', crewModalEdit:'Редактирай екип', crewName:'Име на екип',
@@ -2897,7 +2936,9 @@
     else if (activeView === 'auditlog')    loadAuditLog(_alState.page);
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
     else if (activeView === 'workeraccess') { if (_waGroups) waRender(_waGroups); }
-    else if (activeView === 'housedetail') { if (_houseDetailId && _docTree.length) renderHouseDocSection(_houseDetailId); }
+    else if (activeView === 'housedetail') { if (_houseDetailId) loadHouseDetail(); }
+    else if (activeView === 'workerjourney' && _wjWorkerId) loadWorkerJourney(_wjWorkerId);
+    else if (activeView === 'crewhistory'   && _chCrewId)   loadCrewHistory(_chCrewId);
     if (_dashMode === 'docs') {
       document.querySelectorAll('.doc-dept-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
       document.querySelectorAll('.doc-sub-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
@@ -3195,7 +3236,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false };
   const _navGroupConfig = {
@@ -3236,7 +3277,7 @@
 
     document.getElementById('pageTitle').textContent = t(`pageTitle_${name}`);
     document.getElementById('pageSub').textContent   = t(`pageSub_${name}`);
-    location.hash = name;
+    if (!location.hash.startsWith('#' + name)) location.hash = name;
     closeNav();
 
     if (name === 'dashboard')   loadDashboard();
@@ -3288,10 +3329,11 @@
     if (!_houseDetailId) { el.innerHTML = '<div class="state-msg">No house selected.</div>'; return; }
     el.innerHTML = '<div class="state-msg"><div class="spinner"></div><br>Loading…</div>';
     try {
-      const [houses, stageMatrix, workers] = await Promise.all([
+      const [houses, stageMatrix, workers, timeline] = await Promise.all([
         apiFetch('/api/houses').then(r => r.json()),
         apiFetch('/api/house-stages/matrix').then(r => r.json()),
         apiFetch('/api/workers').then(r => r.json()),
+        apiFetch('/api/houses/' + _houseDetailId + '/timeline').then(r => r.json()),
       ]);
       const h = houses.find(x => x.id == _houseDetailId);
       if (!h) { el.innerHTML = '<div class="state-msg">House not found.</div>'; return; }
@@ -3309,6 +3351,7 @@
         return {
           stageOrder: col.stageOrder,
           stageName: col.stageName,
+          stageNameEn: col.stageNameEn || null,
           status: cell ? cell.status : null,
           crewId: cell ? cell.crewId : null,
           crewName: crew?.crewName || null,
@@ -3328,9 +3371,9 @@
       // Crews assigned to this house (from stages) — track all stages per crew
       const assignedCrews = {};
       stages.forEach(s => {
-        if (s.crewId && s.crewName) {
+        if (s.crewId && s.crewName && (s.status === 'IN_PROGRESS' || s.status === 'DONE' || s.status === 'ASSIGNED')) {
           if (!assignedCrews[s.crewId]) assignedCrews[s.crewId] = { crewName: s.crewName, stages: [] };
-          assignedCrews[s.crewId].stages.push({ stageOrder: s.stageOrder, stageName: s.stageName, status: s.status });
+          assignedCrews[s.crewId].stages.push({ stageOrder: s.stageOrder, stageName: s.stageName, stageNameEn: s.stageNameEn, status: s.status });
         }
       });
 
@@ -3378,7 +3421,7 @@
         const stagesHtml = crewStages.map(s => {
           const pillBg = s.status === 'ASSIGNED' ? '#fde68a' : s.status === 'IN_PROGRESS' ? '#fca5a5' : s.status === 'DONE' ? '#bbf7d0' : 'var(--surface)';
           const pillTxt = s.status === 'ASSIGNED' ? '#78350f' : s.status === 'IN_PROGRESS' ? '#7f1d1d' : s.status === 'DONE' ? '#14532d' : 'var(--muted)';
-          return `<span style="background:${pillBg};color:${pillTxt};border-radius:20px;padding:0.15rem 0.55rem;font-size:0.68rem;font-weight:700;white-space:nowrap">${s.stageOrder}. ${s.stageName}</span>`;
+          return `<span style="background:${pillBg};color:${pillTxt};border-radius:20px;padding:0.15rem 0.55rem;font-size:0.68rem;font-weight:700;white-space:nowrap">${s.stageOrder}. ${isEn && s.stageNameEn ? s.stageNameEn : s.stageName}</span>`;
         }).join(' ');
         const uid = `crew-workers-${crewId}`;
         const memberList = members.length
@@ -3387,10 +3430,10 @@
               return `<div style="padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;display:flex;align-items:center;gap:0.4rem">
                 ${isLeader ? '<span style="font-size:0.65rem;background:rgba(167,139,250,.2);color:#a78bfa;border-radius:4px;padding:0.1rem 0.35rem;font-weight:700">★</span>' : '<span style="width:1.1rem"></span>'}
                 <span style="font-weight:600">${w.name}</span>
-                <span style="color:var(--muted);font-size:0.72rem;margin-left:auto">${w.role === 'CREW_LEADER' ? 'Leader' : w.role === 'CREW_MEMBER' ? 'Member' : w.role || ''}</span>
+                <span style="color:var(--muted);font-size:0.72rem;margin-left:auto">${w.role === 'CREW_LEADER' ? t('chLeader') : w.role === 'CREW_MEMBER' ? (currentLang==='bg'?'Член':'Member') : w.role || ''}</span>
               </div>`;
             }).join('')
-          : '<div style="color:var(--muted);font-size:0.85rem;padding:0.3rem 0">No workers</div>';
+          : `<div style="color:var(--muted);font-size:0.85rem;padding:0.3rem 0">${t('hdNoWorkers')}</div>`;
         return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.65rem 0.85rem;align-self:start">
           <div style="display:flex;flex-wrap:wrap;gap:0.25rem;margin-bottom:0.4rem">${stagesHtml}</div>
           <div onclick="(function(el){const w=document.getElementById('${uid}');const open=w.style.display==='none';w.style.display=open?'':'none';el.querySelector('.crew-arrow').textContent=open?'▾':'▸';})(this)" style="cursor:pointer;display:flex;align-items:center;gap:0.4rem;user-select:none">
@@ -3403,54 +3446,134 @@
 
       el.innerHTML = `
         <div style="padding:0.75rem 1rem">
-          <button onclick="showView('${_houseDetailPrevView}')" style="background:rgba(79,142,247,.12);border:none;color:#4f8ef7;padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-weight:600;margin-bottom:1rem">← Back</button>
+          <button onclick="showView('${_houseDetailPrevView}')" style="background:rgba(79,142,247,.12);border:none;color:#4f8ef7;padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-weight:600;margin-bottom:1rem">${t('hdBack')}</button>
 
           <!-- Info cards -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.6rem;margin-bottom:1.2rem">
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
-              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">House</div>
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelHouse')}</div>
               <div style="font-size:1.05rem;font-weight:800">🏠 ${h.name}</div>
             </div>
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
-              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">Location</div>
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelLocation')}</div>
               <div style="font-weight:600;font-size:0.9rem">📍 ${h.location || '—'}</div>
             </div>
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
-              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">Start Date</div>
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelStartDate')}</div>
               <div style="font-weight:600;font-size:0.9rem">${h.start_date ? '📅 ' + h.start_date : '—'}</div>
             </div>
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
-              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">Active Stage</div>
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelActiveStage')}</div>
               <div style="font-weight:600;font-size:0.9rem;color:var(--purple)">${h.current_phase || '—'}</div>
             </div>
           </div>
 
-          <!-- Stage matrix row -->
-          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">Stages</div>
-          ${columns.length ? `
-          <div style="overflow-x:auto;border-radius:10px;border:1px solid #2e3250;margin-bottom:1.2rem">
-            <table style="border-collapse:collapse;background:var(--card)">
-              <thead>
-                <tr style="background:#1a1d27;border-bottom:2px solid #2e3250">
-                  ${thCells}
-                </tr>
-              </thead>
-              <tbody>
-                <tr style="border-bottom:1px solid #2e3250">
-                  ${tdCells}
-                </tr>
-              </tbody>
-            </table>
-          </div>` : '<div style="color:var(--muted);margin-bottom:1.2rem">No stages assigned.</div>'}
+          <!-- Classic Gantt -->
+          ${(() => {
+            const tlStages = (timeline.stages || []).filter(s => s.startDate || s.endDate || s.status === 'IN_PROGRESS' || s.status === 'DONE');
+            if (!tlStages.length) return '';
+
+            const today      = new Date().toISOString().slice(0,10);
+            const allDates   = tlStages.flatMap(s => [s.startDate, s.endDate].filter(Boolean)).sort();
+            const hasIP      = tlStages.some(s => s.status === 'IN_PROGRESS');
+            const fmtD       = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '—';
+            const diffDays   = (a,b) => a && b ? Math.round((new Date(b)-new Date(a))/86400000) : null;
+            const statusColor = s => ({ DONE:'#3ecf6e', IN_PROGRESS:'#f5a623', NOT_STARTED:'#2a2d3e' }[s] || '#2a2d3e');
+
+            // Date range
+            const minD = new Date(allDates[0]);
+            minD.setDate(1); // snap to month start
+            const maxD = (() => {
+              const candidates = [...allDates, hasIP ? today : null].filter(Boolean).sort();
+              const d = new Date(candidates[candidates.length-1]);
+              d.setMonth(d.getMonth() + 1, 1); // snap to next month start
+              return d;
+            })();
+            const totalMs = maxD - minD || 1;
+            const pct = d => d ? Math.max(0, Math.min(100, (new Date(d) - minD) / totalMs * 100)) : 0;
+            const todayPct = pct(today);
+
+            // Month markers — labels for header, grid lines for body rows
+            const months = [];
+            const cur = new Date(minD);
+            while (cur < maxD) {
+              months.push({ label: cur.toLocaleDateString('en-GB',{month:'short',year:'2-digit'}), left: pct(cur.toISOString().slice(0,10)) });
+              cur.setMonth(cur.getMonth() + 1);
+            }
+            // Header timeline cell: month labels
+            const headerTimeline = months.map(m =>
+              `<div style="position:absolute;left:${m.left}%;top:0;bottom:0;border-left:1px solid var(--border)"></div>
+               <div style="position:absolute;left:${m.left}%;top:50%;transform:translateY(-50%);font-size:0.62rem;color:var(--muted);padding-left:4px;white-space:nowrap;font-weight:600">${m.label}</div>`
+            ).join('') + (todayPct > 0 && todayPct < 100 ? `<div style="position:absolute;left:${todayPct}%;top:0;bottom:0;width:2px;background:#f87171;z-index:3"></div>` : '');
+            // Body rows: only grid lines, no labels
+            const bodyGridLines = months.map(m =>
+              `<div style="position:absolute;left:${m.left}%;top:0;height:100%;border-left:1px solid rgba(255,255,255,0.05)"></div>`
+            ).join('') + (todayPct > 0 && todayPct < 100 ? `<div style="position:absolute;left:${todayPct}%;top:0;height:100%;width:2px;background:#f87171;opacity:0.5;z-index:3"></div>` : '');
+
+            // Gantt rows
+            const ROW_H = 36, BAR_H = 22, BAR_TOP = (ROW_H - BAR_H) / 2;
+            const rows = tlStages.map((s, i) => {
+              const sn      = isEn && s.stageNameEn ? s.stageNameEn : s.stageName;
+              const col     = statusColor(s.status);
+              const sp      = pct(s.startDate);
+              const ep      = s.endDate ? pct(s.endDate) : (s.status==='IN_PROGRESS' ? Math.min(100, pct(today)) : sp);
+              const w       = Math.max(ep - sp, 0.3);
+              const days    = diffDays(s.startDate, s.endDate || (s.status==='IN_PROGRESS' ? today : null));
+              const endLbl  = s.status === 'IN_PROGRESS' ? (currentLang==='bg'?'сега':'now') : fmtD(s.endDate);
+              const tip     = `${sn}: ${fmtD(s.startDate)} → ${endLbl}${days ? ' · ' + days + 'd' : ''}`;
+              
+              const stripeBg = i % 2 === 1 ? 'rgba(255,255,255,0.02)' : 'transparent';
+              return `<tr style="height:${ROW_H}px;background:${stripeBg};border-bottom:1px solid var(--border);cursor:default" onmouseover="this.style.background='rgba(79,142,247,0.12)'" onmouseout="this.style.background='${stripeBg}'">
+                <td style="padding:0 10px;white-space:nowrap;font-size:0.78rem;font-weight:600;color:var(--text);width:190px;border-right:1px solid var(--border)">${sn}</td>
+                <td style="padding:0 8px;font-size:0.7rem;color:#4f8ef7;white-space:nowrap;width:68px;border-right:1px solid var(--border)">${fmtD(s.startDate)}</td>
+                <td style="padding:0 8px;font-size:0.7rem;white-space:nowrap;width:68px;border-right:1px solid var(--border);color:${s.status==='IN_PROGRESS'?'#f5a623':'#3ecf6e'}">${s.status==='IN_PROGRESS'?'…':fmtD(s.endDate)}</td>
+                <td style="padding:0 8px;font-size:0.7rem;color:#a78bfa;font-weight:700;white-space:nowrap;width:44px;border-right:1px solid var(--border);text-align:right">${days !== null ? days+'d' : '—'}</td>
+                <td style="position:relative;padding:0;min-width:${months.length * 140}px">
+                  <div style="position:relative;height:${ROW_H}px">
+                    ${bodyGridLines}
+                    ${sp < 100 ? `<div data-tip="${tip.replace(/"/g,'&quot;')}" style="position:absolute;left:${sp}%;width:${w}%;top:${BAR_TOP}px;height:${BAR_H}px;background:${col};border-radius:4px;z-index:2;box-sizing:border-box;cursor:pointer" onmouseenter="showGanttTip(event,this.dataset.tip)" onmouseleave="hideGanttTip()"></div>` : ''}
+                  </div>
+                </td>
+              </tr>`;
+            }).join('');
+
+            return `
+            <div style="margin-bottom:1.4rem">
+              <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.6rem">${t('hdGanttTitle')}</div>
+              <div style="border-radius:10px;border:1px solid var(--border);overflow:hidden;background:var(--card)">
+                <div style="overflow-x:auto">
+                  <table style="border-collapse:collapse;table-layout:fixed;width:100%">
+                    <thead>
+                      <tr style="background:var(--surface);border-bottom:2px solid var(--border);height:32px">
+                        <th style="padding:0 10px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase;width:190px;border-right:1px solid var(--border)">${t('chColStage')}</th>
+                        <th style="padding:0 8px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase;width:68px;border-right:1px solid var(--border)">${t('chColStarted')}</th>
+                        <th style="padding:0 8px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase;width:68px;border-right:1px solid var(--border)">${t('chColFinished')}</th>
+                        <th style="padding:0 8px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:right;text-transform:uppercase;width:44px;border-right:1px solid var(--border)">${t('chColDays')}</th>
+                        <th style="padding:0;position:relative;min-width:${months.length * 140}px">
+                          <div style="position:relative;height:32px">${headerTimeline}</div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                  </table>
+                </div>
+              </div>
+              <div style="display:flex;gap:1rem;margin-top:0.45rem;flex-wrap:wrap">
+                <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:12px;height:12px;background:#3ecf6e;border-radius:2px"></span>${t('chStatusDone')}</span>
+                <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:12px;height:12px;background:#f5a623;border-radius:2px"></span>${t('chStatusInProgress')}</span>
+                <span style="font-size:0.68rem;color:#f87171;display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:2px;height:12px;background:#f87171"></span>${currentLang==='bg'?'Днес':'Today'}</span>
+              </div>
+            </div>`;
+          })()}
 
           <!-- Crews & workers -->
-          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">Crews & Workers</div>
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">${t('hdCrewsTitle')}</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.6rem;align-items:start">
-            ${crewCards || '<div style="color:var(--muted)">No crews assigned.</div>'}
+            ${crewCards || `<div style="color:var(--muted)">${currentLang==='bg'?'Няма назначени екипи.':'No crews assigned.'}</div>`}
           </div>
 
           <!-- House documents -->
-          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:1.2rem 0 0.5rem">Documents</div>
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:1.2rem 0 0.5rem">${currentLang==='bg'?'Документи':'Documents'}</div>
           <div id="houseFolderSection">
             <div class="state-msg" style="padding:0.5rem 0"><div class="spinner" style="width:18px;height:18px"></div></div>
           </div>
@@ -5460,7 +5583,7 @@
         const currentLeader = s.workerName || currentCrew?.leaderName || '';
         const pc = s.status && s.status !== 'NOT_STARTED' ? PILL_COLOR[s.status] : null;
         const hasCrew = !!s.crewId;
-        const pillLabel = pc ? `${currentLeader}${statusLabel(s.status)}` : hasCrew ? (currentCrew?.crewName || currentLeader || '—') : '—';
+        const pillLabel = pc ? `${currentLeader || currentCrew?.crewName || ''}${statusLabel(s.status)}` : '—';
         const pillStyle = isLocked
           ? hasCrew
             ? `background:rgba(79,142,247,0.08);color:#5a6080;border:1px dashed #4060a0;cursor:not-allowed`
@@ -5492,7 +5615,7 @@
       const allCrewNames = row.stages
         .map(s => { const c = (crewsByStage[s.stageOrder]||[]).find(cr => cr.crewId == s.crewId); return c ? c.crewName : ''; })
         .filter(Boolean).join(' ').toLowerCase();
-      return `<tr data-house="${row.houseName.toLowerCase()}" data-crews="${allCrewNames}" style="border-bottom:1px solid #2e3250">
+      return `<tr data-house="${row.houseName.toLowerCase()}" data-crews="${allCrewNames}" style="border-bottom:1px solid #2e3250;transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.07)'" onmouseout="this.style.background=''">
         <td style="padding:0.5rem 0.75rem;font-size:0.85rem;font-weight:600;white-space:nowrap;position:sticky;left:0;background:var(--card);z-index:1;border-right:2px solid #2e3250">
           <span onclick="openHouseDetail(${row.houseId})" style="cursor:pointer;color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">${row.houseName}</span>
         </td>
@@ -5510,6 +5633,31 @@
         </thead>
         <tbody>${bodyRows}</tbody>
       </table>`;
+  }
+
+  // ── Gantt bar tooltip ────────────────────────────────────────────────────────
+  let _ganttTip = null;
+  function showGanttTip(e, text) {
+    hideGanttTip();
+    const d = document.createElement('div');
+    d.id = 'ganttTip';
+    d.textContent = text;
+    d.style.cssText = 'position:fixed;z-index:9999;background:#1e2235;border:1px solid #4f8ef7;border-radius:10px;padding:0.55rem 0.95rem;font-size:0.88rem;font-weight:600;color:#e8eaf6;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,0.45);white-space:nowrap;max-width:360px;line-height:1.5';
+    document.body.appendChild(d);
+    _ganttTip = d;
+    posGanttTip(e);
+    document.addEventListener('mousemove', posGanttTip);
+  }
+  function posGanttTip(e) {
+    if (!_ganttTip) return;
+    const x = e.clientX + 14, y = e.clientY - 40;
+    const w = _ganttTip.offsetWidth, h = _ganttTip.offsetHeight;
+    _ganttTip.style.left = (x + w > window.innerWidth ? x - w - 28 : x) + 'px';
+    _ganttTip.style.top  = (y < 0 ? e.clientY + 14 : y) + 'px';
+  }
+  function hideGanttTip() {
+    if (_ganttTip) { _ganttTip.remove(); _ganttTip = null; }
+    document.removeEventListener('mousemove', posGanttTip);
   }
 
   function filterMatrixRows(q) {
@@ -5748,12 +5896,12 @@
       const wHouse   = (w.houses||[]).map(h => h.houseName).join(' ').toLowerCase();
       return `<tr data-role="${w.role||'CREW_MEMBER'}" data-hashouse="${hasHouse}" data-hascrew="${hasCrew}" data-name="${wName}" data-crew="${wCrew}" data-house="${wHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
-          <span style="margin-right:0.3rem">${roleCfg.icon}</span>${w.name}
+          <span style="margin-right:0.3rem">${roleCfg.icon}</span><span onclick="openWorkerJourney(${w.id})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;color:var(--text)">${w.name}</span>
         </td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${roleCfg.color};font-weight:700">${roleCfg.icon} ${roleCfg.label}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#a78bfa;font-weight:600">${w.trade ? '🔧 ' + w.trade : '<span style="color:var(--muted)">—</span>'}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewName ? '👥 ' + w.crewName : '<span style="color:var(--muted)">—</span>'}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.houses && w.houses.length > 0 ? w.houses.map(h => '🏠 ' + h.houseName).join('<br>') : w.crewHouseName ? '🏠 ' + w.crewHouseName : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewId ? `<span onclick="openCrewHistory(${w.crewId})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">👥 ${w.crewName}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.houses && w.houses.length > 0 ? w.houses.map(h => `<span onclick="openHouseDetail(${h.houseId})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">🏠 ${h.houseName}</span>`).join('<br>') : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.82rem;color:var(--muted)">${w.location || (w.lat && w.lng ? `${parseFloat(w.lat).toFixed(4)}, ${parseFloat(w.lng).toFixed(4)}` : '—')}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
           <div style="display:flex;gap:0.4rem">
@@ -5912,7 +6060,7 @@
       const cHouse = (c.assignedHouses||[]).map(h => h.name).join(' ').toLowerCase();
       return `<tr data-hashouse="${crewHasHouse}" data-hasmembers="${crewHasMembers}" data-name="${cName}" data-stage="${cStage}" data-house="${cHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
-          <span style="color:#a78bfa;margin-right:0.3rem">👥</span>${c.name}
+          <span style="color:#a78bfa;margin-right:0.3rem">👥</span><span onclick="openCrewHistory(${c.id})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">${c.name}</span>
           <span style="font-size:0.7rem;color:var(--muted);margin-left:0.3rem">#${c.id}</span>
         </td>
         <td style="padding:0.7rem 1rem;color:#a78bfa;font-weight:600;font-size:0.85rem">${c.managerName ? '👔 ' + c.managerName : '<span style="color:var(--muted)">—</span>'}</td>
@@ -7250,7 +7398,7 @@
 
     return `<div class="org-crew-card">
       <div class="org-crew-header">
-        <span class="org-crew-title">👥 ${c.name}</span>
+        <span class="org-crew-title">👥 <span onclick="openCrewHistory(${c.id})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">${c.name}</span></span>
         <div style="display:flex;align-items:center;gap:0.4rem">
           <span class="house-id">#${c.id}</span>
           <div class="card-actions admin-only" onclick="event.stopPropagation()">
@@ -7791,7 +7939,421 @@
   function showCrewLeaderInfo(anchor, crewId, stageOrder) {
     const crews = (window._crewsByStage || {})[stageOrder] || [];
     const c = crews.find(x => x.crewId == crewId) || { crewId };
-    showLeaderTooltip(anchor, { leader: c.leaderName, crewName: c.crewName, assignedHouses: c.assignedHouses });
+    showLeaderTooltip(anchor, { leader: c.leaderName, leaderId: c.leaderId, crewId: c.crewId, crewName: c.crewName, assignedHouses: c.assignedHouses, assignedHousesJson: c.assignedHousesJson });
+  }
+
+  let _wjPrevView = 'dashboard';
+  function openWorkerJourney(workerId) {
+    document.getElementById('leaderTooltip')?.remove();
+    _wjPrevView = document.querySelector('.view.active')?.id?.replace('view-','') || 'dashboard';
+    _wjWorkerId = workerId;
+    history.pushState(null, '', '#workerjourney/' + workerId);
+    showView('workerjourney');
+    loadWorkerJourney(workerId);
+  }
+
+  let _wjWorkerId = null;
+  async function loadWorkerJourney(workerId) {
+    const el = document.getElementById('workerJourneyContent');
+    const from = document.getElementById('wjFrom')?.value || '';
+    const to   = document.getElementById('wjTo')?.value   || '';
+    el.innerHTML = '<div class="state-msg"><div class="spinner"></div><br>Loading…</div>';
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to)   params.set('to', to);
+    const url = '/api/workers/' + workerId + '/journey' + (params.toString() ? '?' + params : '');
+    let data, avgMap;
+    try {
+      [data, avgMap] = await Promise.all([
+        apiFetch(url).then(r => r.json()),
+        apiFetch('/api/stages/avg-days').then(r => r.json())
+      ]);
+    }
+    catch(e) { el.innerHTML = '<div class="state-msg" style="color:#f87171">Failed to load worker data.</div>'; return; }
+
+    const lang = currentLang || 'en';
+    const stageName = s => (lang === 'bg' ? s.stageName : (s.stageNameEn || s.stageName));
+    const roleLabel = { CREW_MEMBER: t('roleCrewMember'), CREW_LEADER: t('roleCrewLeader'), CREW_MANAGER: t('roleCrewManager') }[data.role] || data.role;
+    const roleIcon  = { CREW_MEMBER: '👷', CREW_LEADER: '🦺', CREW_MANAGER: '👔' }[data.role] || '👷';
+
+    const statusBadge = (s, dk, ik, nk) => {
+      const label = { DONE: t(dk), IN_PROGRESS: t(ik), NOT_STARTED: t(nk) }[s] || s;
+      const cfg = { DONE: ['#3ecf6e','✓ '], IN_PROGRESS: ['#f5a623','⏳ '], NOT_STARTED: ['#9aa3be','— '] }[s] || ['#9aa3be',''];
+      return `<span style="background:${cfg[0]}22;color:${cfg[0]};border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;font-weight:700">${cfg[1]}${label}</span>`;
+    };
+    const fmtDate = d => d ? new Date(d).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+    const calcDaysNum = s => {
+      if (s.status !== 'DONE') return null;
+      const start = s.startDate ? new Date(s.startDate) : null;
+      const end   = s.endDate   ? new Date(s.endDate)   : null;
+      if (!start || !end) return null;
+      return Math.round((end - start) / 86400000);
+    };
+    const scoreBadge = (s, avgMap) => {
+      const d = calcDaysNum(s);
+      if (d === null) return '<span style="color:var(--muted)">—</span>';
+      const entry = avgMap ? avgMap[s.stageOrder] : null;
+      if (entry == null) return '<span style="color:var(--muted)">—</span>';
+      const avg = entry.avgDays != null ? entry.avgDays : entry;
+      const diff = d - avg;
+      if (Math.abs(diff) <= 1) return `<span style="background:#f5a62322;color:#f5a623;border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;font-weight:700">≈ ${lang==='bg'?'Средно':'Average'}</span>`;
+      if (diff < 0) return `<span style="background:#3ecf6e22;color:#3ecf6e;border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;font-weight:700">▲ ${lang==='bg'?'По-добър':'Better'}</span>`;
+      return `<span style="background:#f8717122;color:#f87171;border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;font-weight:700">▼ ${lang==='bg'?'По-бавен':'Slower'}</span>`;
+    };
+
+    const timeline = buildTimeline(data.history || []);
+    const timelineRows = timeline.map(s => {
+      const d = calcDaysNum(s);
+      return `
+      <tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.04)'" onmouseout="this.style.background=''">
+        <td style="padding:0.55rem 0.75rem;font-size:0.85rem;font-weight:600;white-space:nowrap"><span onclick="openHouseDetail(${s.houseId})" style="color:#f97316;cursor:pointer;text-decoration:underline;text-underline-offset:3px">🏠 ${s.houseName}</span></td>
+        <td style="padding:0.55rem 0.75rem;font-size:0.85rem;color:var(--text)">${stageName(s)}</td>
+        <td style="padding:0.55rem 0.75rem">${statusBadge(s.status,'wjStatusDone','wjStatusInProgress','wjStatusNotStarted')}</td>
+        <td style="padding:0.55rem 0.75rem;font-size:0.82rem;color:#4f8ef7;white-space:nowrap">${fmtDate(s.startDate)}</td>
+        <td style="padding:0.55rem 0.75rem;font-size:0.82rem;color:#3ecf6e;white-space:nowrap">${s.status==='DONE' ? fmtDate(s.endDate) : '—'}</td>
+        <td style="padding:0.55rem 0.75rem;font-size:0.82rem;color:#a78bfa;font-weight:700;white-space:nowrap">${d !== null ? d + ' d' : '—'}</td>
+        <td style="padding:0.55rem 0.75rem;white-space:nowrap">${scoreBadge(s, avgMap)}</td>
+      </tr>`;}).join('');
+
+    const houseCards = timeline.length ? `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--surface);border-bottom:1px solid var(--border)">
+                <th style="padding:0.4rem 0.75rem;font-size:0.68rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('wjColHouse')}</th>
+                <th style="padding:0.4rem 0.75rem;font-size:0.68rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('wjColStage')}</th>
+                <th style="padding:0.4rem 0.75rem;font-size:0.68rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('wjColStatus')}</th>
+                <th style="padding:0.4rem 0.75rem;font-size:0.68rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('wjColStarted')}</th>
+                <th style="padding:0.4rem 0.75rem;font-size:0.68rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('wjColFinished')}</th>
+                <th style="padding:0.4rem 0.75rem;font-size:0.68rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('wjColDays')}</th>
+                <th style="padding:0.4rem 0.75rem;font-size:0.68rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('wjColScore')}</th>
+              </tr>
+            </thead>
+            <tbody>${timelineRows}</tbody>
+          </table>
+        </div>
+      </div>` : `<div style="color:var(--muted);font-size:0.85rem;padding:1rem 0">${t('wjNoHistory')}</div>`;
+
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
+        <button onclick="showView('${_wjPrevView}')" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.35rem 0.75rem;cursor:pointer;color:var(--text);font-size:0.85rem">${t('wjBack')}</button>
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:1.2rem;font-weight:700;color:var(--text)">${roleIcon} ${data.workerName}</div>
+          <div style="font-size:0.82rem;color:var(--muted);margin-top:0.2rem">
+            ${roleLabel}${data.crewName ? ' · 👥 ' + data.crewName : ''}${data.trade ? ' · 🔧 ' + data.trade : ''}${data.location ? ' · 📍 ' + data.location : ''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+          <label style="font-size:0.78rem;color:var(--muted)">${t('wjFrom')}</label>
+          <input type="date" id="wjFrom" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:0.3rem 0.5rem;color:var(--text);font-size:0.82rem" onchange="if(document.getElementById('wjFrom').value&&document.getElementById('wjTo').value)loadWorkerJourney(${_wjWorkerId})">
+          <label style="font-size:0.78rem;color:var(--muted)">${t('wjTo')}</label>
+          <input type="date" id="wjTo" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:0.3rem 0.5rem;color:var(--text);font-size:0.82rem" onchange="if(document.getElementById('wjFrom').value&&document.getElementById('wjTo').value)loadWorkerJourney(${_wjWorkerId})">
+          <button onclick="exportWorkerJourney(${_wjWorkerId})" style="background:#3ecf6e;color:#fff;border:none;border-radius:8px;padding:0.35rem 0.9rem;cursor:pointer;font-size:0.82rem;font-weight:700">${t('wjExportPdf')}</button>
+        </div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:0.08em;margin-bottom:0.75rem">${t('wjStageHistory')}</div>
+      ${houseCards}`;
+    if (from) document.getElementById('wjFrom').value = from;
+    if (to)   document.getElementById('wjTo').value   = to;
+  }
+
+  function exportWorkerJourney(workerId) {
+    const from = document.getElementById('wjFrom')?.value || '';
+    const to   = document.getElementById('wjTo')?.value   || '';
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to)   params.set('to', to);
+    const url = '/api/workers/' + workerId + '/journey' + (params.toString() ? '?' + params : '');
+    Promise.all([
+      apiFetch(url).then(r => r.json()),
+      fetch('/fonts/arial.ttf').then(r => r.arrayBuffer())
+    ]).then(([data, fontBuf]) => {
+      const { jsPDF } = window.jspdf;
+      const bytes = new Uint8Array(fontBuf);
+      let binary = '';
+      for (let b = 0; b < bytes.length; b++) binary += String.fromCharCode(bytes[b]);
+      const fontBase64 = btoa(binary);
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      doc.addFileToVFS('arial.ttf', fontBase64);
+      doc.addFont('arial.ttf', 'arial', 'normal');
+      doc.setFont('arial');
+
+      const statusLabel = s => ({ IN_PROGRESS: t('wjStatusInProgress'), DONE: t('wjStatusDone'), NOT_STARTED: t('wjStatusNotStarted') }[s] || s);
+
+      doc.setFontSize(16);
+      doc.text(t('pageTitle_workerjourney') + ' Report', 14, 16);
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text((data.workerName || '') + '  |  ' + (data.role || '') + '  |  ' + (data.crewName || ''), 14, 23);
+      if (from || to) doc.text(t('wjFrom') + ': ' + (from || '-') + '  ' + t('wjTo') + ': ' + (to || '-'), 14, 29);
+      doc.setTextColor(0);
+
+      // pair logs same as UI
+      const rows = [];
+      const logs = data.history || [];
+      let i = 0;
+      while (i < logs.length) {
+        const cur = logs[i];
+        if (cur.status === 'IN_PROGRESS') {
+          const nxt = logs[i + 1];
+          if (nxt && nxt.status === 'DONE') {
+            rows.push({ ...cur, status: 'DONE', startDate: cur.startDate || nxt.startDate, endDate: nxt.endDate });
+            i += 2;
+          } else { rows.push(cur); i++; }
+        } else { rows.push(cur); i++; }
+      }
+
+      doc.autoTable({
+        startY: (from || to) ? 34 : 28,
+        head: [[t('wjColHouse'), '#', t('wjColStage'), t('wjColStatus'), t('wjColStarted'), t('wjColFinished'), t('wjColDays')]],
+        body: rows.map(l => {
+          const s = l.startDate ? new Date(l.startDate) : null;
+          const e = l.endDate ? new Date(l.endDate) : (l.status === 'IN_PROGRESS' ? new Date() : null);
+          const days = (s && e) ? Math.max(0, Math.round((e - s) / 86400000)) + ' d' : '—';
+          return [l.houseName || '', l.stageOrder || '', l.stageNameEn || l.stageName || '', statusLabel(l.status), l.startDate || '', l.endDate || '', days];
+        }),
+        styles: { font: 'arial', fontSize: 9 },
+        headStyles: { fillColor: [26, 26, 62], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [240, 240, 248] },
+        columnStyles: { 1: { halign: 'center', cellWidth: 12 } }
+      });
+
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text('Generated: ' + new Date().toISOString().slice(0, 10), 14, doc.internal.pageSize.height - 8);
+
+      const safeName = (data.workerName || 'worker').replace(/[^\p{L}0-9]/gu, '_');
+      doc.save('journey_' + safeName + '.pdf');
+    }).catch(() => showToast('Export failed'));
+  }
+
+  function buildTimeline(history) {
+    const groups = {};
+    history.forEach(h => {
+      const key = h.houseId + '_' + h.stageOrder;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(h);
+    });
+    const rows = [];
+    Object.values(groups).forEach(logs => {
+      let i = 0;
+      while (i < logs.length) {
+        const cur = logs[i];
+        if (cur.status === 'IN_PROGRESS') {
+          const next = logs[i + 1];
+          if (next && next.status === 'DONE') {
+            rows.push({ ...cur, status: 'DONE', startDate: cur.startDate || next.startDate, endDate: next.endDate });
+            i += 2;
+          } else { rows.push(cur); i++; }
+        } else { rows.push(cur); i++; }
+      }
+    });
+    rows.sort((a, b) => (a.startDate || a.loggedAt || '') < (b.startDate || b.loggedAt || '') ? -1 : 1);
+    return rows;
+  }
+
+  // ── Crew History ─────────────────────────────────────────────────────────────
+  let _chCrewId = null;
+  let _chPrevView = 'dashboard';
+
+  function openCrewHistory(crewId) {
+    document.getElementById('leaderTooltip')?.remove();
+    _chPrevView = document.querySelector('.view.active')?.id?.replace('view-','') || 'dashboard';
+    _chCrewId = crewId;
+    history.pushState(null, '', '#crewhistory/' + crewId);
+    showView('crewhistory');
+    loadCrewHistory(crewId);
+  }
+
+  async function loadCrewHistory(crewId) {
+    const el = document.getElementById('crewHistoryContent');
+    const from = document.getElementById('chFrom')?.value || '';
+    const to   = document.getElementById('chTo')?.value   || '';
+    el.innerHTML = '<div class="state-msg"><div class="spinner"></div><br>Loading…</div>';
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to)   params.set('to', to);
+    const url = '/api/crews/' + crewId + '/history' + (params.toString() ? '?' + params : '');
+    let data, avgMap;
+    try {
+      [data, avgMap] = await Promise.all([
+        apiFetch(url).then(r => r.json()),
+        apiFetch('/api/stages/avg-days').then(r => r.json())
+      ]);
+    }
+    catch(e) { el.innerHTML = '<div class="state-msg" style="color:#f87171">Failed to load crew data.</div>'; return; }
+
+    const lang = currentLang || 'en';
+    const stageName = s => (lang === 'bg' ? s.stageName : (s.stageNameEn || s.stageName));
+
+    const statusBadge = (s, dk, ik, nk) => {
+      const label = { DONE: t(dk), IN_PROGRESS: t(ik), NOT_STARTED: t(nk) }[s] || s;
+      const cfg = { DONE: ['#3ecf6e','✓ '], IN_PROGRESS: ['#f5a623','⏳ '], NOT_STARTED: ['#9aa3be','— '] }[s] || ['#9aa3be',''];
+      return `<span style="background:${cfg[0]}22;color:${cfg[0]};border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;font-weight:700">${cfg[1]}${label}</span>`;
+    };
+    const fmtDate = d => d ? new Date(d).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+    const daysNum = s => {
+      if (s.status !== 'DONE') return null;
+      const start = s.startDate ? new Date(s.startDate) : null;
+      const end   = s.endDate   ? new Date(s.endDate)   : null;
+      if (!start || !end) return null;
+      return Math.round((end - start) / 86400000);
+    };
+    const avgVal = s => { const e = avgMap[s.stageOrder]; return e == null ? null : (e.avgDays != null ? e.avgDays : e); };
+    const daysBadge = s => {
+      const d = daysNum(s);
+      if (d === null) return '<span style="color:var(--muted)">—</span>';
+      const avg = avgVal(s);
+      const color = avg == null ? '#a78bfa' : (d <= avg ? '#3ecf6e' : '#f87171');
+      const tip = avg != null ? ` title="Avg: ${Math.round(avg)} d"` : '';
+      return `<span${tip} style="color:${color};font-weight:700">${d} d</span>`;
+    };
+    const scoreBadgeCh = s => {
+      const d = daysNum(s);
+      if (d === null) return '<span style="color:var(--muted)">—</span>';
+      const avg = avgVal(s);
+      if (avg == null) return '<span style="color:var(--muted)">—</span>';
+      const diff = d - avg;
+      if (Math.abs(diff) <= 1) return `<span style="background:#f5a62322;color:#f5a623;border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;font-weight:700">≈ ${lang==='bg'?'Средно':'Average'}</span>`;
+      if (diff < 0) return `<span style="background:#3ecf6e22;color:#3ecf6e;border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;font-weight:700">▲ ${lang==='bg'?'По-добър':'Better'}</span>`;
+      return `<span style="background:#f8717122;color:#f87171;border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;font-weight:700">▼ ${lang==='bg'?'По-бавен':'Slower'}</span>`;
+    };
+
+    const timeline = buildTimeline(data.history || []);
+    const timelineRows = timeline.map(s => `
+      <tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.04)'" onmouseout="this.style.background=''">
+        <td style="padding:0.65rem 1rem;font-size:0.95rem;font-weight:600;white-space:nowrap"><span onclick="openHouseDetail(${s.houseId})" style="color:#f97316;cursor:pointer;text-decoration:underline;text-underline-offset:3px">🏠 ${s.houseName}</span></td>
+        <td style="padding:0.65rem 1rem;font-size:0.95rem;color:var(--text)">${stageName(s)}</td>
+        <td style="padding:0.65rem 1rem">${statusBadge(s.status,'chStatusDone','chStatusInProgress','chStatusNotStarted')}</td>
+        <td style="padding:0.65rem 1rem;font-size:0.92rem;color:#4f8ef7;white-space:nowrap">${fmtDate(s.startDate)}</td>
+        <td style="padding:0.65rem 1rem;font-size:0.92rem;color:#3ecf6e;white-space:nowrap">${s.status === 'DONE' ? fmtDate(s.endDate) : '—'}</td>
+        <td style="padding:0.65rem 1rem;font-size:0.92rem;white-space:nowrap">${daysBadge(s)}</td>
+        <td style="padding:0.65rem 1rem;white-space:nowrap">${scoreBadgeCh(s)}</td>
+      </tr>`).join('');
+
+    // Only show the benchmark chip for the stage this crew works on
+    const crewStageOrder = timeline.length ? String(timeline[0].stageOrder) : null;
+    const benchmarkChips = crewStageOrder && avgMap[crewStageOrder] ? (() => {
+      const entry = avgMap[crewStageOrder];
+      const avg   = entry.avgDays != null ? entry.avgDays : entry;
+      const label = lang === 'bg' ? (entry.stageName || `Stage ${crewStageOrder}`) : (entry.stageNameEn || entry.stageName || `Stage ${crewStageOrder}`);
+      return `<span style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.25rem 0.6rem;font-size:0.75rem;color:var(--text)">
+        <span style="color:var(--muted);font-size:0.7rem">${label}</span> <strong style="color:#a78bfa">${Math.round(avg)} d</strong>
+      </span>`;
+    })() : '';
+
+    const houseCards = timeline.length ? `
+      ${benchmarkChips ? `<div style="margin-bottom:0.75rem;display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center">
+        <span style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-right:0.25rem">Avg across crews:</span>
+        ${benchmarkChips}
+        <span style="font-size:0.7rem;color:var(--muted);margin-left:0.25rem">— <span style="color:#3ecf6e">green</span> = faster · <span style="color:#f87171">red</span> = slower</span>
+      </div>` : ''}
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--surface);border-bottom:1px solid var(--border)">
+                <th style="padding:0.55rem 1rem;font-size:0.78rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('chColHouse')}</th>
+                <th style="padding:0.55rem 1rem;font-size:0.78rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('chColStage')}</th>
+                <th style="padding:0.55rem 1rem;font-size:0.78rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('chColStatus')}</th>
+                <th style="padding:0.55rem 1rem;font-size:0.78rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('chColStarted')}</th>
+                <th style="padding:0.55rem 1rem;font-size:0.78rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('chColFinished')}</th>
+                <th style="padding:0.55rem 1rem;font-size:0.78rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('chColDays')}</th>
+                <th style="padding:0.55rem 1rem;font-size:0.78rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase">${t('chColScore')}</th>
+              </tr>
+            </thead>
+            <tbody>${timelineRows}</tbody>
+          </table>
+        </div>
+      </div>` : `<div style="color:var(--muted);font-size:0.85rem;padding:1rem 0">${t('chNoHistory')}</div>`;
+
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
+        <button onclick="showView('${_chPrevView}')" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.35rem 0.75rem;cursor:pointer;color:var(--text);font-size:0.85rem">${t('chBack')}</button>
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:1.2rem;font-weight:700;color:var(--text)">👷 ${data.crewName}</div>
+          <div style="font-size:0.82rem;color:var(--muted);margin-top:0.2rem">
+            ${data.leaderName ? t('chLeader') + ': <span style="cursor:pointer;color:var(--accent,#4f8ef7);text-decoration:underline" onclick="openWorkerJourney('+data.leaderId+')">' + data.leaderName + '</span>' : ''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+          <label style="font-size:0.78rem;color:var(--muted)">${t('chFrom')}</label>
+          <input type="date" id="chFrom" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:0.3rem 0.5rem;color:var(--text);font-size:0.82rem" onchange="if(document.getElementById('chFrom').value&&document.getElementById('chTo').value)loadCrewHistory(${_chCrewId})">
+          <label style="font-size:0.78rem;color:var(--muted)">${t('chTo')}</label>
+          <input type="date" id="chTo" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:0.3rem 0.5rem;color:var(--text);font-size:0.82rem" onchange="if(document.getElementById('chFrom').value&&document.getElementById('chTo').value)loadCrewHistory(${_chCrewId})">
+          <button onclick="exportCrewHistory(${_chCrewId})" style="background:#3ecf6e;color:#fff;border:none;border-radius:8px;padding:0.35rem 0.9rem;cursor:pointer;font-size:0.82rem;font-weight:700">${t('chExportPdf')}</button>
+        </div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:0.08em;margin-bottom:0.75rem">${t('chStageHistory')}</div>
+      ${houseCards}`;
+    if (from) document.getElementById('chFrom').value = from;
+    if (to)   document.getElementById('chTo').value   = to;
+  }
+
+  function exportCrewHistory(crewId) {
+    const from = document.getElementById('chFrom')?.value || '';
+    const to   = document.getElementById('chTo')?.value   || '';
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to)   params.set('to', to);
+    const url = '/api/crews/' + crewId + '/history' + (params.toString() ? '?' + params : '');
+    Promise.all([
+      apiFetch(url).then(r => r.json()),
+      fetch('/fonts/arial.ttf').then(r => r.arrayBuffer())
+    ]).then(([data, fontBuf]) => {
+      const { jsPDF } = window.jspdf;
+      const bytes = new Uint8Array(fontBuf);
+      let binary = '';
+      for (let b = 0; b < bytes.length; b++) binary += String.fromCharCode(bytes[b]);
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      doc.addFileToVFS('arial.ttf', btoa(binary));
+      doc.addFont('arial.ttf', 'arial', 'normal');
+      doc.setFont('arial');
+
+      const statusLabel = s => ({ IN_PROGRESS: t('chStatusInProgress'), DONE: t('chStatusDone'), NOT_STARTED: t('chStatusNotStarted') }[s] || s);
+
+      doc.setFontSize(16);
+      doc.text(t('pageTitle_crewhistory') + ' Report', 14, 16);
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(data.crewName + (data.leaderName ? '  |  ' + t('chLeader') + ': ' + data.leaderName : ''), 14, 23);
+      if (from || to) doc.text(t('chFrom') + ': ' + (from || '-') + '  ' + t('chTo') + ': ' + (to || '-'), 14, 29);
+      doc.setTextColor(0);
+
+      const rows = [];
+      const logs = data.history || [];
+      let i = 0;
+      while (i < logs.length) {
+        const cur = logs[i];
+        if (cur.status === 'IN_PROGRESS') {
+          const nxt = logs[i + 1];
+          if (nxt && nxt.status === 'DONE') {
+            rows.push({ ...cur, status: 'DONE', startDate: cur.startDate || nxt.startDate, endDate: nxt.endDate });
+            i += 2;
+          } else { rows.push(cur); i++; }
+        } else { rows.push(cur); i++; }
+      }
+
+      doc.autoTable({
+        startY: (from || to) ? 34 : 28,
+        head: [[t('chColHouse'), t('chColStage'), t('chColStatus'), t('chColStarted'), t('chColFinished'), t('chColDays')]],
+        body: rows.map(l => {
+          const s = l.startDate ? new Date(l.startDate) : null;
+          const e = l.endDate ? new Date(l.endDate) : (l.status === 'IN_PROGRESS' ? new Date() : null);
+          const days = (s && e) ? Math.max(0, Math.round((e - s) / 86400000)) + ' d' : '—';
+          return [l.houseName || '', l.stageNameEn || l.stageName || '', statusLabel(l.status), l.startDate || '', l.endDate || '', days];
+        }),
+        styles: { font: 'arial', fontSize: 9 },
+        headStyles: { fillColor: [26, 26, 62], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [240, 240, 248] }
+      });
+
+      doc.setFontSize(8); doc.setTextColor(150);
+      doc.text('Generated: ' + new Date().toISOString().slice(0, 10), 14, doc.internal.pageSize.height - 8);
+      const safeName = (data.crewName || 'crew').replace(/[^\p{L}0-9]/gu, '_');
+      doc.save('crew_history_' + safeName + '.pdf');
+    }).catch(() => showToast('Export failed'));
   }
 
   function showLeaderTooltip(anchor, c) {
@@ -7800,11 +8362,30 @@
     const tip = document.createElement('div');
     tip.id = 'leaderTooltip';
     tip.style.cssText = 'position:fixed;z-index:10000;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;box-shadow:0 8px 24px rgba(0,0,0,.5);font-size:0.83rem;min-width:180px';
+    const leaderLink = c.leaderId
+      ? `<span onclick="event.stopPropagation();document.getElementById('leaderTooltip')?.remove();openWorkerJourney(${c.leaderId})" style="cursor:pointer;color:var(--accent,#4f8ef7);font-weight:700;text-decoration:underline;text-underline-offset:3px">${c.leader || '—'}</span>`
+      : `<span style="font-weight:700">${c.leader || c.crewName || '—'}</span>`;
+    const crewLink = c.crewId
+      ? `<span onclick="event.stopPropagation();document.getElementById('leaderTooltip')?.remove();openCrewHistory(${c.crewId})" style="cursor:pointer;color:#a78bfa;font-weight:600;text-decoration:underline;text-underline-offset:3px">${c.crewName}</span>`
+      : `<span style="color:var(--muted)">${c.crewName || '—'}</span>`;
+    let housesHtml = '<div style="color:var(--muted);font-size:0.78rem">No house assigned</div>';
+    if (c.assignedHousesJson) {
+      try {
+        const houses = typeof c.assignedHousesJson === 'string' ? JSON.parse(c.assignedHousesJson) : c.assignedHousesJson;
+        if (houses && houses.length) {
+          housesHtml = houses.map(h => `<div style="font-size:0.78rem;margin-top:0.15rem">🏠 <span onclick="event.stopPropagation();document.getElementById('leaderTooltip')?.remove();showView('housedetail');loadHouseDetail(${h.id})" style="cursor:pointer;color:#f97316;font-weight:600;text-decoration:underline;text-underline-offset:3px">${h.name}</span></div>`).join('');
+        }
+      } catch(e) {
+        housesHtml = c.assignedHouses ? `<div style="color:#f5a623;font-size:0.78rem">🏠 ${c.assignedHouses}</div>` : housesHtml;
+      }
+    } else if (c.assignedHouses) {
+      housesHtml = `<div style="color:#f5a623;font-size:0.78rem">🏠 ${c.assignedHouses}</div>`;
+    }
     tip.innerHTML = `
       <button onclick="document.getElementById('leaderTooltip')?.remove()" style="position:absolute;top:0.3rem;right:0.4rem;background:none;border:none;color:var(--muted);font-size:0.9rem;cursor:pointer;line-height:1;padding:0.1rem 0.3rem" title="Close">✕</button>
-      <div style="font-weight:700;margin-bottom:0.4rem">👷 ${c.leader || c.crewName || '—'}</div>
-      ${c.crewName ? `<div style="color:var(--muted);margin-bottom:0.2rem">👥 ${c.crewName}</div>` : ''}
-      ${c.assignedHouses ? `<div style="color:#f5a623;font-size:0.78rem">🏠 ${c.assignedHouses}</div>` : '<div style="color:var(--muted);font-size:0.78rem">No house assigned</div>'}`;
+      <div style="margin-bottom:0.4rem">👷 ${leaderLink}</div>
+      ${c.crewName ? `<div style="margin-bottom:0.35rem">👥 ${crewLink}</div>` : ''}
+      ${housesHtml}`;
     document.body.appendChild(tip);
     const r = anchor.getBoundingClientRect();
     let left = r.right + 6;
@@ -9713,14 +10294,39 @@
       return;
     }
 
-    const hashView = location.hash.replace('#', '');
-    showView(VALID_VIEWS.includes(hashView) ? hashView : 'dashboard');
+    function resolveHash() {
+      const raw = location.hash.replace('#', '');
+      const [view, param] = raw.split('/');
+      if (view === 'workerjourney' && param) {
+        _wjWorkerId = parseInt(param);
+        showView('workerjourney');
+        loadWorkerJourney(_wjWorkerId);
+      } else if (view === 'crewhistory' && param) {
+        _chCrewId = parseInt(param);
+        showView('crewhistory');
+        loadCrewHistory(_chCrewId);
+      } else {
+        showView(VALID_VIEWS.includes(view) ? view : 'dashboard');
+      }
+    }
+    resolveHash();
     translateStatic();
 
     // Browser back/forward support — re-route whenever the hash changes
     window.addEventListener('hashchange', () => {
-      const v = location.hash.replace('#', '');
-      if (VALID_VIEWS.includes(v)) showView(v);
+      const raw = location.hash.replace('#', '');
+      const [view, param] = raw.split('/');
+      if (view === 'workerjourney' && param) {
+        _wjWorkerId = parseInt(param);
+        showView('workerjourney');
+        loadWorkerJourney(_wjWorkerId);
+      } else if (view === 'crewhistory' && param) {
+        _chCrewId = parseInt(param);
+        showView('crewhistory');
+        loadCrewHistory(_chCrewId);
+      } else if (VALID_VIEWS.includes(view)) {
+        showView(view);
+      }
     });
   }
 
