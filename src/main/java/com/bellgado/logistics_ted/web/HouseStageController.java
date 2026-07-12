@@ -385,17 +385,29 @@ public class HouseStageController {
                     }
                 }
                 if (shouldLog) {
-                    HouseStageCrewLog log = new HouseStageCrewLog();
-                    log.setHouseId(saved.getHouse().getId());
-                    log.setHouseName(saved.getHouse().getName());
-                    log.setStageOrder(saved.getStageOrder());
-                    log.setStageName(saved.getStageName());
-                    log.setStageNameEn(saved.getStageNameEn());
-                    log.setCrewId(saved.getCrewId());
-                    crews.findById(saved.getCrewId()).ifPresent(c -> log.setCrewName(c.getName()));
+                    boolean isDone = "DONE".equals(saved.getStatus());
+                    // When DONE: update the existing IN_PROGRESS row so start_date is preserved
+                    // and end_date is filled in — gives accurate duration for the average.
+                    HouseStageCrewLog log = null;
+                    if (isDone) {
+                        log = stageLogs.findLatest(saved.getHouse().getId(), saved.getStageOrder(), saved.getCrewId())
+                                .filter(l -> "IN_PROGRESS".equals(l.getStatus()))
+                                .orElse(null);
+                    }
+                    if (log == null) {
+                        log = new HouseStageCrewLog();
+                        log.setHouseId(saved.getHouse().getId());
+                        log.setHouseName(saved.getHouse().getName());
+                        log.setStageOrder(saved.getStageOrder());
+                        log.setStageName(saved.getStageName());
+                        log.setStageNameEn(saved.getStageNameEn());
+                        log.setCrewId(saved.getCrewId());
+                        String crewName = crews.findById(saved.getCrewId()).map(c -> c.getName()).orElse(null);
+                        log.setCrewName(crewName);
+                        log.setStartDate(isDone ? saved.getStartDate() : today());
+                    }
                     log.setStatus(saved.getStatus());
-                    log.setStartDate(saved.getStatus().equals("DONE") ? saved.getStartDate() : today());
-                    log.setEndDate(saved.getStatus().equals("DONE") ? saved.getEndDate() : null);
+                    log.setEndDate(isDone ? today() : null);
                     log.setLoggedAt(OffsetDateTime.now());
                     stageLogs.save(log);
                 }

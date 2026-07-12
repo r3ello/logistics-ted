@@ -159,6 +159,7 @@ public class CrewController {
     private String validate(Map<String, Object> body) {
         Object name = body.get("name");
         if (name == null || name.toString().isBlank()) return "Crew name is required.";
+        if (body.get("stageOrder") == null) return "Stage type (stageOrder) is required.";
         if (body.get("managerId") != null) {
             Integer mid = Integer.parseInt(body.get("managerId").toString());
             Worker m = workers.findById(mid).orElse(null);

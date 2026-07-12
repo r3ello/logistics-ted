@@ -103,6 +103,12 @@ public class WorkerController {
         if (requireName) {
             Object name = body.get("name");
             if (name == null || name.toString().isBlank()) return "Worker name is required.";
+            String role = body.get("role") != null ? body.get("role").toString() : "CREW_MEMBER";
+            boolean isManager = "CREW_MANAGER".equals(role);
+            if (!isManager) {
+                Object trade = body.get("trade");
+                if (trade == null || trade.toString().isBlank()) return "Trade is required for crew members and leaders.";
+            }
         }
         if (body.get("lat") != null && body.get("lng") != null) {
             try {

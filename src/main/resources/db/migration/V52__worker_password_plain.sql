@@ -1,1 +1,0 @@
-ALTER TABLE worker ADD COLUMN IF NOT EXISTS password_plain VARCHAR(100);

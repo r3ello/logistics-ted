@@ -1,1 +1,0 @@
-ALTER TABLE delivery ADD COLUMN responsible_id INTEGER REFERENCES worker(id) ON DELETE SET NULL;
