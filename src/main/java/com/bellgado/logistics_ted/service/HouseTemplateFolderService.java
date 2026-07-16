@@ -2,12 +2,17 @@ package com.bellgado.logistics_ted.service;
 
 import com.bellgado.logistics_ted.domain.DocDocument;
 import com.bellgado.logistics_ted.domain.DocFolder;
+import com.bellgado.logistics_ted.domain.DocFolderTemplate;
 import com.bellgado.logistics_ted.domain.House;
 import com.bellgado.logistics_ted.repository.DocDocumentRepository;
 import com.bellgado.logistics_ted.repository.DocFolderRepository;
+import com.bellgado.logistics_ted.repository.DocFolderTemplateRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,50 +22,45 @@ public class HouseTemplateFolderService {
     private final DocFolderRepository folders;
     private final DocDocumentRepository documents;
     private final HouseRepository houses;
+    private final DocFolderTemplateRepository templates;
 
     public HouseTemplateFolderService(DocFolderRepository folders,
                                       DocDocumentRepository documents,
-                                      HouseRepository houses) {
+                                      HouseRepository houses,
+                                      DocFolderTemplateRepository templates) {
         this.folders   = folders;
         this.documents = documents;
         this.houses    = houses;
+        this.templates = templates;
     }
-
-    // Template: code → [labelEn, labelBg]
-    private static final String[][] TEMPLATE = {
-        {"01", "01_ЧЕРТЕЖИ",                          "Drawings"},
-        {"02", "02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ",             "Contracts & Annexes"},
-        {"03", "03_СНИМКИ",                            "Photos"},
-        {"04", "04_Материали_и_Логистика",             "Materials & Logistics"},
-        {"05", "05_Комуникация_с_Клиента",             "Client Communication"},
-        {"06", "06_Работна_документация_и_Протоколи",  "Working Docs & Protocols"},
-        {"07", "07_ОТЧЕТИ_ТРУД",                       "Labour Reports"},
-        {"08", "08_РЕЗУЛТАТИ",                         "Results"},
-        {"09", "09_КОНТРОЛ_КАЧЕСТВО",                  "Quality Control"},
-    };
-
-    // Sub-folders under code "04"
-    private static final String[][] TEMPLATE_04_SUBS = {
-        {"04-01", "Заявки",            "Requests"},
-        {"04-02", "Остатъчен материал","Residual material"},
-    };
 
     @Transactional
     public void seedTemplate(DocFolder houseFolder) {
-        DocFolder folder04 = null;
-        for (String[] t : TEMPLATE) {
-            String code = t[0], labelBg = t[1], labelEn = t[2];
-            DocFolder sub = getOrCreate(code, labelEn, labelBg, houseFolder);
-            if ("04".equals(code)) folder04 = sub;
-        }
-        if (folder04 != null) {
-            for (String[] t : TEMPLATE_04_SUBS) {
-                getOrCreate(t[0], t[2], t[1], folder04);
+        List<DocFolderTemplate> all = templates.findAllOrdered();
+
+        // top-level template entries (no parent_code)
+        List<DocFolderTemplate> topLevel = all.stream()
+            .filter(t -> t.getParentId() == null)
+            .toList();
+
+        // children grouped by parent_id
+        Map<Integer, List<DocFolderTemplate>> children = all.stream()
+            .filter(t -> t.getParentId() != null)
+            .collect(Collectors.groupingBy(DocFolderTemplate::getParentId));
+
+        for (DocFolderTemplate t : topLevel) {
+            DocFolder sub = getOrCreate(t.getCode(), t.getLabelEn(), t.getLabelBg(), houseFolder);
+            List<DocFolderTemplate> subs = children.get(t.getId());
+            if (subs != null) {
+                for (DocFolderTemplate c : subs) {
+                    getOrCreate(c.getCode(), c.getLabelEn(), c.getLabelBg(), sub);
+                }
             }
         }
+
         // Seed 2 documents on the house folder itself
-        seedDoc(houseFolder, "MASTER", "MASTER", "SPREADSHEET", 1);
-        seedDoc(houseFolder, "Calculator", "Калкулатор", "SPREADSHEET", 2);
+        seedDoc(houseFolder, "MASTER",     "MASTER",      "SPREADSHEET", 1);
+        seedDoc(houseFolder, "Calculator", "Калкулатор",  "SPREADSHEET", 2);
     }
 
     @Transactional
@@ -73,7 +73,6 @@ public class HouseTemplateFolderService {
         for (House h : allHouses) {
             Optional<DocFolder> hf = folders.findByCodeAndParentId("house_" + h.getId(), active.getId());
             if (hf.isPresent()) {
-                // Check if template already seeded (01 subfolder exists)
                 boolean alreadySeeded = folders.findByParentId(hf.get().getId()).stream()
                     .anyMatch(f -> "01".equals(f.getCode()));
                 if (!alreadySeeded) {
