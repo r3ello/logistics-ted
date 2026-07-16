@@ -858,8 +858,83 @@ INSERT INTO public.worker_stage_type (worker_id, stage_order) VALUES
 
 
 -- ────────────────────────────────────────────────────────────
+--  DOC FOLDERS (company-level only — house folders are created by the app)
+-- ────────────────────────────────────────────────────────────
+
+INSERT INTO public.doc_folder (id, code, label_en, label_bg, icon, color, link_url, sort_order, parent_id) OVERRIDING SYSTEM VALUE VALUES
+-- Root folders
+(1,  '00', 'Control',               'Контрол',              '🛡️', '#4f8ef7', NULL, 0, NULL),
+(2,  '01', 'Sales',                 'Продажби',             '📈', '#3ecf6e', NULL, 1, NULL),
+(3,  '02', 'Active Sites',          'Обекти в строеж',      '🏗️', '#f97316', NULL, 2, NULL),
+(4,  '03', 'Finance',               'Финанси',              '🧮', '#a78bfa', NULL, 3, NULL),
+(5,  '04', 'Administration & HR',   'Администрация и ЧР',   '👥', '#fb7185', NULL, 4, NULL),
+(6,  '05', 'Standards & Templates', 'Стандарти и Шаблони',  '📋', '#00c9b1', NULL, 5, NULL),
+(7,  '06', 'Marketing',             'Маркетинг',            '📣', '#f59e0b', NULL, 6, NULL),
+(8,  '07', 'Completed Sites',       'Обекти завършени',     '🏠', '#4f8ef7', NULL, 7, NULL),
+(9,  '08', 'Purchases',             'Покупки',              '🛒', '#00c9b1', NULL, 8, NULL),
+-- Control subfolders (parent=1)
+(10, 'doc00_01', '01_OBJECTS_CONTROL',   '01_КОНТРОЛ_ОБЕКТИ',     '📂', '#4f8ef7', NULL, 0, 1),
+(11, 'doc00_02', '02_EXPENSES_CONTROL',  '02_КОНТРОЛ_РАЗХОДИ',    '📂', '#4f8ef7', NULL, 1, 1),
+(12, 'doc00_03', '03_CLIENTS_CONTROL',   '03_КОНТРОЛ_КЛИЕНТИ',    '📂', '#4f8ef7', NULL, 2, 1),
+(13, 'doc00_04', '04_SUPPLIERS_CONTROL', '04_КОНТРОЛ_ДОСТАВЧИЦИ', '📂', '#4f8ef7', NULL, 3, 1),
+(14, 'doc00_05', '05_CREWS_CONTROL',     '05_КОНТРОЛ_БРИГАДИ',    '📂', '#4f8ef7', NULL, 4, 1),
+(15, 'doc00_06', '06_FLEET_CONTROL',     '06_КОНТРОЛ_АВТОПАРК',   '📂', '#4f8ef7', NULL, 5, 1),
+(16, 'doc00_07', '07_MATERIALS_CONTROL', '07_КОНТРОЛ_МАТЕРИАЛИ',  '📂', '#4f8ef7', NULL, 6, 1),
+-- Sales subfolders (parent=2)
+(17, 'doc01_00a', '00_CRM',                    '00_CRM',                         '📂', '#3ecf6e', NULL,  0, 2),
+(18, 'doc01_00b', '00_NEW_CLIENTS',            '00_НОВИ_КЛИЕНТИ',                '📂', '#3ecf6e', NULL,  1, 2),
+(19, 'doc01_01',  '01_WITH_ARCHITECTS',        '01_ПРИ_АРХИТЕКТИ',               '📂', '#3ecf6e', NULL,  2, 2),
+(20, 'doc01_02',  '02_FOR_OFFER',              '02_ЗА_ОФЕРТА',                   '📂', '#3ecf6e', NULL,  3, 2),
+(21, 'doc01_03',  '03_OFFERS_FOR_APPROVAL',    '03_ОФЕРТИ_ЗА_ПОТВЪРЖДЕНИЕ',      '📂', '#3ecf6e', NULL,  4, 2),
+(22, 'doc01_04',  '04_SENT_OFFERS',            '04_ИЗПРАТЕНИ_ОФЕРТИ',            '📂', '#3ecf6e', NULL,  5, 2),
+(23, 'doc01_05',  '05_FOR_CONTRACT',           '05_ЗА_ДОГОВОР',                  '📂', '#3ecf6e', NULL,  6, 2),
+(24, 'doc01_06',  '06_CONTRACTS_FOR_APPROVAL', '06_ДОГОВОРИ_ЗА_ПОТВЪРЖДЕНИЕ',    '📂', '#3ecf6e', NULL,  7, 2),
+(25, 'doc01_07',  '07_SENT_CONTRACTS',         '07_ИЗПРАТЕНИ_ДОГОВОРИ',          '📂', '#3ecf6e', NULL,  8, 2),
+(26, 'doc01_08',  '08_CONTRACT_SIGNED',        '08_ДОГОВОР_ПОДПИСАН',            '📂', '#3ecf6e', NULL,  9, 2),
+(27, 'doc01_09',  '09_AUDIO',                  '09_АУДИО',                       '📂', '#3ecf6e', NULL, 10, 2),
+(28, 'doc01_10',  '10_CRM_ARCHIVE',            '10_CRM_АРХИВ',                   '📂', '#3ecf6e', NULL, 11, 2),
+-- Finance subfolders (parent=4)
+(29, 'doc03_01', 'Accounting', 'Счетоводство', '📂', '#a78bfa', NULL, 0, 4),
+-- Admin subfolders (parent=5)
+(30, 'doc04_01', '01_COMPANY_DOCUMENTS', '01_ФИРМЕНИ_ДОКУМЕНТИ', '📂', '#fb7185', NULL, 0, 5),
+(31, 'doc04_02', '02_HR',               '02_HR',                 '📂', '#fb7185', NULL, 1, 5),
+(32, 'doc04_03', '03_CONTRACTS',        '03_ДОГОВОРИ',           '📂', '#fb7185', NULL, 2, 5),
+(33, 'doc04_07', '07_PERSONNEL',        '07_ПЕРСОНАЛ',           '📂', '#fb7185', NULL, 3, 5),
+-- Standards subfolders (parent=6)
+(34, 'doc05_01', 'Technical standards',   'Технически стандарти',    '📂', '#00c9b1', NULL,  0, 6),
+(35, 'doc05_02', 'TEMPLATE_CREW_MASTER',  'ШАБЛОН_БРИГАДА_МАСТЪР',   '📂', '#00c9b1', NULL,  1, 6),
+(36, 'doc05_03', 'TEMPLATE_INVOICE_ISSUE','ШАБЛОН_ИЗДАВАНЕ_ФАКТУРИ', '📂', '#00c9b1', NULL,  2, 6),
+(37, 'doc05_04', 'TEMPLATE_MATERIALS',    'ШАБЛОН_МАТЕРИАЛИ',        '📂', '#00c9b1', NULL,  3, 6),
+(38, 'doc05_05', 'TEMPLATE_REPORTS',      'ШАБЛОН_ОТЧЕТИ',           '📂', '#00c9b1', NULL,  4, 6),
+(39, 'doc05_06', 'TEMPLATE_RECEIPT',      'ШАБЛОН_РАЗПИСКА',         '📂', '#00c9b1', NULL,  5, 6),
+(40, 'doc05_07', 'TEMPLATE_CONTRACTS',    'ШАБЛОН_ДОГОВОРИ',         '📂', '#00c9b1', NULL,  6, 6),
+(41, 'doc05_08', 'TEMPLATE_REQUEST',      'ШАБЛОН_ЗАЯВКА',           '📂', '#00c9b1', NULL,  7, 6),
+(42, 'doc05_09', 'TEMPLATE_OFFERS',       'ШАБЛОН_ОФЕРТИ',           '📂', '#00c9b1', NULL,  8, 6),
+(43, 'doc05_10', 'TEMPLATE_FOLDERS',      'ШАБЛОН_ПАПКИ',            '📂', '#00c9b1', NULL,  9, 6),
+(44, 'doc05_11', 'TEMPLATE_COMPLETION',   'ШАБЛОН_ПРИКЛЮЧВАНЕ',      '📂', '#00c9b1', NULL, 10, 6);
+
+-- ────────────────────────────────────────────────────────────
+--  DOC FOLDER TEMPLATES (house folder structure for new houses)
+-- ────────────────────────────────────────────────────────────
+
+INSERT INTO public.doc_folder_template (id, code, label_bg, label_en, parent_id, sort_order) OVERRIDING SYSTEM VALUE VALUES
+  (1,  '01',    '01_ЧЕРТЕЖИ',                         'Drawings',                 NULL, 1),
+  (2,  '02',    '02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ',            'Contracts & Annexes',      NULL, 2),
+  (3,  '03',    '03_СНИМКИ',                           'Photos',                   NULL, 3),
+  (4,  '04',    '04_Материали_и_Логистика',            'Materials & Logistics',    NULL, 4),
+  (5,  '04-01', 'Заявки',                              'Requests',                 4,    1),
+  (6,  '04-02', 'Остатъчен материал',                  'Residual material',        4,    2),
+  (7,  '05',    '05_Комуникация_с_Клиента',            'Client Communication',     NULL, 5),
+  (8,  '06',    '06_Работна_документация_и_Протоколи', 'Working Docs & Protocols', NULL, 6),
+  (9,  '07',    '07_ОТЧЕТИ_ТРУД',                      'Labour Reports',           NULL, 7),
+  (10, '08',    '08_РЕЗУЛТАТИ',                        'Results',                  NULL, 8),
+  (11, '09',    '09_КОНТРОЛ_КАЧЕСТВО',                 'Quality Control',          NULL, 9);
+
+-- ────────────────────────────────────────────────────────────
 --  SEQUENCE RESETS
 -- ────────────────────────────────────────────────────────────
 
-SELECT pg_catalog.setval('public.house_id_seq',       4,   true);
-SELECT pg_catalog.setval('public.house_stage_id_seq', 74,  true);
+SELECT pg_catalog.setval('public.house_id_seq',              4,   true);
+SELECT pg_catalog.setval('public.house_stage_id_seq',        74,  true);
+SELECT pg_catalog.setval('public.doc_folder_id_seq',         44,  true);
+SELECT pg_catalog.setval('public.doc_folder_template_id_seq',11,  true);
