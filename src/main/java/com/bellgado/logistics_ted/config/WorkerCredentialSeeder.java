@@ -34,8 +34,8 @@ public class WorkerCredentialSeeder {
            .forEach(w -> usedNames.put(w.getUsername(), 1));
 
         for (Worker w : all) {
-            // backfill plain password for workers already seeded without it
-            if (w.getUsername() != null && w.getPasswordPlain() == null && w.getPasswordHash() != null) {
+            // backfill password for workers that have a username but no working credentials
+            if (w.getUsername() != null && w.getPasswordPlain() == null) {
                 String pin = String.format("%04d", 1000 + rng.nextInt(9000));
                 w.setPasswordHash(encoder.encode(pin));
                 w.setPasswordPlain(pin);
