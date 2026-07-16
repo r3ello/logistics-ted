@@ -134,7 +134,7 @@ public class AttendanceController {
         // Validation 3: GPS within 200m of house
         if (house.getLat() != null && lat != null) {
             double dist = haversineMeters(lat, lng, house.getLat().doubleValue(), house.getLng().doubleValue());
-            if (dist > 200) return error("You are not on site (%.0f m away)".formatted(dist));
+            if (dist > 1000) return error("You are not on site (%.0f m away)".formatted(dist));
         }
 
         WorkSession s = new WorkSession();
@@ -181,7 +181,7 @@ public class AttendanceController {
         // Validation 4: GPS
         if (house.getLat() != null && lat != null) {
             double dist = haversineMeters(lat, lng, house.getLat().doubleValue(), house.getLng().doubleValue());
-            if (dist > 200) return error("You are not on site (%.0f m away)".formatted(dist));
+            if (dist > 1000) return error("You are not on site (%.0f m away)".formatted(dist));
         }
 
         s.setCheckedOutAt(OffsetDateTime.now(ZoneOffset.UTC));

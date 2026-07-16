@@ -8024,7 +8024,7 @@
     // populate leader dropdown
     const ldrSel = document.getElementById('cLeader');
     ldrSel.innerHTML = `<option value="">${t('crewNoLeader')}</option>` +
-      leaders.map(l => `<option value="${l.id}" data-crew-id="${l.crewId||''}" data-crew-name="${l.crewName||''}">${l.name}${l.crewName ? ' · ' + l.crewName : ''}</option>`).join('');
+      leaders.filter(l => !l.crewId || l.crewId === (id || null)).map(l => `<option value="${l.id}" data-crew-id="${l.crewId||''}" data-crew-name="${l.crewName||''}">${l.name}</option>`).join('');
     document.getElementById('cLeaderWarn').style.display = 'none';
 
     // populate house dropdown
@@ -8696,6 +8696,7 @@
     const cLoc = document.getElementById('cLocation').value;
     const body = {
       name,
+      leaderId:   leaderId   ? parseInt(leaderId)   : null,
       managerId:  managerId  ? parseInt(managerId)  : null,
       houseId:    houseId    ? parseInt(houseId)    : null,
       stageOrder: stageOrder ? parseInt(stageOrder) : null,
