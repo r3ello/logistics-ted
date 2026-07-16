@@ -28,16 +28,12 @@ public class DocFolderTemplateController {
     @PostMapping
     @Transactional
     public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
-        String code    = str(body, "code");
         String labelBg = str(body, "labelBg");
         String labelEn = str(body, "labelEn");
-        if (code.isEmpty() || labelBg.isEmpty() || labelEn.isEmpty())
-            return ResponseEntity.badRequest().body(Map.of("error", "code, labelBg and labelEn are required"));
-        if (repo.findByCode(code).isPresent())
-            return ResponseEntity.badRequest().body(Map.of("error", "code already exists"));
+        if (labelBg.isEmpty() || labelEn.isEmpty())
+            return ResponseEntity.badRequest().body(Map.of("error", "labelBg and labelEn are required"));
 
         DocFolderTemplate t = new DocFolderTemplate();
-        t.setCode(code);
         t.setLabelBg(labelBg);
         t.setLabelEn(labelEn);
         t.setParentId(intOrNull(body, "parentId"));
@@ -51,7 +47,6 @@ public class DocFolderTemplateController {
     @Transactional
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         return repo.findById(id).map(t -> {
-            if (body.containsKey("code"))      t.setCode(str(body, "code"));
             if (body.containsKey("labelBg"))   t.setLabelBg(str(body, "labelBg"));
             if (body.containsKey("labelEn"))   t.setLabelEn(str(body, "labelEn"));
             if (body.containsKey("parentId"))  t.setParentId(intOrNull(body, "parentId"));
@@ -77,7 +72,6 @@ public class DocFolderTemplateController {
     private Map<String, Object> toDto(DocFolderTemplate t) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id",        t.getId());
-        m.put("code",      t.getCode());
         m.put("labelBg",   t.getLabelBg());
         m.put("labelEn",   t.getLabelEn());
         m.put("parentId",  t.getParentId());

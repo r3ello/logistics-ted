@@ -11,9 +11,6 @@ public class DocFolderTemplate {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, length = 30, unique = true)
-    private String code;
-
     @Column(name = "label_bg", nullable = false, length = 255)
     private String labelBg;
 

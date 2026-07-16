@@ -49,11 +49,11 @@ public class HouseTemplateFolderService {
             .collect(Collectors.groupingBy(DocFolderTemplate::getParentId));
 
         for (DocFolderTemplate t : topLevel) {
-            DocFolder sub = getOrCreate(t.getCode(), t.getLabelEn(), t.getLabelBg(), houseFolder);
+            DocFolder sub = getOrCreate(t.getLabelEn(), t.getLabelBg(), houseFolder);
             List<DocFolderTemplate> subs = children.get(t.getId());
             if (subs != null) {
                 for (DocFolderTemplate c : subs) {
-                    getOrCreate(c.getCode(), c.getLabelEn(), c.getLabelBg(), sub);
+                    getOrCreate(c.getLabelEn(), c.getLabelBg(), sub);
                 }
             }
         }
@@ -65,16 +65,21 @@ public class HouseTemplateFolderService {
 
     @Transactional
     public int seedAllHouses() {
-        Optional<DocFolder> activeSites = folders.findTopLevelByCode("02");
+        Optional<DocFolder> activeSites = folders.findByFolderType("ACTIVE_SITES");
         if (activeSites.isEmpty()) return 0;
         DocFolder active = activeSites.get();
         List<House> allHouses = houses.findAllByOrderByIdAsc();
+        // use the first template's labelEn as the "already seeded" marker
+        String firstTemplateLabelEn = templates.findAllOrdered().stream()
+            .filter(t -> t.getParentId() == null)
+            .findFirst().map(DocFolderTemplate::getLabelEn).orElse(null);
         int count = 0;
         for (House h : allHouses) {
             Optional<DocFolder> hf = folders.findByCodeAndParentId("house_" + h.getId(), active.getId());
             if (hf.isPresent()) {
-                boolean alreadySeeded = folders.findByParentId(hf.get().getId()).stream()
-                    .anyMatch(f -> "01".equals(f.getCode()));
+                boolean alreadySeeded = firstTemplateLabelEn == null ||
+                    folders.findByParentId(hf.get().getId()).stream()
+                        .anyMatch(f -> firstTemplateLabelEn.equals(f.getLabelEn()));
                 if (!alreadySeeded) {
                     seedTemplate(hf.get());
                     count++;
@@ -86,8 +91,8 @@ public class HouseTemplateFolderService {
 
     @Transactional
     public void moveToCompleted(Integer houseId) {
-        Optional<DocFolder> activeSites    = folders.findTopLevelByCode("02");
-        Optional<DocFolder> completedSites = folders.findTopLevelByCode("07");
+        Optional<DocFolder> activeSites    = folders.findByFolderType("ACTIVE_SITES");
+        Optional<DocFolder> completedSites = folders.findByFolderType("COMPLETED_SITES");
         if (activeSites.isEmpty() || completedSites.isEmpty()) return;
         folders.findByCodeAndParentId("house_" + houseId, activeSites.get().getId()).ifPresent(f -> {
             f.setParent(completedSites.get());
@@ -97,8 +102,8 @@ public class HouseTemplateFolderService {
 
     @Transactional
     public void moveToActive(Integer houseId) {
-        Optional<DocFolder> activeSites    = folders.findTopLevelByCode("02");
-        Optional<DocFolder> completedSites = folders.findTopLevelByCode("07");
+        Optional<DocFolder> activeSites    = folders.findByFolderType("ACTIVE_SITES");
+        Optional<DocFolder> completedSites = folders.findByFolderType("COMPLETED_SITES");
         if (activeSites.isEmpty() || completedSites.isEmpty()) return;
         folders.findByCodeAndParentId("house_" + houseId, completedSites.get().getId()).ifPresent(f -> {
             f.setParent(activeSites.get());
@@ -108,14 +113,14 @@ public class HouseTemplateFolderService {
 
     // ── helpers ──────────────────────────────────────────────────────────────
 
-    private DocFolder getOrCreate(String code, String labelEn, String labelBg, DocFolder parent) {
+    private DocFolder getOrCreate(String labelEn, String labelBg, DocFolder parent) {
         List<DocFolder> existing = folders.findByParentId(parent.getId());
         return existing.stream()
-            .filter(f -> code.equals(f.getCode()))
+            .filter(f -> labelEn.equals(f.getLabelEn()))
             .findFirst()
             .orElseGet(() -> {
                 DocFolder f = new DocFolder();
-                f.setCode(code);
+                f.setCode(labelEn.toLowerCase().replaceAll("[^a-z0-9]+", "-"));
                 f.setLabelEn(labelEn);
                 f.setLabelBg(labelBg);
                 f.setIcon("");

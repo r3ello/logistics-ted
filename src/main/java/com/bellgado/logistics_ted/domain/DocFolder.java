@@ -14,6 +14,9 @@ public class DocFolder {
     @Column(nullable = false, length = 30)
     private String code;
 
+    @Column(name = "folder_type", length = 50)
+    private String folderType;
+
     @Column(name = "label_en", nullable = false, length = 255)
     private String labelEn;
 

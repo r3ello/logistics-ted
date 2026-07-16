@@ -19,6 +19,9 @@ public interface DocFolderRepository extends JpaRepository<DocFolder, Integer> {
     @Query("SELECT f FROM DocFolder f WHERE f.code = :code AND f.parent IS NULL")
     java.util.Optional<DocFolder> findTopLevelByCode(String code);
 
+    @Query("SELECT f FROM DocFolder f WHERE f.folderType = :folderType")
+    java.util.Optional<DocFolder> findByFolderType(String folderType);
+
     @Query(value = "SELECT MAX(CAST(code AS INTEGER)) FROM doc_folder WHERE parent_id IS NULL AND code ~ '^[0-9]+$'", nativeQuery = true)
     Integer findMaxTopLevelCode();
 
