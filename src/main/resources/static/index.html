@@ -2301,14 +2301,13 @@
         <thead style="background:var(--surface2,#21252f)">
           <tr>
             <th style="border-bottom:1px solid var(--border);width:28px"></th>
-            <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Code</th>
             <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Folder</th>
             <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Label EN</th>
             <th style="padding:.6rem 1rem;text-align:center;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);width:60px">Sort</th>
             <th style="border-bottom:1px solid var(--border);width:80px"></th>
           </tr>
         </thead>
-        <tbody id="cfTbody"><tr><td colspan="6" style="padding:2.5rem;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+        <tbody id="cfTbody"><tr><td colspan="5" style="padding:2.5rem;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
       </table>
     </div>
     <!-- modal -->
@@ -2319,9 +2318,7 @@
           <button onclick="cfCloseForm()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
         </div>
         <div style="padding:1.25rem;display:flex;flex-direction:column;gap:.9rem">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Code *</label>
-              <input id="cfCode" placeholder="e.g. 10" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-family:var(--font-mono,'monospace');font-size:.85rem;outline:none"></div>
+          <div>
             <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Sort order</label>
               <input id="cfSort" type="number" value="0" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
           </div>
@@ -2379,7 +2376,6 @@
         <thead style="background:var(--surface2,#21252f)">
           <tr>
             <th style="border-bottom:1px solid var(--border);width:28px"></th>
-            <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Code</th>
             <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Label (BG)</th>
             <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Label (EN)</th>
             <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Parent</th>
@@ -2387,7 +2383,7 @@
             <th style="border-bottom:1px solid var(--border);width:80px"></th>
           </tr>
         </thead>
-        <tbody id="hftTbody"><tr><td colspan="7" style="padding:2.5rem;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+        <tbody id="hftTbody"><tr><td colspan="6" style="padding:2.5rem;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
       </table>
     </div>
     <!-- modal -->
@@ -2398,12 +2394,8 @@
           <button onclick="hftCloseForm()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
         </div>
         <div style="padding:1.25rem;display:flex;flex-direction:column;gap:.9rem">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Code *</label>
-              <input id="hftCode" placeholder="e.g. 10" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-family:var(--font-mono,'monospace');font-size:.85rem;outline:none"></div>
-            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Sort order</label>
-              <input id="hftSort" type="number" value="0" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
-          </div>
+          <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Sort order</label>
+            <input id="hftSort" type="number" value="0" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
           <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Label (BG) *</label>
             <input id="hftLabelBg" placeholder="е.г. 10_Нова_Папка" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
           <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Label (EN) *</label>
@@ -3877,8 +3869,7 @@
           <div onclick="_hdToggle(${folder.id})" style="display:flex;align-items:center;gap:12px;padding:1rem 1.1rem;cursor:pointer;background:var(--card);border-bottom:2px solid ${color}33">
             <div style="width:38px;height:38px;border-radius:10px;background:${color}20;border:1.5px solid ${color}50;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${folder.icon || '&#128193;'}</div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:0.7rem;color:${color};font-weight:700;letter-spacing:0.08em">${folder.code}</div>
-              <div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-top:1px;word-break:break-word">${label}</div>
+              <div style="font-size:0.88rem;font-weight:700;color:var(--text);word-break:break-word">${label}</div>
             </div>
             <div style="display:flex;align-items:center;gap:3px;flex-shrink:0" onclick="event.stopPropagation()">${linkBtn}${adminBtns}</div>
             <div data-hd-arrow="${folder.id}" style="font-size:0.75rem;color:var(--muted,#9aa3be);transition:transform .2s;margin-left:4px;flex-shrink:0">${(hasChildren||hasDocs) ? '&#9654;' : '&#9654;'}</div>
@@ -5253,8 +5244,7 @@
           <div onclick="_docToggle(${folder.id})" style="display:flex;align-items:center;gap:12px;padding:1rem 1.1rem;cursor:pointer;background:var(--card);border-bottom:2px solid ${color}33">
             <div style="width:38px;height:38px;border-radius:10px;background:${color}20;border:1.5px solid ${color}50;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">${folder.icon || '📁'}</div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:0.7rem;color:${color};font-weight:700;letter-spacing:0.08em">${folder.code}</div>
-              <div style="font-size:0.92rem;font-weight:700;color:var(--text);margin-top:1px">${label}</div>
+              <div style="font-size:0.92rem;font-weight:700;color:var(--text)">${label}</div>
             </div>
             <div style="display:flex;align-items:center;gap:3px" onclick="event.stopPropagation()">
               ${linkBtn}${adminBtns}
@@ -12299,7 +12289,6 @@
       : `<td style="padding:.6rem 1rem"><div style="display:flex;align-items:center;gap:.5rem">${icon}${name}</div></td>`;
     return `<tr draggable="true" data-id="${r.id}" data-parent="${r.parentId||''}" style="border-bottom:1px solid var(--border);transition:background .1s">
       <td style="padding:.4rem .5rem;width:28px;text-align:center"><span class="dd-handle" draggable="true" style="cursor:grab;color:var(--muted);font-size:1rem;user-select:none;display:inline-block;line-height:1;padding:2px 4px" title="Drag to reorder">⠿</span></td>
-      <td style="padding:.6rem 1rem"><span style="font-family:var(--font-mono,'monospace');font-size:.78rem;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2);border-radius:4px;padding:1px 6px">${esc(r.code)}</span></td>
       ${cell}
       <td style="padding:.6rem 1rem;color:var(--muted);font-size:.82rem">${esc(r.labelEn)}</td>
       <td style="padding:.6rem 1rem;text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:var(--surface2,#21252f);color:var(--muted);font-size:.75rem;font-weight:600">${r.sortOrder}</span></td>
@@ -12314,7 +12303,7 @@
     const sel = document.getElementById('cfParent');
     sel.innerHTML = '<option value="">— top level —</option>';
     _cfData.filter(r => !r.parentId && r.id !== excludeId).sort((a,b) => a.sortOrder - b.sortOrder)
-      .forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = `${r.icon||''} ${r.code} — ${r.labelEn}`; sel.appendChild(o); });
+      .forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = `${r.icon||''} ${r.labelEn}`; sel.appendChild(o); });
   }
 
   function cfSyncPreview() {
@@ -12327,7 +12316,7 @@
   function cfOpenAdd() {
     _cfEditId = null;
     document.getElementById('cfFormTitle').textContent = 'Add Folder';
-    ['cfCode','cfLabelBg','cfLabelEn'].forEach(id => document.getElementById(id).value = '');
+    ['cfLabelBg','cfLabelEn'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('cfSort').value = '0';
     document.getElementById('cfIcon').value = '📁';
     document.getElementById('cfColor').value = '#4f8ef7';
@@ -12335,14 +12324,13 @@
     document.getElementById('cfParent').value = '';
     cfSyncPreview();
     document.getElementById('cfOverlay').style.display = 'flex';
-    setTimeout(() => document.getElementById('cfCode').focus(), 50);
+    setTimeout(() => document.getElementById('cfLabelEn').focus(), 50);
   }
 
   function cfOpenEdit(id) {
     const r = _cfData.find(x => x.id === id); if (!r) return;
     _cfEditId = id;
     document.getElementById('cfFormTitle').textContent = 'Edit Folder';
-    document.getElementById('cfCode').value    = r.code;
     document.getElementById('cfLabelBg').value = r.labelBg;
     document.getElementById('cfLabelEn').value = r.labelEn;
     document.getElementById('cfSort').value    = r.sortOrder;
@@ -12376,7 +12364,7 @@
   function cfOpenDel(id) {
     _cfDelId = id;
     const r = _cfData.find(x => x.id === id);
-    document.getElementById('cfDelName').textContent = `"${r.icon||''} ${r.code} — ${r.labelEn}"`;
+    document.getElementById('cfDelName').textContent = `"${r.icon||''} ${r.labelEn}"`;
     document.getElementById('cfDelOverlay').style.display = 'flex';
   }
   function cfCloseDel() { document.getElementById('cfDelOverlay').style.display = 'none'; }
@@ -12414,14 +12402,13 @@
 
   function hftRow(r, parent) {
     const parentCell = parent
-      ? `<span style="font-family:var(--font-mono,'monospace');font-size:.78rem;background:var(--surface2,#21252f);color:var(--muted);border-radius:4px;padding:1px 6px">${esc(parent.code)}</span>`
+      ? `<span style="font-size:.82rem;color:var(--muted)">${esc(parent.labelEn)}</span>`
       : `<span style="color:var(--border)">—</span>`;
     const labelBg = parent
       ? `<div style="display:flex;align-items:center;gap:.5rem;border-left:1.5px solid var(--border);padding-left:.75rem;margin-left:1rem">${esc(r.labelBg)}</div>`
       : esc(r.labelBg);
     return `<tr draggable="true" data-id="${r.id}" data-parent="${r.parentId||''}" style="border-bottom:1px solid var(--border);transition:background .1s">
       <td style="padding:.4rem .5rem;width:28px;text-align:center"><span class="dd-handle" draggable="true" style="cursor:grab;color:var(--muted);font-size:1rem;user-select:none;display:inline-block;line-height:1;padding:2px 4px" title="Drag to reorder">⠿</span></td>
-      <td style="padding:.6rem 1rem"><span style="font-family:var(--font-mono,'monospace');font-size:.78rem;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2);border-radius:4px;padding:1px 6px">${esc(r.code)}</span></td>
       <td style="padding:.6rem 1rem;color:var(--muted);font-size:.82rem">${labelBg}</td>
       <td style="padding:.6rem 1rem;font-size:.85rem">${esc(r.labelEn)}</td>
       <td style="padding:.6rem 1rem">${parentCell}</td>
@@ -12437,25 +12424,24 @@
     const sel = document.getElementById('hftParent');
     sel.innerHTML = '<option value="">— top level —</option>';
     _hftData.filter(r => !r.parentId && r.id !== excludeId).sort((a,b) => a.sortOrder - b.sortOrder)
-      .forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = `${r.code} — ${r.labelEn}`; sel.appendChild(o); });
+      .forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = r.labelEn; sel.appendChild(o); });
   }
 
   function hftOpenAdd() {
     _hftEditId = null;
     document.getElementById('hftFormTitle').textContent = 'Add Folder';
-    ['hftCode','hftLabelBg','hftLabelEn'].forEach(id => document.getElementById(id).value = '');
+    ['hftLabelBg','hftLabelEn'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('hftSort').value = '0';
     hftPopulateParent(null);
     document.getElementById('hftParent').value = '';
     document.getElementById('hftOverlay').style.display = 'flex';
-    setTimeout(() => document.getElementById('hftCode').focus(), 50);
+    setTimeout(() => document.getElementById('hftLabelEn').focus(), 50);
   }
 
   function hftOpenEdit(id) {
     const r = _hftData.find(x => x.id === id); if (!r) return;
     _hftEditId = id;
     document.getElementById('hftFormTitle').textContent = 'Edit Folder';
-    document.getElementById('hftCode').value    = r.code;
     document.getElementById('hftLabelBg').value = r.labelBg;
     document.getElementById('hftLabelEn').value = r.labelEn;
     document.getElementById('hftSort').value    = r.sortOrder;
@@ -12468,13 +12454,12 @@
 
   async function hftSave() {
     const body = {
-      code:     document.getElementById('hftCode').value.trim(),
       labelBg:  document.getElementById('hftLabelBg').value.trim(),
       labelEn:  document.getElementById('hftLabelEn').value.trim(),
       sortOrder:parseInt(document.getElementById('hftSort').value)||0,
       parentId: document.getElementById('hftParent').value ? parseInt(document.getElementById('hftParent').value) : null,
     };
-    if (!body.code || !body.labelBg || !body.labelEn) { showToast('Fill in all required fields','error'); return; }
+    if (!body.labelBg || !body.labelEn) { showToast('Fill in all required fields','error'); return; }
     const url    = _hftEditId ? `/api/folder-templates/${_hftEditId}` : '/api/folder-templates';
     const method = _hftEditId ? 'PUT' : 'POST';
     const res = await apiFetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).then(r => r.ok ? r.json() : r.json().then(e => { throw e; })).catch(e => e);
@@ -12485,7 +12470,7 @@
   function hftOpenDel(id) {
     _hftDelId = id;
     const r = _hftData.find(x => x.id === id);
-    document.getElementById('hftDelName').textContent = `"${r.code} — ${r.labelEn}"`;
+    document.getElementById('hftDelName').textContent = `"${r.labelEn}"`;
     document.getElementById('hftDelOverlay').style.display = 'flex';
   }
   function hftCloseDel() { document.getElementById('hftDelOverlay').style.display = 'none'; }

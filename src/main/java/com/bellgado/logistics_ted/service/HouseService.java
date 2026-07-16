@@ -216,7 +216,7 @@ public class HouseService {
     }
 
     private DocFolder createHouseDocFolder(House h) {
-        var dept = docFolders.findTopLevelByCode("02");
+        var dept = docFolders.findByFolderType("ACTIVE_SITES");
         if (dept.isEmpty()) return null;
         String code = "house_" + h.getId();
         var existing = docFolders.findByCodeAndParentId(code, dept.get().getId());
@@ -233,7 +233,7 @@ public class HouseService {
     }
 
     private void syncHouseDocFolderName(House h) {
-        docFolders.findTopLevelByCode("02").ifPresent(dept ->
+        docFolders.findByFolderType("ACTIVE_SITES").ifPresent(dept ->
             docFolders.findByCodeAndParentId("house_" + h.getId(), dept.getId()).ifPresent(f -> {
                 f.setLabelEn(h.getName());
                 f.setLabelBg(h.getName());
