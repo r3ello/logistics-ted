@@ -54,10 +54,7 @@ public class DocFolderController {
                 }
             }
         }
-        roots.sort((a, b) -> {
-            String ca = (String) a.get("code"), cb = (String) b.get("code");
-            try { return Integer.compare(Integer.parseInt(ca), Integer.parseInt(cb)); } catch (NumberFormatException e) { return ca.compareTo(cb); }
-        });
+        roots.sort(Comparator.comparingInt(a -> (Integer) ((Map<?, ?>) a).get("sortOrder")));
         return roots;
     }
 
