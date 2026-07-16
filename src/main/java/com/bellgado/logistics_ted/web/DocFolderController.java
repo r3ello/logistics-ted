@@ -105,6 +105,8 @@ public class DocFolderController {
             if (body.containsKey("linkUrl")) f.setLinkUrl(nullOrString(body.get("linkUrl")));
             if (body.containsKey("icon"))    f.setIcon(body.get("icon") == null ? "" : body.get("icon").toString());
             if (body.containsKey("color"))   f.setColor(body.get("color") == null ? "#4f8ef7" : body.get("color").toString());
+            if (body.containsKey("sortOrder") && body.get("sortOrder") != null)
+                f.setSortOrder(Integer.parseInt(body.get("sortOrder").toString()));
             if (body.containsKey("parentId")) {
                 if (body.get("parentId") == null) {
                     f.setParent(null);

@@ -1322,6 +1322,8 @@
       <div id="wLocStatus" style="display:none;margin-top:0.3rem;font-size:0.75rem;color:var(--muted)"></div>
       <input type="hidden" id="wLocation" /><input type="hidden" id="wLat" /><input type="hidden" id="wLng" />
     </div>
+    <div class="field"><label>Phone</label><input id="wPhone" type="tel" placeholder="+359 ..." style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;box-sizing:border-box" /></div>
+    <div class="field"><label>Email</label><input id="wEmail" type="email" placeholder="email@example.com" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;box-sizing:border-box" /></div>
     <div class="field" id="wCrewField"><label id="wCrewLbl">Trade</label>
       <select id="wCrew" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
         <option value="">— Select trade —</option>
@@ -1619,6 +1621,12 @@
       <div class="nav-item nav-sub" id="navDocs" onclick="showView('dashboard');setDashMode('docs');setNavActive('navDocs')">
         <span class="nav-icon">📂</span> <span id="navDocsLabel">Company Documentation</span>
       </div>
+      <a class="nav-item nav-sub" id="navCompanyFolders" href="#companyfolders" onclick="showView('companyfolders');return false;">
+        <span class="nav-icon">🗂️</span> Company Folders Template
+      </a>
+      <a class="nav-item nav-sub" id="navHouseFolderTemplates" href="#housefoldertemplate" onclick="showView('housefoldertemplate');return false;">
+        <span class="nav-icon">🏠</span> House Folder Template
+      </a>
     </div>
     <div class="nav-item" id="navAttendanceGroup" onclick="toggleNavGroup('attendance')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
       <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🕐</span><span id="navAttendanceGroupLabel">Attendance</span></span>
@@ -2250,6 +2258,156 @@
 
   </div><!-- /view-attendance -->
 
+  <!-- ═══════════════════════════════════════════════════════════ COMPANY FOLDERS -->
+  <div class="view" id="view-companyfolders">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap">
+      <div>
+        <h2 style="margin:0;font-size:1.25rem;font-weight:700">🗂️ Company Folders Template</h2>
+        <p style="margin:.25rem 0 0;font-size:.82rem;color:var(--muted)">Global document folder structure shared across the company</p>
+      </div>
+      <button onclick="cfOpenAdd()" style="background:var(--accent);color:#0F1117;border:none;border-radius:8px;padding:.5rem 1.1rem;font-weight:600;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem">
+        <span style="font-size:1rem;line-height:1">＋</span> Add Folder
+      </button>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse">
+        <thead style="background:var(--surface2,#21252f)">
+          <tr>
+            <th style="border-bottom:1px solid var(--border);width:28px"></th>
+            <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Code</th>
+            <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Folder</th>
+            <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Label EN</th>
+            <th style="padding:.6rem 1rem;text-align:center;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);width:60px">Sort</th>
+            <th style="border-bottom:1px solid var(--border);width:80px"></th>
+          </tr>
+        </thead>
+        <tbody id="cfTbody"><tr><td colspan="6" style="padding:2.5rem;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <!-- modal -->
+    <div id="cfOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)cfCloseForm()">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:480px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
+          <h3 id="cfFormTitle" style="margin:0;font-size:.95rem;font-weight:600">Add Folder</h3>
+          <button onclick="cfCloseForm()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
+        </div>
+        <div style="padding:1.25rem;display:flex;flex-direction:column;gap:.9rem">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Code *</label>
+              <input id="cfCode" placeholder="e.g. 10" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-family:var(--font-mono,'monospace');font-size:.85rem;outline:none"></div>
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Sort order</label>
+              <input id="cfSort" type="number" value="0" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
+          </div>
+          <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Label (BG) *</label>
+            <input id="cfLabelBg" placeholder="е.г. Финанси" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
+          <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Label (EN) *</label>
+            <input id="cfLabelEn" placeholder="e.g. Finance" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
+          <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Parent folder</label>
+            <select id="cfParent" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none">
+              <option value="">— top level —</option>
+            </select></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 56px;gap:.75rem;align-items:end">
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Icon (emoji)</label>
+              <input id="cfIcon" maxlength="4" placeholder="📁" oninput="cfSyncPreview()" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.45rem;font-size:1.3rem;text-align:center;outline:none"></div>
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Color</label>
+              <input id="cfColor" type="color" value="#4f8ef7" oninput="cfSyncPreview()" style="width:100%;height:38px;border:1px solid var(--border);border-radius:6px;background:var(--surface2,#21252f);cursor:pointer;padding:2px 4px"></div>
+            <div id="cfPreview" style="width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:rgba(79,142,247,.15);border:1.5px solid rgba(79,142,247,.3)">📁</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
+          <button onclick="cfCloseForm()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
+          <button onclick="cfSave()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Save</button>
+        </div>
+      </div>
+    </div>
+    <!-- delete confirm -->
+    <div id="cfDelOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)cfCloseDel()">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:360px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
+          <h3 style="margin:0;font-size:.95rem;font-weight:600">Delete folder</h3>
+          <button onclick="cfCloseDel()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
+        </div>
+        <div style="padding:1.25rem;font-size:.875rem;color:var(--muted);line-height:1.6">Delete <strong id="cfDelName" style="color:var(--text)"></strong>? Subfolders will also be removed.</div>
+        <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
+          <button onclick="cfCloseDel()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
+          <button onclick="cfConfirmDel()" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /view-companyfolders -->
+
+  <!-- ═══════════════════════════════════════════════════════ HOUSE FOLDER TEMPLATE -->
+  <div class="view" id="view-housefoldertemplate">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap">
+      <div>
+        <h2 style="margin:0;font-size:1.25rem;font-weight:700">🏠 House Folder Template</h2>
+        <p style="margin:.25rem 0 0;font-size:.82rem;color:var(--muted)">Subfolders auto-created for every new construction site</p>
+      </div>
+      <button onclick="hftOpenAdd()" style="background:var(--accent);color:#0F1117;border:none;border-radius:8px;padding:.5rem 1.1rem;font-weight:600;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem">
+        <span style="font-size:1rem;line-height:1">＋</span> Add Folder
+      </button>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse">
+        <thead style="background:var(--surface2,#21252f)">
+          <tr>
+            <th style="border-bottom:1px solid var(--border);width:28px"></th>
+            <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Code</th>
+            <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Label (BG)</th>
+            <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Label (EN)</th>
+            <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Parent</th>
+            <th style="padding:.6rem 1rem;text-align:center;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);width:60px">Sort</th>
+            <th style="border-bottom:1px solid var(--border);width:80px"></th>
+          </tr>
+        </thead>
+        <tbody id="hftTbody"><tr><td colspan="7" style="padding:2.5rem;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <!-- modal -->
+    <div id="hftOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)hftCloseForm()">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:460px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
+          <h3 id="hftFormTitle" style="margin:0;font-size:.95rem;font-weight:600">Add Folder</h3>
+          <button onclick="hftCloseForm()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
+        </div>
+        <div style="padding:1.25rem;display:flex;flex-direction:column;gap:.9rem">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Code *</label>
+              <input id="hftCode" placeholder="e.g. 10" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-family:var(--font-mono,'monospace');font-size:.85rem;outline:none"></div>
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Sort order</label>
+              <input id="hftSort" type="number" value="0" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
+          </div>
+          <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Label (BG) *</label>
+            <input id="hftLabelBg" placeholder="е.г. 10_Нова_Папка" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
+          <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Label (EN) *</label>
+            <input id="hftLabelEn" placeholder="e.g. New Folder" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
+          <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Parent folder</label>
+            <select id="hftParent" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none">
+              <option value="">— top level —</option>
+            </select></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
+          <button onclick="hftCloseForm()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
+          <button onclick="hftSave()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Save</button>
+        </div>
+      </div>
+    </div>
+    <!-- delete confirm -->
+    <div id="hftDelOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)hftCloseDel()">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:360px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
+          <h3 style="margin:0;font-size:.95rem;font-weight:600">Delete folder</h3>
+          <button onclick="hftCloseDel()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
+        </div>
+        <div style="padding:1.25rem;font-size:.875rem;color:var(--muted);line-height:1.6">Delete <strong id="hftDelName" style="color:var(--text)"></strong>? Children will become top-level.</div>
+        <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
+          <button onclick="hftCloseDel()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
+          <button onclick="hftConfirmDel()" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /view-housefoldertemplate -->
+
   <div class="view" id="view-stagematrix">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem">
       <div>
@@ -2602,6 +2760,20 @@
       // documentation
       docTab:'Company Documentation', navDocsLabel:'Company Documentation', navDocsGroupLabel:'Documentation',
       docComingSoon:'— Coming soon —',
+      // company folders admin
+      pageTitle_companyfolders:'Company Folders Template', pageSub_companyfolders:'Global document folder structure shared across the company',
+      navCompanyFolders:'Company Folders Template',
+      cfColCode:'Code', cfColFolder:'Folder', cfColLabelEn:'Label EN', cfColLabelBg:'Label BG', cfColParent:'Parent', cfColActions:'Actions',
+      cfAddBtn:'＋ Add Folder', cfModalAdd:'Add Folder', cfModalEdit:'Edit Folder',
+      cfFieldCode:'Code', cfFieldLabelBg:'Label BG', cfFieldLabelEn:'Label EN', cfFieldParent:'Parent folder',
+      cfNoParent:'— top level —', cfDeleteConfirm:'Delete this folder?', cfSaveFail:'Save failed', cfNoFolders:'No folders yet.',
+      // house folder template admin
+      pageTitle_housefoldertemplate:'House Folder Template', pageSub_housefoldertemplate:'Subfolder structure seeded into every new house',
+      navHouseFolderTemplates:'House Folder Template',
+      hftColCode:'Code', hftColFolder:'Folder', hftColLabelEn:'Label EN', hftColLabelBg:'Label BG', hftColParent:'Parent', hftColActions:'Actions',
+      hftAddBtn:'＋ Add Entry', hftModalAdd:'Add Template Entry', hftModalEdit:'Edit Template Entry',
+      hftFieldCode:'Code', hftFieldLabelBg:'Label BG', hftFieldLabelEn:'Label EN', hftFieldParent:'Parent entry',
+      hftNoParent:'— top level —', hftDeleteConfirm:'Delete this template entry?', hftSaveFail:'Save failed', hftNoEntries:'No template entries yet.',
     },
     bg: {
       brandName:'Теодор Логистика', brandSub:'Управление на материали',
@@ -2894,6 +3066,20 @@
       // documentation
       docTab:'Фирмена документация', navDocsLabel:'Фирмена документация', navDocsGroupLabel:'Документация',
       docComingSoon:'— Очаквайте скоро —',
+      // company folders admin
+      pageTitle_companyfolders:'Шаблон за фирмени папки', pageSub_companyfolders:'Обща структура на документни папки за цялата фирма',
+      navCompanyFolders:'Шаблон за фирмени папки',
+      cfColCode:'Код', cfColFolder:'Папка', cfColLabelEn:'Етикет EN', cfColLabelBg:'Етикет BG', cfColParent:'Родител', cfColActions:'Действия',
+      cfAddBtn:'＋ Добави папка', cfModalAdd:'Добави папка', cfModalEdit:'Редактирай папка',
+      cfFieldCode:'Код', cfFieldLabelBg:'Етикет BG', cfFieldLabelEn:'Етикет EN', cfFieldParent:'Родителска папка',
+      cfNoParent:'— горно ниво —', cfDeleteConfirm:'Изтрий тази папка?', cfSaveFail:'Грешка при запис', cfNoFolders:'Няма папки.',
+      // house folder template admin
+      pageTitle_housefoldertemplate:'Шаблон за папки на обект', pageSub_housefoldertemplate:'Структура на подпапки за всеки нов обект',
+      navHouseFolderTemplates:'Шаблон за папки на обект',
+      hftColCode:'Код', hftColFolder:'Папка', hftColLabelEn:'Етикет EN', hftColLabelBg:'Етикет BG', hftColParent:'Родител', hftColActions:'Действия',
+      hftAddBtn:'＋ Добави запис', hftModalAdd:'Добави запис в шаблон', hftModalEdit:'Редактирай запис в шаблон',
+      hftFieldCode:'Код', hftFieldLabelBg:'Етикет BG', hftFieldLabelEn:'Етикет EN', hftFieldParent:'Родителски запис',
+      hftNoParent:'— горно ниво —', hftDeleteConfirm:'Изтрий този запис от шаблона?', hftSaveFail:'Грешка при запис', hftNoEntries:'Няма записи в шаблона.',
     },
   };
 
@@ -3236,7 +3422,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false };
   const _navGroupConfig = {
@@ -3293,6 +3479,8 @@
     if (name === 'qrcodes')     qrInit();
     if (name === 'stagematrix') loadStageMatrix();
     if (name === 'workeraccess') waInit();
+    if (name === 'companyfolders')     cfLoad();
+    if (name === 'housefoldertemplate') hftLoad();
     if (name === 'housedetail') loadHouseDetail();
     if (name === 'myorders')    loadMyOrders();
     if (name === 'order' && materials && materials.length) {
@@ -3382,7 +3570,7 @@
         IN_PROGRESS: { bg:'#fca5a5', text:'#7f1d1d' },
         DONE:        { bg:'#bbf7d0', text:'#14532d' },
       };
-      const foundationDone = (stages.find(s => s.stageOrder === 0)?.status === 'DONE');
+      const foundationDone = (stages.find(s => s.stageOrder === 1)?.status === 'DONE');
       const isEn = currentLang === 'en';
       const thCells = columns.map(col =>
         `<th style="min-width:120px;padding:0.4rem 0.5rem;text-align:center;font-size:0.62rem;color:#9aa3be;text-transform:uppercase;white-space:nowrap;border-right:1px solid #2e3250">${isEn && col.stageNameEn ? col.stageNameEn : col.stageName}</th>`
@@ -3395,7 +3583,7 @@
       const tdCells = columns.map(col => {
         const s = stages.find(x => x.stageOrder === col.stageOrder);
         const status = s?.status || 'NOT_STARTED';
-        const isLocked = col.stageOrder !== 0 && !foundationDone;
+        const isLocked = col.stageOrder > 1 && !foundationDone;
         const hasCrew = !!s?.crewId;
         const pc = HD_PILL[status];
         const leader = s?.leaderName || '';
@@ -5558,11 +5746,11 @@
     };
 
     const bodyRows = rows.map(row => {
-      const foundationCell = row.stages.find(s => s.stageOrder === 0);
+      const foundationCell = row.stages.find(s => s.stageOrder === 1);
       const foundationDone = foundationCell?.status === 'DONE';
 
       const cells = row.stages.map(s => {
-        const isFoundation = s.stageOrder === 0;
+        const isFoundation = s.stageOrder === 1;
         const isLocked = !isFoundation && !foundationDone;
 
         if (isFoundation) {
@@ -5572,7 +5760,7 @@
             : `background:transparent;color:var(--muted);border:1px dashed var(--border);cursor:pointer`;
           const label = done ? `✓ ${t('stageStatusDone')}` : '—';
           return `<td style="padding:0.2rem 0.3rem;border-right:1px solid #1a1d27;min-width:130px">
-            <button onclick="openFoundationPicker(${s.id},this,'${s.status||'NOT_STARTED'}')"
+            <button onclick="openFoundationPicker(${s.id||'null'},this,'${s.status||'NOT_STARTED'}',${row.houseId},${s.stageOrder})"
               style="${pillStyle};width:100%;padding:0.28rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap"
               >${label}</button>
           </td>`;
@@ -5596,7 +5784,7 @@
         const currentLeaderName = (currentCrew?.leaderName || s.workerName || '').replace(/"/g,'&quot;');
         const clickHandler = isLocked
           ? `onclick="showToast('${t('stageFoundationFirst').replace(/'/g,"\\'")}')"`
-          : `onclick="openStagePicker(${s.id},this,'${s.status||'NOT_STARTED'}',${s.crewId||'null'},this.dataset.crews,this.dataset.currentCrewName,this.dataset.currentLeader)"`;
+          : `onclick="openStagePicker(${s.id||'null'},this,'${s.status||'NOT_STARTED'}',${s.crewId||'null'},this.dataset.crews,this.dataset.currentCrewName,this.dataset.currentLeader,${row.houseId},${s.stageOrder})"`;
         const eyeHtml = (pc && !isLocked && s.crewId)
           ? `<span onclick="event.stopPropagation();showCrewLeaderInfo(this,${s.crewId},${s.stageOrder})" title="View leader info" style="cursor:pointer;font-size:0.8rem;padding:0.15rem 0.3rem;border-radius:5px;color:var(--muted);flex-shrink:0;user-select:none" onmouseover="this.style.background='rgba(79,142,247,0.15)'" onmouseout="this.style.background=''">👁</span>`
           : '';
@@ -5687,7 +5875,7 @@
     return leader;
   }
 
-  function openFoundationPicker(id, btn, currentStatus) {
+  function openFoundationPicker(id, btn, currentStatus, houseId, stageOrder) {
     document.getElementById('stagePicker')?.remove();
     const picker = document.createElement('div');
     picker.id = 'stagePicker';
@@ -5710,7 +5898,10 @@
         btn.style.border     = done ? 'none' : '1px dashed var(--border)';
         btn.textContent      = opt.label;
         try {
-          await apiFetch(`/api/house-stages/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+          const url = id && id !== 'null'
+            ? `/api/house-stages/${id}`
+            : `/api/houses/${houseId}/stages/${stageOrder}`;
+          await apiFetch(url, { method:'PUT', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ status: opt.status, crewId: null, workerName: null }) });
           loadStageMatrix();
         } catch(e) { console.error('Failed to update foundation', e); }
@@ -5729,7 +5920,7 @@
     setTimeout(() => document.addEventListener('click', close, true), 10);
   }
 
-  function openStagePicker(id, btn, currentStatus, currentCrewId, crewsJson, currentCrewName, currentLeader) {
+  function openStagePicker(id, btn, currentStatus, currentCrewId, crewsJson, currentCrewName, currentLeader, houseId, stageOrder) {
     document.getElementById('stagePicker')?.remove();
     const crews = JSON.parse(crewsJson.replace(/&quot;/g, '"'));
     const picker = document.createElement('div');
@@ -5740,7 +5931,7 @@
     const clearBtn = document.createElement('button');
     clearBtn.textContent = '—';
     clearBtn.style.cssText = 'background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:20px;padding:0.25rem 0.75rem;font-size:0.75rem;font-weight:600;cursor:pointer;text-align:center';
-    clearBtn.onclick = () => { pickStageCell(id, null, 'NOT_STARTED', null, btn); picker.remove(); };
+    clearBtn.onclick = () => { pickStageCell(id, null, 'NOT_STARTED', null, btn, houseId, stageOrder); picker.remove(); };
     picker.appendChild(clearBtn);
 
     const currentCrew = crews.find(c => c.crewId == currentCrewId)
@@ -5759,7 +5950,7 @@
         const b = document.createElement('button');
         b.textContent = label;
         b.style.cssText = `background:${pc.bg};color:${pc.text};border:none;border-radius:20px;padding:0.28rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;text-align:center;outline:${active ? '2px solid #fff' : 'none'};white-space:nowrap`;
-        b.onclick = () => { pickStageCell(id, currentCrew.crewId, v, currentCrew.leader, btn); picker.remove(); };
+        b.onclick = () => { pickStageCell(id, currentCrew.crewId, v, currentCrew.leader, btn, houseId, stageOrder); picker.remove(); };
         picker.appendChild(b);
       });
     } else {
@@ -5820,7 +6011,7 @@
             const okBtn = document.createElement('button');
             okBtn.textContent = currentLang === 'bg' ? 'Продължи' : 'Continue';
             okBtn.style.cssText = 'flex:1;padding:0.55rem 1rem;border-radius:8px;border:none;background:#f97316;color:#fff;font-size:0.88rem;font-weight:700;cursor:pointer';
-            okBtn.onclick = () => { overlay.remove(); pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn); };
+            okBtn.onclick = () => { overlay.remove(); pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn, houseId, stageOrder); };
             row.appendChild(cancelBtn);
             row.appendChild(okBtn);
             box.appendChild(icon);
@@ -5831,7 +6022,7 @@
             document.body.appendChild(overlay);
             return;
           }
-          pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn);
+          pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn, houseId, stageOrder);
           picker.remove();
         };
         row.appendChild(b);
@@ -5852,7 +6043,7 @@
     setTimeout(() => document.addEventListener('click', close, true), 10);
   }
 
-  async function pickStageCell(id, crewId, status, leader, btn) {
+  async function pickStageCell(id, crewId, status, leader, btn, houseId, stageOrder) {
     const pc = PILL_COLORS[status];
     const label = pc && leader ? stagePillLabel(leader, status) : '—';
     if (pc) {
@@ -5866,9 +6057,12 @@
     }
     btn.textContent = label;
     btn.title       = label;
-    btn.onclick = () => openStagePicker(id, btn, status, crewId, btn.dataset.crews || '[]');
+    btn.onclick = () => openStagePicker(id, btn, status, crewId, btn.dataset.crews || '[]', '', '', houseId, stageOrder);
+    const url = id && id !== 'null'
+      ? `/api/house-stages/${id}`
+      : `/api/houses/${houseId}/stages/${stageOrder}`;
     try {
-      await apiFetch(`/api/house-stages/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+      await apiFetch(url, { method:'PUT', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ crewId: crewId || null, status, workerName: leader || null }) });
       // Reload matrix so lock state updates if foundation changed
       // Refresh houses cache so house cards show updated stage immediately
@@ -5902,6 +6096,8 @@
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#a78bfa;font-weight:600">${w.trade ? '🔧 ' + w.trade : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewId ? `<span onclick="openCrewHistory(${w.crewId})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">👥 ${w.crewName}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.houses && w.houses.length > 0 ? w.houses.map(h => `<span onclick="openHouseDetail(${h.houseId})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">🏠 ${h.houseName}</span>`).join('<br>') : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.82rem">${w.phone ? `<a href="tel:${w.phone}" style="color:#4f8ef7;text-decoration:none">📞 ${w.phone}</a>` : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.82rem">${w.email ? `<a href="mailto:${w.email}" style="color:#3ecf6e;text-decoration:none">✉ ${w.email}</a>` : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.82rem;color:var(--muted)">${w.location || (w.lat && w.lng ? `${parseFloat(w.lat).toFixed(4)}, ${parseFloat(w.lng).toFixed(4)}` : '—')}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
           <div style="display:flex;gap:0.4rem">
@@ -5925,6 +6121,8 @@
                 <th data-i18n="colTrade" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colTrade')}</th>
                 <th data-i18n="colCrew" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
                 <th data-i18n="colHouse" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Phone</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Email</th>
                 <th data-i18n="colLocation" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
                 <th data-i18n="colActions" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
               </tr>
@@ -6037,7 +6235,7 @@
       const members = c.members || [];
       const memberListHtml = members.map(m => `<div style="display:flex;align-items:center;gap:0.4rem;padding:0.2rem 0;border-top:1px solid var(--border)">
             <span style="font-size:0.8rem">👷</span>
-            <span style="font-size:0.78rem;font-weight:600;color:var(--text)">${m.name}</span>
+            <span onclick="openWorkerJourney(${m.id})" style="font-size:0.78rem;font-weight:600;color:var(--text);cursor:pointer;text-decoration:underline;text-underline-offset:3px">${m.name}</span>
             ${m.trade ? `<span style="font-size:0.68rem;font-weight:600;color:${tradeColors[m.trade]||'#9aa3be'}">· ${m.trade}</span>` : ''}
           </div>`).join('');
       const membersHtml = members.length
@@ -6065,7 +6263,7 @@
         </td>
         <td style="padding:0.7rem 1rem;color:#a78bfa;font-weight:600;font-size:0.85rem">${c.managerName ? '👔 ' + c.managerName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;color:#f5a623;font-weight:600;font-size:0.85rem">${c.leaderName ? '🦺 ' + c.leaderName : '<span style="color:var(--muted)">—</span>'}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${c.stageNames ? '🔧 ' + c.stageNames : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${c.stageName ? '🔧 ' + c.stageName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem">${housesHtml}</td>
         <td style="padding:0.7rem 1rem">${membersHtml}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
@@ -6135,13 +6333,30 @@
         if (ob) { const oc = ob.querySelector('.crew-chevron'); if (oc) oc.textContent = '▾'; ob.style.background = 'rgba(167,139,250,0.08)'; }
       }
     });
-    panel.style.display = open ? 'none' : 'flex';
-    chevron.textContent = open ? '▾' : '▴';
-    btn.style.background = open ? 'rgba(167,139,250,0.08)' : 'rgba(167,139,250,0.18)';
-    if (!open) {
-      const close = (e) => { if (!panel.contains(e.target) && e.target !== btn) { panel.style.display = 'none'; chevron.textContent = '▾'; btn.style.background = 'rgba(167,139,250,0.08)'; document.removeEventListener('click', close, true); } };
-      setTimeout(() => document.addEventListener('click', close, true), 10);
+    if (open) {
+      panel.style.display = 'none';
+      chevron.textContent = '▾';
+      btn.style.background = 'rgba(167,139,250,0.08)';
+      return;
     }
+    // Position as fixed so it overflows the table without clipping
+    panel.style.position = 'fixed';
+    panel.style.display = 'flex';
+    chevron.textContent = '▴';
+    btn.style.background = 'rgba(167,139,250,0.18)';
+    const rect = btn.getBoundingClientRect();
+    panel.style.top  = (rect.bottom + 6) + 'px';
+    panel.style.left = rect.left + 'px';
+    panel.style.zIndex = '9999';
+    const close = (e) => {
+      if (!panel.contains(e.target) && !btn.contains(e.target)) {
+        panel.style.display = 'none';
+        chevron.textContent = '▾';
+        btn.style.background = 'rgba(167,139,250,0.08)';
+        document.removeEventListener('click', close, true);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', close, true), 10);
   }
 
   async function deleteCrewDash(id) {
@@ -7076,6 +7291,8 @@
       role:     document.getElementById('wRole').value,
       location: document.getElementById('wLocation').value,
       trade:    document.getElementById('wCrew').value,
+      phone:    document.getElementById('wPhone').value,
+      email:    document.getElementById('wEmail').value,
       lat:      document.getElementById('wLat').value,
       lng:      document.getElementById('wLng').value,
     };
@@ -7112,6 +7329,8 @@
       document.getElementById('wRole').value     = savedState.role     || 'CREW_MEMBER';
       document.getElementById('wLocation').value = savedState.location || '';
       document.getElementById('wCrew').value     = savedState.trade    || '';
+      document.getElementById('wPhone').value    = savedState.phone    || '';
+      document.getElementById('wEmail').value    = savedState.email    || '';
       document.getElementById('wLat').value      = mapCoords ? mapCoords.lat : (savedState.lat || '');
       document.getElementById('wLng').value      = mapCoords ? mapCoords.lng : (savedState.lng || '');
     } else if (id) {
@@ -7123,6 +7342,8 @@
           document.getElementById('wRole').value     = w.role     || 'CREW_MEMBER';
           document.getElementById('wLocation').value = w.location || '';
           document.getElementById('wCrew').value     = w.trade    || '';
+          document.getElementById('wPhone').value    = w.phone    || '';
+          document.getElementById('wEmail').value    = w.email    || '';
           document.getElementById('wLat').value      = w.lat      || '';
           document.getElementById('wLng').value      = w.lng      || '';
         }
@@ -7132,6 +7353,8 @@
       document.getElementById('wRole').value = 'CREW_MEMBER';
       document.getElementById('wLocation').value = '';
       document.getElementById('wCrew').value = '';
+      document.getElementById('wPhone').value = '';
+      document.getElementById('wEmail').value = '';
       document.getElementById('wLat').value = '';
       document.getElementById('wLng').value = '';
     }
@@ -7187,7 +7410,9 @@
     const lat      = document.getElementById('wLat').value  || null;
     const lng      = document.getElementById('wLng').value  || null;
     if (!name) { document.getElementById('workerModalErr').textContent = 'Name is required.'; return; }
-    const body = { name, role, location, trade,
+    const phone = document.getElementById('wPhone').value.trim() || null;
+    const email = document.getElementById('wEmail').value.trim() || null;
+    const body = { name, role, location, trade, phone, email,
                    lat: lat ? parseFloat(lat) : null, lng: lng ? parseFloat(lng) : null };
     try {
       let res;
@@ -8043,6 +8268,10 @@
           <div style="font-size:0.82rem;color:var(--muted);margin-top:0.2rem">
             ${roleLabel}${data.crewName ? ' · 👥 ' + data.crewName : ''}${data.trade ? ' · 🔧 ' + data.trade : ''}${data.location ? ' · 📍 ' + data.location : ''}
           </div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:0.4rem">
+            ${data.phone ? `<a href="tel:${data.phone}" style="font-size:0.82rem;color:#4f8ef7;text-decoration:none">📞 ${data.phone}</a>` : ''}
+            ${data.email ? `<a href="mailto:${data.email}" style="font-size:0.82rem;color:#3ecf6e;text-decoration:none">✉ ${data.email}</a>` : ''}
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
           <label style="font-size:0.78rem;color:var(--muted)">${t('wjFrom')}</label>
@@ -8247,7 +8476,7 @@
       ${benchmarkChips ? `<div style="margin-bottom:0.75rem;display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center">
         <span style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-right:0.25rem">Avg across crews:</span>
         ${benchmarkChips}
-        <span style="font-size:0.7rem;color:var(--muted);margin-left:0.25rem">— <span style="color:#3ecf6e">green</span> = faster · <span style="color:#f87171">red</span> = slower</span>
+        <span style="font-size:0.7rem;color:var(--muted);margin-left:0.25rem">— <span style="color:#3ecf6e">green</span> = faster · <span style="color:#f5a623">orange</span> = average · <span style="color:#f87171">red</span> = slower</span>
       </div>` : ''}
       <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
         <div style="overflow-x:auto">
@@ -8272,10 +8501,27 @@
       <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
         <button onclick="showView('${_chPrevView}')" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.35rem 0.75rem;cursor:pointer;color:var(--text);font-size:0.85rem">${t('chBack')}</button>
         <div style="flex:1;min-width:200px">
-          <div style="font-size:1.2rem;font-weight:700;color:var(--text)">👷 ${data.crewName}</div>
+          <div style="font-size:1.2rem;font-weight:700;color:var(--text)">👥 ${data.crewName}</div>
           <div style="font-size:0.82rem;color:var(--muted);margin-top:0.2rem">
-            ${data.leaderName ? t('chLeader') + ': <span style="cursor:pointer;color:var(--accent,#4f8ef7);text-decoration:underline" onclick="openWorkerJourney('+data.leaderId+')">' + data.leaderName + '</span>' : ''}
+            ${data.stageName ? '🔧 ' + data.stageName + (data.leaderName ? ' · ' : '') : ''}${data.leaderName ? t('chLeader') + ': <span style="cursor:pointer;color:var(--accent,#4f8ef7);text-decoration:underline" onclick="openWorkerJourney('+data.leaderId+')">' + data.leaderName + '</span>' : ''}
           </div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:0.4rem">
+            ${data.leaderPhone ? `<a href="tel:${data.leaderPhone}" style="font-size:0.82rem;color:#4f8ef7;text-decoration:none">📞 ${data.leaderPhone}</a>` : ''}
+            ${data.leaderEmail ? `<a href="mailto:${data.leaderEmail}" style="font-size:0.82rem;color:#3ecf6e;text-decoration:none">✉ ${data.leaderEmail}</a>` : ''}
+          </div>
+          ${data.members && data.members.length ? `<div style="position:relative;display:inline-block;margin-top:0.5rem">
+            <button onclick="(function(btn){var p=btn.nextElementSibling,open=p.style.display==='flex';p.style.display=open?'none':'flex';if(!open){var r=btn.getBoundingClientRect();p.style.top=r.bottom+6+'px';p.style.left=r.left+'px';}btn.querySelector('.ch-chev').textContent=open?'▾':'▴';})(this)" style="display:flex;align-items:center;gap:0.4rem;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:7px;padding:0.28rem 0.65rem;cursor:pointer">
+              <span style="font-size:0.8rem;color:#a78bfa;font-weight:700">👷 ${data.members.length} member${data.members.length!==1?'s':''}</span>
+              <span class="ch-chev" style="font-size:0.7rem;color:#a78bfa">▾</span>
+            </button>
+            <div style="display:none;position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.5rem 0.75rem;box-shadow:0 8px 28px rgba(0,0,0,.4);min-width:220px;flex-direction:column;gap:0.15rem" onmousedown="event.stopPropagation()">
+              ${data.members.map(m => `<div style="display:flex;align-items:center;gap:0.4rem;padding:0.2rem 0;border-top:1px solid var(--border)">
+                <span style="font-size:0.8rem">👷</span>
+                <span onclick="openWorkerJourney(${m.id})" style="font-size:0.78rem;font-weight:600;color:var(--text);cursor:pointer;text-decoration:underline;text-underline-offset:3px">${m.name}</span>
+                ${m.trade ? `<span style="font-size:0.68rem;color:#a78bfa">· ${m.trade}</span>` : ''}
+              </div>`).join('')}
+            </div>
+          </div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
           <label style="font-size:0.78rem;color:var(--muted)">${t('chFrom')}</label>
@@ -11779,6 +12025,325 @@
     document.getElementById('ebMainBreakerLabel').textContent =
       `${t('ebMainLabel')} — ${document.getElementById('ebMainAmps').value || 200} A`;
   });
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── shared drag-and-drop for folder tables (reorder within same level) ──
+  function initDragDrop(tbodyId, getData, saveItem, rerender) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+    if (tbody.dataset.ddInit) return;
+    tbody.dataset.ddInit = '1';
+
+    let dragId = null;
+
+    tbody.addEventListener('dragstart', e => {
+      const tr = e.target.closest('tr[data-id]');
+      if (!tr) { e.preventDefault(); return; }
+      dragId = parseInt(tr.dataset.id);
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(dragId));
+      requestAnimationFrame(() => tr.style.opacity = '0.4');
+    });
+
+    tbody.addEventListener('dragend', () => {
+      tbody.querySelectorAll('tr[data-id]').forEach(r => {
+        r.style.opacity = '';
+        r.style.borderTop = '';
+      });
+      dragId = null;
+    });
+
+    tbody.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const tr = e.target.closest('tr[data-id]');
+      tbody.querySelectorAll('tr[data-id]').forEach(r => r.style.borderTop = '');
+      if (tr && parseInt(tr.dataset.id) !== dragId) {
+        tr.style.borderTop = '2px solid var(--accent)';
+      }
+    });
+
+    tbody.addEventListener('dragleave', e => {
+      if (!tbody.contains(e.relatedTarget)) {
+        tbody.querySelectorAll('tr[data-id]').forEach(r => r.style.borderTop = '');
+      }
+    });
+
+    tbody.addEventListener('drop', async e => {
+      e.preventDefault();
+      tbody.querySelectorAll('tr[data-id]').forEach(r => r.style.borderTop = '');
+      const targetTr = e.target.closest('tr[data-id]');
+      if (!targetTr) return;
+      const dropId = parseInt(e.dataTransfer.getData('text/plain') || dragId);
+      if (!dropId) return;
+      const targetId = parseInt(targetTr.dataset.id);
+      if (targetId === dropId) return;
+
+      const data    = getData();
+      const dragged = data.find(r => r.id === dropId);
+      const target  = data.find(r => r.id === targetId);
+      if (!dragged || !target) return;
+
+      const draggedParent = dragged.parentId ?? null;
+      const targetParent  = target.parentId  ?? null;
+
+      if (draggedParent === targetParent) {
+        // reorder within same level
+        const siblings = data
+          .filter(r => (r.parentId ?? null) === draggedParent)
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+        const fromIdx = siblings.findIndex(r => r.id === dropId);
+        const toIdx   = siblings.findIndex(r => r.id === targetId);
+        if (fromIdx === -1 || toIdx === -1) return;
+        siblings.splice(fromIdx, 1);
+        siblings.splice(toIdx, 0, dragged);
+        siblings.forEach((r, i) => { r.sortOrder = i + 1; });
+        await Promise.all(siblings.map(r => saveItem(r)));
+      } else if (dragged.parentId && !target.parentId) {
+        // child dragged onto a different top-level → reparent
+        dragged.parentId = targetId;
+        const newSiblings = data.filter(r => (r.parentId ?? null) === targetId && r.id !== dropId)
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+        dragged.sortOrder = newSiblings.length + 1;
+        await saveItem(dragged);
+      } else if (!dragged.parentId && !target.parentId) {
+        // both top-level but treated as same parent (already covered above, kept for clarity)
+      }
+
+      rerender();
+    });
+  }
+
+  // ═══════════════════════════════════════════════════ COMPANY FOLDERS
+  let _cfData = [], _cfEditId = null, _cfDelId = null;
+
+  async function cfLoad() {
+    const res = await apiFetch('/api/doc-folders/flat').then(r => r.json()).catch(() => []);
+    _cfData = Array.isArray(res) ? res : [];
+    cfRender();
+    initDragDrop('cfTbody',
+      () => _cfData,
+      r => apiFetch(`/api/doc-folders/${r.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({sortOrder: r.sortOrder, parentId: r.parentId}) }),
+      cfRender
+    );
+  }
+
+  function cfRender() {
+    const tops = _cfData.filter(r => !r.parentId).sort((a,b) => a.sortOrder - b.sortOrder);
+    let html = '';
+    for (const t of tops) {
+      html += cfRow(t, false);
+      _cfData.filter(r => r.parentId === t.id).sort((a,b) => a.sortOrder - b.sortOrder)
+             .forEach(c => html += cfRow(c, true));
+    }
+    document.getElementById('cfTbody').innerHTML = html ||
+      '<tr><td colspan="6" style="padding:2.5rem;text-align:center;color:var(--muted)">No folders yet.</td></tr>';
+  }
+
+  function cfRow(r, isChild) {
+    const bg   = (r.color || '#4f8ef7') + '20';
+    const icon = `<div style="width:28px;height:28px;border-radius:7px;background:${bg};border:1px solid ${(r.color||'#4f8ef7')}30;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem">${r.icon||'📁'}</div>`;
+    const name = `<div style="font-weight:500;font-size:.85rem">${esc(r.labelBg)}</div>`;
+    const cell = isChild
+      ? `<td style="padding:.6rem 1rem .6rem 2.5rem"><div style="display:flex;align-items:center;gap:.5rem;border-left:1.5px solid var(--border);padding-left:.75rem">${icon}${name}</div></td>`
+      : `<td style="padding:.6rem 1rem"><div style="display:flex;align-items:center;gap:.5rem">${icon}${name}</div></td>`;
+    return `<tr draggable="true" data-id="${r.id}" data-parent="${r.parentId||''}" style="border-bottom:1px solid var(--border);transition:background .1s">
+      <td style="padding:.4rem .5rem;width:28px;text-align:center"><span class="dd-handle" draggable="true" style="cursor:grab;color:var(--muted);font-size:1rem;user-select:none;display:inline-block;line-height:1;padding:2px 4px" title="Drag to reorder">⠿</span></td>
+      <td style="padding:.6rem 1rem"><span style="font-family:var(--font-mono,'monospace');font-size:.78rem;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2);border-radius:4px;padding:1px 6px">${esc(r.code)}</span></td>
+      ${cell}
+      <td style="padding:.6rem 1rem;color:var(--muted);font-size:.82rem">${esc(r.labelEn)}</td>
+      <td style="padding:.6rem 1rem;text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:var(--surface2,#21252f);color:var(--muted);font-size:.75rem;font-weight:600">${r.sortOrder}</span></td>
+      <td style="padding:.6rem 1rem"><div style="display:flex;gap:.25rem;justify-content:flex-end">
+        <button onclick="cfOpenEdit(${r.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 7px;border-radius:5px;font-size:.8rem" title="Edit">✏️</button>
+        <button onclick="cfOpenDel(${r.id})" style="background:none;border:none;cursor:pointer;color:#f87171;padding:4px 7px;border-radius:5px;font-size:.8rem" title="Delete">🗑️</button>
+      </div></td>
+    </tr>`;
+  }
+
+  function cfPopulateParent(excludeId) {
+    const sel = document.getElementById('cfParent');
+    sel.innerHTML = '<option value="">— top level —</option>';
+    _cfData.filter(r => !r.parentId && r.id !== excludeId).sort((a,b) => a.sortOrder - b.sortOrder)
+      .forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = `${r.icon||''} ${r.code} — ${r.labelEn}`; sel.appendChild(o); });
+  }
+
+  function cfSyncPreview() {
+    const icon = document.getElementById('cfIcon').value || '📁';
+    const color = document.getElementById('cfColor').value || '#4f8ef7';
+    const p = document.getElementById('cfPreview');
+    p.textContent = icon; p.style.background = color + '20'; p.style.border = `1.5px solid ${color}40`;
+  }
+
+  function cfOpenAdd() {
+    _cfEditId = null;
+    document.getElementById('cfFormTitle').textContent = 'Add Folder';
+    ['cfCode','cfLabelBg','cfLabelEn'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('cfSort').value = '0';
+    document.getElementById('cfIcon').value = '📁';
+    document.getElementById('cfColor').value = '#4f8ef7';
+    cfPopulateParent(null);
+    document.getElementById('cfParent').value = '';
+    cfSyncPreview();
+    document.getElementById('cfOverlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('cfCode').focus(), 50);
+  }
+
+  function cfOpenEdit(id) {
+    const r = _cfData.find(x => x.id === id); if (!r) return;
+    _cfEditId = id;
+    document.getElementById('cfFormTitle').textContent = 'Edit Folder';
+    document.getElementById('cfCode').value    = r.code;
+    document.getElementById('cfLabelBg').value = r.labelBg;
+    document.getElementById('cfLabelEn').value = r.labelEn;
+    document.getElementById('cfSort').value    = r.sortOrder;
+    document.getElementById('cfIcon').value    = r.icon || '';
+    document.getElementById('cfColor').value   = r.color || '#4f8ef7';
+    cfPopulateParent(id);
+    document.getElementById('cfParent').value  = r.parentId || '';
+    cfSyncPreview();
+    document.getElementById('cfOverlay').style.display = 'flex';
+  }
+
+  function cfCloseForm() { document.getElementById('cfOverlay').style.display = 'none'; }
+
+  async function cfSave() {
+    const body = {
+      labelBg:  document.getElementById('cfLabelBg').value.trim(),
+      labelEn:  document.getElementById('cfLabelEn').value.trim(),
+      icon:     document.getElementById('cfIcon').value.trim(),
+      color:    document.getElementById('cfColor').value,
+      sortOrder:parseInt(document.getElementById('cfSort').value)||0,
+      parentId: document.getElementById('cfParent').value ? parseInt(document.getElementById('cfParent').value) : null,
+    };
+    if (!body.labelEn || !body.labelBg) { showToast('Fill in both labels','error'); return; }
+    const url    = _cfEditId ? `/api/doc-folders/${_cfEditId}` : '/api/doc-folders';
+    const method = _cfEditId ? 'PUT' : 'POST';
+    const res = await apiFetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).then(r => r.ok ? r.json() : r.json().then(e => { throw e; })).catch(e => e);
+    if (res && res.error) { showToast(res.error, 'error'); return; }
+    cfCloseForm(); await cfLoad(); showToast(_cfEditId ? 'Folder updated' : 'Folder added');
+  }
+
+  function cfOpenDel(id) {
+    _cfDelId = id;
+    const r = _cfData.find(x => x.id === id);
+    document.getElementById('cfDelName').textContent = `"${r.icon||''} ${r.code} — ${r.labelEn}"`;
+    document.getElementById('cfDelOverlay').style.display = 'flex';
+  }
+  function cfCloseDel() { document.getElementById('cfDelOverlay').style.display = 'none'; }
+  async function cfConfirmDel() {
+    await apiFetch(`/api/doc-folders/${_cfDelId}`, { method:'DELETE' });
+    cfCloseDel(); await cfLoad(); showToast('Folder deleted');
+  }
+
+  // ═══════════════════════════════════════════════ HOUSE FOLDER TEMPLATE
+  let _hftData = [], _hftEditId = null, _hftDelId = null;
+
+  async function hftLoad() {
+    const res = await apiFetch('/api/folder-templates').then(r => r.json()).catch(() => []);
+    _hftData = Array.isArray(res) ? res : [];
+    hftRender();
+    initDragDrop('hftTbody',
+      () => _hftData,
+      r => apiFetch(`/api/folder-templates/${r.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({sortOrder: r.sortOrder, parentId: r.parentId}) }),
+      hftRender
+    );
+  }
+
+  function hftRender() {
+    const byId  = Object.fromEntries(_hftData.map(r => [r.id, r]));
+    const tops  = _hftData.filter(r => !r.parentId).sort((a,b) => a.sortOrder - b.sortOrder);
+    let html = '';
+    for (const t of tops) {
+      html += hftRow(t, null);
+      _hftData.filter(r => r.parentId === t.id).sort((a,b) => a.sortOrder - b.sortOrder)
+              .forEach(c => html += hftRow(c, t));
+    }
+    document.getElementById('hftTbody').innerHTML = html ||
+      '<tr><td colspan="7" style="padding:2.5rem;text-align:center;color:var(--muted)">No templates yet.</td></tr>';
+  }
+
+  function hftRow(r, parent) {
+    const parentCell = parent
+      ? `<span style="font-family:var(--font-mono,'monospace');font-size:.78rem;background:var(--surface2,#21252f);color:var(--muted);border-radius:4px;padding:1px 6px">${esc(parent.code)}</span>`
+      : `<span style="color:var(--border)">—</span>`;
+    const labelBg = parent
+      ? `<div style="display:flex;align-items:center;gap:.5rem;border-left:1.5px solid var(--border);padding-left:.75rem;margin-left:1rem">${esc(r.labelBg)}</div>`
+      : esc(r.labelBg);
+    return `<tr draggable="true" data-id="${r.id}" data-parent="${r.parentId||''}" style="border-bottom:1px solid var(--border);transition:background .1s">
+      <td style="padding:.4rem .5rem;width:28px;text-align:center"><span class="dd-handle" draggable="true" style="cursor:grab;color:var(--muted);font-size:1rem;user-select:none;display:inline-block;line-height:1;padding:2px 4px" title="Drag to reorder">⠿</span></td>
+      <td style="padding:.6rem 1rem"><span style="font-family:var(--font-mono,'monospace');font-size:.78rem;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2);border-radius:4px;padding:1px 6px">${esc(r.code)}</span></td>
+      <td style="padding:.6rem 1rem;color:var(--muted);font-size:.82rem">${labelBg}</td>
+      <td style="padding:.6rem 1rem;font-size:.85rem">${esc(r.labelEn)}</td>
+      <td style="padding:.6rem 1rem">${parentCell}</td>
+      <td style="padding:.6rem 1rem;text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:var(--surface2,#21252f);color:var(--muted);font-size:.75rem;font-weight:600">${r.sortOrder}</span></td>
+      <td style="padding:.6rem 1rem"><div style="display:flex;gap:.25rem;justify-content:flex-end">
+        <button onclick="hftOpenEdit(${r.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 7px;border-radius:5px;font-size:.8rem" title="Edit">✏️</button>
+        <button onclick="hftOpenDel(${r.id})" style="background:none;border:none;cursor:pointer;color:#f87171;padding:4px 7px;border-radius:5px;font-size:.8rem" title="Delete">🗑️</button>
+      </div></td>
+    </tr>`;
+  }
+
+  function hftPopulateParent(excludeId) {
+    const sel = document.getElementById('hftParent');
+    sel.innerHTML = '<option value="">— top level —</option>';
+    _hftData.filter(r => !r.parentId && r.id !== excludeId).sort((a,b) => a.sortOrder - b.sortOrder)
+      .forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = `${r.code} — ${r.labelEn}`; sel.appendChild(o); });
+  }
+
+  function hftOpenAdd() {
+    _hftEditId = null;
+    document.getElementById('hftFormTitle').textContent = 'Add Folder';
+    ['hftCode','hftLabelBg','hftLabelEn'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('hftSort').value = '0';
+    hftPopulateParent(null);
+    document.getElementById('hftParent').value = '';
+    document.getElementById('hftOverlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('hftCode').focus(), 50);
+  }
+
+  function hftOpenEdit(id) {
+    const r = _hftData.find(x => x.id === id); if (!r) return;
+    _hftEditId = id;
+    document.getElementById('hftFormTitle').textContent = 'Edit Folder';
+    document.getElementById('hftCode').value    = r.code;
+    document.getElementById('hftLabelBg').value = r.labelBg;
+    document.getElementById('hftLabelEn').value = r.labelEn;
+    document.getElementById('hftSort').value    = r.sortOrder;
+    hftPopulateParent(id);
+    document.getElementById('hftParent').value  = r.parentId || '';
+    document.getElementById('hftOverlay').style.display = 'flex';
+  }
+
+  function hftCloseForm() { document.getElementById('hftOverlay').style.display = 'none'; }
+
+  async function hftSave() {
+    const body = {
+      code:     document.getElementById('hftCode').value.trim(),
+      labelBg:  document.getElementById('hftLabelBg').value.trim(),
+      labelEn:  document.getElementById('hftLabelEn').value.trim(),
+      sortOrder:parseInt(document.getElementById('hftSort').value)||0,
+      parentId: document.getElementById('hftParent').value ? parseInt(document.getElementById('hftParent').value) : null,
+    };
+    if (!body.code || !body.labelBg || !body.labelEn) { showToast('Fill in all required fields','error'); return; }
+    const url    = _hftEditId ? `/api/folder-templates/${_hftEditId}` : '/api/folder-templates';
+    const method = _hftEditId ? 'PUT' : 'POST';
+    const res = await apiFetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).then(r => r.ok ? r.json() : r.json().then(e => { throw e; })).catch(e => e);
+    if (res && res.error) { showToast(res.error, 'error'); return; }
+    hftCloseForm(); await hftLoad(); showToast(_hftEditId ? 'Template updated' : 'Template added');
+  }
+
+  function hftOpenDel(id) {
+    _hftDelId = id;
+    const r = _hftData.find(x => x.id === id);
+    document.getElementById('hftDelName').textContent = `"${r.code} — ${r.labelEn}"`;
+    document.getElementById('hftDelOverlay').style.display = 'flex';
+  }
+  function hftCloseDel() { document.getElementById('hftDelOverlay').style.display = 'none'; }
+  async function hftConfirmDel() {
+    await apiFetch(`/api/folder-templates/${_hftDelId}`, { method:'DELETE' });
+    hftCloseDel(); await hftLoad(); showToast('Template deleted');
+  }
 
 </script>
 </body>

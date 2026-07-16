@@ -1532,2090 +1532,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Data for Name: app_user; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.app_user (id, username, password_hash, role, created_at) FROM stdin;
-1	admin	$2b$10$t01RgPA7kYT3F0ML0zyNhuNAQIkq2m3p6gGwV.JtIJANEaXf0xBSS	admin	2026-05-17 20:50:57
-2	user	$2b$10$E1JpDkL3aFadFdQVsEc80./Jc/ifz6mhD.HbZYhOZtidx3EpMnS0m	user	2026-05-17 20:50:57
-\.
-
-
---
--- Data for Name: house; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.house (id, name, location, lat, lng, start_date, current_phase, scaffold_status, scaffold_start_date, scaffold_end_date, checkin_token) FROM stdin;
-9	House Dobrich	Dobrich, Bulgaria	43.566700	27.833300	2026-02-28	\N	NONE	\N	\N	69a87b5b1809c6c7596cb549d7f32e49f5fe3356e149758565fd930bb69be7c8
-18	Herakovo 1	Dobrich, Bulgaria	43.604262	27.861328	\N	Конструкция	NONE	\N	\N	2983c44fa5a80bb232be64cddf3715dbb5340b5939dedda5d7637d45c3f48856
-4	House Burgas	Burgas, Bulgaria	42.495800	27.472600	2026-03-03	Конструкция	IN_USE	2026-05-15	2026-06-20	c323304257c5c090f7f521e7ec6e35525a3e7ebc8395049b3e1eeaf4042ed8ba
-6	House Stara Zagora	Stara Zagora, Bulgaria	42.425800	25.634500	2026-04-28	\N	NONE	\N	\N	0e686cdfadf1332f015cc1f1a6f9744669c6de5effb6b53ff65acd7c477260d8
-8	House Sliven	Sliven, Bulgaria	42.683300	26.316700	2026-03-17	\N	NONE	\N	\N	5f493cff736689bff9872ad012fe8f6a5e5238826da550a345c39d207129f045
-10	House Shumen	Shumen, Bulgaria	43.270600	26.922100	2026-04-05	\N	NONE	\N	\N	c2b903f826e3645ac4076211f226da6905f3a1b54c0f63b239b1da96e50b66f5
-2	House Plovdiv	Plovdiv, Bulgaria	42.150000	24.750000	2026-05-05	\N	IN_USE	2026-05-20	2026-06-30	86801d8cf43d9f56228ebb84fc7bff077563124285e3b53404e51c004127c7d4
-7	House Pleven	Pleven, Bulgaria	43.416800	24.606900	2026-01-20	\N	AVAILABLE	2026-07-01	2026-09-01	d8071ec393af6e333bc6755a3552a434b98f880729a1c43b68f499372df63930
-19	Yeni house	Dolno Sahrane, Bulgaria	42.642041	25.224609	\N	\N	NONE	\N	\N	f4f6ff04ba3b6886f80286d9f0c4a9156177d44399409d04ce7f57be9c29c552
-20	Yeni house	Leca, Serbia	43.092961	20.544434	\N	\N	NONE	\N	\N	9b1b8a82756dac458efd316bea8d5c263cd811fd8682ddd2541230022a79fb10
-3	House Varna Mar	Varna, Bulgaria	43.214100	27.914700	2026-02-14	\N	NONE	2026-06-10	2026-08-01	a57978dc2c0262700badfd7b4ffd962736f2f726acb54e4dcbaf729a86cb6e04
-17	House test	Sofia	42.558897	23.392296	2026-05-01	Водостоци, Плочки	NONE	\N	\N	9d472ccda30de20623ca9130259dc781f14ce70df37e50be582c7dec7cd398ef
-1	House Sofia Centro	Sofia, Bulgaria	42.697700	23.321900	2026-01-10	\N	AVAILABLE	2026-06-01	2026-07-15	99d83d7c450f5bd9abd6d820639ddf2d1b3721f5c2efea15a25fdc0ce8a2fe42
-22	Test House	My Location	42.845765	23.228134	\N	\N	NONE	\N	\N	e770e6b54e9214082f889b5db8aaa496f5f0e7c7a88ad5d367b8c3937e427b27
-25	House Paul 1	Sofia, Bulgaria	42.617791	23.356934	\N	\N	NONE	\N	\N	468b6e9b3a5984ead7cdbeb2779cf3b04c86873121e706cf302510ca6ce3e8e5
-32	Lili House	Baliovtsi, Bulgaria	42.569264	23.675537	\N	\N	NONE	\N	\N	c7957a528622cd82195aec58e8b2d8da0537a1b9862604863ad85ccaf0e37acc
-24	House Paul	Sofia, Bulgaria	42.678397	23.332214	2026-07-01	\N	NONE	\N	\N	3c24dc654115998a398168e48c493e55de5ce820935cab3b82ffe0cc49968452
-33	Tania House	Voynegovtsi, Bulgaria	42.835696	23.444824	\N	\N	NONE	\N	\N	c2e756206e9bcf44bbce252bf32fe7623b5e32c555bc156e89f73d8b073468b2
-30	Casa Paulitin	Golyam Izvor, Bulgaria	42.964463	24.082031	\N	Конструкция	NONE	\N	\N	10632f0b185c11b42ee96f1d703c4706e9266a0a73d979e042617c158389e0b7
-\.
-
-
---
--- Data for Name: stage_type; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.stage_type (stage_order, stage_name, stage_name_en) FROM stdin;
-13	Гипсокартон	Drywall
-15	Замазка	Screed
-2	Ламперия	Cladding
-4	Покривно покритие	Roof Covering
-17	Мазилка	Render
-10	Ел	Electrical
-11	ВиК	Plumbing
-18	Водостоци	Downpipes
-9	Врати поръчка	Doors Order
-7	Ниво замазка	Screed Level
-8	Дограма монтаж	Joinery Installation
-23	Мълниезащита	Lightning Protection
-24	Врати	Doors
-25	Первази	Skirting Boards
-21	Ламинат	Laminate
-20	Боя	Paint
-16	Конзоли Ел	Electrical Conduits
-5	Комин	Chimney
-1	Конструкция	Structure
-26	Приключване	Completion
-3	Улуци	Gutters
-19	Плочки	Tiles
-6	Дограма размери	Joinery Measurements
-12	Изолация	Insulation
-0	Фундамент	Foundation
-14	Шпакловка	Plastering
-22	Ключове и контакти	Switches & Sockets
-\.
-
-
---
--- Data for Name: worker; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.worker (id, name, location, lat, lng, trade, role, crew_id, username, password_hash, password_plain) FROM stdin;
-403	Lili		\N	\N	ВиК	CREW_MEMBER	100	lili	$2a$10$zwGnCOHHilZx7t6LqsoxROCZR5kj798YZFxC.JseaRrieoqJPBXPe	8714
-320	Владимир Кирилов	Haskovo	41.924005	25.546696	Ел	CREW_MEMBER	76	владимир9	$2a$10$uVstiLiyKxiy5O07J6/azeyZ/u0bhDlmGaMxIIS1ARu25t7J36fNK	1328
-322	Стоян Лазаров	Pazardzhik	42.197238	24.338299	Ел	CREW_MEMBER	77	стоян9	$2a$10$ZRsI13u5EbgLCwuE4Df9eOhuWsGmETAjwVLwZ0qEKVPbCo0wcTnHm	5551
-399	Ivan Ivanov	Ochindol, Bulgaria	43.109004	23.477783	Конструкция	CREW_LEADER	13	ivan	$2a$10$7iUc7yxnOChDejgL5DxdPOvi77fAxeJ7zf/RPrMOO.wPFCCETTsTG	2270
-323	Евгени Колев	Pazardzhik	42.196486	24.335592	Ел	CREW_MEMBER	77	евгени5	$2a$10$JfMd5r.7jRh2cYhFavTU2OHmWMagWTbiWHeA1AXal6yp1.EHXENKO	3952
-324	Любомир Попов	Pazardzhik	42.199542	24.336665	Ел	CREW_MEMBER	77	любомир9	$2a$10$1dT27oNWthyGi7u.E3IyResDjv2pqan41bB78Dwf0PxvgZeWkHn.e	5399
-326	Калин Георгиев	Pernik	42.614532	23.038108	Ел	CREW_MEMBER	78	калин9	$2a$10$N8Nd4d0eP8tpUQdsu/TiYuhsja46hMMJZ5c4komhXLyFcZc3a6HMS	6380
-404	Chris		\N	\N	ВиК	CREW_MEMBER	100	chris	$2a$10$EMiwv6IK/DfNJlpMzTamrONUrNVYGqdXQohcAwITwpvBg2iOaJRqi	6897
-76	Христо Христов	Dobrich	43.568292	27.824077	Конструкция	CREW_MEMBER	15	христо4	$2a$10$c0vGnAOeYkKaKgXzxN2Dcu9.EH1xMbgkrd0Jl9V1EbFYqA6Gqlvae	6681
-142	Стоян Лазаров	Pazardzhik	42.198573	24.335123	Боя	CREW_MEMBER	32	стоян	$2a$10$.niQDj0IF8T5vpRpPvQOv.XxKxAENAZPjBofWuFp.oHSwrgTQ3yRS	8520
-143	Евгени Колев	Pazardzhik	42.200683	24.336072	Боя	CREW_MEMBER	32	евгени	$2a$10$FG8ZvSXdLVPeIsjGiMI0v.3sCsRorcudWugDnKMmol7UqrJWxVZwS	1463
-144	Любомир Попов	Pazardzhik	42.200977	24.330252	Боя	CREW_MEMBER	32	любомир	$2a$10$SV.jhnky9RjUcPzbxUTKtOjCh5Q9LKoVZnXS6dPj.acaCEeVV.HSG	7637
-146	Калин Георгиев	Pernik	42.599686	23.028354	Боя	CREW_MEMBER	33	калин2	$2a$10$0Kvg6Rh0Fnk4ZyUOsIeTS.I9y31i7JPShCTn/eNQXWOE3WNw2wMFe	8039
-147	Огнян Петров	Pernik	42.601393	23.029684	Боя	CREW_MEMBER	33	огнян	$2a$10$Ejs4LAw4ROPLVNklu2WfhO0IRa3caw8.jso8gAHetsSigocHSUKsu	1784
-401	Yeni	Plovdiv, Bulgaria	42.771211	24.510498	Конструкция	CREW_LEADER	14	yeni	$2a$10$/fCS1F8GoPU2spYTvzJ8Y.Z4Q0SIWHKo0HxuMv6njPua9Ato.MdY.	6004
-168	Тодор Николаев	Sliven	42.692135	26.314194	Боя	CREW_MEMBER	38	тодор2	$2a$10$7M9HnaRpEev7TYlvumgwBeARH.YG/MzNGa17hSvtVjXAcgWwkNOxy	5644
-170	Владимир Стефанов	Sofia	42.704779	23.319344	Боя	CREW_MEMBER	39	владимир2	$2a$10$IQzokSuRH6KxNkcqEm3GR.inVKdoyPjvmMdZIfb9W9llfQCvUvOx.	4774
-171	Красимир Антонов	Sofia	42.706375	23.324675	Боя	CREW_MEMBER	39	красимир	$2a$10$so3/OHjTjZT7jjFY8JX/feFMqmCEt.Sr1DLpGY5lu9.IftWmtVvu.	3496
-172	Стоян Мартинов	Sofia	42.699903	23.319608	Боя	CREW_MEMBER	39	стоян2	$2a$10$tMP8i7Pemabq9zXCKbbVFuURRXPkan15B5wjFDg26NIv0iCdD859.	3131
-214	Андрей Александров	Plovdiv	42.145750	24.737927	Боя	CREW_MEMBER	50	андрей3	$2a$10$GPk3NLZ3B2fDlI5bCWjib.G536w0UGk1itohNO9aCJexHIg9Fd.jy	3083
-79	Радослав Владимиров	Haskovo	41.937172	25.559537	Боя	CREW_MEMBER	16	радослав2	$2a$10$T6L.rJT.4AaW3/jj3OqtYuFjpBsaf5ldVRF1jIflASkoDdT71gliK	8124
-80	Владимир Кирилов	Haskovo	41.937633	25.563953	Боя	CREW_MEMBER	16	владимир4	$2a$10$WKg/BeWbTa2z.P1hgrE.p.stJE3MkX9.Cg/ffLN5dYNyQBAmgT2qO	3542
-369	Димитър Димитров	Burgas	42.500505	27.466931	Боя	CREW_LEADER	89	димитър7	$2a$10$8QgEL.mQI0slO1ZGF2qKXepamiZIUyZXRvoo4XZj4iQYLPwiM0waW	5545
-137	Валери Пенев	Haskovo	41.938695	25.553080	Боя	CREW_LEADER	31	валери6	$2a$10$B555Q5mDTaJgMAA/k3RbsOXZFEJJ1gZRSZ0NcwYWpwLzmjPL9cp0O	4516
-141	Красимир Стоянов	Pazardzhik	42.198712	24.332993	Боя	CREW_LEADER	32	красимир6	$2a$10$/eZ/2DWVOvz8hbWWIhaGIec27a5D.G3c9VgBWER7MkFMCfY2IKL3C	2475
-145	Пламен Иванов	Pernik	42.600385	23.035243	Боя	CREW_LEADER	33	пламен6	$2a$10$UKdZw5SynOeVhVwmx5hUTOc7LtA9FrqxuVGjUdDFmXvFV2gl.NNlO	6477
-165	Борис Иванов	Sliven	42.692660	26.311978	Боя	CREW_LEADER	38	борис7	$2a$10$aduutkJGCRhFuPiRaEFVFuDSIJlAgvU7MpYXS3nW375X7ZHcujzUa	9063
-169	Радослав Димитров	Sofia	42.705298	23.320049	Боя	CREW_LEADER	39	радослав7	$2a$10$I9CJSZBALUgE.ivzv8qp3uIMkrcXvPCTk/MbzR4gn81uAO0Rb86hW	5375
-201	Красимир Стоянов	Pazardzhik	42.203413	24.332739	Боя	CREW_LEADER	47	красимир7	$2a$10$HhqJqBeXuCeixgWEL1O8I..2.WKBF11QmNjI92ghmzCpKXj6/KzZe	5535
-205	Пламен Иванов	Pernik	42.599987	23.030652	Боя	CREW_LEADER	48	пламен7	$2a$10$epjHI5USRKhl0sFj08i86e6AGKWAln15.EF.gRJ9Df0CsEAy7Qe2C	6225
-213	Даниел Виков	Plovdiv	42.144186	24.739535	Боя	CREW_LEADER	50	даниел7	$2a$10$KxeDmQaoEIvw0wXUo2msLOHrlvGtwTac7zMA.nU9KwkK4cZEBB5SO	3894
-217	Петър Пенев	Ruse	43.853973	25.978387	Боя	CREW_LEADER	51	петър9	$2a$10$7ZugWvjRJxADB4AYzqoCyOrt5e6Bop1.YtpSWYKgBS9WPhT3nHV8S	4821
-373	Виктор Виков	Dobrich	43.572084	27.823221	Боя	CREW_LEADER	90	виктор8	$2a$10$1Fg7OiIWIv05PMiyB9hnzugAI8.Ux32rQWnS5g6NvMMYKl1guJrqy	9905
-342	Мартин Лазаров	Shumen	43.264366	26.931267	Боя	CREW_MEMBER	82	мартин10	$2a$10$YSNCi/rWI6Wqz/6PX8z.ROEFpRmI3oXGtTpRuqzVDT9yra7gx1rBS	7664
-343	Виктор Колев	Shumen	43.267546	26.930083	Боя	CREW_MEMBER	82	виктор9	$2a$10$SqGeiA2ULcJ1aPPjjByU.efPX4MjGRxP99ZTW3o1/ND2GPxnbf2k6	2211
-221	Антон Стоянов	Shumen	43.265951	26.918321	Боя	CREW_LEADER	52	антон8	$2a$10$7hqJrYPholGihScSPUyRDOXFyM1zBgT/g8S294k2vxtJAtF6YWOt6	2949
-225	Борис Иванов	Sliven	42.693935	26.321575	Боя	CREW_LEADER	53	борис8	$2a$10$dH.GC223Lya0Rlpcu1YKIOk7you9ApIN4RbD.foN7WpkdUEnxW4EW	9242
-68	Николай Николаев	Blagoevgrad	42.005188	23.094269	Конструкция	CREW_MEMBER	13	николай4	$2a$10$5z7IjAQ8qLDfAUycwn.NtewTAcK5j8QczzKRY70Ng8/P4C3ISCqxW	2919
-402	Paul	Konare, Bulgaria	42.658202	25.839844	ВиК	CREW_LEADER	100	paul	$2a$10$H6UajpHDgTdxL.vMpcqjU.CrTDlQVwgMwQEwYRGbHPTPzP.2tWGGy	6366
-66	Георги Георгиев	Blagoevgrad	42.005506	23.091703	Конструкция	CREW_MEMBER	13	георги5	$2a$10$91pS5gXJWamU5o/Y6/lpcOqLWZRqASRYb3EKqHyrtF1OtXJJMtfX.	5315
-67	Петър Петров	Blagoevgrad	42.006248	23.092964	Конструкция	CREW_MEMBER	13	петър2	$2a$10$xpc2xDYz3VE3tSK9hlbYR.wrSfnOUT3ZL1shTJVErb4hVw0hpunqu	7522
-65	Георги Димитров	Blagoevgrad	42.008406	23.089736	Конструкция	CREW_MANAGER	13	иван3	$2a$10$5QINn8N2nqRKd/klpmIRe.RY3yCw/8T/8r7AXJzpkVTXe9KYQceMy	9598
-71	Антон Антонов	Burgas	42.500999	27.466034	Конструкция	CREW_MEMBER	14	антон2	$2a$10$ao22sDMwdbVu/s0qKsl/Hev2AqHL.SjDUGkA.EEu5L/eI1H/MZJ8m	1932
-90	Деян Стефанов	Pleven	43.425102	24.604532	Покривно покритие	CREW_MEMBER	19	деян5	$2a$10$unDoWmerftScHj/nVIEAHusYdFKneTqpGrCZ34diBUzbFA6iua7kW	8102
-77	Валери Пенев	Haskovo	41.935972	25.565971	Боя	CREW_LEADER	16	валери3	$2a$10$NMay5MreUDQ5bSMZlobZZeIM1rJZJoDei8eLM2iY1ALpGCMhWw2di	6797
-229	Радослав Димитров	Sofia	42.700794	23.316479	Боя	CREW_LEADER	54	радослав8	$2a$10$1op0uY/ZcdJt3Yhc9JiqUeKDXW4znl5bPnQtqUxRfmpk6KgdLo8eG	3080
-233	Евгени Виков	Stara Zagora	42.422146	25.639232	Боя	CREW_LEADER	55	евгени9	$2a$10$Nj7L77GcirITqFZj0XkJmOMyY74rQTayhyxCTl9zMwbn6d3eLwCL.	1766
-237	Огнян Пенев	Varna	43.217761	27.919597	Боя	CREW_LEADER	56	огнян9	$2a$10$vO1fFhFIlLmZvthS.GLQQ.8LWJfMKOM4e7/iq8njeY56bE9G5k7Ii	6569
-241	Росен Стоянов	Yambol	42.472584	26.503021	Боя	CREW_LEADER	57	росен9	$2a$10$t88k798CFxB1NFlRDooPQuVKD.XpOuBQLAPO7E.bGWcFOPLUZnzRi	5863
-257	Валери Пенев	Haskovo	41.927524	25.554611	Боя	CREW_LEADER	61	валери8	$2a$10$em6rid1UjwDjcp5xFKg2p.1CdGVRvcF4fjAlj309f.TIWCxbqT6HK	4836
-261	Красимир Стоянов	Pazardzhik	42.199888	24.330215	Боя	CREW_LEADER	62	красимир8	$2a$10$OseW74ZNGfF6Q//VOFYBFOjrw1gJZEuVNjdbFYESfKwfR0Rs5jh7i	6783
-247	Петър Петров	Blagoevgrad	42.015466	23.102574	Ел	CREW_MEMBER	58	петър3	$2a$10$5XhnlbBFdGPPwp4BUCdg3Ohcuu7R2QlWpmosyMp86HlTZqOT2kxAa	3107
-248	Николай Николаев	Blagoevgrad	42.019094	23.102755	Ел	CREW_MEMBER	58	николай5	$2a$10$LgaTqJRBB0TbooGg97u32uwbSX9b9ZaADfj0nMGl3dxQ1Akt1mK1q	6376
-250	Стефан Стефанов	Burgas	42.498171	27.476267	Ел	CREW_MEMBER	59	стефан5	$2a$10$bp.NueftX/y68ou6O9V2SuWzM7LSgBM1ToP7TlMHjUVo9MZYe8cZm	8406
-251	Антон Антонов	Burgas	42.498631	27.470801	Ел	CREW_MEMBER	59	антон3	$2a$10$gr0eMQYGyqwjF5IiXb4dO.XB.unV/D3OvExoCsrXe/0Lc1I29v5bK	3581
-182	Емил Лазаров	Yambol	42.479343	26.493736	Ел	CREW_MEMBER	42	емил7	$2a$10$WBMT2ExWuHgaf44R/Svn/ufXqMOEAjO22EavsnE0i0rGbz.F4Y7Xi	3811
-183	Даниел Колев	Yambol	42.476875	26.500692	Ел	CREW_MEMBER	42	даниел4	$2a$10$EHpbiTMO8uA2Q1UtcyqvZuvF0/CBZ/MMiOdCKf1knEzr1m/vnxnvW	7413
-184	Андрей Попов	Yambol	42.481773	26.497513	Ел	CREW_MEMBER	42	андрей7	$2a$10$zZ6N0t1ZFgOsukTdraSLeemRG9hcEtMsBsPHKIlHcS0gCqDJTt87K	5781
-327	Огнян Петров	Pernik	42.616588	23.041004	Ел	CREW_MEMBER	78	огнян5	$2a$10$4eWRxzne33Zw7XJ0MJgw/OHSVfMqBVRpOrvTVeV/kRhdwaHxyWVz.	6979
-328	Бойко Николаев	Pernik	42.616960	23.043262	Ел	CREW_MEMBER	78	бойко9	$2a$10$zvzTwwGo49oTC3jvhH560ujYiKwO8CUhhfWHJ02g3lByJfSyw.thK	8255
-330	Деян Стефанов	Pleven	43.412108	24.596163	Ел	CREW_MEMBER	79	деян9	$2a$10$O74XeH3pZkKIlPuKhvLw3.bYEzF/v4JyLuX2YsdiY4W4CfXyGrzXW	5611
-331	Росен Антонов	Pleven	43.408076	24.599814	Ел	CREW_MEMBER	79	росен5	$2a$10$H3QcSXE9qgTYeHuU5tWdTOkkTqHyKWlnnRlsn17DqYs9wxmmV28F6	3871
-332	Емил Мартинов	Pleven	43.411917	24.596016	Ел	CREW_MEMBER	79	емил9	$2a$10$lyVTwzWFVaisa2ZmA5sXcO4IEhUGsiw2KGFnpCHDdImlqYO4t6/Ky	3806
-69	Димитър Димитров	Burgas, Bulgaria	42.504548	27.461836	Конструкция	CREW_LEADER	\N	димитър3	$2a$10$uUBJm6QNjEd7U4flXMPBrOMW0O9U0NemGfNE9Yk6LFDNwzAeeflBO	5246
-74	Александър Александров	Dobrich	43.572186	27.825866	Конструкция	CREW_MEMBER	15	александър4	$2a$10$b1QhRSFLAU4NhZrNieBL0OuShitX2O3noWzhLEZp.rg0DRUGZzABe	9348
-72	Мартин Мартинов	Burgas	42.502872	27.461645	Конструкция	CREW_MEMBER	14	мартин4	$2a$10$0c3expfm3s1lUvvm0X3MT.8g9pEYGDYKfUtzvhU2EJuKovB9n5pj6	1103
-70	Стефан Стефанов	Burgas	42.500871	27.463439	Конструкция	CREW_MEMBER	14	стефан4	$2a$10$tn2QnNxVKHOArJnqYJ6V0uMwP3lMVcC2TCDyK84pSTgMi.LLoysBK	7369
-125	Иван Иванов	Blagoevgrad	42.009075	23.092640	Конструкция	CREW_LEADER	28	иван8	$2a$10$JAItah/K9bvT1eSbkBSyvuMNeF8zc4K4fHlHJqp/lqffxxSGYI1gu	9570
-129	Димитър Димитров	Burgas	42.514022	27.459033	Конструкция	CREW_LEADER	29	димитър8	$2a$10$iHmEy.hZLza4m6GCBAjtL.r0GIDx4oBWYX9v1u6p2P2FvqbNAnmy.	8685
-133	Виктор Виков	Dobrich	43.575262	27.825826	Конструкция	CREW_LEADER	30	виктор6	$2a$10$KApJmwLtwYGz/.Ir9EAe.e26L1k1AvwGdH4NMJ2Z2K5B55hBZk0uK	5829
-149	Венцислав Димитров	Pleven	43.407720	24.608537	Конструкция	CREW_LEADER	34	венцислав6	$2a$10$jyg5E1eVD1F31MYHGY5lWe/t1MaVR65gTC.ZYmQzwnp3efPpS8lKi	8423
-317	Валери Пенев	Haskovo	41.928935	25.548013	Ел	CREW_LEADER	76	валери9	$2a$10$QnbDRMKZzWVkqyLkLRcnf.0Gsx6pw3jOneyNOU6RsCd7O0fZeDQki	1253
-321	Красимир Стоянов	Pazardzhik	42.198613	24.338220	Ел	CREW_LEADER	77	красимир9	$2a$10$WGLf7LBVFwsDd1gNQs.sMeRWZyKi5yEFuaBu6v2LWLsWtx8oNO.0W	3663
-325	Пламен Иванов	Pernik	42.615483	23.044346	Ел	CREW_LEADER	78	пламен9	$2a$10$pudwROCa00pv.Vb7CGpuC.KOXsxhDAZ9XXOlISAZ1ZW1DkuUFhdHG	2584
-329	Венцислав Димитров	Pleven	43.414200	24.599399	Ел	CREW_LEADER	79	венцислав9	$2a$10$b.bZU5yA.NfIY16sIlYkzOwgMYYnHSGxMmaaLsmOj5QYQ4XQljbc6	6715
-333	Даниел Виков	Plovdiv	42.139188	24.752055	Ел	CREW_LEADER	80	даниел9	$2a$10$S5IcgwN1t8I9O0VVxevIr.ZFSVinxt7RDjFgLf.XUUXRYcHFEz4KS	4783
-337	Петър Пенев	Ruse	43.859279	25.967995	Ел	CREW_LEADER	81	петър11	$2a$10$oSA6yWMqjlqmQPW9NsBTL.gxAMrNYQd/ramZoaTjLZqBZKayQfEO.	5526
-334	Андрей Александров	Plovdiv	42.135995	24.748551	Ел	CREW_MEMBER	80	андрей9	$2a$10$cvLBClA08sCcwQR9ZCzqP.q749XKMjzMzlhtAIdmwkT78Z3hBXUla	3835
-335	Иван Борисов	Plovdiv	42.135215	24.748282	Ел	CREW_MEMBER	80	иван6	$2a$10$FFRk248fi38l3lG9A12DZebxVCjdD8xx5FYd.3VIlYT.DlWBWKhJO	2581
-336	Георги Христов	Plovdiv	42.138992	24.751355	Ел	CREW_MEMBER	80	георги10	$2a$10$7k/RchiVlexrj.AvICxDyeZCq/LJ2lWBhiBN9qcw/3kA31FfnUmDC	3334
-338	Николай Тодоров	Ruse	43.860658	25.966221	Ел	CREW_MEMBER	81	николай10	$2a$10$yixkQxxA8yOspEfPcF0eMe8rNXn/O5QU7SLgOUxaDVwH/Uw6V8eaa	8507
-339	Димитър Владимиров	Ruse	43.862779	25.973214	Ел	CREW_MEMBER	81	димитър6	$2a$10$co9Kx7je05BSODXawN8/P.lU/S8kEAogv/te71vNQuxN.vYY6Ch9W	4911
-73	Виктор Виков	Dobrich, Bulgaria	43.569257	27.821201	Конструкция	CREW_MEMBER	15	виктор3	$2a$10$5lW0nkQqNK0kGEqgmdjX4.BlqV1SZHXWQnjL9CeoVPNDZ2VmWr9sq	1012
-135	Борис Борисов	Dobrich	43.572468	27.824973	Конструкция	CREW_MEMBER	30	борис	$2a$10$mlQfTcQtARoWbLd49AnXAunha4tUDJJVb8CauASwJ8sq4my4QQQLS	5313
-252	Мартин Мартинов	Burgas	42.500366	27.474979	Ел	CREW_MEMBER	59	мартин5	$2a$10$jc6KIMT9BiwnJpLS1aDbUu9jn0/rZdg0gImXjsd5QK7F9jbPRnM0.	3051
-174	Любомир Александров	Stara Zagora	42.421549	25.645591	Ел	CREW_MEMBER	40	любомир2	$2a$10$08Sl046LjWvTeeXNbiz87u2U8OPORRfTJbPIvb9kRZnWoicSGX4kC	7562
-175	Пламен Борисов	Stara Zagora	42.421079	25.641884	Ел	CREW_MEMBER	40	пламен	$2a$10$8.WD093iM4METEHA4ouCIORY/pxr0oG59QvAF3u1ymjo1q13LoZVO	8038
-176	Калин Христов	Stara Zagora	42.421223	25.641301	Ел	CREW_MEMBER	40	калин3	$2a$10$SqXUXQE/5S8I9oe9TXH0wOLUmjSH924hjr8UR0CB.nZF.u/APwSIu	8756
-246	Георги Георгиев	Blagoevgrad	42.015252	23.102334	Ел	CREW_MEMBER	58	георги4	$2a$10$x7zuigLs4kJHKC2TwZcmoOOFIETgVMJhgQCbQ6NxSurdH.v4vsWXK	6452
-186	Георги Георгиев	Blagoevgrad	42.018007	23.101503	ВиК	CREW_MEMBER	43	георги8	$2a$10$aMkN.0j44ad6Ln5LN2lEeuDsbO21qQ956EXRpQPVcc9.6psUR5tPa	2682
-187	Петър Петров	Blagoevgrad	42.019060	23.099953	ВиК	CREW_MEMBER	43	петър5	$2a$10$gkzoZqYcfd6K3rzJ.S0XReq9lmFe7VFUQw7l22d5/B24vv1RZbV3q	1966
-126	Георги Георгиев	Blagoevgrad	42.003395	23.093447	Конструкция	CREW_MEMBER	28	георги	$2a$10$axutqeLyJR7pFkxHxrCw0.634cmP1wVW6puD2kqTq1wmEFJQwHgSe	7145
-127	Петър Петров	Blagoevgrad	42.010130	23.094464	Конструкция	CREW_MEMBER	28	петър	$2a$10$fKZ0uS6R/0agbvvH6TnsYOn7vunQ.42.6W0aCv.APb4cE9QRS0Sr.	3730
-128	Николай Николаев	Blagoevgrad	42.009984	23.097771	Конструкция	CREW_MEMBER	28	николай	$2a$10$vcDle6ygAKkhVBYgkvwHuOVLy.AGP3pD8I13Z1dYGsvTVKzAQSSJS	8873
-130	Стефан Стефанов	Burgas	42.509466	27.460789	Конструкция	CREW_MEMBER	29	стефан	$2a$10$PDGfr2HWMYE.aAekfdBXPuMmg1I3LNiLxAVvkha2r6qHxG/2Zm7eO	8968
-131	Антон Антонов	Burgas	42.511571	27.454988	Конструкция	CREW_MEMBER	29	антон	$2a$10$MfGh/5vtA.MfdiI4m58gf./jMXUh4Z0K6ojeCSMD/yREezRTEViFu	3365
-132	Мартин Мартинов	Burgas	42.510727	27.458621	Конструкция	CREW_MEMBER	29	мартин	$2a$10$JA46IzVixN.KiJbBYfoE4.vGmiz6MLjwEJ2zCaQhjdVQrL7jly7Uy	8120
-134	Александър Александров	Dobrich	43.573650	27.818328	Конструкция	CREW_MEMBER	30	александър	$2a$10$oswbwpjIuO13lQA8an8RnOceWhLzxqSCezbBm.TsIJgfq87SqyQ2y	9782
-136	Христо Христов	Dobrich	43.573791	27.819321	Конструкция	CREW_MEMBER	30	христо	$2a$10$u.aGbhR7DK8ApOW7I6e5H.kdfO08xCVH/wGOOUIVAmrHb5Dst2mtm	2196
-75	Борис Борисов	Dobrich	43.570778	27.826680	Конструкция	CREW_MEMBER	15	борис2	$2a$10$YT4Bep.tbaFfROdb.Lx11OgkNRtjIWyDtIv2KyiAbogRsAZ1K/eaG	5725
-254	Александър Александров	Dobrich	43.572381	27.818287	Ел	CREW_MEMBER	60	александър5	$2a$10$m80KXCxcFTGh0nNJWZAfr.MSsHyqoAxvDiUO5uy2rrVIPW27deFEa	9481
-255	Борис Борисов	Dobrich	43.574396	27.815611	Ел	CREW_MEMBER	60	борис3	$2a$10$macI/gDVs0iEC42T7BDwq.VFwaJ2KYm92XacjqruCOd1Nl47m0AYS	3700
-188	Николай Николаев	Blagoevgrad	42.021266	23.101428	ВиК	CREW_MEMBER	43	николай8	$2a$10$PyLWlRjWzU2Z0ksmVNC2he9.LlPnTM6IV9YWmmAk8yaYY2zPzzKBy	6854
-190	Стефан Стефанов	Burgas	42.513761	27.458577	ВиК	CREW_MEMBER	44	стефан8	$2a$10$Zfe2vGu4MVqoBrCyJ9ftJOpOfJyGSPBqpH.nc4jHOHl8I50oa26za	8323
-191	Антон Антонов	Burgas	42.513826	27.460230	ВиК	CREW_MEMBER	44	антон5	$2a$10$SD/4aUhz9MFuH1hGc3eXM.riH3ea0WSXScEYai2XY.YLWOHleByJ6	5984
-192	Мартин Мартинов	Burgas	42.513123	27.457683	ВиК	CREW_MEMBER	44	мартин8	$2a$10$p/hzHxU9SoK/EBeMJ64ZqOmk0Vz6PKAiG.C.L8lhb.f2Ftfs8R9VK	6480
-194	Александър Александров	Dobrich	43.574375	27.827520	ВиК	CREW_MEMBER	45	александър8	$2a$10$rtJLRJcr/NMwNCr8wQ7Ru.N48hyTQK8TuqhI8AAJmBZvaCgtLBmtK	2829
-195	Борис Борисов	Dobrich	43.577887	27.826643	ВиК	CREW_MEMBER	45	борис5	$2a$10$K69mOT47r86VDS4.KpoA7OSn9resnclOnGLZgJKDLyntil0rKxoQO	7969
-89	Стефан Колев	Pleven	43.420379	24.612141	Покривно покритие	CREW_MANAGER	19	венцислав3	$2a$10$QeEs9zV5/voBy6Kh.8.rBuM60eBv9mHNCAJOaX4PNnkTsexILuz3a	5218
-95	Иван Борисов	Plovdiv	42.139154	24.739709	Покривно покритие	CREW_MEMBER	20	иван4	$2a$10$bdlfMsq.RmdKbTI6095w7e6im8Rci4vUAT2VlKtX4sTS5fPe3OS7G	1605
-96	Георги Христов	Plovdiv	42.144017	24.735175	Покривно покритие	CREW_MEMBER	20	георги7	$2a$10$I5HinKF5zOrCdkk0MjTrouXtBTZ4Ono0Zpd8ufpo4S35qPKQB0YFK	9797
-116	Калин Христов	Stara Zagora	42.434429	25.638183	Покривно покритие	CREW_MEMBER	25	калин	$2a$10$QFcQZSMM4mQa1w6qnrZiMeMMP7XbkZXjtCXSVKifIFJW7hYtoQ5C2	9609
-118	Бойко Тодоров	Varna	43.216095	27.908813	Покривно покритие	CREW_MEMBER	26	бойко	$2a$10$8ZgHF8Or.b02m6TZgb.2gurIF4UNaOeKEBPjXa5XtXo12BU.zcoF6	1838
-119	Венцислав Владимиров	Varna	43.213110	27.904560	Покривно покритие	CREW_MEMBER	26	венцислав	$2a$10$0uNxdCTJPve7I13R3eb1q.thApQ51cJE4QFYCokyH4WVNTAW7ZM32	4181
-120	Деян Кирилов	Varna	43.213409	27.902781	Покривно покритие	CREW_MEMBER	26	деян	$2a$10$f3U4/BBIw/IoxIYpKI81H.7RLgUyYf97Xu8BqPfaClUQi9ZKGosEO	6411
-122	Емил Лазаров	Yambol	42.493992	26.512119	Покривно покритие	CREW_MEMBER	27	емил	$2a$10$SjV5kc5oWr30QJsLhOJaL.yAcxp/vkXSS6oaQTZCVw7LPWyD/Jnsa	4259
-123	Даниел Колев	Yambol	42.487487	26.509134	Покривно покритие	CREW_MEMBER	27	даниел	$2a$10$h/.na5qXzkK5ffmN88X1Q.hnsWG5JVUHygqpiAnNcUEiuD8q8Rnju	2847
-124	Андрей Попов	Yambol	42.491171	26.506217	Покривно покритие	CREW_MEMBER	27	андрей	$2a$10$NwxYcwL6trpOKKUH3vDTRO3nYGh74OIu61BP1aOp9ih4zDfe7KaCK	9083
-274	Андрей Александров	Plovdiv	42.130085	24.749592	Покривно покритие	CREW_MEMBER	65	андрей8	$2a$10$T6J6OakZB8pjK8aaCVhYnOpmB7jC7hgpOtYJ4BAltO0NW.KseS.rO	4912
-275	Иван Борисов	Plovdiv	42.135025	24.750953	Покривно покритие	CREW_MEMBER	65	иван5	$2a$10$Y0GtobtCVjpygFQ.qEyGq.pc1GplkTKZmxJflsyMYFqhFXwh3Ly76	9469
-276	Георги Христов	Plovdiv	42.129917	24.751585	Покривно покритие	CREW_MEMBER	65	георги9	$2a$10$k..IFAUoDL6qGnkRK3lgje4/npGmrAOBKY/OBdTudRiifiyUE0.su	1653
-111	Красимир Антонов	Sofia	42.708709	23.319218	Покривно покритие	CREW_MEMBER	24	красимир5	$2a$10$ZA2XGfwcjERP1.QoSml6Ku94xwRx4CZR1jKQN9CntiYGb7KmVsYMC	8517
-112	Стоян Мартинов	Sofia	42.704656	23.318900	Покривно покритие	CREW_MEMBER	24	стоян7	$2a$10$Lhpg911bjRG7qTS.O/.dB.I6KLvfHEFEHdZPv9Zg/Ox/.BKmEfsdq	5417
-114	Любомир Александров	Stara Zagora	42.434975	25.632235	Покривно покритие	CREW_MEMBER	25	любомир7	$2a$10$KPide7fyKn7qxe6xfOh9m.aHZLuMniVpIO0wyG8w8Ul39abEdPIyO	4899
-91	Росен Антонов	Pleven	43.419143	24.611173	Покривно покритие	CREW_MEMBER	19	росен3	$2a$10$Dg5wH5/drajfwNBrFnCqoe6/8PACAiHAnAfRgq0eQSXsxCQ396UNK	6919
-94	Андрей Александров	Plovdiv	42.142814	24.740990	Покривно покритие	CREW_MEMBER	20	андрей6	$2a$10$zlt7s/3hdqdxm4DpliBSqunwqHt4eKF2xX3gYvW8HaE88TZx8bKZi	7492
-115	Пламен Борисов	Stara Zagora	42.435589	25.635757	Покривно покритие	CREW_MEMBER	25	пламен5	$2a$10$zoSC65G/Covmq9B2EoePn.sjN/LP0RsUJIZCY71NDYRJQPYxOUPDC	2965
-270	Деян Стефанов	Pleven	43.414257	24.618527	Покривно покритие	CREW_MEMBER	64	деян8	$2a$10$/S6fqkP57o8RhIEVvGAaTu3DHiIVcqe1/MQGZbgj9WPed4E9WrHrS	7821
-271	Росен Антонов	Pleven	43.413559	24.618357	Покривно покритие	CREW_MEMBER	64	росен4	$2a$10$OGGwo5P1.wqZAJW6rOYo/.82x1KSZ810bbx71iIEED9DxctHipzQm	4828
-93	Даниел Виков	Plovdiv	42.138174	24.734610	Покривно покритие	CREW_LEADER	20	даниел5	$2a$10$pxzmIa45d1oypC2gCI73RuenGty59dv3yaQ4oEh4GlAD3J.z06qsq	3462
-97	Петър Пенев	Ruse	43.854170	25.979800	Покривно покритие	CREW_LEADER	21	петър7	$2a$10$9nyK8HOlwIkOb.K7mDdYj.ZvfN5YEELkb1u3lB4RnO649eEEOIqp.	8545
-101	Антон Стоянов	Shumen	43.262754	26.918299	Покривно покритие	CREW_LEADER	22	антон6	$2a$10$NVJEAfYjR05pxO/gSiZpZ.ERZQROyxcWZe/2GLqfO2JpiySZt/ApW	9253
-105	Борис Иванов	Sliven	42.685372	26.317970	Покривно покритие	CREW_LEADER	23	борис6	$2a$10$9lOw2zVU39UrCm.UlBQmIeMBke8nOHXEXTxDApiEIS9qsvX0VbWqO	6892
-109	Радослав Димитров	Sofia	42.709492	23.323410	Покривно покритие	CREW_LEADER	24	радослав6	$2a$10$1QpUaFWu8K2mKakNmkX7WuvRJQWhWIWSdU8Ixi0ui2XtArErJS77.	2159
-113	Евгени Виков	Stara Zagora	42.433862	25.631914	Покривно покритие	CREW_LEADER	25	евгени7	$2a$10$Jm3i7MW1MbCatv0QKBeZPOpgsjgOHLlrG8kBqBHt6Ry2W0UeyY13O	2913
-117	Огнян Пенев	Varna	43.216083	27.909812	Покривно покритие	CREW_LEADER	26	огнян7	$2a$10$mPuBChEIG4FrlqU0Siqicu0MtZY/R5ikcPtclfrj8LZ9bj6y62yH.	1350
-121	Росен Стоянов	Yambol	42.491892	26.507454	Покривно покритие	CREW_LEADER	27	росен7	$2a$10$HoNhzoCEAd81iXqO48eByuw3eEJoOG9o.ZbhHrYfjQJ2iF3CzsSYi	9604
-209	Петър Стоянов	Pleven	43.410948	24.612347	Боя	CREW_MANAGER	49	венцислав7	$2a$10$4cIfgD4oCaoOxrBBXLm9X.efub3rlMSDT5G1TF9ZemIywE0e9QGzu	6118
-196	Христо Христов	Dobrich	43.579696	27.825872	ВиК	CREW_MEMBER	45	христо8	$2a$10$JvUvpRHc91NKxkQZOxx1qODnbwgLlZGam6UHLQ65GM4aqaWJIMOai	1715
-281	Мария Иванова	Shumen	43.270078	26.929795	Боя	CREW_MANAGER	67	антон9	$2a$10$W9N88B0y8r/VxmVtnpJG.eorWsZ79NZXy8JlBQNAIb1vmmEJRzPNq	7870
-161	Елена Николова	Shumen	43.276611	26.916087	Боя	CREW_MANAGER	37	антон7	$2a$10$AF3blzUrqDGQXZN1vLFlv.FcWUZPcunpdOVG2fsdf.oj2SmUOyu66	2935
-167	Валери Петров	Sliven	42.694898	26.316242	Боя	CREW_MEMBER	38	валери	$2a$10$BrH6bclk2h67/tCR.faNQO1IeuRZmNGRWXC/HT3szCVFMUz9Jnn5S	6887
-282	Мартин Лазаров	Shumen	43.269977	26.932464	Боя	CREW_MEMBER	67	мартин9	$2a$10$bk0AXBSeevT.KOfrIccnXuMGYPBXOXRB.oNb/dUzL9ix5tJ4.gLmG	2672
-283	Виктор Колев	Shumen	43.272827	26.934199	Боя	CREW_MEMBER	67	виктор5	$2a$10$8P9bnvAbHK0XOekFQ2f0aOybAhjpc2oETxITaukwesUZ/XgEtjFS.	4355
-284	Александър Попов	Shumen	43.269489	26.931475	Боя	CREW_MEMBER	67	александър9	$2a$10$fASPuDKquzGGE7QKQJoxauoT3UUdcBubYJfQJFG6yLAGFCXcu0gXq	1919
-286	Христо Георгиев	Sliven	42.680814	26.330112	Боя	CREW_MEMBER	68	христо9	$2a$10$qSgRh9NaevfZKYSVoQhnLOVJ9i0Jdaj0ahq8GpwIDMaS49pb2eHo6	2089
-287	Валери Петров	Sliven	42.681007	26.326396	Боя	CREW_MEMBER	68	валери5	$2a$10$5Tpe0SPfMXzPQrK6fKXbse4Y6ow1LCH7b9QNV0CuiTtOU088DQ.q2	8133
-288	Тодор Николаев	Sliven	42.684206	26.330545	Боя	CREW_MEMBER	68	тодор9	$2a$10$NR8.DD89tbVIvSM0DSHz1ex5hCeyMBT59nNsP8TjVZnlzKrsI1Mze	6977
-290	Владимир Стефанов	Sofia	42.688377	23.326065	Боя	CREW_MEMBER	69	владимир8	$2a$10$HrL6hKGfpEO5S6eoGjjT8uIKUY2csy.QcWPSdKJUnOQkoTTlGjQgO	7187
-267	Огнян Петров	Pernik	42.603131	23.044284	Боя	CREW_MEMBER	63	огнян4	$2a$10$GwqniWmzEF5bLb4UdnBQieI8o4/hUkAI5RPf1gbBx1oYX4rwfJiCi	2679
-268	Бойко Николаев	Pernik	42.598101	23.043727	Боя	CREW_MEMBER	63	бойко8	$2a$10$eeZUNdvkP6WlsamQCo/AA.TSq1p7n8NLqXDeVSTOtNgmyoAfhs3GO	7234
-365	Иван Иванов	Blagoevgrad	42.007561	23.093468	Боя	CREW_LEADER	88	иван7	$2a$10$2x5HHYPUJpSw7ZTaCX4h/u94Bz6qhiWy0Rjt8AV3W4fv4Sh1RE5VK	4169
-309	Димитър Димитров	Burgas	42.506734	27.473449	Боя	CREW_LEADER	74	димитър11	$2a$10$Yd4ur78X/X8oVc/TF9/8uuKrTxStvvQ7DLDXFXACHhDTYvuwld0w.	6038
-313	Виктор Виков	Dobrich	43.574887	27.822749	Боя	CREW_LEADER	75	виктор11	$2a$10$mECUNI1NPwmbaDs30ZdoguaB7s4u2sTCAr7AgIrbqqHBgcJdt9lVu	5146
-341	Антон Стоянов	Shumen	43.270549	26.930732	Боя	CREW_LEADER	82	антон10	$2a$10$vjgwGmFsEExKhBSABF8oq.S6UC1G./9ZSAbsJY83VN0pTfaEMtOPW	3411
-345	Борис Иванов	Sliven	42.676378	26.315685	Боя	CREW_LEADER	83	борис10	$2a$10$h84.syU4Jijdg35cZEvcue0RWfMEV9q0a2Ti/xpMSXf.1wycEwdhi	7700
-349	Радослав Димитров	Sofia	42.692271	23.320212	Боя	CREW_LEADER	84	радослав10	$2a$10$u4QPWh2/65vpTcxEXAqfje3yeH8jj5X.mH0Su7YqiZE7yRRkhRoIW	1508
-344	Александър Попов	Shumen	43.267662	26.931497	Боя	CREW_MEMBER	82	александър10	$2a$10$JAMjnMTP5jaiTH1dnhmwveeNiT.LCA/vWkr3wMI7TCI1LsL0cpDum	4126
-346	Христо Георгиев	Sliven	42.679259	26.318288	Боя	CREW_MEMBER	83	христо10	$2a$10$wMRGZTxVo13oMJurlrIYHeeHMg9AkwHSDn1sA182Weh/7tqmycfOG	6597
-347	Валери Петров	Sliven	42.678366	26.314969	Боя	CREW_MEMBER	83	валери10	$2a$10$CZb1YtM08gQ9QLXivVkrK.5VgeeWcpieIOidsbF.3wd.U0w.PVk2W	4754
-148	Бойко Николаев	Pernik	42.599999	23.027773	Боя	CREW_MEMBER	33	бойко2	$2a$10$M2hx4iuU4igQnuahKkxO2.zzPLatCKfwm6wFzqw5iR27ZUeHTwAeW	4814
-150	Деян Стефанов	Pleven	43.406720	24.607894	Боя	CREW_MEMBER	34	деян2	$2a$10$UH/5onkjRXZkNFgNO6ebNe0jtWPt1AmEjBx300WbCBxC1K4LgzcIK	1654
-215	Иван Борисов	Plovdiv	42.144514	24.735265	Боя	CREW_MEMBER	50	иван2	$2a$10$NIfVHVoCHQap2gGFb4I6FehvbBTj/YmPxG1FK3PduQQcC7jSVvoP2	5823
-216	Георги Христов	Plovdiv	42.145135	24.737789	Боя	CREW_MEMBER	50	георги3	$2a$10$A1.B6yv/D0kncL.xF8cvl.c/rybFxFzXb1XU59v0/0vy0J0bOBj9u	5294
-218	Николай Тодоров	Ruse	43.856765	25.976083	Боя	CREW_MEMBER	51	николай3	$2a$10$ofLD8nFndUp.ZJ.jDHt8nOdWTAJEbSVBUogPTx.nclDlq0K4gojOO	3169
-219	Димитър Владимиров	Ruse	43.855486	25.976654	Боя	CREW_MEMBER	51	димитър2	$2a$10$4XdT9j.8C8v1t5SbPRkr3eAeoRf.xF/SFRlyUNagRukOhdby9a7E.	2700
-220	Стефан Кирилов	Ruse	43.859585	25.977506	Боя	CREW_MEMBER	51	стефан3	$2a$10$tJfrJjrv4J1yS7DNiVY3ge6ODlQhBLcWjTv2wAfocL4GQA0xI4L8q	5201
-222	Мартин Лазаров	Shumen	43.266109	26.920742	Боя	CREW_MEMBER	52	мартин3	$2a$10$3nIedWkkwqlpLKDixnWZ.O2ODbz1GLCdn7JMDP0j5nbN5xyJ5HCcq	7847
-223	Виктор Колев	Shumen	43.269921	26.923362	Боя	CREW_MEMBER	52	виктор2	$2a$10$O985ZpWyfmoWXs/ynw0h9.lbTxrgg1PEQOSiLKU5iXquA405g45u.	5000
-224	Александър Попов	Shumen	43.263645	26.924051	Боя	CREW_MEMBER	52	александър3	$2a$10$MFukFHV4N3e7TJBt.Kp7A.CJ.82O1LGGkZCoKdrNO386TAgXVbpMm	3183
-226	Христо Георгиев	Sliven	42.692992	26.322066	Боя	CREW_MEMBER	53	христо3	$2a$10$wcfwdApQAx5rEz5rHH0s.O2Iw2rHFqJV5iE029xh7ZYoWsoofEmT6	8293
-227	Валери Петров	Sliven	42.690328	26.323094	Боя	CREW_MEMBER	53	валери2	$2a$10$KfxAvEYUF0pnURz7fJ3IJuHRUTokYb8wL4c.cSrvnQI/Z201VFd/u	1218
-228	Тодор Николаев	Sliven	42.690242	26.325613	Боя	CREW_MEMBER	53	тодор3	$2a$10$euflb6uGaTEzgxkGIyAPeuUNvWKqgoy/e2mrf1NwdJn2vWIY5bKwC	7323
-230	Владимир Стефанов	Sofia	42.701482	23.321884	Боя	CREW_MEMBER	54	владимир3	$2a$10$ebMzycNB./PlzGYlIQ3kkeshlv1tnK92DTD88jclTbV25qMaI9WtC	3848
-231	Красимир Антонов	Sofia	42.700755	23.319309	Боя	CREW_MEMBER	54	красимир2	$2a$10$dJxP8eOLUDuweW9FEoaPwOS8.1Hnnq5RBrEKBgzj1FBAXJOE7a7MC	1321
-232	Стоян Мартинов	Sofia	42.696632	23.320204	Боя	CREW_MEMBER	54	стоян3	$2a$10$9YqbBtONbr1YFHB8ueFmA.W.zG4Z/3PM4FTixlO/RudqFfekeZ3xm	3368
-234	Любомир Александров	Stara Zagora	42.422050	25.635945	Боя	CREW_MEMBER	55	любомир4	$2a$10$Pjny2yUmp7ZVzy0lDx7pGuYsN6FNtLSkpX7U.xKDZpVtzQenp6vUK	6824
-193	Виктор Виков	Dobrich	43.575029	27.828376	ВиК	CREW_LEADER	45	виктор7	$2a$10$8GTzv97kGrdeYvtCBLaszeZ0vbssdKUjYOAasHpdZC7Wm/3P.JTEm	7756
-235	Пламен Борисов	Stara Zagora	42.423556	25.638229	Боя	CREW_MEMBER	55	пламен2	$2a$10$sfZ61CFyZN9x/tZeaSmLPOQef1qNn99jOBbVpaL6zgi3I8m1zbNPC	2796
-236	Калин Христов	Stara Zagora	42.421226	25.637303	Боя	CREW_MEMBER	55	калин5	$2a$10$lDrjjhXI2scGTi0VGxe0buAz.CmXrHG7qJzyD7sGsyImTez0X5QIO	5645
-238	Бойко Тодоров	Varna	43.211956	27.917313	Боя	CREW_MEMBER	56	бойко4	$2a$10$GiNC0B9fTxaZL5PnsaIBY.RIn4qI2XzxRdQZUPQv14A98vD5uql3K	5202
-242	Емил Лазаров	Yambol	42.474711	26.504443	Боя	CREW_MEMBER	57	емил4	$2a$10$MeAX1DYy.Ztb82OVr6VMneplQ.fsGVcPqhJVSQCfz1svKopOhEiIO	4502
-82	Стоян Лазаров	Pazardzhik	42.184184	24.336000	Боя	CREW_MEMBER	17	стоян4	$2a$10$qEAX4.pW4c.RMdmJLpmKpeckn7nxA29pvsfnskOarIDa1xRXPdKle	5031
-83	Евгени Колев	Pazardzhik	42.183244	24.342487	Боя	CREW_MEMBER	17	евгени3	$2a$10$hkaYq0gZ8TXAAC/wFy0DZONwgcbTL7.UNox5HUBvrXCZw0nmcAinG	4834
-84	Любомир Попов	Pazardzhik	42.187235	24.337440	Боя	CREW_MEMBER	17	любомир5	$2a$10$e.puyX4iHacjT./TO120BOp/S5i8HC/lxkezf9nN0p9QXKg.i5aOS	1625
-86	Калин Георгиев	Pernik	42.614919	23.038796	Боя	CREW_MEMBER	18	калин6	$2a$10$xkdlSViJtAWEVmTfBfG0OewgiDOifuuaphwfWFB0Tm8G2WiRTxAP.	7930
-87	Огнян Петров	Pernik	42.608075	23.036091	Боя	CREW_MEMBER	18	огнян3	$2a$10$psuvbP3L.8aHk.uXOQmfKuc46/nLhzKLXZ0fy0gjcDWSdHujob4uW	4959
-88	Бойко Николаев	Pernik	42.615385	23.043169	Боя	CREW_MEMBER	18	бойко5	$2a$10$zvLix/v.zlwiavqHmWzxj.2EzVa.VcowCJUnyjsNG4rgcm0A5Xxa2	5564
-78	Тодор Тодоров	Haskovo	41.938167	25.565214	Боя	CREW_MEMBER	16	тодор4	$2a$10$CeHadd1luvN6UWEn7qq4SewbsMkQB4KuMsK0oh806au31n4F97kRC	9344
-151	Росен Антонов	Pleven	43.405911	24.605107	Боя	CREW_MEMBER	34	росен	$2a$10$W4Bl/x/KYf7bLjDbjaoiqegwH4GzoidQ4dsSCKzj4VYhPABwst5OO	5589
-152	Емил Мартинов	Pleven	43.408063	24.606889	Боя	CREW_MEMBER	34	емил2	$2a$10$VZbt2Pz.xAY5uXJiljK78u0TSQiRSsxOzpaJJfMJxsrSlo74HELsq	6200
-81	Красимир Стоянов	Pazardzhik	42.185233	24.336345	Боя	CREW_LEADER	17	красимир3	$2a$10$tVCjSbLO8lHE5rwhdDBBgOMhG0AffUjZBdgEOfm0T/GOJWJjtuAVm	5706
-85	Пламен Иванов	Pernik	42.610622	23.037733	Боя	CREW_LEADER	18	пламен3	$2a$10$9ai7XD5sAurBhlWKhWrA7eftWqwkG60odt1FkzyFtbVsSE.Lniozu	5258
-140	Владимир Кирилов	Haskovo	41.941769	25.550107	Боя	CREW_MEMBER	31	владимир	$2a$10$cBLxbGjAdeiS4vbQEPvOA.XpXJ2wTd.Eyog7Y1zO0Xbkp7f6tnfhG	2432
-203	Евгени Колев	Pazardzhik	42.197205	24.338430	Боя	CREW_MEMBER	47	евгени2	$2a$10$KsZxWVloxxJoWAUvh6Il2OiJN.ie9yyZ/WKps0Qf6uDzhLrRqe1n6	8192
-204	Любомир Попов	Pazardzhik	42.199573	24.332533	Боя	CREW_MEMBER	47	любомир3	$2a$10$FoLOH6u.HyFQ7TzeZtkB2Ofn77sosvyPQQjX1hxGQ8.JFhdIIWqbu	2730
-206	Калин Георгиев	Pernik	42.596332	23.030310	Боя	CREW_MEMBER	48	калин4	$2a$10$74OUVhMqUI1t1Ex3xc9PJeKgtBGOIdzwFGXgdPhDHFp0naxzv7PBG	8673
-207	Огнян Петров	Pernik	42.594228	23.033010	Боя	CREW_MEMBER	48	огнян2	$2a$10$jdOjHDkN2B10K9bJd/Gezur1Ftsy9Gq..vcAhVpVDP/h5J7KfCpYa	1040
-208	Бойко Николаев	Pernik	42.596772	23.034905	Боя	CREW_MEMBER	48	бойко3	$2a$10$7XAMD7HzF7CHrsOigBzATOsJmtQBXw4PsvaTlFBVDeV4CuSAzjHbe	2339
-210	Деян Стефанов	Pleven	43.414766	24.612496	Боя	CREW_MEMBER	49	деян3	$2a$10$K1dDS72RGNWxxed5DvAZe.uJWmkMPUNurjNjwDBED.6InnWVhvNhm	3478
-211	Росен Антонов	Pleven	43.416380	24.614591	Боя	CREW_MEMBER	49	росен2	$2a$10$oSK1O1belc/4Sx3dwyrCYOStBwTPAExtKQP0yd6Edm/HReQQ4DPrS	3381
-212	Емил Мартинов	Pleven	43.413729	24.617303	Боя	CREW_MEMBER	49	емил3	$2a$10$qhuWdjm12JsLmkSzGYtr6ux6G9ZFFJHwZ6UNWq7sn/6ePezXvVzt6	9722
-243	Даниел Колев	Yambol	42.479981	26.504849	Боя	CREW_MEMBER	57	даниел2	$2a$10$MxUpvUXZafPvlTiTPeqL6.h3Dqml1GwjJPfvDBvx5v2XZVooYVDZ.	2559
-244	Андрей Попов	Yambol	42.478028	26.499638	Боя	CREW_MEMBER	57	андрей4	$2a$10$pdOFzRB1QOJULDm/WJED6uecpaF64JLhcRTCtM20uV1Ntramm02TW	6774
-154	Андрей Александров	Plovdiv	42.143987	24.743432	Боя	CREW_MEMBER	35	андрей2	$2a$10$OpNRGdov.mghTCMB0CFyTe5FarLOw08w15SeGRwe2BopfQ1fXxrmO	1751
-155	Иван Борисов	Plovdiv	42.138445	24.745091	Боя	CREW_MEMBER	35	иван	$2a$10$wY98MqCxtm9npP8nI.EXzeTNuJ18pbaHz7mFcdaOoPfXsXTSRnMdG	9204
-156	Георги Христов	Plovdiv	42.138375	24.740147	Боя	CREW_MEMBER	35	георги2	$2a$10$GaEI0WZNYjTVdoIEhM62JuRUrPn/9IVLX8iPY0db/jHJ2HOqHS/be	1442
-158	Николай Тодоров	Ruse	43.861579	25.972778	Боя	CREW_MEMBER	36	николай2	$2a$10$MAKC.B/HHq3JGpqPS5rg3eJJZLxjpfBZZoXtOR/TUCUZ1wALkfjS6	8143
-159	Димитър Владимиров	Ruse	43.867315	25.972709	Боя	CREW_MEMBER	36	димитър	$2a$10$zgy5e4R16hd5.Me6IJH7/ONG6vIk6vX.AWzBj.hIIDLU7NWTGlKrm	7759
-160	Стефан Кирилов	Ruse	43.867403	25.976600	Боя	CREW_MEMBER	36	стефан2	$2a$10$lve3jQmFzLFgeyJI4m7K9u0Gr4R9tYp1nBXq36tOobLNUbHcQ/jqC	9943
-162	Мартин Лазаров	Shumen	43.278512	26.913570	Боя	CREW_MEMBER	37	мартин2	$2a$10$eCY8EsaW7kNyskKPYR0XTeiL1z4ORuVgoc1NL7D0pPsJ8aPhafpo.	3463
-163	Виктор Колев	Shumen	43.280885	26.914542	Боя	CREW_MEMBER	37	виктор	$2a$10$Q.uTUwgfHUInOcRJvZ2SVeMEd6I7B28Ujc4RgpDyQMTP.sVd0W1Cm	4965
-164	Александър Попов	Shumen	43.279214	26.912551	Боя	CREW_MEMBER	37	александър2	$2a$10$xO22TBRpTHkw1QEErWSYjekIog3CetHfjujbTP7S3wdfPxMhzXMXG	2126
-166	Христо Георгиев	Sliven	42.692273	26.315991	Боя	CREW_MEMBER	38	христо2	$2a$10$NWD/EHFRdS7S7nZJwfas3uIsTrKKA5Q/sjdve6Ec/k5u2Gv3ydT2u	6789
-239	Венцислав Владимиров	Varna	43.218904	27.921239	Боя	CREW_MEMBER	56	венцислав2	$2a$10$A2q1nQHp9l.nP1VTxgQfDO8WERvZ/E1rAYJRIyhNPc2KU4Q3sMcTW	1267
-394	Георги Димитров	Bulgaria	43.594072	24.950233	\N	CREW_MANAGER	\N	георги11	$2a$10$LohHiduNERmRM1Ld.QDwMu.Liaofs5BZtvLnjNWva94gPesuvxlRa	8884
-395	Петър Стоянов	Bulgaria	42.796208	26.099129	\N	CREW_MANAGER	\N	петър6	$2a$10$IQpvxYpmvi9jWMj0z4fDQexJ1vvCIridRKLmeguJkxhcOeB.VMSXK	4783
-396	Мария Иванова	Bulgaria	43.334974	23.380875	\N	CREW_MANAGER	\N	мария	$2a$10$9H2KQ1ZCkmNbOOXj6xBYgOKQPSn0vXcZLofs5no4rBt7wLBB7Pr9i	9704
-397	Стефан Колев	Bulgaria	43.725088	25.753495	\N	CREW_MANAGER	\N	стефан10	$2a$10$kU8XhC5CZieurDh07N.en.Yqx62EFuQa4zqoaXEkRA2AzI0l0CD9W	9979
-398	Елена Николова	Bulgaria	43.041211	27.244433	\N	CREW_MANAGER	\N	елена	$2a$10$737lt5pztUPpsb0gOwlaIuhZlZm5eHUts3FZyMdtWFPxAIQZ4g5ZS	3272
-256	Христо Христов	Dobrich	43.572995	27.816920	Ел	CREW_MEMBER	60	христо5	$2a$10$6mdsU2paaveIV5xB.Zxm8ekg5/O7ZIwzBaxkTfycPn2JVE4TsgCqW	3224
-98	Николай Тодоров	Ruse	43.851738	25.981924	Покривно покритие	CREW_MEMBER	21	николай7	$2a$10$jcbomJasFdHz98LnmV/j/ONpqtoBFo7FYLU3vv0iYVQHpRVh.V3XS	3705
-99	Димитър Владимиров	Ruse	43.850445	25.977013	Покривно покритие	CREW_MEMBER	21	димитър4	$2a$10$PViF8yHIVO0oEFuB1xZ42O2W92NWyIZm0NGb6fz/R00twpU.3PWrW	5430
-100	Стефан Кирилов	Ruse	43.850758	25.981582	Покривно покритие	CREW_MEMBER	21	стефан7	$2a$10$f6BD5T44Ud2qv3gMuetSFOgrn8n5wjQ3NdeehzMAT22StpkrPknQC	4053
-102	Мартин Лазаров	Shumen	43.261749	26.918335	Покривно покритие	CREW_MEMBER	22	мартин7	$2a$10$BBDCwrAvNiSYT9wTSFa/euuAdzg/VQJgaPqDxSlqf0uZ6UyfXNh1W	5869
-103	Виктор Колев	Shumen	43.261368	26.918855	Покривно покритие	CREW_MEMBER	22	виктор4	$2a$10$5s6M7cbVEACIeVEqcsS0LuB.UVLup4KiNNjIMZJILt49Z91d1YmSu	1913
-104	Александър Попов	Shumen	43.263027	26.917093	Покривно покритие	CREW_MEMBER	22	александър7	$2a$10$oiTBa73c.xVR/rflyH1bAeEWMGCre0WBEGPPUDkQnyXGuBMw8SIOW	4052
-106	Христо Георгиев	Sliven	42.684108	26.324225	Покривно покритие	CREW_MEMBER	23	христо7	$2a$10$DrlF52YuVw1VTAfBXV56Pe/S9CvfNvQHXSTwWcbm6WNWKTQ3FL3Cm	9675
-92	Емил Мартинов	Pleven	43.425877	24.608731	Покривно покритие	CREW_MEMBER	19	емил6	$2a$10$nKfa1P78lW606rpjx8uZFuNS6MT18HDXlNoKZa14rBDnjHvsprN6S	4305
-107	Валери Петров	Sliven	42.688091	26.323244	Покривно покритие	CREW_MEMBER	23	валери4	$2a$10$4I1GjTYB4AjrcnWYDUIaaO0RhkGzSu6CIEjaMFTDV4Wmu2/hoaUta	2906
-108	Тодор Николаев	Sliven	42.689158	26.321100	Покривно покритие	CREW_MEMBER	23	тодор7	$2a$10$jRQ8pXzBuEY3CLpti0DZGeayvGA4mkyg9/AY0q5eYXRxwuQXhQAZ6	1955
-110	Владимир Стефанов	Sofia	42.706568	23.316942	Покривно покритие	CREW_MEMBER	24	владимир6	$2a$10$FmvOT/VJbqIkIXYWf1WM/uvbrxd1V3nJcMk7XF9qn87Ll1ejxcXly	2150
-272	Емил Мартинов	Pleven	43.418282	24.619090	Покривно покритие	CREW_MEMBER	64	емил8	$2a$10$WR/6QRsYw0m1JzBVDcloQ.PoL0.SoEXa/lPMlKxGFFoCGjvfyC21m	9328
-318	Тодор Тодоров	Haskovo	41.926917	25.549549	Ел	CREW_MEMBER	76	тодор6	$2a$10$amZvSRr336c1R6ed4SW0pOMbT0v6K5PlRmINciEmPAz1OPgwjC/su	1881
-319	Радослав Владимиров	Haskovo	41.926486	25.550684	Ел	CREW_MEMBER	76	радослав4	$2a$10$I/UpBaLCxuUHILjgK4YU.u3dLNF9p88rzG28P8Afops2pg8Mdnvai	4519
-178	Бойко Тодоров	Varna	43.224228	27.917351	Ел	CREW_MEMBER	41	бойко7	$2a$10$zCe3DzK6oZzwiuoOOszp8.aLZWueoVLFDbGE2DBZmqG1AHkaCj/mq	4458
-179	Венцислав Владимиров	Varna	43.221369	27.918875	Ел	CREW_MEMBER	41	венцислав5	$2a$10$G9Zo5063oW6T1VNjEM/lFudYPgGkPpZCgDmgiPUPteQTxLNVjC3ti	9956
-180	Деян Кирилов	Varna	43.219395	27.919082	Ел	CREW_MEMBER	41	деян7	$2a$10$1AqvIXwSB2Pw/fGD2NhQn.AZSiaPnb6hgEegwWZOtUfTvljTbs53.	2634
-153	Даниел Виков	Plovdiv	42.144223	24.739214	Конструкция	CREW_LEADER	35	даниел6	$2a$10$ZatF0m4bo789UaLfoChzE.tyd1.4I.4g.4wPZjBZ/XyTH9G9Mq/TG	8262
-157	Петър Пенев	Ruse	43.862624	25.973000	Конструкция	CREW_LEADER	36	петър8	$2a$10$2ugzlxX7ATY0X7HRl6zmSOg2LjT.s5rKo2ER/5sMOy.Z9wEDPK/rK	8609
-173	Евгени Виков	Stara Zagora	42.419757	25.644433	Ел	CREW_LEADER	40	евгени8	$2a$10$m.YUvB8UoLOeSJ79YEFTduCqVgWy8B7ab2esGNiSjAbpnyoyD4.1i	1324
-177	Огнян Пенев	Varna	43.219270	27.919753	Ел	CREW_LEADER	41	огнян8	$2a$10$vZO434UdIIzLGVVW0TrJbenl0CtlKnVjQwnet095L7wNYCa.QVyYW	5639
-181	Росен Стоянов	Yambol	42.479059	26.496051	Ел	CREW_LEADER	42	росен8	$2a$10$Cabmfr8a7azQJZ2r1vmAfO6f2fu41xod.JAPSsC4JEkoV4ZFeOfo.	4416
-340	Стефан Кирилов	Ruse	43.864859	25.972283	Ел	CREW_MEMBER	81	стефан11	$2a$10$EoLxsD2unxL7ea.T7o3wxeqqchZ2xN0vJutU2yFicc/mfp0/Dvwga	1899
-245	Иван Иванов	Blagoevgrad	42.014550	23.105758	Ел	CREW_LEADER	58	иван10	$2a$10$I3Kjqfot5gCRRCxnAC9Rge8nJ6GZjHmoZKAvqAXrvgiY/3weFofhq	1085
-249	Димитър Димитров	Burgas	42.500736	27.472365	Ел	CREW_LEADER	59	димитър10	$2a$10$y/wFSxSi8LS4KlNC56ndyesPIy0UimC2uw68dRu4CPyQmFDIpLi/m	6746
-253	Виктор Виков	Dobrich	43.576182	27.816373	Ел	CREW_LEADER	60	виктор10	$2a$10$ARuK0gSD.nykEJu/F1uxx.XRgzWFbsdjJtzpXFg5HMSA25seHJH6S	9563
-185	Иван Иванов	Blagoevgrad	42.018486	23.101353	ВиК	CREW_LEADER	43	иван9	$2a$10$.EbNw6L.Y5HbFz9Yt9iYAufkfFMZAgR8xuAaFOwxiib7uOpEWG5Gq	2319
-189	Димитър Димитров	Burgas	42.512529	27.461201	ВиК	CREW_LEADER	44	димитър9	$2a$10$Tlp79iDmqzJ8get.h9a4c.whsiMddmbeydizNJ.f4lisB4oTx3Rni	5064
-240	Деян Кирилов	Varna	43.213760	27.917347	Боя	CREW_MEMBER	56	деян4	$2a$10$CfkaPha6OJ8X6FKTbWP3juiqVK4.fIMp5B2Gm7B8/cwgWgPzlr9je	5503
-308	Николай Николаев	Blagoevgrad	42.018807	23.104225	Боя	CREW_MEMBER	73	николай6	$2a$10$kWSMlaJoL38qPIYUBRojfuOPR1clXBT.yQkmCd9zAm1L6M.EseQie	4676
-310	Стефан Стефанов	Burgas	42.511440	27.472035	Боя	CREW_MEMBER	74	стефан6	$2a$10$UWG8jEl9bJnV.76a.RSO9eI1B2QP.M6YzMrr5qr1/lrDhjxOpPhBG	5998
-269	Венцислав Димитров	Pleven	43.412401	24.612459	Покривно покритие	CREW_LEADER	64	венцислав8	$2a$10$c9024SN1Jamx1.09vm/iHeMUhbINiplY2R.hrOSePcKnnTCc78itG	7451
-273	Даниел Виков	Plovdiv	42.131867	24.749273	Покривно покритие	CREW_LEADER	65	даниел8	$2a$10$XzDkfFWw8u7WcCFhcD5YGOr9Fym1Qs1.HYU2klYxnvQyWwCBv8bii	7680
-277	Петър Пенев	Ruse	43.849851	25.961934	Покривно покритие	CREW_LEADER	66	петър10	$2a$10$hsJCLOfoGEbmLWKaHPe17OolKWKwcIUKKrcxLGITVvXL6Lo8hrmV2	9775
-278	Николай Тодоров	Ruse	43.855035	25.966199	Покривно покритие	CREW_MEMBER	66	николай9	$2a$10$SNLX8wv5YDJEZyDBx3EMtuOvIwNY7CWj6DJCElKhpX/zoDMvqC8.y	9769
-279	Димитър Владимиров	Ruse	43.851113	25.966073	Покривно покритие	CREW_MEMBER	66	димитър5	$2a$10$KZcuzTIe2i8bEvHCnAmFautjlar9D0dw564to1r12RIVus7rBxU8u	7761
-280	Стефан Кирилов	Ruse	43.857090	25.967134	Покривно покритие	CREW_MEMBER	66	стефан9	$2a$10$inu2GeiORB7dbXkzgwCNyObZdyTELE0G9HmhZwdFC3.I3V3zihGvO	1599
-138	Тодор Тодоров	Haskovo	41.936702	25.549509	Боя	CREW_MEMBER	31	тодор	$2a$10$O7geV1WCA32KNN3o6wt2h.g.1wJfv6mVioxKDUqrdweD/ObtHj9BW	9056
-139	Радослав Владимиров	Haskovo	41.943353	25.553867	Боя	CREW_MEMBER	31	радослав	$2a$10$tFTFGszcvmDAOUCu/XugF..Huf3PbEq1Wi0wUuZrEp1N8r.8/rU5u	5796
-197	Валери Пенев	Haskovo	41.929426	25.547791	Боя	CREW_LEADER	46	валери7	$2a$10$maNmq2OdsEaMtbsEAwj0/uwANkPFQwcNtRdLx5AaXp/vHDxrUwsV6	4578
-258	Тодор Тодоров	Haskovo	41.930013	25.553854	Боя	CREW_MEMBER	61	тодор5	$2a$10$Q.gbu8NG7KhLAdo.1ktJWuGmMrT4hsvIlFGXG1q7tnFxTUgH6NAEm	2626
-259	Радослав Владимиров	Haskovo	41.928288	25.555195	Боя	CREW_MEMBER	61	радослав3	$2a$10$AwpmF/uUQCABhlnrg79tROD931aWf/xOQkJsjWOSksRCxDm8HKGQy	4628
-260	Владимир Кирилов	Haskovo	41.923021	25.556710	Боя	CREW_MEMBER	61	владимир5	$2a$10$PEgaDxXEk3PAPOIlcDuofexZccMVmsslxR0LEBpknXRrI1eh78FYa	4807
-262	Стоян Лазаров	Pazardzhik	42.199569	24.333140	Боя	CREW_MEMBER	62	стоян5	$2a$10$wgUddPdS8NQ9fEPcdmjygudyeynUP1FdmThZVonF/2U4W/YQ1XF5W	3561
-292	Стоян Мартинов	Sofia	42.693965	23.333309	Боя	CREW_MEMBER	69	стоян6	$2a$10$dZ3QqwaTdQxpUUFL2uz0oOnQta6Bz4wsBPu2w47fyKsXgaRyTLAzG	1839
-294	Любомир Александров	Stara Zagora	42.422956	25.622841	Боя	CREW_MEMBER	70	любомир6	$2a$10$iFRVsOUVTGVMUXM1Uh34p.XqBZtkX77UOa7DgqGpUF6F.7syO42c6	2071
-295	Пламен Борисов	Stara Zagora	42.423305	25.621700	Боя	CREW_MEMBER	70	пламен4	$2a$10$yIHYK2MkDPloWL9gblNWu.j2qSSI/bgQTuHXvMwQW985fn/hoDqTa	9033
-296	Калин Христов	Stara Zagora	42.428180	25.625072	Боя	CREW_MEMBER	70	калин7	$2a$10$4hzg.eBzuB92attVmeGCduYMmF6hGCXX1XtAJ8LM382evNphDAZH6	7071
-298	Бойко Тодоров	Varna	43.216462	27.906007	Боя	CREW_MEMBER	71	бойко6	$2a$10$rXAc8wSMfVltOJM6i8AvhesZuXXdLupFHnwrtEQRaOZYWvKIBwIhW	6967
-299	Венцислав Владимиров	Varna	43.220609	27.908436	Боя	CREW_MEMBER	71	венцислав4	$2a$10$ClOmMF.U/hEAkEGfYAosCe.iLnr70xvDpF.HT8IX6ayMBVXDH/TEu	7061
-300	Деян Кирилов	Varna	43.217750	27.910806	Боя	CREW_MEMBER	71	деян6	$2a$10$3bDxONNYsNOW3xggk7z32emC8cRFl7uHN26nXD5JHsnPdpi3raWtW	7124
-302	Емил Лазаров	Yambol	42.484743	26.504107	Боя	CREW_MEMBER	72	емил5	$2a$10$Vbdykl/pXumu6AssfIxvHOr1TKeXnWW74MdEpq1areOXm37RfnOp2	8719
-303	Даниел Колев	Yambol	42.485454	26.505987	Боя	CREW_MEMBER	72	даниел3	$2a$10$a/3MCvorfcHA/g6bNr3c2ecpnqPXUV.UodJcGyp1X7544gpbzGdtm	1436
-304	Андрей Попов	Yambol	42.487787	26.499596	Боя	CREW_MEMBER	72	андрей5	$2a$10$DrWkmko5unlnjdeAsUturOFxnhiimbxemkVOCuN6vqSX0cHrE5SAe	3404
-306	Георги Георгиев	Blagoevgrad	42.016766	23.103235	Боя	CREW_MEMBER	73	георги6	$2a$10$S5pf61D./e4yDsiwKTpHpO.QEHd8leU0rsnqy0EzbYw7JQ1W7VjZu	7865
-307	Петър Петров	Blagoevgrad	42.012023	23.100295	Боя	CREW_MEMBER	73	петър4	$2a$10$7foShf0R0d47oL8oKJ07huhr/A9M75V7Hn72bwp2ZLm1iZh7D/ahG	3040
-263	Евгени Колев	Pazardzhik	42.196597	24.329513	Боя	CREW_MEMBER	62	евгени4	$2a$10$SWNPAGNbQwqYdEQBKErLWOCC/LAE02zOWuuTOOcWTK18iojsqdKjS	9305
-291	Красимир Антонов	Sofia	42.688250	23.327429	Боя	CREW_MEMBER	69	красимир4	$2a$10$/EeHZkzVFvsaRKYk118lHuN2u8Ai7l3XW.bfQjVqtjZRGqXP0bctG	2267
-311	Антон Антонов	Burgas	42.506525	27.467903	Боя	CREW_MEMBER	74	антон4	$2a$10$IUr4TwYXkRmNBY1EVOJwDOnd/Ynba4Rv7ZfhAaUExj179P165yX66	2126
-312	Мартин Мартинов	Burgas	42.505915	27.471418	Боя	CREW_MEMBER	74	мартин6	$2a$10$bj7t0FkAlg1SFVWqgvGzOOrjkEIhtg3qm8KDFDjvKLckR66hZECSu	7361
-314	Александър Александров	Dobrich	43.576521	27.823026	Боя	CREW_MEMBER	75	александър6	$2a$10$kyzWNkxe513pKgMbvQwF6.sdiDJpShnm.4QGYPP13w4TcchK0NnPm	9718
-315	Борис Борисов	Dobrich	43.576537	27.826118	Боя	CREW_MEMBER	75	борис4	$2a$10$jZ5eJY2e8kWXhird7rXFTuG0cn3OfORFJSP3/rgCMRLj91dtUWqmy	2891
-316	Христо Христов	Dobrich	43.573710	27.827539	Боя	CREW_MEMBER	75	христо6	$2a$10$DnQFz.sTV9.robAI8BPXdOBqaSigl0CGXnddepAq.gKkEEVRWW/Mi	8438
-198	Тодор Тодоров	Haskovo	41.927910	25.554403	Боя	CREW_MEMBER	46	тодор8	$2a$10$cndJLehLM2.jRSL2Q40qj.O13HvJV1Jdx9Zc421PfjsDMdRvj.15G	9413
-199	Радослав Владимиров	Haskovo	41.931396	25.550865	Боя	CREW_MEMBER	46	радослав5	$2a$10$QRdv9Ay73VJPXwItlorJyuUAQFicgun53qaoRG2tOS1cS7ka9MPAm	6868
-353	Евгени Виков	Stara Zagora	42.421858	25.644178	Боя	CREW_LEADER	85	евгени6	$2a$10$PYhkqqycz5M077z6V7QDGebNE3Nld661O0.QCAXQWkf29RkzYNUJu	6508
-357	Огнян Пенев	Varna	43.206025	27.922135	Боя	CREW_LEADER	86	огнян6	$2a$10$YHHzIVNXrts4kWXYgqSJvOlbT.Um20PPJk5wgT6oaNtEq3phS1eJ6	8280
-361	Росен Стоянов	Yambol	42.487727	26.503381	Боя	CREW_LEADER	87	росен6	$2a$10$nIwiYeE/14LeSlYGhviHv.sJvaRwgoF7YjUHYYVlXXlGDrOZyu70e	6518
-265	Пламен Иванов	Pernik	42.601718	23.039931	Боя	CREW_LEADER	63	пламен8	$2a$10$S/NPibbnBfI2iaDtP423hOlqbx8FVLv4LshcnuT9wuS/Zi8/hgsNm	5931
-285	Борис Иванов	Sliven	42.680987	26.327926	Боя	CREW_LEADER	68	борис9	$2a$10$rqxewUMvQWwflyt6avzvg.0KB9fi.YLzzjSD4oEbKp3vdsyKH9rQm	6189
-289	Радослав Димитров	Sofia	42.691553	23.332669	Боя	CREW_LEADER	69	радослав9	$2a$10$57rfCx/.ZMOdcrXnoQfGJ.h5TL8ZlwMVfPmWbZ002ovBX.IdR5EFC	2953
-293	Евгени Виков	Stara Zagora	42.429538	25.625297	Боя	CREW_LEADER	70	евгени10	$2a$10$0RtEaYo03NCUqtNxnQx9q.tDTjUdJqiS8Jg/y14vR0HHKqMb7ziKi	7453
-297	Огнян Пенев	Varna	43.221990	27.906097	Боя	CREW_LEADER	71	огнян10	$2a$10$40.ALU9SB5xOyMxKjTJLxOLr2MmGHvOjQKD2C1geYGbyVCw8G.QPi	7774
-301	Росен Стоянов	Yambol	42.486493	26.500980	Боя	CREW_LEADER	72	росен10	$2a$10$8ZQkqueo715c49TclSm0LuleKv7AzVQV5BN/mpcMG33SRbXoijacO	5623
-305	Иван Иванов	Blagoevgrad	42.017159	23.104441	Боя	CREW_LEADER	73	иван11	$2a$10$lYQVXyzjeRHYsOPLO43YLOpxzBWHiwEj.37oz.daQ74uAkMn3W1Pm	8830
-350	Владимир Стефанов	Sofia	42.688205	23.320570	Боя	CREW_MEMBER	84	владимир10	$2a$10$o/CpIEBg0maw7pqOp21CNeUlCLn8tQJhWdUfAyZUDI2BJScw9s8/K	6713
-351	Красимир Антонов	Sofia	42.688917	23.317955	Боя	CREW_MEMBER	84	красимир10	$2a$10$K8xQ3sRV7nXIyOuFp.tLq.MPkghOF9TvsA51XD3QsAoT9GDlRk4qy	6946
-352	Стоян Мартинов	Sofia	42.694394	23.324820	Боя	CREW_MEMBER	84	стоян10	$2a$10$zCNaiORRcsht1jiddhcOx.byUI8oLeZBMMTJVGRnODu3fJzoMjPkS	6531
-354	Любомир Александров	Stara Zagora	42.426909	25.642283	Боя	CREW_MEMBER	85	любомир10	$2a$10$WKB6RwR/gicNVdoitvmQ9ub6POuB68cICMWS11iy4HocYwgQD/yqW	9305
-355	Пламен Борисов	Stara Zagora	42.425133	25.642091	Боя	CREW_MEMBER	85	пламен10	$2a$10$wGdZ5JKRWgQwTXJFCFlkAO0iXGEHB1xB6Vxyyf0Lb2HacW6ASlEKi	5104
-356	Калин Христов	Stara Zagora	42.426708	25.640940	Боя	CREW_MEMBER	85	калин10	$2a$10$KZIS1gdbyRYtgAJfO6E02OmFuR.N6ju7M85cgmTfMP2d3e757pVci	3703
-358	Бойко Тодоров	Varna	43.202305	27.924570	Боя	CREW_MEMBER	86	бойко10	$2a$10$CsKAdG3BPqGnG1UFxpIM8u6fL5Kg82Ll97hH93.YqhiUdIzqJ1nMW	3507
-200	Владимир Кирилов	Haskovo	41.928329	25.550143	Боя	CREW_MEMBER	46	владимир7	$2a$10$cNaUuXGzYC2.eoISvl/s/ejJxeeNPQXHNc.7ygptHzb3vRxU3tEpG	6473
-202	Стоян Лазаров	Pazardzhik	42.199031	24.337637	Боя	CREW_MEMBER	47	стоян8	$2a$10$KlLFTsDGmeI5TqicmPz0m.ChfB4aahvBhuKmDqTztUcHhRvJzp9cK	1252
-264	Любомир Попов	Pazardzhik	42.199850	24.331313	Боя	CREW_MEMBER	62	любомир8	$2a$10$Sd53ahef0YFRXqDgl5.zkOyM6JsLHAxj5gws09VyDo9Lw1U6h2YTa	6521
-266	Калин Георгиев	Pernik	42.602873	23.040264	Боя	CREW_MEMBER	63	калин8	$2a$10$sIcgdSxpGils01WiEMQE5erJVErluO/M2kaznYWtj1xvvWlMMfXgy	6393
-348	Тодор Николаев	Sliven	42.676382	26.317926	Боя	CREW_MEMBER	83	тодор10	$2a$10$EPTgIU/RYU.e5QkGgecvKupcqhN.1Hr39wN5mAGimIb.UT0rBsCCG	2174
-359	Венцислав Владимиров	Varna	43.202002	27.926300	Боя	CREW_MEMBER	86	венцислав10	$2a$10$RHlyw31lXDlfIwJQHFbhl.8nDWyuhYc6hIb/0cbXD/EZuLIE6ff/G	2183
-360	Деян Кирилов	Varna	43.203473	27.921915	Боя	CREW_MEMBER	86	деян10	$2a$10$stBqxB7dOhZFy6n5K9c5cO7SqfyObEJIiNNELA9rf.ENCyE5ptCbG	5624
-362	Емил Лазаров	Yambol	42.480495	26.499730	Боя	CREW_MEMBER	87	емил10	$2a$10$08zeIVl3WFOKLogdyOloAugwuCYw1ikhgquO4URshzYrQlOzCSCIO	7199
-363	Даниел Колев	Yambol	42.482441	26.504188	Боя	CREW_MEMBER	87	даниел10	$2a$10$KPR/hm86r6hThvkW496/7OCAsp.GEWOujQy9409oDulinbk9GySoS	5210
-364	Андрей Попов	Yambol	42.483788	26.498245	Боя	CREW_MEMBER	87	андрей10	$2a$10$Cm8OU8VaCvMKoBkGQ4jy2uBOhsJaV.UxwxYqMCqCKM6wxhbL0gUD2	3281
-366	Георги Георгиев	Blagoevgrad	42.011237	23.094783	Боя	CREW_MEMBER	88	георги12	$2a$10$Y9arqGNyAByYrdsd7sn1M.fGmlOVYKf4k6QMvK4VaQ83CsgqNZ3hG	3233
-367	Петър Петров	Blagoevgrad	42.004354	23.097091	Боя	CREW_MEMBER	88	петър12	$2a$10$zFB2bT9NS0XlwNrsV3RmF.J2s9R2O4YW9os0X/BmRe5/VUET7OWCC	2906
-368	Николай Николаев	Blagoevgrad	42.005074	23.095773	Боя	CREW_MEMBER	88	николай11	$2a$10$23u.kGHd0TyXZ04U69WyPeuGtxyFxq6k5dMHMHyz8.yvWSF8zUtQK	5640
-370	Стефан Стефанов	Burgas	42.501335	27.469641	Боя	CREW_MEMBER	89	стефан12	$2a$10$GpH0U2lJ06UT70E3W/D/qe7h2Kk0wHY6q6goRjOqWiB1CoouA3tHi	6251
-371	Антон Антонов	Burgas	42.501942	27.467735	Боя	CREW_MEMBER	89	антон11	$2a$10$N.MOFWFakBBo8/d1USDZE.UDhwF3J0316Ahzc3skr9hHifM46wMnu	1382
-372	Мартин Мартинов	Burgas	42.502443	27.466333	Боя	CREW_MEMBER	89	мартин11	$2a$10$cd2rag.t6lo8H3aCP.nG9.C0jxdnF8i.gliyKlpp/0lBAhwX3czN.	9899
-374	Александър Александров	Dobrich	43.573371	27.824471	Боя	CREW_MEMBER	90	александър11	$2a$10$VasRYWrqqMjWSTtA3bhzzudXlwsaGokZxWQuT8WrUIB3i8uHwffLi	4035
-375	Борис Борисов	Dobrich	43.571468	27.826062	Боя	CREW_MEMBER	90	борис11	$2a$10$dZ6KvNRlgPOQ873wSSxBleYCPlL.B3Ww0rdCVNJNazDEJY3UzInqy	4754
-376	Христо Христов	Dobrich	43.574012	27.828265	Боя	CREW_MEMBER	90	христо11	$2a$10$aH2z/kQWhQXbNpv6H0ZcVu5lnWipKuq3r/i1MXSQrt7stCdVm8U5i	3921
-\.
-
-
---
--- Data for Name: crew; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.crew (id, name, manager_id, house_id, stage_order, location, lat, lng, leader_id) FROM stdin;
-19	Улуци - Екип 1	89	\N	3	Pleven	43.422929	24.608303	\N
-25	Комин - Екип 1	65	\N	5	Stara Zagora	42.434308	25.634190	113
-26	Комин - Екип 2	65	\N	5	Varna	43.213163	27.906328	117
-27	Комин - Екип 3	65	\N	5	Yambol	42.490237	26.509870	121
-73	Ламинат - Екип 1	281	\N	21	Blagoevgrad	42.014816	23.101587	305
-74	Ламинат - Екип 2	281	\N	21	Burgas	42.508224	27.470341	309
-75	Ламинат - Екип 3	281	\N	21	Dobrich	43.573047	27.825224	313
-85	Первази - Екип 1	281	\N	25	Stara Zagora	42.425108	25.644078	353
-86	Первази - Екип 2	281	\N	25	Varna	43.205121	27.922940	357
-87	Первази - Екип 3	281	\N	25	Yambol	42.483827	26.501988	361
-20	Улуци - Екип 2	89	\N	3	Plovdiv	42.140526	24.738487	93
-21	Улуци - Екип 3	89	\N	3	Ruse	43.854119	25.979318	97
-79	Мълниезащита - Екип 1	89	\N	23	Pleven	43.410497	24.598604	329
-80	Мълниезащита - Екип 2	89	\N	23	Plovdiv	42.137782	24.749983	333
-81	Мълниезащита - Екип 3	89	\N	23	Ruse	43.861332	25.969940	337
-76	Ключове и контакти - Екип 1	396	\N	22	Haskovo	41.926423	25.549890	317
-77	Ключове и контакти - Екип 2	397	\N	22	Pazardzhik	42.200339	24.336106	321
-78	Ключове и контакти - Екип 3	398	\N	22	Pernik	42.614346	23.041742	325
-82	Врати - Екип 1	396	\N	24	Shumen	43.267132	26.930915	341
-83	Врати - Екип 2	397	\N	24	Sliven	42.677817	26.317667	345
-84	Врати - Екип 3	398	\N	24	Sofia	42.690783	23.321847	349
-88	Приключване - Екип 1	396	\N	26	Blagoevgrad	42.007563	23.096029	365
-89	Приключване - Екип 2	397	\N	26	Burgas	42.498773	27.468948	369
-90	Приключване - Екип 3	398	\N	26	Dobrich	43.572137	27.826148	373
-34	Дограма монтаж - Екип 1	396	\N	8	Pleven	43.409185	24.607870	149
-35	Дограма монтаж - Екип 2	397	\N	8	Plovdiv	42.140289	24.742330	153
-36	Дограма монтаж - Екип 3	398	\N	8	Ruse	43.865183	25.975111	157
-40	Ел - Екип 1	396	\N	10	Stara Zagora	42.419815	25.642034	173
-41	Ел - Екип 2	397	\N	10	Varna	43.222869	27.915962	177
-42	Ел - Екип 3	398	\N	10	Yambol	42.478108	26.497022	181
-46	Изолация - Екип 1	396	\N	12	Haskovo	41.930232	25.550502	197
-14	Конструкция - Екип 2	65	4	1	Burgas	42.500867	27.463431	401
-18	Ламперия - Екип 3	398	\N	2	Pernik	42.611605	23.040024	85
-15	Конструкция - Екип 3	65	\N	1	Dobrich	43.568980	27.823805	\N
-22	Покривно покритие - Екип 1	396	\N	4	Shumen	43.263600	26.915547	101
-13	Конструкция - Екип 1	65	\N	1	Blagoevgrad	42.007523	23.090318	399
-23	Покривно покритие - Екип 2	397	\N	4	Sliven	42.687705	26.320642	105
-24	Покривно покритие - Екип 3	398	\N	4	Sofia	42.707449	23.319779	109
-28	Дограма размери - Екип 1	396	\N	6	Blagoevgrad	42.007295	23.095212	125
-29	Дограма размери - Екип 2	397	\N	6	Burgas	42.513036	27.458524	129
-30	Дограма размери - Екип 3	398	\N	6	Dobrich	43.571429	27.821946	133
-70	Боя - Екип 1	396	\N	20	Stara Zagora	42.425680	25.625459	293
-71	Боя - Екип 2	397	\N	20	Varna	43.219114	27.908641	297
-72	Боя - Екип 3	398	\N	20	Yambol	42.487126	26.503050	301
-16	Ламперия - Екип 1	396	\N	2	Haskovo	41.935562	25.563237	77
-100	Water	161	\N	11		\N	\N	402
-17	Ламперия - Екип 2	397	\N	2	Pazardzhik	42.186980	24.339642	81
-47	Изолация - Екип 2	397	\N	12	Pazardzhik	42.199624	24.335517	201
-48	Изолация - Екип 3	398	\N	12	Pernik	42.597309	23.033814	205
-52	Шпакловка - Екип 1	396	\N	14	Shumen	43.265978	26.920453	221
-53	Шпакловка - Екип 2	397	\N	14	Sliven	42.692584	26.323427	225
-54	Шпакловка - Екип 3	398	\N	14	Sofia	42.697636	23.320457	229
-58	Конзоли Ел - Екип 1	396	\N	16	Blagoevgrad	42.017447	23.103451	245
-59	Конзоли Ел - Екип 2	397	\N	16	Burgas	42.499373	27.472375	249
-60	Конзоли Ел - Екип 3	398	\N	16	Dobrich	43.572751	27.817568	253
-43	ВиК - Екип 1	65	\N	11	Blagoevgrad	42.018276	23.103235	185
-44	ВиК - Екип 2	65	\N	11	Burgas	42.510485	27.458876	189
-45	ВиК - Екип 3	65	\N	11	Dobrich	43.577073	27.828651	193
-49	Гипсокартон - Екип 1	209	\N	13	Pleven	43.413960	24.614943	\N
-64	Водостоци - Екип 1	396	\N	18	Pleven	43.414851	24.615367	269
-50	Гипсокартон - Екип 2	209	\N	13	Plovdiv	42.142283	24.737491	213
-51	Гипсокартон - Екип 3	209	\N	13	Ruse	43.856986	25.979002	217
-67	Плочки - Екип 1	281	17	19	Shumen	43.271031	26.933392	\N
-55	Замазка - Екип 1	209	\N	15	Stara Zagora	42.421301	25.639027	233
-56	Замазка - Екип 2	209	\N	15	Varna	43.215531	27.918127	237
-57	Замазка - Екип 3	209	\N	15	Yambol	42.476334	26.503560	241
-61	Мазилка - Екип 1	209	\N	17	Haskovo	41.926312	25.555168	257
-62	Мазилка - Екип 2	209	\N	17	Pazardzhik	42.200194	24.330774	261
-63	Мазилка - Екип 3	209	\N	17	Pernik	42.600353	23.042316	265
-68	Плочки - Екип 2	281	\N	19	Sliven	42.681761	26.326935	285
-69	Плочки - Екип 3	281	\N	19	Sofia	42.690891	23.329701	289
-31	Ниво замазка - Екип 1	161	\N	7	Haskovo	41.940427	25.550619	137
-32	Ниво замазка - Екип 2	161	\N	7	Pazardzhik	42.201922	24.334032	141
-33	Ниво замазка - Екип 3	161	\N	7	Pernik	42.597513	23.031608	145
-37	Врати поръчка - Екип 1	161	\N	9	Shumen	43.279591	26.915839	\N
-38	Врати поръчка - Екип 2	161	\N	9	Sliven	42.694088	26.314290	165
-39	Врати поръчка - Екип 3	161	\N	9	Sofia	42.703855	23.323027	169
-65	Водостоци - Екип 2	397	\N	18	Plovdiv	42.133010	24.749244	273
-66	Водостоци - Екип 3	398	\N	18	Ruse	43.853812	25.965086	277
-\.
-
-
---
--- Data for Name: customer_order; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.customer_order (id, public_id, created_at, app_user_id, telegram_chat_id, source, lang, start_lat, start_lng, start_name, destination_house_id, materials_json, alternatives_count, fully_fulfilled, matrix_provider, compute_ms, chosen_option_id, chosen_at) FROM stdin;
-1	37ac427b-0e17-47c4-b32c-997f68cfafbc	2026-06-04 22:39:37.891345+03	1	\N	dashboard	en	43.500752	22.181396	Driver location	2	{"1": 196, "2": 0, "3": 0, "4": 0}	1	t	google	1242	1	2026-06-04 22:39:43.39157+03
-2	d6bbc7c1-9f69-4397-82d0-f93c11585783	2026-06-04 22:54:21.23549+03	1	\N	dashboard	en	43.723475	23.961182	Driver location	9	{"1": 0, "2": 10, "3": 0, "4": 0}	1	t	google	1215	\N	\N
-3	9c29fc18-6fa8-4957-a057-d583148021a1	2026-06-04 22:54:27.516286+03	1	\N	dashboard	en	43.723475	23.961182	Driver location	9	{"1": 0, "2": 10, "3": 0, "4": 0}	1	t	google	50	\N	\N
-4	8ae50603-6704-4996-9ac4-7d461ad66ce5	2026-06-04 22:56:47.995195+03	1	\N	dashboard	en	43.349150	23.181152	Driver location	4	{"1": 12, "2": 0, "3": 0, "4": 0}	1	t	google	230	\N	\N
-5	c27ac5ab-b3fe-49da-882f-c3d24e96ce9d	2026-06-04 22:56:52.139947+03	1	\N	dashboard	en	43.349150	23.181152	Driver location	4	{"1": 12, "2": 0, "3": 0, "4": 0}	1	t	google	51	\N	\N
-6	c42fb621-2cad-429f-a0a7-d3fa82162454	2026-06-04 22:56:52.507435+03	1	\N	dashboard	en	43.349150	23.181152	Driver location	4	{"1": 12, "2": 0, "3": 0, "4": 0}	1	t	google	29	\N	\N
-7	a6d544a4-c69c-4b51-b954-580b40cf3dc4	2026-06-04 22:57:06.598258+03	1	\N	dashboard	en	44.668653	26.993408	Driver location	3	{"1": 11, "2": 0, "3": 0, "4": 0}	1	t	google	91	\N	\N
-8	3c45fcd7-f81b-468a-994f-d98c0030ef7a	2026-06-04 22:57:34.077594+03	1	\N	dashboard	en	44.213710	24.631348	Driver location	4	{"1": 12, "2": 0, "3": 0, "4": 0}	1	t	google	142	\N	\N
-9	27799993-3df3-4331-b271-96e868aa1b12	2026-06-04 22:58:47.983681+03	1	\N	dashboard	en	43.984910	23.939209	Driver location	4	{"1": 12, "2": 0, "3": 0, "4": 0}	1	t	google	220	\N	\N
-10	c42c68df-e6f6-4b26-bbff-7c9079e840fb	2026-06-04 22:58:50.720658+03	1	\N	dashboard	en	43.984910	23.939209	Driver location	4	{"1": 12, "2": 0, "3": 0, "4": 0}	1	t	google	46	\N	\N
-11	a3a1cbcb-d291-437b-986e-bc928b2e5d68	2026-06-04 23:00:35.737298+03	1	\N	dashboard	en	44.229457	27.476807	Driver location	6	{"1": 12, "2": 0, "3": 0, "4": 0}	1	t	google	1282	11	2026-06-04 23:00:39.299428+03
-12	4d8838ed-b6a7-489b-a5d9-a912bb4da01a	2026-06-04 23:35:38.510217+03	1	\N	dashboard	en	44.323848	22.445068	Driver location	1	{"1": 22, "2": 0, "3": 0, "4": 0}	1	t	google	1243	\N	\N
-13	45152d1b-6a39-4c67-9a35-d19111ffa12e	2026-06-05 15:22:07.44748+03	1	\N	dashboard	bg	43.468868	23.203125	Локация на шофьора	2	{"1": 12, "2": 0, "3": 0, "4": 0}	1	t	google	589	\N	\N
-14	d49db3a9-a96c-49f4-aaf2-abc7cc47629d	2026-06-05 17:33:21.541239+03	1	\N	dashboard	en	43.802819	19.885254	Driver location	3	{"1": 1000, "2": 500000, "3": 12, "4": 123}	1	f	google	1476	\N	\N
-15	b74f7b3e-0948-4cc4-a776-033417490971	2026-06-25 21:25:10.634415+03	1	\N	dashboard	en	43.484812	25.433350	Driver location	1	{"1": 1000000, "2": 0, "3": 0, "4": 0}	1	f	google	1408	15	2026-06-25 21:25:32.230481+03
-16	068cded2-4107-4e98-a438-519d6c76962e	2026-06-27 22:44:35.50383+03	1	\N	dashboard	en	43.874138	23.345947	Driver location	4	{"1": 30, "3": 60}	1	t	google	1883	\N	\N
-17	14728041-87f2-46f4-853d-938a0268aa74	2026-06-27 22:51:31.12993+03	1	\N	dashboard	en	43.984910	20.972900	Driver location	4	{"1": 500, "2": 3000, "3": 200, "4": 600}	1	t	google	288	\N	\N
-18	0c97d30b-3dbd-4363-b200-00a0d0acc037	2026-06-27 22:52:55.668078+03	1	\N	dashboard	en	42.714732	22.664795	Driver location	4	{"1": 500, "2": 3000, "3": 200, "4": 600}	1	t	google	237	\N	\N
-19	3c426180-e971-415f-bec0-b6aaf3721910	2026-06-27 23:15:45.826736+03	1	\N	dashboard	en	43.357138	22.774658	Driver location	4	{"1": 500, "2": 3000, "3": 200, "4": 600}	1	t	google	1052	\N	\N
-20	1418bed5-63a4-4c92-b6ca-45c4260b9231	2026-06-27 23:20:35.392889+03	1	\N	dashboard	en	42.875964	22.906494	Driver location	4	{"1": 500, "2": 3000, "3": 200, "4": 600}	3	t	google	4738	\N	\N
-21	bec09852-32db-4d30-9e69-4eda82df6052	2026-06-27 23:23:19.838003+03	1	\N	dashboard	en	42.875964	22.906494	Driver location	4	{"1": 500, "2": 3000, "3": 200, "4": 600}	3	t	google	181	\N	\N
-22	3f9d2a94-b7ca-4b7b-ab70-e07ecf52aab9	2026-06-27 23:23:41.466195+03	1	\N	dashboard	en	42.843751	22.895508	Driver location	4	{"1": 2500, "2": 3000, "3": 500, "4": 600}	3	t	google	1371	\N	\N
-23	6e219fc9-fe4c-4968-8197-87f590042f07	2026-06-27 23:27:12.029883+03	1	\N	dashboard	en	43.028745	22.675781	Driver location	4	{"1": 2500, "2": 3000, "3": 500, "4": 600}	3	t	google	2470	\N	\N
-24	622e6cea-ca95-4dce-a13b-6856b711e1c7	2026-06-27 23:31:13.179437+03	1	\N	dashboard	en	43.028745	22.675781	Driver location	4	{"1": 2500, "2": 3000, "3": 500, "4": 600}	3	t	google	180	\N	\N
-25	6a81b4b7-a0f9-4f18-8165-4ebd81d9e535	2026-06-27 23:31:35.858787+03	1	\N	dashboard	en	42.714732	22.763672	Driver location	4	{"1": 2500, "2": 3000, "3": 500, "4": 600}	3	t	google	1731	\N	\N
-26	e144e876-99a8-4975-bf61-513c53c0be18	2026-06-27 23:35:07.948056+03	1	\N	dashboard	en	42.714732	22.763672	Driver location	4	{"1": 2500, "2": 3000, "3": 500, "4": 600}	3	t	google	2263	\N	\N
-27	ecbde592-6d5d-47dc-9ecf-acd7d96a9720	2026-06-28 11:10:56.771333+03	1	\N	dashboard	en	43.357138	25.037842	Driver location	7	{"1": 23, "2": 2}	3	t	google	1858	\N	\N
-28	b7b730bd-0cb6-494e-b1c3-63df3e2c0873	2026-06-28 11:11:24.977462+03	1	\N	dashboard	en	43.357138	25.037842	Driver location	4	{"1": 2500, "2": 3000, "3": 500, "4": 600}	3	t	google	1333	\N	\N
-29	c1d02107-3dcd-40e2-93fb-66a6ed68890c	2026-06-28 12:25:08.332632+03	1	\N	dashboard	en	43.444943	19.698486	Driver location	4	{"1": 2500, "2": 3000, "3": 500, "4": 600}	3	t	google	7028	\N	\N
-30	dc6ad107-9854-42b5-a406-69de081e4c9b	2026-06-28 13:24:09.67795+03	1	\N	dashboard	en	43.675818	21.082764	Driver location	4	{"1": 2500, "2": 3000, "3": 500, "4": 600}	5	t	google	11547	54	2026-06-28 13:24:48.958278+03
-31	a86b075e-47b6-4ae9-ada6-c73b12e90be5	2026-06-28 14:28:37.946219+03	1	\N	dashboard	en	44.127028	20.148926	Driver location	4	{"1": 2500, "2": 3000, "3": 500, "4": 600}	5	t	google	9702	\N	\N
-\.
-
-
---
--- Data for Name: house_stage; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.house_stage (id, house_id, stage_order, stage_name, worker_name, status, notes, updated_at, stage_name_en, crew_id, start_date, end_date) FROM stdin;
-616	30	3	Улуци	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Gutters	\N	\N	\N
-617	30	4	Покривно покритие	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Roof Covering	\N	\N	\N
-618	30	5	Комин	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Chimney	\N	\N	\N
-619	30	6	Дограма размери	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Joinery Measurements	\N	\N	\N
-620	30	7	Ниво замазка	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Screed Level	\N	\N	\N
-621	30	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Joinery Installation	\N	\N	\N
-622	30	9	Врати поръчка	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Doors Order	\N	\N	\N
-623	30	10	Ел	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Electrical	\N	\N	\N
-625	30	12	Изолация	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Insulation	\N	\N	\N
-626	30	13	Гипсокартон	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Drywall	\N	\N	\N
-627	30	14	Шпакловка	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Plastering	\N	\N	\N
-628	30	15	Замазка	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Screed	\N	\N	\N
-629	30	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Electrical Conduits	\N	\N	\N
-630	30	17	Мазилка	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Render	\N	\N	\N
-631	30	18	Водостоци	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Downpipes	\N	\N	\N
-632	30	19	Плочки	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Tiles	\N	\N	\N
-633	30	20	Боя	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Paint	\N	\N	\N
-634	30	21	Ламинат	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Laminate	\N	\N	\N
-635	30	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Switches & Sockets	\N	\N	\N
-636	30	23	Мълниезащита	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Lightning Protection	\N	\N	\N
-637	30	24	Врати	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Doors	\N	\N	\N
-638	30	25	Первази	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Skirting Boards	\N	\N	\N
-639	30	26	Приключване	\N	NOT_STARTED	\N	2026-07-07 14:21:36.718981	Completion	\N	\N	\N
-613	30	0	Фундамент	\N	DONE	\N	2026-07-07 14:21:57.3548	Foundation	\N	\N	2026-07-07
-614	30	1	Конструкция	Yeni	IN_PROGRESS	\N	2026-07-11 21:33:55.21248	Structure	14	2026-07-11	\N
-615	30	2	Ламперия	\N	NOT_STARTED	\N	2026-07-10 09:49:56.627025	Cladding	\N	\N	\N
-694	33	0	Фундамент	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Foundation	\N	\N	\N
-695	33	1	Конструкция	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Structure	\N	\N	\N
-696	33	2	Ламперия	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Cladding	\N	\N	\N
-697	33	3	Улуци	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Gutters	\N	\N	\N
-698	33	4	Покривно покритие	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Roof Covering	\N	\N	\N
-699	33	5	Комин	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Chimney	\N	\N	\N
-700	33	6	Дограма размери	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Joinery Measurements	\N	\N	\N
-701	33	7	Ниво замазка	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Screed Level	\N	\N	\N
-702	33	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Joinery Installation	\N	\N	\N
-703	33	9	Врати поръчка	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Doors Order	\N	\N	\N
-704	33	10	Ел	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Electrical	\N	\N	\N
-705	33	11	ВиК	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Plumbing	\N	\N	\N
-706	33	12	Изолация	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Insulation	\N	\N	\N
-707	33	13	Гипсокартон	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Drywall	\N	\N	\N
-708	33	14	Шпакловка	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Plastering	\N	\N	\N
-709	33	15	Замазка	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Screed	\N	\N	\N
-710	33	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Electrical Conduits	\N	\N	\N
-711	33	17	Мазилка	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Render	\N	\N	\N
-712	33	18	Водостоци	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Downpipes	\N	\N	\N
-713	33	19	Плочки	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Tiles	\N	\N	\N
-714	33	20	Боя	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Paint	\N	\N	\N
-715	33	21	Ламинат	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Laminate	\N	\N	\N
-716	33	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Switches & Sockets	\N	\N	\N
-717	33	23	Мълниезащита	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Lightning Protection	\N	\N	\N
-718	33	24	Врати	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Doors	\N	\N	\N
-719	33	25	Первази	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Skirting Boards	\N	\N	\N
-720	33	26	Приключване	\N	NOT_STARTED	\N	2026-07-10 09:54:16.303945	Completion	\N	\N	\N
-624	30	11	ВиК	\N	NOT_STARTED	\N	2026-07-10 11:27:04.912187	Plumbing	\N	\N	\N
-442	17	0	Фундамент	\N	DONE	\N	2026-06-28 20:40:08.496133	Foundation	\N	2026-01-05	2026-01-14
-55	18	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 19:07:44.53997	Roof Covering	\N	\N	\N
-438	6	0	Фундамент	\N	NOT_STARTED	\N	2026-06-28 20:40:08.496133	Foundation	\N	\N	\N
-446	19	0	Фундамент	\N	NOT_STARTED	\N	2026-06-28 20:40:08.496133	Foundation	\N	\N	\N
-449	3	0	Фундамент	\N	NOT_STARTED	\N	2026-06-28 20:40:08.496133	Foundation	\N	\N	\N
-450	22	0	Фундамент	\N	NOT_STARTED	\N	2026-06-28 20:40:08.496133	Foundation	\N	\N	\N
-52	4	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-30 15:40:14.668773	Roof Covering	\N	\N	\N
-443	2	0	Фундамент	\N	NOT_STARTED	\N	2026-07-01 16:21:17.461538	Foundation	\N	\N	\N
-441	10	0	Фундамент	\N	NOT_STARTED	\N	2026-07-01 16:21:19.03761	Foundation	\N	\N	\N
-439	8	0	Фундамент	\N	NOT_STARTED	\N	2026-07-01 16:21:20.583321	Foundation	\N	\N	\N
-25	18	2	Ламперия	\N	NOT_STARTED	\N	2026-07-10 11:02:27.033735	Cladding	\N	\N	\N
-437	18	0	Фундамент	Leader - Foundation Crew A	DONE	\N	2026-06-28 20:44:46.648758	Foundation	\N	\N	2026-06-28
-444	4	0	Фундамент	\N	DONE	\N	2026-06-28 21:00:04.149364	Foundation	\N	\N	2026-06-28
-440	9	0	Фундамент	\N	DONE	\N	2026-06-28 21:00:13.755979	Foundation	\N	\N	2026-06-28
-445	7	0	Фундамент	\N	DONE	\N	2026-07-01 19:38:23.915356	Foundation	\N	\N	2026-07-01
-436	1	0	Фундамент	\N	DONE	\N	2026-07-02 09:09:16.88494	Foundation	\N	\N	2026-07-02
-447	20	0	Фундамент	\N	DONE	\N	2026-07-09 18:16:17.680755	Foundation	\N	\N	2026-07-09
-454	24	3	Улуци	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Gutters	\N	\N	\N
-455	24	4	Покривно покритие	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Roof Covering	\N	\N	\N
-456	24	5	Комин	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Chimney	\N	\N	\N
-457	24	6	Дограма размери	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Joinery Measurements	\N	\N	\N
-458	24	7	Ниво замазка	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Screed Level	\N	\N	\N
-459	24	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Joinery Installation	\N	\N	\N
-460	24	9	Врати поръчка	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Doors Order	\N	\N	\N
-461	24	10	Ел	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Electrical	\N	\N	\N
-462	24	11	ВиК	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Plumbing	\N	\N	\N
-463	24	12	Изолация	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Insulation	\N	\N	\N
-464	24	13	Гипсокартон	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Drywall	\N	\N	\N
-465	24	14	Шпакловка	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Plastering	\N	\N	\N
-466	24	15	Замазка	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Screed	\N	\N	\N
-467	24	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Electrical Conduits	\N	\N	\N
-468	24	17	Мазилка	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Render	\N	\N	\N
-469	24	18	Водостоци	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Downpipes	\N	\N	\N
-470	24	19	Плочки	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Tiles	\N	\N	\N
-471	24	20	Боя	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Paint	\N	\N	\N
-472	24	21	Ламинат	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Laminate	\N	\N	\N
-473	24	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Switches & Sockets	\N	\N	\N
-474	24	23	Мълниезащита	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Lightning Protection	\N	\N	\N
-475	24	24	Врати	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Doors	\N	\N	\N
-476	24	25	Первази	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Skirting Boards	\N	\N	\N
-477	24	26	Приключване	\N	NOT_STARTED	\N	2026-07-01 19:26:30.629471	Completion	\N	\N	\N
-40	18	3	Улуци	\N	NOT_STARTED	\N	2026-07-07 14:18:57.782731	Gutters	\N	\N	\N
-667	32	0	Фундамент	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Foundation	\N	\N	\N
-452	24	1	Конструкция	\N	NOT_STARTED	\N	2026-07-01 21:36:18.067099	Structure	\N	\N	\N
-668	32	1	Конструкция	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Structure	\N	\N	\N
-669	32	2	Ламперия	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Cladding	\N	\N	\N
-670	32	3	Улуци	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Gutters	\N	\N	\N
-671	32	4	Покривно покритие	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Roof Covering	\N	\N	\N
-672	32	5	Комин	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Chimney	\N	\N	\N
-673	32	6	Дограма размери	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Joinery Measurements	\N	\N	\N
-674	32	7	Ниво замазка	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Screed Level	\N	\N	\N
-675	32	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Joinery Installation	\N	\N	\N
-676	32	9	Врати поръчка	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Doors Order	\N	\N	\N
-677	32	10	Ел	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Electrical	\N	\N	\N
-678	32	11	ВиК	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Plumbing	\N	\N	\N
-679	32	12	Изолация	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Insulation	\N	\N	\N
-680	32	13	Гипсокартон	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Drywall	\N	\N	\N
-681	32	14	Шпакловка	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Plastering	\N	\N	\N
-682	32	15	Замазка	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Screed	\N	\N	\N
-683	32	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Electrical Conduits	\N	\N	\N
-684	32	17	Мазилка	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Render	\N	\N	\N
-685	32	18	Водостоци	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Downpipes	\N	\N	\N
-686	32	19	Плочки	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Tiles	\N	\N	\N
-687	32	20	Боя	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Paint	\N	\N	\N
-688	32	21	Ламинат	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Laminate	\N	\N	\N
-689	32	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Switches & Sockets	\N	\N	\N
-690	32	23	Мълниезащита	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Lightning Protection	\N	\N	\N
-691	32	24	Врати	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Doors	\N	\N	\N
-692	32	25	Первази	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Skirting Boards	\N	\N	\N
-693	32	26	Приключване	\N	NOT_STARTED	\N	2026-07-09 16:21:38.090479	Completion	\N	\N	\N
-453	24	2	Ламперия	\N	NOT_STARTED	\N	2026-07-10 09:40:15.157837	Cladding	\N	\N	\N
-451	24	0	Фундамент	\N	DONE	\N	2026-07-01 16:28:05.539606	Foundation	\N	\N	2026-07-01
-478	25	0	Фундамент	\N	DONE	\N	2026-07-01 18:12:42.157584	Foundation	\N	\N	2026-07-01
-3	9	1	Конструкция	\N	NOT_STARTED	\N	2026-07-11 21:16:12.784538	Structure	\N	\N	\N
-5	17	1	Конструкция	\N	DONE	\N	2026-06-28 16:22:50.073536	Structure	13	2026-01-15	2026-01-28
-481	25	3	Улуци	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Gutters	\N	\N	\N
-482	25	4	Покривно покритие	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Roof Covering	\N	\N	\N
-483	25	5	Комин	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Chimney	\N	\N	\N
-484	25	6	Дограма размери	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Joinery Measurements	\N	\N	\N
-485	25	7	Ниво замазка	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Screed Level	\N	\N	\N
-486	25	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Joinery Installation	\N	\N	\N
-487	25	9	Врати поръчка	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Doors Order	\N	\N	\N
-488	25	10	Ел	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Electrical	\N	\N	\N
-489	25	11	ВиК	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Plumbing	\N	\N	\N
-490	25	12	Изолация	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Insulation	\N	\N	\N
-491	25	13	Гипсокартон	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Drywall	\N	\N	\N
-492	25	14	Шпакловка	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Plastering	\N	\N	\N
-493	25	15	Замазка	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Screed	\N	\N	\N
-494	25	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Electrical Conduits	\N	\N	\N
-495	25	17	Мазилка	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Render	\N	\N	\N
-496	25	18	Водостоци	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Downpipes	\N	\N	\N
-497	25	19	Плочки	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Tiles	\N	\N	\N
-498	25	20	Боя	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Paint	\N	\N	\N
-499	25	21	Ламинат	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Laminate	\N	\N	\N
-500	25	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Switches & Sockets	\N	\N	\N
-501	25	23	Мълниезащита	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Lightning Protection	\N	\N	\N
-502	25	24	Врати	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Doors	\N	\N	\N
-503	25	25	Первази	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Skirting Boards	\N	\N	\N
-504	25	26	Приключване	\N	NOT_STARTED	\N	2026-07-01 18:12:26.030864	Completion	\N	\N	\N
-480	25	2	Ламперия	\N	NOT_STARTED	\N	2026-07-01 21:26:28.179341	Cladding	\N	\N	\N
-479	25	1	Конструкция	\N	NOT_STARTED	\N	2026-07-02 08:43:31.815051	Structure	\N	\N	\N
-1	6	1	Конструкция	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Structure	\N	\N	\N
-2	8	1	Конструкция	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Structure	\N	\N	\N
-4	10	1	Конструкция	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Structure	\N	\N	\N
-6	2	1	Конструкция	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Structure	\N	\N	\N
-50	17	4	Покривно покритие	\N	DONE	\N	2026-06-28 16:22:50.073536	Roof Covering	22	2026-02-13	2026-02-27
-155	17	11	ВиК	\N	DONE	\N	2026-06-28 16:22:50.073536	Plumbing	43	2026-04-22	2026-05-05
-11	19	1	Конструкция	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Structure	\N	\N	\N
-12	20	1	Конструкция	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Structure	\N	\N	\N
-14	3	1	Конструкция	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Structure	\N	\N	\N
-15	22	1	Конструкция	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Structure	\N	\N	\N
-16	6	2	Ламперия	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Cladding	\N	\N	\N
-17	8	2	Ламперия	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Cladding	\N	\N	\N
-18	9	2	Ламперия	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Cladding	\N	\N	\N
-19	10	2	Ламперия	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Cladding	\N	\N	\N
-21	2	2	Ламперия	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Cladding	\N	\N	\N
-24	1	2	Ламперия	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Cladding	\N	\N	\N
-26	19	2	Ламперия	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Cladding	\N	\N	\N
-27	20	2	Ламперия	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Cladding	\N	\N	\N
-29	3	2	Ламперия	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Cladding	\N	\N	\N
-30	22	2	Ламперия	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Cladding	\N	\N	\N
-31	6	3	Улуци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Gutters	\N	\N	\N
-32	8	3	Улуци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Gutters	\N	\N	\N
-34	10	3	Улуци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Gutters	\N	\N	\N
-36	2	3	Улуци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Gutters	\N	\N	\N
-38	7	3	Улуци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Gutters	\N	\N	\N
-39	1	3	Улуци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Gutters	\N	\N	\N
-41	19	3	Улуци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Gutters	\N	\N	\N
-42	20	3	Улуци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Gutters	\N	\N	\N
-44	3	3	Улуци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Gutters	\N	\N	\N
-45	22	3	Улуци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Gutters	\N	\N	\N
-46	6	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-47	8	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-48	9	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-49	10	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-51	2	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-53	7	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-54	1	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-56	19	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-57	20	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-59	3	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-60	22	4	Покривно покритие	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Roof Covering	\N	\N	\N
-61	6	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-62	8	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-63	9	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-64	10	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-66	2	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-67	4	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-68	7	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-69	1	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-71	19	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-72	20	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-74	3	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-75	22	5	Комин	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Chimney	\N	\N	\N
-76	6	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-77	8	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-78	9	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-79	10	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-81	2	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-70	18	5	Комин	\N	NOT_STARTED	\N	2026-06-28 19:07:45.610822	Chimney	\N	\N	\N
-22	4	2	Ламперия	\N	NOT_STARTED	\N	2026-07-10 11:02:28.813761	Cladding	\N	\N	\N
-8	7	1	Конструкция	\N	NOT_STARTED	\N	2026-07-02 08:43:33.997752	Structure	\N	\N	\N
-9	1	1	Конструкция	\N	NOT_STARTED	\N	2026-07-07 11:59:03.797049	Structure	\N	\N	\N
-23	7	2	Ламперия	\N	NOT_STARTED	\N	2026-07-02 08:43:36.146735	Cladding	\N	\N	\N
-37	4	3	Улуци	\N	NOT_STARTED	\N	2026-06-30 16:11:05.42905	Gutters	\N	\N	\N
-33	9	3	Улуци	\N	NOT_STARTED	\N	2026-06-30 16:11:03.205043	Gutters	\N	\N	\N
-20	17	2	Ламперия	\N	DONE	\N	2026-06-28 16:22:50.073536	Cladding	16	2026-01-29	2026-02-07
-35	17	3	Улуци	\N	DONE	\N	2026-06-28 16:22:50.073536	Gutters	19	2026-02-08	2026-02-15
-65	17	5	Комин	\N	DONE	\N	2026-06-28 16:22:50.073536	Chimney	25	2026-02-28	2026-03-07
-80	17	6	Дограма размери	\N	DONE	\N	2026-06-28 16:22:50.073536	Joinery Measurements	28	2026-03-08	2026-03-16
-10	18	1	Конструкция	Yeni	IN_PROGRESS	\N	2026-07-11 21:34:08.157258	Structure	14	2026-07-11	\N
-7	4	1	Конструкция	Yeni	IN_PROGRESS	\N	2026-07-11 21:34:46.802819	Structure	14	2026-07-11	\N
-82	4	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-83	7	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-84	1	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-85	18	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-86	19	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-87	20	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-89	3	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-90	22	6	Дограма размери	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Measurements	\N	\N	\N
-91	6	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-92	8	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-93	9	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-94	10	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-300	22	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-96	2	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-97	4	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-98	7	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-99	1	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-100	18	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-101	19	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-102	20	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-104	3	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-105	22	7	Ниво замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed Level	\N	\N	\N
-106	6	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-107	8	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-108	9	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-109	10	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-111	2	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-112	4	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-113	7	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-114	1	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-115	18	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-116	19	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-117	20	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-119	3	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-120	22	8	Дограма монтаж	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Joinery Installation	\N	\N	\N
-121	6	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-122	8	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-123	9	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-124	10	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-126	2	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-127	4	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-128	7	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-129	1	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-130	18	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-131	19	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-132	20	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-134	3	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-135	22	9	Врати поръчка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors Order	\N	\N	\N
-136	6	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-137	8	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-138	9	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-139	10	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-141	2	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-142	4	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-143	7	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-144	1	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-145	18	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-146	19	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-147	20	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-149	3	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-150	22	10	Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical	\N	\N	\N
-151	6	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-152	8	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-153	9	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-154	10	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-95	17	7	Ниво замазка	\N	DONE	\N	2026-06-28 16:22:50.073536	Screed Level	31	2026-03-17	2026-03-27
-110	17	8	Дограма монтаж	\N	DONE	\N	2026-06-28 16:22:50.073536	Joinery Installation	34	2026-03-28	2026-04-06
-125	17	9	Врати поръчка	\N	DONE	\N	2026-06-28 16:22:50.073536	Doors Order	37	2026-04-07	2026-04-14
-140	17	10	Ел	\N	DONE	\N	2026-06-28 16:22:50.073536	Electrical	40	2026-04-15	2026-04-26
-156	2	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-157	4	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-158	7	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-159	1	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-160	18	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-161	19	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-162	20	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-185	17	13	Гипсокартон	\N	DONE	\N	2026-06-28 16:22:50.073536	Drywall	49	2026-05-25	2026-06-05
-164	3	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-165	22	11	ВиК	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plumbing	\N	\N	\N
-166	6	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-167	8	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-168	9	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-169	10	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-230	17	16	Конзоли Ел	\N	DONE	\N	2026-06-28 16:22:50.073536	Electrical Conduits	58	2026-06-17	2026-06-28
-171	2	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-172	4	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-173	7	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-174	1	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-175	18	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-176	19	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-177	20	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-179	3	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-180	22	12	Изолация	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Insulation	\N	\N	\N
-181	6	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-182	8	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-183	9	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-184	10	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-186	2	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-187	4	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-188	7	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-189	1	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-190	18	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-191	19	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-192	20	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-194	3	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-195	22	13	Гипсокартон	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Drywall	\N	\N	\N
-196	6	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-197	8	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-198	9	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-199	10	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-201	2	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-202	4	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-203	7	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-204	1	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-205	18	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-206	19	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-207	20	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-209	3	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-210	22	14	Шпакловка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Plastering	\N	\N	\N
-211	6	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-212	8	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-213	9	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-214	10	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-216	2	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-217	4	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-218	7	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-219	1	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-220	18	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-221	19	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-222	20	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-224	3	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-225	22	15	Замазка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Screed	\N	\N	\N
-226	6	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-227	8	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-228	9	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-229	10	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-231	2	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-232	4	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-233	7	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-234	1	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-170	17	12	Изолация	\N	DONE	\N	2026-06-28 16:22:50.073536	Insulation	46	2026-05-08	2026-05-17
-200	17	14	Шпакловка	\N	DONE	\N	2026-06-28 16:22:50.073536	Plastering	52	2026-05-30	2026-06-09
-215	17	15	Замазка	\N	DONE	\N	2026-06-28 16:22:50.073536	Screed	55	2026-06-10	2026-06-20
-235	18	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-236	19	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-237	20	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-245	17	17	Мазилка	\N	DONE	\N	2026-06-28 16:22:50.073536	Render	61	2026-06-25	2026-07-05
-239	3	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-240	22	16	Конзоли Ел	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Electrical Conduits	\N	\N	\N
-241	6	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-242	8	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-243	9	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-244	10	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-260	17	18	Водостоци	\N	IN_PROGRESS	\N	2026-06-28 16:22:50.073536	Downpipes	64	2026-07-03	\N
-246	2	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-247	4	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-248	7	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-249	1	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-250	18	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-251	19	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-252	20	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-275	17	19	Плочки	\N	IN_PROGRESS	\N	2026-07-10 16:26:00.940566	Tiles	67	2026-07-10	\N
-254	3	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-255	22	17	Мазилка	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Render	\N	\N	\N
-256	6	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-257	8	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-258	9	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-259	10	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-261	2	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-262	4	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-263	7	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-264	1	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-265	18	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-266	19	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-267	20	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-269	3	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-270	22	18	Водостоци	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Downpipes	\N	\N	\N
-271	6	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-272	8	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-273	9	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-274	10	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-276	2	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-277	4	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-278	7	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-279	1	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-280	18	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-281	19	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-282	20	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-284	3	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-285	22	19	Плочки	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Tiles	\N	\N	\N
-286	6	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-287	8	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-288	9	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-289	10	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-291	2	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-292	4	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-293	7	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-294	1	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-295	18	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-296	19	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-297	20	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-299	3	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	\N	\N	\N
-301	6	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-302	8	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-303	9	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-304	10	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-306	2	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-307	4	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-308	7	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-309	1	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-310	18	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-311	19	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-312	20	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-314	3	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-315	22	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	\N	\N	\N
-316	6	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-317	8	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-318	9	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-290	17	20	Боя	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Paint	70	\N	\N
-305	17	21	Ламинат	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Laminate	73	\N	\N
-319	10	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-321	2	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-322	4	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-323	7	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-324	1	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-325	18	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-326	19	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-327	20	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-329	3	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-330	22	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	\N	\N	\N
-331	6	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-332	8	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-333	9	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-334	10	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-336	2	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-337	4	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-338	7	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-339	1	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-340	18	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-341	19	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-342	20	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-344	3	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-345	22	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	\N	\N	\N
-346	6	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-347	8	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-348	9	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-349	10	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-351	2	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-352	4	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-353	7	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-354	1	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-355	18	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-356	19	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-357	20	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-359	3	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-360	22	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	\N	\N	\N
-361	6	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-362	8	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-363	9	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-364	10	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-366	2	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-367	4	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-368	7	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-369	1	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-370	18	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-371	19	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-372	20	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-374	3	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-375	22	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	\N	\N	\N
-376	6	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-377	8	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-378	9	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-379	10	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-381	2	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-382	4	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-383	7	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-384	1	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-385	18	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-386	19	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-387	20	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-389	3	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-390	22	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	\N	\N	\N
-320	17	22	Ключове и контакти	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Switches & Sockets	76	\N	\N
-335	17	23	Мълниезащита	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Lightning Protection	79	\N	\N
-350	17	24	Врати	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Doors	82	\N	\N
-365	17	25	Первази	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Skirting Boards	85	\N	\N
-380	17	26	Приключване	\N	NOT_STARTED	\N	2026-06-28 16:22:50.073536	Completion	88	\N	\N
-\.
-
-
---
--- Data for Name: material_order; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.material_order (id, house_id, status, notes, created_at, updated_at, created_by, house_stage_id) FROM stdin;
-5	4	DRAFT	Route test order - large multi-source quantities	2026-06-27 22:50:35.360576	2026-06-27 22:50:35.360576	\N	\N
-2	1	CONFIRMED	Urgent roofing materials	2026-06-22 21:54:57.549514	2026-06-28 08:39:20.596652	\N	\N
-3	2	DELIVERED	Interior finishing	2026-06-17 21:54:57.549514	2026-06-25 21:54:57.549514	\N	\N
-4	4	DRAFT	Foundation supplies	2026-06-26 21:54:57.549514	2026-06-26 21:54:57.549514	\N	\N
-1	1	DELIVERED	this order needs to be prioritized	2026-06-27 18:35:51.877647	2026-06-27 18:37:57.570728	\N	\N
-6	7	DRAFT	test order	2026-06-28 07:55:29.240331	2026-06-28 07:55:29.25919	\N	\N
-8	2	DRAFT	this order is priority	2026-06-28 11:32:41.296653	2026-06-28 11:32:41.7557	\N	\N
-7	2	CONFIRMED	this order is priority	2026-06-28 11:32:42.355578	2026-06-28 11:33:18.412574	\N	\N
-\.
-
-
---
--- Data for Name: delivery; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.delivery (id, order_id, delivered_at, notes, responsible_id) FROM stdin;
-1	3	2026-06-22 21:55:03.700313	First batch	\N
-2	3	2026-06-25 21:55:03.700313	Remaining stock	\N
-3	1	2026-06-24 22:20:03.607226	Full delivery	\N
-4	2	2026-06-28 08:39:00	\N	\N
-\.
-
-
---
--- Data for Name: material; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.material (id, name, unit, price) FROM stdin;
-1	Lumber	m²	28.50
-2	Screws	unidades	0.15
-3	Boards	unidades	12.00
-4	Tiles	unidades	3.80
-\.
-
-
---
--- Data for Name: delivery_item; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.delivery_item (id, delivery_id, material_id, qty_delivered) FROM stdin;
-1	1	3	80.00
-2	1	2	300.00
-3	2	3	40.00
-4	2	2	200.00
-5	3	1	12.00
-6	3	2	23.00
-7	3	4	233.00
-8	4	4	100.00
-\.
-
-
---
--- Data for Name: depot; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.depot (id, name, location, lat, lng) FROM stdin;
-1	Central Depot Sofia	Bozhurishte, Sofia, Bulgaria	42.652400	23.285600
-2	Central Depot Plovdiv	Plovdiv Industrial Zone, Bulgaria	42.112000	24.713000
-\.
-
-
---
--- Data for Name: depot_inventory; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.depot_inventory (id, depot_id, material_id, quantity) FROM stdin;
-1	1	1	500.00
-2	1	2	2000.00
-3	1	3	150.00
-4	1	4	1000.00
-5	2	1	300.00
-6	2	2	1500.00
-7	2	3	100.00
-8	2	4	600.00
-\.
-
-
---
--- Data for Name: doc_folder; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.doc_folder (id, code, label_en, label_bg, icon, color, link_url, sort_order, parent_id) FROM stdin;
-2	01	Sales	Продажби	📈	#3ecf6e	\N	1	\N
-3	02	Active Sites	Обекти в строеж	🏗️	#f97316	\N	2	\N
-4	03	Finance	Финанси	🧮	#a78bfa	\N	3	\N
-5	04	Administration & HR	Администрация и ЧР	👥	#fb7185	\N	4	\N
-6	05	Standards & Templates	Стандарти и Шаблони	📋	#00c9b1	\N	5	\N
-7	06	Marketing	Маркетинг	📣	#f59e0b	\N	6	\N
-8	07	Completed Sites	Обекти завършени	🏠	#4f8ef7	\N	7	\N
-9	08	Purchases	Покупки	🛒	#00c9b1	\N	8	\N
-10	doc00_01	01_OBJECTS_CONTROL	01_КОНТРОЛ_ОБЕКТИ	📂	#4f8ef7	\N	0	1
-11	doc00_02	02_EXPENSES_CONTROL	02_КОНТРОЛ_РАЗХОДИ	📂	#4f8ef7	\N	1	1
-12	doc00_03	03_CLIENTS_CONTROL	03_КОНТРОЛ_КЛИЕНТИ	📂	#4f8ef7	\N	2	1
-13	doc00_04	04_SUPPLIERS_CONTROL	04_КОНТРОЛ_ДОСТАВЧИЦИ	📂	#4f8ef7	\N	3	1
-14	doc00_05	05_CREWS_CONTROL	05_КОНТРОЛ_БРИГАДИ	📂	#4f8ef7	\N	4	1
-15	doc00_06	06_FLEET_CONTROL	06_КОНТРОЛ_АВТОПАРК	📂	#4f8ef7	\N	5	1
-16	doc00_07	07_MATERIALS_CONTROL	07_КОНТРОЛ_МАТЕРИАЛИ	📂	#4f8ef7	\N	6	1
-17	doc01_00a	00_CRM	00_CRM	📂	#3ecf6e	\N	0	2
-18	doc01_00b	00_NEW_CLIENTS	00_НОВИ_КЛИЕНТИ	📂	#3ecf6e	\N	1	2
-19	doc01_01	01_WITH_ARCHITECTS	01_ПРИ_АРХИТЕКТИ	📂	#3ecf6e	\N	2	2
-20	doc01_02	02_FOR_OFFER	02_ЗА_ОФЕРТА	📂	#3ecf6e	\N	3	2
-21	doc01_03	03_OFFERS_FOR_APPROVAL	03_ОФЕРТИ_ЗА_ПОТВЪРЖДЕНИЕ	📂	#3ecf6e	\N	4	2
-22	doc01_04	04_SENT_OFFERS	04_ИЗПРАТЕНИ_ОФЕРТИ	📂	#3ecf6e	\N	5	2
-23	doc01_05	05_FOR_CONTRACT	05_ЗА_ДОГОВОР	📂	#3ecf6e	\N	6	2
-24	doc01_06	06_CONTRACTS_FOR_APPROVAL	06_ДОГОВОРИ_ЗА_ПОТВЪРЖДЕНИЕ	📂	#3ecf6e	\N	7	2
-25	doc01_07	07_SENT_CONTRACTS	07_ИЗПРАТЕНИ_ДОГОВОРИ	📂	#3ecf6e	\N	8	2
-26	doc01_08	08_CONTRACT_SIGNED	08_ДОГОВОР_ПОДПИСАН	📂	#3ecf6e	\N	9	2
-27	doc01_09	09_AUDIO	09_АУДИО	📂	#3ecf6e	\N	10	2
-28	doc01_10	10_CRM_ARCHIVE	10_CRM_АРХИВ	📂	#3ecf6e	\N	11	2
-30	doc04_01	01_COMPANY_DOCUMENTS	01_ФИРМЕНИ_ДОКУМЕНТИ	📂	#fb7185	\N	0	5
-31	doc04_02	02_HR	02_HR	📂	#fb7185	\N	1	5
-32	doc04_03	03_CONTRACTS	03_ДОГОВОРИ	📂	#fb7185	\N	2	5
-33	doc04_07	07_PERSONNEL	07_ПЕРСОНАЛ	📂	#fb7185	\N	3	5
-34	doc05_01	Technical standards	Технически стандарти	📂	#00c9b1	\N	0	6
-35	doc05_02	TEMPLATE_CREW_MASTER	ШАБЛОН_БРИГАДА_МАСТЪР	📂	#00c9b1	\N	1	6
-36	doc05_03	TEMPLATE_INVOICE_ISSUE	ШАБЛОН_ИЗДАВАНЕ_ФАКТУРИ	📂	#00c9b1	\N	2	6
-37	doc05_04	TEMPLATE_MATERIALS	ШАБЛОН_МАТЕРИАЛИ	📂	#00c9b1	\N	3	6
-38	doc05_05	TEMPLATE_REPORTS	ШАБЛОН_ОТЧЕТИ	📂	#00c9b1	\N	4	6
-39	doc05_06	TEMPLATE_RECEIPT	ШАБЛОН_РАЗПИСКА	📂	#00c9b1	\N	5	6
-40	doc05_07	TEMPLATE_CONTRACTS	ШАБЛОН_ДОГОВОРИ	📂	#00c9b1	\N	6	6
-41	doc05_08	TEMPLATE_REQUEST	ШАБЛОН_ЗАЯВКА	📂	#00c9b1	\N	7	6
-42	doc05_09	TEMPLATE_OFFERS	ШАБЛОН_ОФЕРТИ	📂	#00c9b1	\N	8	6
-43	doc05_10	TEMPLATE_FOLDERS	ШАБЛОН_ПАПКИ	📂	#00c9b1	\N	9	6
-44	doc05_11	TEMPLATE_COMPLETION	ШАБЛОН_ПРИКЛЮЧВАНЕ	📂	#00c9b1	\N	10	6
-66	house_30	Casa Paulitin	Casa Paulitin	🏠	#f97316	\N	30	3
-45	house_9	House Dobrich	House Dobrich	🏠	#f97316	\N	9	3
-46	house_4	House Burgas	House Burgas	🏠	#f97316	\N	4	3
-47	house_6	House Stara Zagora	House Stara Zagora	🏠	#f97316	\N	6	3
-48	house_8	House Sliven	House Sliven	🏠	#f97316	\N	8	3
-49	house_10	House Shumen	House Shumen	🏠	#f97316	\N	10	3
-50	house_17	House test	House test	🏠	#f97316	\N	17	3
-51	house_2	House Plovdiv	House Plovdiv	🏠	#f97316	\N	2	3
-52	house_7	House Pleven	House Pleven	🏠	#f97316	\N	7	3
-53	house_19	Yeni house	Yeni house	🏠	#f97316	\N	19	3
-54	house_20	Yeni house	Yeni house	🏠	#f97316	\N	20	3
-56	house_3	House Varna Mar	House Varna Mar	🏠	#f97316	\N	3	3
-57	house_18	Herakovo 1	Herakovo 1	🏠	#f97316	\N	18	3
-59	house_22	Test House	Test House	🏠	#f97316	\N	22	3
-60	house_24	House Paul	House Paul	🏠	#f97316	\N	24	3
-61	house_25	House Paul 1	House Paul 1	🏠	#f97316	\N	25	3
-1	00	Control	Контрол	🛡️	#4f8ef7	\N	0	\N
-58	house_1	House Sofia Centro	House Sofia Centro	🏠	#f97316	https://drive.google.com/file/d/1ZGa3ruAsUCBPFM3OETRJS66OlAqbLxQY/view?usp=sharing	1	3
-29	doc03_01	Accounting	Счетоводство	📂	#a78bfa	\N	0	4
-68	09	TEST	TESTBG		#4f8ef7	\N	0	\N
-73	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	66
-74	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	66
-75	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	66
-76	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	66
-77	04-01	Requests	Заявки		#4f8ef7	\N	0	76
-78	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	76
-79	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	66
-152	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	51
-80	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	66
-81	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	66
-82	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	66
-83	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	66
-84	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	45
-85	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	45
-86	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	45
-87	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	45
-88	04-01	Requests	Заявки		#4f8ef7	\N	0	87
-89	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	87
-90	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	45
-91	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	45
-92	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	45
-93	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	45
-94	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	45
-95	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	46
-96	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	46
-97	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	46
-98	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	46
-99	04-01	Requests	Заявки		#4f8ef7	\N	0	98
-100	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	98
-101	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	46
-102	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	46
-103	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	46
-104	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	46
-105	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	46
-106	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	47
-107	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	47
-108	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	47
-109	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	47
-110	04-01	Requests	Заявки		#4f8ef7	\N	0	109
-111	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	109
-112	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	47
-113	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	47
-114	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	47
-115	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	47
-116	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	47
-117	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	48
-118	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	48
-119	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	48
-120	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	48
-121	04-01	Requests	Заявки		#4f8ef7	\N	0	120
-122	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	120
-123	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	48
-124	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	48
-125	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	48
-126	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	48
-127	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	48
-128	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	49
-129	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	49
-130	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	49
-131	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	49
-132	04-01	Requests	Заявки		#4f8ef7	\N	0	131
-133	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	131
-134	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	49
-135	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	49
-136	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	49
-137	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	49
-138	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	49
-139	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	50
-140	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	50
-141	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	50
-142	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	50
-143	04-01	Requests	Заявки		#4f8ef7	\N	0	142
-144	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	142
-145	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	50
-146	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	50
-147	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	50
-148	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	50
-149	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	50
-150	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	51
-151	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	51
-153	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	51
-154	04-01	Requests	Заявки		#4f8ef7	\N	0	153
-155	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	153
-156	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	51
-157	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	51
-158	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	51
-159	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	51
-160	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	51
-161	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	52
-162	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	52
-163	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	52
-164	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	52
-165	04-01	Requests	Заявки		#4f8ef7	\N	0	164
-166	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	164
-167	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	52
-168	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	52
-169	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	52
-170	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	52
-171	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	52
-172	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	53
-173	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	53
-174	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	53
-175	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	53
-176	04-01	Requests	Заявки		#4f8ef7	\N	0	175
-177	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	175
-178	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	53
-179	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	53
-180	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	53
-181	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	53
-182	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	53
-183	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	54
-184	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	54
-185	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	54
-186	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	54
-187	04-01	Requests	Заявки		#4f8ef7	\N	0	186
-188	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	186
-189	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	54
-190	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	54
-191	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	54
-192	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	54
-193	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	54
-205	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	56
-206	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	56
-207	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	56
-208	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	56
-210	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	208
-211	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	56
-212	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	56
-213	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	56
-214	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	56
-215	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	56
-216	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	57
-217	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	57
-218	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	57
-219	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	57
-220	04-01	Requests	Заявки		#4f8ef7	\N	0	219
-221	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	219
-222	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	57
-223	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	57
-209	04-01	Requests	Заявки		#4f8ef7	\N	0	208
-224	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	57
-225	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	57
-226	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	57
-227	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	59
-228	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	59
-229	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	59
-230	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	59
-231	04-01	Requests	Заявки		#4f8ef7	\N	0	230
-232	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	230
-233	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	59
-234	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	59
-235	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	59
-236	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	59
-237	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	59
-238	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	60
-239	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	60
-240	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	60
-241	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	60
-242	04-01	Requests	Заявки		#4f8ef7	\N	0	241
-243	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	241
-244	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	60
-245	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	60
-246	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	60
-247	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	60
-248	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	60
-249	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	61
-250	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	61
-251	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	61
-252	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	61
-253	04-01	Requests	Заявки		#4f8ef7	\N	0	252
-254	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	252
-255	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	61
-256	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	61
-257	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	61
-258	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	61
-259	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	61
-260	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	58
-261	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	58
-262	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	58
-263	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	58
-264	04-01	Requests	Заявки		#4f8ef7	\N	0	263
-265	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	263
-266	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	58
-267	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	58
-268	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	58
-269	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	58
-270	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	58
-283	house_32	Lili House	Lili House	🏠	#f97316	\N	32	3
-284	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	283
-285	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	283
-286	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	283
-288	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	283
-289	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	283
-290	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	283
-291	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	283
-292	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	283
-293	04-01	Requests	Заявки		#4f8ef7	\N	0	287
-294	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	287
-300	05	Client Communication	05_Комуникация_с_Клиента		#4f8ef7	\N	0	295
-287	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	283
-295	house_33	Tania House	Tania House	🏠	#f97316	\N	33	3
-296	01	Drawings	01_ЧЕРТЕЖИ		#4f8ef7	\N	0	295
-297	02	Contracts & Annexes	02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ		#4f8ef7	\N	0	295
-298	03	Photos	03_СНИМКИ		#4f8ef7	\N	0	295
-299	04	Materials & Logistics	04_Материали_и_Логистика		#4f8ef7	\N	0	295
-301	06	Working Docs & Protocols	06_Работна_документация_и_Протоколи		#4f8ef7	\N	0	295
-302	07	Labour Reports	07_ОТЧЕТИ_ТРУД		#4f8ef7	\N	0	295
-303	08	Results	08_РЕЗУЛТАТИ		#4f8ef7	\N	0	295
-304	09	Quality Control	09_КОНТРОЛ_КАЧЕСТВО		#4f8ef7	\N	0	295
-305	04-01	Requests	Заявки		#4f8ef7	\N	0	299
-306	04-02	Residual material	Остатъчен материал		#4f8ef7	\N	0	299
-\.
-
-
---
--- Data for Name: doc_document; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.doc_document (id, folder_id, title_en, title_bg, link_url, doc_type, description, sort_order, created_at) FROM stdin;
-3	66	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-4	66	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-5	45	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-6	45	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-7	46	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-8	46	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-9	47	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-10	47	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-11	48	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-12	48	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-13	49	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-14	49	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-15	50	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-16	50	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-17	51	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-18	51	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-19	52	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-20	52	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-21	53	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-22	53	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-23	54	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-24	54	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-27	56	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-28	56	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-29	57	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-30	57	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-31	59	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-32	59	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-33	60	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-34	60	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-35	61	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-36	61	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-37	58	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 18:42:20.393189
-38	58	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 18:42:20.393189
-41	283	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-09 16:21:38.209697
-42	283	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-09 16:21:38.222435
-43	295	MASTER	MASTER	\N	SPREADSHEET	\N	1	2026-07-10 09:54:16.470795
-44	295	Calculator	Калкулатор	\N	SPREADSHEET	\N	2	2026-07-10 09:54:16.479889
-\.
-
-
---
--- Data for Name: driver; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.driver (id, name, van) FROM stdin;
-\.
-
-
---
--- Data for Name: electric_box; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.electric_box (id, house_id, main_amps, label, token, created_at) FROM stdin;
-1	1	200	Main Panel	Ofrqb3ZNcy6ZlUjYo2mlDn3N79lWp3591GSZhICOikg	2026-06-08 17:25:19.456879+03
-2	4	200		R59oKWw__JxeeWX74CPikPlVLq-ImLMgZ5UFLQQJyts	2026-06-08 17:56:27.970339+03
-\.
-
-
---
--- Data for Name: electric_circuit; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.electric_circuit (id, box_id, slot_index, side, label, amps, type, status) FROM stdin;
-17	2	0	LEFT	Bathromm 1	50	DOUBLE	ON
-18	2	4	LEFT	Second floor	30	SINGLE	ON
-19	2	2	RIGHT	Livingroom	50	DOUBLE	ON
-23	1	0	LEFT	Kitchen	20	SINGLE	ON
-24	1	2	LEFT	livingroom	30	SINGLE	ON
-\.
-
-
---
--- Data for Name: house_stage_crew_log; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.house_stage_crew_log (id, house_id, house_name, stage_order, stage_name, stage_name_en, crew_id, crew_name, status, start_date, end_date, logged_at) FROM stdin;
-63	30	Casa Paulitin	1	Конструкция	Structure	14	Конструкция - Екип 2	IN_PROGRESS	2026-07-11	\N	2026-07-12 00:08:21.167854+03
-64	18	Herakovo 1	1	Конструкция	Structure	14	Конструкция - Екип 2	IN_PROGRESS	2026-07-11	\N	2026-07-12 00:08:23.117195+03
-65	30	Casa Paulitin	1	Конструкция	Structure	14	Конструкция - Екип 2	DONE	2026-07-11	2026-07-11	2026-07-12 00:08:49.864147+03
-66	18	Herakovo 1	1	Конструкция	Structure	14	Конструкция - Екип 2	DONE	2026-07-11	2026-07-11	2026-07-12 00:09:01.627003+03
-67	4	House Burgas	1	Конструкция	Structure	14	Конструкция - Екип 2	IN_PROGRESS	2026-07-11	\N	2026-07-12 00:09:11.315188+03
-68	9	House Dobrich	1	Конструкция	Structure	14	Конструкция - Екип 2	IN_PROGRESS	2026-07-11	\N	2026-07-12 00:09:17.061808+03
-69	4	House Burgas	1	Конструкция	Structure	14	Конструкция - Екип 2	DONE	2026-07-11	2026-07-11	2026-07-12 00:09:43.37135+03
-70	9	House Dobrich	1	Конструкция	Structure	14	Конструкция - Екип 2	DONE	2026-07-11	2026-07-11	2026-07-12 00:09:50.119216+03
-71	30	Casa Paulitin	1	Конструкция	Structure	14	Конструкция - Екип 2	IN_PROGRESS	2026-07-11	\N	2026-07-12 00:10:07.114211+03
-72	30	Casa Paulitin	1	Конструкция	Structure	14	Конструкция - Екип 2	DONE	2026-07-11	2026-07-11	2026-07-12 00:10:17.82782+03
-73	30	Casa Paulitin	1	Конструкция	Structure	14	Конструкция - Екип 2	IN_PROGRESS	2026-07-11	\N	2026-07-12 00:33:55.224363+03
-74	18	Herakovo 1	1	Конструкция	Structure	14	Конструкция - Екип 2	IN_PROGRESS	2026-07-11	\N	2026-07-12 00:34:08.164796+03
-75	4	House Burgas	1	Конструкция	Structure	14	Конструкция - Екип 2	IN_PROGRESS	2026-07-11	\N	2026-07-12 00:34:46.812828+03
-\.
-
-
---
--- Data for Name: warehouse; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.warehouse (id, house_id) FROM stdin;
-1	1
-2	2
-3	3
-4	4
-6	6
-7	7
-8	8
-9	9
-10	10
-17	17
-18	18
-19	19
-20	20
-22	22
-23	24
-24	25
-29	30
-31	32
-32	33
-\.
-
-
---
--- Data for Name: inventory; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.inventory (id, warehouse_id, material_id, quantity) FROM stdin;
-1	1	1	120.00
-2	1	2	500.00
-3	1	3	30.00
-4	1	4	200.00
-5	2	1	0.00
-6	2	2	320.00
-7	2	3	15.00
-8	2	4	150.00
-9	3	1	200.00
-10	3	2	800.00
-12	3	4	400.00
-13	4	1	60.00
-14	4	2	150.00
-15	4	3	10.00
-16	4	4	80.00
-21	6	1	45.00
-22	6	2	200.00
-23	6	3	25.00
-24	6	4	100.00
-25	7	1	175.00
-26	7	2	450.00
-27	7	3	40.00
-28	7	4	320.00
-29	8	1	90.00
-30	8	2	370.00
-31	8	3	20.00
-32	8	4	130.00
-33	9	1	250.00
-34	9	2	700.00
-35	9	3	60.00
-36	9	4	290.00
-37	10	1	130.00
-38	10	2	480.00
-39	10	3	35.00
-40	10	4	210.00
-41	17	1	0.00
-42	17	2	0.00
-43	17	3	0.00
-44	17	4	0.00
-45	18	1	10.00
-46	18	2	10.00
-47	18	3	10.00
-48	18	4	10.00
-11	3	3	1.00
-\.
-
-
---
--- Data for Name: material_order_item; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.material_order_item (id, order_id, material_id, quantity) FROM stdin;
-16	1	1	12.00
-17	1	2	23.00
-18	1	4	233.00
-19	2	1	50.00
-20	2	4	200.00
-21	3	3	120.00
-22	3	2	500.00
-23	4	1	30.00
-24	4	3	60.00
-26	5	2	3000.00
-28	5	4	600.00
-25	5	1	2500.00
-27	5	3	500.00
-29	6	1	23.00
-30	6	2	2.00
-33	8	1	1212.00
-34	8	2	1212.00
-35	7	2	1212.00
-36	7	1	1212.00
-\.
-
-
---
--- Data for Name: order_route_option; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.order_route_option (id, public_id, order_id, objective, is_primary, sequence_index, total_distance_km, total_minutes, total_stops, supplier_stops_count, fully_fulfilled, house_ids_signature, maps_url, payload_json, first_viewed_at, last_viewed_at, view_count, warehouse_stops_count) FROM stdin;
-1	2531299f-2424-44c0-bf13-33387c7fe2be	1	shortest_distance	t	0	401	602	2	0	t	h1-h7	https://www.google.com/maps/dir/43.50075243569041,22.181396484375/42.6977,23.3219/43.4168,24.6069/42.15,24.75	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 129}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 76.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.50075243569041,22.181396484375/42.6977,23.3219/43.4168,24.6069/42.15,24.75", "optionId": null, "objective": "shortest_distance", "totalStops": 2, "totalMinutes": 602, "supplierStops": [], "totalDistance": 401, "fullyFulfilled": true}	2026-06-04 22:39:38.238405+03	2026-06-04 22:39:38.238405+03	1	0
-2	11749dbd-4070-44fe-b164-bab1dc9f63af	2	shortest_distance	t	0	323	484	1	0	t	h7	https://www.google.com/maps/dir/43.723474896114794,23.961181640625004/43.4168,24.6069/43.5667,27.8333	{"route": [{"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 450.0, "selectionReason": "optimal_single", "distanceFromOrigin": 62}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.723474896114794,23.961181640625004/43.4168,24.6069/43.5667,27.8333", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 484, "supplierStops": [], "totalDistance": 323, "fullyFulfilled": true}	\N	\N	0	0
-3	20efb1dd-b786-45c8-9ed4-3f4e85b99c4d	3	shortest_distance	t	0	323	484	1	0	t	h7	https://www.google.com/maps/dir/43.723474896114794,23.961181640625004/43.4168,24.6069/43.5667,27.8333	{"route": [{"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 450.0, "selectionReason": "optimal_single", "distanceFromOrigin": 62}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.723474896114794,23.961181640625004/43.4168,24.6069/43.5667,27.8333", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 484, "supplierStops": [], "totalDistance": 323, "fullyFulfilled": true}	\N	\N	0	0
-34	0932d117-21be-47d7-bcfc-4a9b426ca59f	24	houses_suppliers_only	f	2	817	1226	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 10, "totalMinutes": 1226, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 817, "fullyFulfilled": true, "warehouseStops": []}	\N	\N	0	0
-36	39ad0724-f067-41db-aab9-711cab13931a	25	houses_warehouses_only	f	1	1445	2167	10	0	f	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1	https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}}}], "deficit": [{"name": "Boards", "unit": "unidades", "quantity": 14.0}], "mapsUrl": "https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 10, "totalMinutes": 2167, "supplierStops": [], "totalDistance": 1445, "fullyFulfilled": false, "warehouseStops": [{"id": 2, "lat": 42.15, "lng": 24.75, "name": "Central Depot Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "Central Depot Sofia", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}}}]}	2026-06-27 23:32:46.817787+03	2026-06-27 23:33:32.072928+03	4	2
-37	fcc98a5b-9eab-4562-9909-6f5b55624f9f	25	houses_suppliers_only	f	2	803	1204	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 10, "totalMinutes": 1204, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 803, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:32:37.113611+03	2026-06-27 23:33:36.055872+03	3	0
-35	9d0666bf-54ec-4e5a-bc87-62118011a21c	25	shortest_distance	t	0	1445	2167	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 10, "totalMinutes": 2167, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 0}}}], "totalDistance": 1445, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.15, "lng": 24.75, "name": "Central Depot Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "Central Depot Sofia", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}}}]}	2026-06-27 23:31:35.967562+03	2026-06-27 23:33:44.421244+03	5	2
-53	4a97b581-5c03-4685-a29e-e3dda6571b76	30	houses_warehouses_only	f	3	1614	2421	10	0	f	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1	https://www.google.com/maps/dir/43.67581809328341,21.082763671875004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 554}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 554}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 545}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 545}}}], "deficit": [{"name": "Boards", "unit": "unidades", "quantity": 14.0}], "mapsUrl": "https://www.google.com/maps/dir/43.67581809328341,21.082763671875004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 10, "totalMinutes": 2421, "supplierStops": [], "totalDistance": 1614, "fullyFulfilled": false, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	\N	\N	0	2
-52	8af63ffe-f618-4947-a98b-5bee334aedad	30	balanced	f	2	1617	2426	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/43.67581809328341,21.082763671875004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 554}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 554}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 545}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 545}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.67581809328341,21.082763671875004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "balanced", "totalStops": 10, "totalMinutes": 2426, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 6}}}], "totalDistance": 1617, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	2026-06-28 13:24:44.154544+03	2026-06-28 13:24:44.154544+03	1	2
-4	17c392c6-603f-4352-9b1d-00f8473f6c80	4	shortest_distance	t	0	362	544	1	0	t	h8	https://www.google.com/maps/dir/43.34914966389313,23.181152343750004/42.6833,26.3167/42.4958,27.4726	{"route": [{"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 12.0, "availableQty": 90.0, "selectionReason": "optimal_single", "distanceFromOrigin": 265}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.34914966389313,23.181152343750004/42.6833,26.3167/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 544, "supplierStops": [], "totalDistance": 362, "fullyFulfilled": true}	\N	\N	0	0
-5	8009e2ca-ac71-436f-9ba0-6c52a09c87e0	5	shortest_distance	t	0	362	544	1	0	t	h8	https://www.google.com/maps/dir/43.34914966389313,23.181152343750004/42.6833,26.3167/42.4958,27.4726	{"route": [{"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 12.0, "availableQty": 90.0, "selectionReason": "optimal_single", "distanceFromOrigin": 265}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.34914966389313,23.181152343750004/42.6833,26.3167/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 544, "supplierStops": [], "totalDistance": 362, "fullyFulfilled": true}	\N	\N	0	0
-7	00cd60e6-713d-4c08-9250-4ae5ebbdad95	7	shortest_distance	t	0	179	269	1	0	t	h9	https://www.google.com/maps/dir/44.66865287227321,26.993408203125004/43.5667,27.8333/43.2141,27.9147	{"route": [{"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 11.0, "availableQty": 250.0, "selectionReason": "optimal_single", "distanceFromOrigin": 140}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/44.66865287227321,26.993408203125004/43.5667,27.8333/43.2141,27.9147", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 269, "supplierStops": [], "totalDistance": 179, "fullyFulfilled": true}	\N	\N	0	0
-8	d45501fb-385f-4ee0-9b6f-6d4d48ba9578	8	shortest_distance	t	0	309	463	1	0	t	h10	https://www.google.com/maps/dir/44.213709909702054,24.63134765625/43.2706,26.9221/42.4958,27.4726	{"route": [{"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 12.0, "availableQty": 130.0, "selectionReason": "optimal_single", "distanceFromOrigin": 212}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/44.213709909702054,24.63134765625/43.2706,26.9221/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 463, "supplierStops": [], "totalDistance": 309, "fullyFulfilled": true}	\N	\N	0	0
-9	85146959-eeb3-4253-aa7a-592488e79d00	9	shortest_distance	t	0	338	506	1	0	t	h8	https://www.google.com/maps/dir/43.98491011404692,23.939208984375004/42.6833,26.3167/42.4958,27.4726	{"route": [{"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 12.0, "availableQty": 90.0, "selectionReason": "optimal_single", "distanceFromOrigin": 241}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.98491011404692,23.939208984375004/42.6833,26.3167/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 506, "supplierStops": [], "totalDistance": 338, "fullyFulfilled": true}	\N	\N	0	0
-6	f62d6093-1601-4dcc-9f79-61caa657761a	6	shortest_distance	t	0	362	544	1	0	t	h8	https://www.google.com/maps/dir/43.34914966389313,23.181152343750004/42.6833,26.3167/42.4958,27.4726	{"route": [{"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 12.0, "availableQty": 90.0, "selectionReason": "optimal_single", "distanceFromOrigin": 265}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.34914966389313,23.181152343750004/42.6833,26.3167/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 544, "supplierStops": [], "totalDistance": 362, "fullyFulfilled": true}	\N	\N	0	0
-10	12800db5-d5d8-4374-9bb0-ccc9b6d0f940	10	shortest_distance	t	0	338	506	1	0	t	h8	https://www.google.com/maps/dir/43.98491011404692,23.939208984375004/42.6833,26.3167/42.4958,27.4726	{"route": [{"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 12.0, "availableQty": 90.0, "selectionReason": "optimal_single", "distanceFromOrigin": 241}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.98491011404692,23.939208984375004/42.6833,26.3167/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 506, "supplierStops": [], "totalDistance": 338, "fullyFulfilled": true}	\N	\N	0	0
-12	b031571d-c110-407f-8a44-5c978bd60040	12	shortest_distance	t	0	332	498	1	0	t	h7	https://www.google.com/maps/dir/44.32384807250689,22.445068359375004/43.4168,24.6069/42.6977,23.3219	{"route": [{"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 22.0, "availableQty": 175.0, "selectionReason": "optimal_single", "distanceFromOrigin": 200}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/44.32384807250689,22.445068359375004/43.4168,24.6069/42.6977,23.3219", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 498, "supplierStops": [], "totalDistance": 332, "fullyFulfilled": true}	2026-06-04 23:35:38.903223+03	2026-06-04 23:35:38.903223+03	1	0
-11	e0153236-ce41-4965-8d35-67868cbb390c	11	shortest_distance	t	0	256	385	1	0	t	h10	https://www.google.com/maps/dir/44.2294565683017,27.476806640625004/43.2706,26.9221/42.4258,25.6345	{"route": [{"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 12.0, "availableQty": 130.0, "selectionReason": "optimal_single", "distanceFromOrigin": 116}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/44.2294565683017,27.476806640625004/43.2706,26.9221/42.4258,25.6345", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 385, "supplierStops": [], "totalDistance": 256, "fullyFulfilled": true}	2026-06-04 23:00:36.121748+03	2026-06-04 23:00:36.121748+03	1	0
-39	2789f8b2-a618-4cda-a0cc-18bf61922044	26	houses_warehouses_only	f	1	1452	2178	10	0	f	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1	https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}}}], "deficit": [{"name": "Boards", "unit": "unidades", "quantity": 14.0}], "mapsUrl": "https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 10, "totalMinutes": 2178, "supplierStops": [], "totalDistance": 1452, "fullyFulfilled": false, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	\N	\N	0	2
-13	d107455f-8677-4ae9-906c-919e52e1e42a	13	shortest_distance	t	0	218	328	1	0	t	h1	https://www.google.com/maps/dir/43.46886761482925,23.203125000000004/42.6977,23.3219/42.15,24.75	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 12.0, "availableQty": 120.0, "selectionReason": "optimal_single", "distanceFromOrigin": 86}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.46886761482925,23.203125000000004/42.6977,23.3219/42.15,24.75", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 328, "supplierStops": [], "totalDistance": 218, "fullyFulfilled": true}	2026-06-05 15:22:07.591309+03	2026-06-05 15:22:07.591309+03	1	0
-38	d4b58b55-4d8c-4aeb-90cd-27e237c705e5	26	shortest_distance	t	0	1455	2183	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 10, "totalMinutes": 2183, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 6}}}], "totalDistance": 1455, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	2026-06-27 23:35:08.147332+03	2026-06-27 23:35:08.147332+03	1	2
-40	ded83977-d4e4-4c30-8e21-c420b7edd2b6	26	houses_suppliers_only	f	2	803	1204	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 37}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 46}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 169}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 175}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 237}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 290}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 344}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 423}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 425}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.71473218539458,22.763671875000004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 10, "totalMinutes": 1204, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 803, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:35:14.956858+03	2026-06-27 23:35:14.956858+03	1	0
-54	8b1daa62-c1c1-4560-b96c-e362c2a90fb6	30	houses_suppliers_only	f	4	965	1447	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/43.67581809328341,21.082763671875004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 554}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 554}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 545}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 545}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.67581809328341,21.082763671875004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 10, "totalMinutes": 1447, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 965, "fullyFulfilled": true, "warehouseStops": []}	2026-06-28 13:24:37.489272+03	2026-06-28 13:24:47.81396+03	2	0
-14	b18bbb29-6ed4-4452-a439-f3130f26532c	14	shortest_distance	t	0	1101	1651	10	0	f	h21-h1-h7-h2-h6-h8-h10-h18-h9-h4	https://www.google.com/maps/dir/43.8028187190472,19.885253906250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.604262,27.861328/43.5667,27.8333/42.4958,27.4726/43.2141,27.9147	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 292}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 292}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 304}, "3": {"name": "Boards", "unit": "unidades", "quantity": 12.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 304}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 123.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 304}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 383}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 436}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 491}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 535}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 570}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 641}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 639}}}, {"id": 4, "lat": 42.4958, "lng": 27.4726, "name": "House Burgas", "location": "Burgas, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 632}}}], "deficit": [{"name": "Screws", "unit": "unidades", "quantity": 496810.0}], "mapsUrl": "https://www.google.com/maps/dir/43.8028187190472,19.885253906250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.604262,27.861328/43.5667,27.8333/42.4958,27.4726/43.2141,27.9147", "optionId": null, "objective": "shortest_distance", "totalStops": 10, "totalMinutes": 1651, "supplierStops": [], "totalDistance": 1101, "fullyFulfilled": false}	2026-06-05 17:33:22.028909+03	2026-06-05 17:33:22.028909+03	1	0
-16	8709b6e9-50de-4813-8410-655dc7d091d9	16	shortest_distance	t	0	371	557	2	0	t	h7-h8	https://www.google.com/maps/dir/43.874138181474734,23.345947265625004/43.4168,24.6069/42.6833,26.3167/42.4958,27.4726	{"route": [{"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 30.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 113}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 113}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 275}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.874138181474734,23.345947265625004/43.4168,24.6069/42.6833,26.3167/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 2, "totalMinutes": 557, "supplierStops": [], "totalDistance": 371, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 22:44:36.068116+03	2026-06-27 22:44:36.068116+03	1	0
-15	25a24cad-0525-4401-82b4-4c3dc3bf3fa3	15	shortest_distance	t	0	2154	3231	9	6	f	h7-h21-h6-h8-h10-h18-h9-h3-h4-w2-w1-s1-s2-s6-s5-s4-s3	https://www.google.com/maps/dir/43.48481212891603,25.433349609375004/43.4168,24.6069/42.779275,23.214111/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.604262,27.861328/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726/42.15,24.75/42.6977,23.3219/42.6977,23.3219/42.15,24.75/42.4258,25.6345/43.8468,25.9544/42.4958,27.4726/43.2141,27.9147/42.6977,23.3219	{"route": [{"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 67}}}, {"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 119}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 123}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 194}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 203}}}, {"id": 4, "lat": 42.4958, "lng": 27.4726, "name": "House Burgas", "location": "Burgas, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}}}], "deficit": [{"name": "Lumber", "unit": "m²", "quantity": 993090.0}], "mapsUrl": "https://www.google.com/maps/dir/43.48481212891603,25.433349609375004/43.4168,24.6069/42.779275,23.214111/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.604262,27.861328/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726/42.15,24.75/42.6977,23.3219/42.6977,23.3219/42.15,24.75/42.4258,25.6345/43.8468,25.9544/42.4958,27.4726/43.2141,27.9147/42.6977,23.3219", "optionId": null, "objective": "shortest_distance", "totalStops": 9, "totalMinutes": 3231, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 800.0, "availableQty": 800.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 0}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "PlovdivMat EOOD", "location": "Plovdiv, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 600.0, "availableQty": 600.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 132}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "Zagora Supplies", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 650.0, "availableQty": 650.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 192}}}, {"id": 5, "lat": 43.8468, "lng": 25.9544, "name": "RuseBuild OOD", "location": "Ruse, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 248}}}, {"id": 4, "lat": 42.4958, "lng": 27.4726, "name": "Burgas Materiali", "location": "Burgas, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 340}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 900.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 378}}}], "totalDistance": 2154, "fullyFulfilled": false, "warehouseStops": [{"id": 2, "lat": 42.15, "lng": 24.75, "name": "Central Depot Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 227}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "Central Depot Sofia", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 340}}}]}	2026-06-25 21:25:10.980426+03	2026-06-25 21:25:10.980426+03	1	2
-42	378e150f-5b3b-4b62-8f84-3eaea488d94c	27	houses_warehouses_only	f	1	253	379	1	0	t	h6	https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/42.4258,25.6345/43.4168,24.6069	{"route": [{"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 23.0, "availableQty": 45.0, "selectionReason": "optimal_single", "distanceFromOrigin": 114}, "2": {"name": "Screws", "unit": "unidades", "quantity": 2.0, "availableQty": 200.0, "selectionReason": "optimal_single", "distanceFromOrigin": 114}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/42.4258,25.6345/43.4168,24.6069", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 1, "totalMinutes": 379, "supplierStops": [], "totalDistance": 253, "fullyFulfilled": true, "warehouseStops": []}	2026-06-28 11:11:06.835683+03	2026-06-28 11:11:06.835683+03	1	0
-18	0dd123a6-4d27-47c2-b213-5e7b26cd5e0f	18	shortest_distance	t	0	676	1014	7	0	t	h1-h7-h6-h8-h10-h9-h3	https://www.google.com/maps/dir/42.71473218539458,22.664794921875/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 54}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 54}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 54}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 54}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 176}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 176}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 176}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 176}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 245}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 245}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 245}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 245}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 298}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 298}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 298}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 70.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 352}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 352}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 352}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 430}, "3": {"name": "Boards", "unit": "unidades", "quantity": 50.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 430}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 300.0, "availableQty": 800.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 431}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.71473218539458,22.664794921875/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 7, "totalMinutes": 1014, "supplierStops": [], "totalDistance": 676, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 22:52:55.811363+03	2026-06-27 22:52:55.811363+03	1	0
-17	1300369d-6d47-41b1-b3db-2f5ebb704f3a	17	shortest_distance	t	0	860	1290	7	0	t	h1-h7-h6-h8-h10-h9-h3	https://www.google.com/maps/dir/43.98491011404692,20.972900390625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 238}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 238}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 238}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 238}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 416}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 416}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 416}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 416}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 456}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 456}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 456}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 70.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 485}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 485}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 485}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "3": {"name": "Boards", "unit": "unidades", "quantity": 50.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 300.0, "availableQty": 800.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 565}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.98491011404692,20.972900390625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 7, "totalMinutes": 1290, "supplierStops": [], "totalDistance": 860, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 22:51:31.305222+03	2026-06-27 22:51:31.305222+03	1	0
-19	20bef4cf-35f7-429c-8f7f-9e3245f9a214	19	shortest_distance	t	0	708	1062	7	0	t	h1-h7-h6-h8-h10-h9-h3	https://www.google.com/maps/dir/43.35713822211053,22.774658203125004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 86}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 86}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 86}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 86}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 148}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 148}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 148}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 148}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 255}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 255}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 255}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 255}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 298}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 298}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 298}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 70.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 336}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 336}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 336}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 409}, "3": {"name": "Boards", "unit": "unidades", "quantity": 50.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 409}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 300.0, "availableQty": 800.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 416}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.35713822211053,22.774658203125004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 7, "totalMinutes": 1062, "supplierStops": [], "totalDistance": 708, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:15:46.114159+03	2026-06-27 23:15:46.114159+03	1	0
-20	709fb09f-c1c3-47d5-828f-ccac319e48f9	20	shortest_distance	t	0	662	993	7	0	t	h1-h7-h6-h8-h10-h9-h3	https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 70.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}, "3": {"name": "Boards", "unit": "unidades", "quantity": 50.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 300.0, "availableQty": 800.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 409}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 7, "totalMinutes": 993, "supplierStops": [], "totalDistance": 662, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:20:36.717302+03	2026-06-27 23:22:28.480062+03	3	0
-21	a35b688b-8f6d-49b4-b072-9cc18069b7b7	20	houses_warehouses_only	f	1	662	993	7	0	t	h1-h7-h6-h8-h10-h9-h3	https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 70.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}, "3": {"name": "Boards", "unit": "unidades", "quantity": 50.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 300.0, "availableQty": 800.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 409}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 7, "totalMinutes": 993, "supplierStops": [], "totalDistance": 662, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:21:04.636328+03	2026-06-27 23:22:27.312104+03	3	0
-22	2b37b0aa-92bd-4834-8de7-0e05b36ca23d	20	houses_suppliers_only	f	2	662	993	7	0	t	h1-h7-h6-h8-h10-h9-h3	https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 70.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}, "3": {"name": "Boards", "unit": "unidades", "quantity": 50.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 300.0, "availableQty": 800.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 409}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 7, "totalMinutes": 993, "supplierStops": [], "totalDistance": 662, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:21:10.292603+03	2026-06-27 23:22:26.077927+03	2	0
-23	e089a679-1e1b-43a2-8122-5423e9cb62af	21	shortest_distance	t	0	662	993	7	0	t	h1-h7-h6-h8-h10-h9-h3	https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 70.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}, "3": {"name": "Boards", "unit": "unidades", "quantity": 50.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 300.0, "availableQty": 800.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 409}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 7, "totalMinutes": 993, "supplierStops": [], "totalDistance": 662, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:23:19.965553+03	2026-06-27 23:23:19.965553+03	1	0
-24	12d015f2-1eb5-4e58-8e5f-1011845767b0	21	houses_warehouses_only	f	1	662	993	7	0	t	h1-h7-h6-h8-h10-h9-h3	https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 70.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}, "3": {"name": "Boards", "unit": "unidades", "quantity": 50.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 300.0, "availableQty": 800.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 409}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 7, "totalMinutes": 993, "supplierStops": [], "totalDistance": 662, "fullyFulfilled": true, "warehouseStops": []}	\N	\N	0	0
-25	65662598-bdda-4764-b36d-706a0a813556	21	houses_suppliers_only	f	2	662	993	7	0	t	h1-h7-h6-h8-h10-h9-h3	https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 39}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 150}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 279}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 70.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 329}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 700.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}, "3": {"name": "Boards", "unit": "unidades", "quantity": 50.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 406}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 300.0, "availableQty": 800.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 409}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.87596410238256,22.906494140625004/42.6977,23.3219/43.4168,24.6069/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.5667,27.8333/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 7, "totalMinutes": 993, "supplierStops": [], "totalDistance": 662, "fullyFulfilled": true, "warehouseStops": []}	\N	\N	0	0
-31	68e660ae-3ae4-433f-bb08-fc68dc31db6c	23	houses_suppliers_only	f	2	817	1226	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 10, "totalMinutes": 1226, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 817, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:27:57.423663+03	2026-06-27 23:27:57.423663+03	1	0
-29	dcc460c7-feb6-4bdc-aa00-f604282a8f76	23	shortest_distance	t	0	1459	2189	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 10, "totalMinutes": 2189, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 0}}}], "totalDistance": 1459, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.15, "lng": 24.75, "name": "Central Depot Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "Central Depot Sofia", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}}}]}	2026-06-27 23:27:12.758635+03	2026-06-27 23:28:25.81086+03	4	2
-26	6543964c-dbfb-4078-ab67-e059d207c615	22	shortest_distance	t	0	792	1189	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/42.84375132629023,22.895507812500004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 27}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 27}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 170}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 170}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 170}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 280}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 280}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 280}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 331}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 331}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 331}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 410}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 410}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 408}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 408}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 408}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 411}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 411}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.84375132629023,22.895507812500004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 10, "totalMinutes": 1189, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 792, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:23:41.668929+03	2026-06-27 23:23:41.668929+03	1	0
-27	9ca4f19d-38d9-41b0-bdae-408698882f70	22	houses_warehouses_only	f	1	792	1189	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/42.84375132629023,22.895507812500004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 27}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 27}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 170}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 170}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 170}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 280}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 280}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 280}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 331}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 331}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 331}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 410}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 410}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 408}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 408}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 408}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 411}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 411}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.84375132629023,22.895507812500004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 10, "totalMinutes": 1189, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 792, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:23:55.287067+03	2026-06-27 23:23:55.287067+03	1	0
-28	22f86f22-ab28-49a0-a28f-5bcedb7eec76	22	houses_suppliers_only	f	2	792	1189	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/42.84375132629023,22.895507812500004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 27}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 27}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 38}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 170}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 170}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 170}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 280}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 280}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 280}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 331}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 331}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 331}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 410}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 410}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 408}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 408}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 408}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 411}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 411}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/42.84375132629023,22.895507812500004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 10, "totalMinutes": 1189, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 792, "fullyFulfilled": true, "warehouseStops": []}	2026-06-27 23:24:01.068018+03	2026-06-27 23:24:01.068018+03	1	0
-33	289c7bec-001b-4da9-99a2-32de818bdb67	24	houses_warehouses_only	f	1	1459	2189	10	0	f	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1	https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}}}], "deficit": [{"name": "Boards", "unit": "unidades", "quantity": 14.0}], "mapsUrl": "https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 10, "totalMinutes": 2189, "supplierStops": [], "totalDistance": 1459, "fullyFulfilled": false, "warehouseStops": [{"id": 2, "lat": 42.15, "lng": 24.75, "name": "Central Depot Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "Central Depot Sofia", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}}}]}	\N	\N	0	2
-30	514c2ef5-4d11-4fc8-a9ed-b0c4d2adb52c	23	houses_warehouses_only	f	1	1459	2189	10	0	f	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1	https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}}}], "deficit": [{"name": "Boards", "unit": "unidades", "quantity": 14.0}], "mapsUrl": "https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 10, "totalMinutes": 2189, "supplierStops": [], "totalDistance": 1459, "fullyFulfilled": false, "warehouseStops": [{"id": 2, "lat": 42.15, "lng": 24.75, "name": "Central Depot Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "Central Depot Sofia", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}}}]}	2026-06-27 23:27:39.031963+03	2026-06-27 23:28:45.480772+03	4	2
-32	9a41a624-21de-4231-9181-b6a4fc835544	24	shortest_distance	t	0	1459	2189	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 52}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 64}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 162}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 196}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 251}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 299}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 345}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 426}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 422}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 424}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.02874525134882,22.67578125/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.15,24.75/42.6977,23.3219/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 10, "totalMinutes": 2189, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 0}}}], "totalDistance": 1459, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.15, "lng": 24.75, "name": "Central Depot Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 301}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "Central Depot Sofia", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 382}}}]}	2026-06-27 23:31:13.382041+03	2026-06-27 23:31:13.382041+03	1	2
-50	d68fe80d-2436-414d-9fd8-551f0e25878c	30	shortest_distance	t	0	1617	2426	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/43.67581809328341,21.082763671875004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 554}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 554}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 545}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 545}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.67581809328341,21.082763671875004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 10, "totalMinutes": 2426, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 6}}}], "totalDistance": 1617, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	2026-06-28 13:24:11.851976+03	2026-06-28 13:24:41.414559+03	2	2
-41	387f96c0-a491-4c8f-a351-06b867883157	27	shortest_distance	t	0	253	379	1	0	t	h6	https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/42.4258,25.6345/43.4168,24.6069	{"route": [{"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 23.0, "availableQty": 45.0, "selectionReason": "optimal_single", "distanceFromOrigin": 114}, "2": {"name": "Screws", "unit": "unidades", "quantity": 2.0, "availableQty": 200.0, "selectionReason": "optimal_single", "distanceFromOrigin": 114}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/42.4258,25.6345/43.4168,24.6069", "optionId": null, "objective": "shortest_distance", "totalStops": 1, "totalMinutes": 379, "supplierStops": [], "totalDistance": 253, "fullyFulfilled": true, "warehouseStops": []}	2026-06-28 11:10:56.988767+03	2026-06-28 11:10:56.988767+03	1	0
-43	7a7c8024-5c91-4571-8fc1-da5bdac956c1	27	houses_suppliers_only	f	2	253	379	1	0	t	h6	https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/42.4258,25.6345/43.4168,24.6069	{"route": [{"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 23.0, "availableQty": 45.0, "selectionReason": "optimal_single", "distanceFromOrigin": 114}, "2": {"name": "Screws", "unit": "unidades", "quantity": 2.0, "availableQty": 200.0, "selectionReason": "optimal_single", "distanceFromOrigin": 114}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/42.4258,25.6345/43.4168,24.6069", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 1, "totalMinutes": 379, "supplierStops": [], "totalDistance": 253, "fullyFulfilled": true, "warehouseStops": []}	2026-06-28 11:11:09.162154+03	2026-06-28 11:11:09.162154+03	1	0
-48	6b1f464d-7b92-4b7a-a686-21cdd89e66b1	29	houses_warehouses_only	f	1	1710	2564	10	0	f	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1	https://www.google.com/maps/dir/43.44494295526125,19.698486328125004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 295}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 295}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 436}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 436}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 436}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 496}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 496}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 496}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 544}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 544}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 544}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 584}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 584}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 584}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 665}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 665}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 656}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 656}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 656}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 658}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 658}}}], "deficit": [{"name": "Boards", "unit": "unidades", "quantity": 14.0}], "mapsUrl": "https://www.google.com/maps/dir/43.44494295526125,19.698486328125004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 10, "totalMinutes": 2564, "supplierStops": [], "totalDistance": 1710, "fullyFulfilled": false, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	\N	\N	0	2
-49	c4fa4000-558e-411b-a1e4-96dc243f8cc1	29	houses_suppliers_only	f	2	1060	1590	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/43.44494295526125,19.698486328125004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 295}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 295}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 436}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 436}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 436}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 496}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 496}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 496}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 544}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 544}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 544}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 584}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 584}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 584}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 665}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 665}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 656}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 656}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 656}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 658}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 658}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.44494295526125,19.698486328125004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 10, "totalMinutes": 1590, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 1060, "fullyFulfilled": true, "warehouseStops": []}	\N	\N	0	0
-44	ab1c464f-72c3-4469-bc3b-95b6b93a0e5c	28	shortest_distance	t	0	1446	2169	10	1	t	h7-h21-h1-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/43.4168,24.6069/42.779275,23.214111/42.6977,23.3219/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}}}, {"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 161}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 161}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 158}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 158}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 158}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 136}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 136}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 50.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 136}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 233}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 233}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 227}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 227}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 227}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/43.4168,24.6069/42.779275,23.214111/42.6977,23.3219/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 10, "totalMinutes": 2169, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 6}}}], "totalDistance": 1446, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	2026-06-28 11:11:25.127427+03	2026-06-28 11:11:25.127427+03	1	2
-45	b0ab3391-eb28-48b5-9a5f-800b245917f8	28	houses_warehouses_only	f	1	1443	2164	10	0	f	h7-h21-h1-h2-h6-h8-h10-h3-h9-h18-w2-w1	https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/43.4168,24.6069/42.779275,23.214111/42.6977,23.3219/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.4958,27.4726	{"route": [{"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}}}, {"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 161}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 161}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 158}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 158}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 158}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 136}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 136}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 50.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 136}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 233}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 233}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 227}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 227}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 227}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}], "deficit": [{"name": "Boards", "unit": "unidades", "quantity": 14.0}], "mapsUrl": "https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/43.4168,24.6069/42.779275,23.214111/42.6977,23.3219/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 10, "totalMinutes": 2164, "supplierStops": [], "totalDistance": 1443, "fullyFulfilled": false, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	2026-06-28 11:11:43.234914+03	2026-06-28 11:11:43.234914+03	1	2
-46	2dfb69fe-5eb7-4abe-a9a0-f16e442cfea6	28	houses_suppliers_only	f	2	794	1190	10	1	t	h7-h21-h1-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/43.4168,24.6069/42.779275,23.214111/42.6977,23.3219/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 35}}}, {"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 161}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 161}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 158}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 158}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 158}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 136}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 136}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 50.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 136}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 114}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 128}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 153}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 233}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 233}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 227}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 227}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 227}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 229}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.35713822211053,25.037841796875004/43.4168,24.6069/42.779275,23.214111/42.6977,23.3219/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 10, "totalMinutes": 1190, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 794, "fullyFulfilled": true, "warehouseStops": []}	2026-06-28 11:11:50.135097+03	2026-06-28 11:11:50.135097+03	1	0
-47	e82dda33-9989-48e2-b704-202f9b9ce20e	29	shortest_distance	t	0	1713	2569	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/43.44494295526125,19.698486328125004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 295}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 295}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 306}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 396}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 436}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 436}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 436}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 496}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 496}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 496}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 544}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 544}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 544}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 584}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 584}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 584}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 665}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 665}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 656}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 656}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 656}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 658}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 658}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.44494295526125,19.698486328125004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 10, "totalMinutes": 2569, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 6}}}], "totalDistance": 1713, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	2026-06-28 12:25:11.998155+03	2026-06-28 12:25:11.998155+03	1	2
-56	e101f5f5-ea7d-4b94-bd8b-e8d6980746ef	31	fastest_time	f	1	1707	2561	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/44.12702800650004,20.148925781250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 289}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 289}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 633}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 633}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 621}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 621}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/44.12702800650004,20.148925781250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "fastest_time", "totalStops": 10, "totalMinutes": 2561, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 6}}}], "totalDistance": 1707, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	\N	\N	0	2
-51	13b2caad-005c-455c-97eb-ed3bf06e2193	30	fastest_time	f	1	1617	2426	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/43.67581809328341,21.082763671875004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 199}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 212}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 285}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 343}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 395}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 438}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 473}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 554}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 554}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 543}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 545}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 545}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/43.67581809328341,21.082763671875004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "fastest_time", "totalStops": 10, "totalMinutes": 2426, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 6}}}], "totalDistance": 1617, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	2026-06-28 13:24:43.523271+03	2026-06-28 13:24:43.523271+03	1	2
-55	bc3f157f-9689-41e5-80fe-df76fef77e67	31	shortest_distance	t	0	1707	2561	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/44.12702800650004,20.148925781250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 289}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 289}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 633}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 633}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 621}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 621}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/44.12702800650004,20.148925781250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "shortest_distance", "totalStops": 10, "totalMinutes": 2561, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 6}}}], "totalDistance": 1707, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	2026-06-28 14:28:47.349765+03	2026-06-28 14:28:47.349765+03	1	2
-57	31f4b732-8793-4481-9969-154c061c9e94	31	balanced	f	2	1707	2561	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1-s1	https://www.google.com/maps/dir/44.12702800650004,20.148925781250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 289}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 289}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 633}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 633}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 621}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 621}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/44.12702800650004,20.148925781250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.6977,23.3219/42.4958,27.4726", "optionId": null, "objective": "balanced", "totalStops": 10, "totalMinutes": 2561, "supplierStops": [{"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "BulgarBuild Sofia", "location": "Sofia, Bulgaria", "contribution": {"3": {"name": "Boards", "unit": "unidades", "quantity": 14.0, "availableQty": 300.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 6}}}], "totalDistance": 1707, "fullyFulfilled": true, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	\N	\N	0	2
-59	bb54de36-0ac5-488a-ad1f-a11edc2bb2f9	31	houses_suppliers_only	f	4	1055	1582	10	1	t	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-s3	https://www.google.com/maps/dir/44.12702800650004,20.148925781250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 289}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 289}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 633}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 633}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 621}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 621}}}], "deficit": [], "mapsUrl": "https://www.google.com/maps/dir/44.12702800650004,20.148925781250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/43.2141,27.9147/42.4958,27.4726", "optionId": null, "objective": "houses_suppliers_only", "totalStops": 10, "totalMinutes": 1582, "supplierStops": [{"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "Varna Construction Co", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 480.0, "availableQty": 900.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}, "3": {"name": "Boards", "unit": "unidades", "quantity": 264.0, "availableQty": 350.0, "selectionReason": "supplier_fallback", "distanceFromOrigin": 44}}}], "totalDistance": 1055, "fullyFulfilled": true, "warehouseStops": []}	\N	\N	0	0
-58	a2d121d5-3ac9-4272-b01e-7410f8d489ae	31	houses_warehouses_only	f	3	1704	2556	10	0	f	h21-h1-h7-h2-h6-h8-h10-h3-h9-h18-w2-w1	https://www.google.com/maps/dir/44.12702800650004,20.148925781250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.4958,27.4726	{"route": [{"id": 21, "lat": 42.779275, "lng": 23.214111, "name": "Teodor HOuse", "location": "Voluyak, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 1000.0, "availableQty": 1000.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 289}, "2": {"name": "Screws", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 289}}}, {"id": 1, "lat": 42.6977, "lng": 23.3219, "name": "House Sofia Centro", "location": "Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 120.0, "availableQty": 120.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "2": {"name": "Screws", "unit": "unidades", "quantity": 500.0, "availableQty": 500.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "3": {"name": "Boards", "unit": "unidades", "quantity": 30.0, "availableQty": 30.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 302}}}, {"id": 7, "lat": 43.4168, "lng": 24.6069, "name": "House Pleven", "location": "Pleven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 175.0, "availableQty": 175.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "2": {"name": "Screws", "unit": "unidades", "quantity": 450.0, "availableQty": 450.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "3": {"name": "Boards", "unit": "unidades", "quantity": 40.0, "availableQty": 40.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 367}}}, {"id": 2, "lat": 42.15, "lng": 24.75, "name": "House Plovdiv", "location": "Plovdiv, Bulgaria", "contribution": {"2": {"name": "Screws", "unit": "unidades", "quantity": 320.0, "availableQty": 320.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}, "3": {"name": "Boards", "unit": "unidades", "quantity": 15.0, "availableQty": 15.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}, "4": {"name": "Tiles", "unit": "unidades", "quantity": 80.0, "availableQty": 150.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 433}}}, {"id": 6, "lat": 42.4258, "lng": 25.6345, "name": "House Stara Zagora", "location": "Stara Zagora, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 45.0, "availableQty": 45.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}, "2": {"name": "Screws", "unit": "unidades", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}, "3": {"name": "Boards", "unit": "unidades", "quantity": 25.0, "availableQty": 25.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 483}}}, {"id": 8, "lat": 42.6833, "lng": 26.3167, "name": "House Sliven", "location": "Sliven, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 90.0, "availableQty": 90.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}, "2": {"name": "Screws", "unit": "unidades", "quantity": 370.0, "availableQty": 370.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}, "3": {"name": "Boards", "unit": "unidades", "quantity": 20.0, "availableQty": 20.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 523}}}, {"id": 10, "lat": 43.2706, "lng": 26.9221, "name": "House Shumen", "location": "Shumen, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 130.0, "availableQty": 130.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "2": {"name": "Screws", "unit": "unidades", "quantity": 480.0, "availableQty": 480.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}, "3": {"name": "Boards", "unit": "unidades", "quantity": 35.0, "availableQty": 35.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 553}}}, {"id": 3, "lat": 43.2141, "lng": 27.9147, "name": "House Varna Mar", "location": "Varna, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 200.0, "availableQty": 200.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 633}, "3": {"name": "Boards", "unit": "unidades", "quantity": 1.0, "availableQty": 1.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 633}}}, {"id": 9, "lat": 43.5667, "lng": 27.8333, "name": "House Dobrich", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 250.0, "availableQty": 250.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}, "2": {"name": "Screws", "unit": "unidades", "quantity": 670.0, "availableQty": 700.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}, "3": {"name": "Boards", "unit": "unidades", "quantity": 60.0, "availableQty": 60.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 619}}}, {"id": 18, "lat": 43.604262, "lng": 27.861328, "name": "Herakovo 1", "location": "Dobrich, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 621}, "3": {"name": "Boards", "unit": "unidades", "quantity": 10.0, "availableQty": 10.0, "selectionReason": "optimal_multi", "distanceFromOrigin": 621}}}], "deficit": [{"name": "Boards", "unit": "unidades", "quantity": 14.0}], "mapsUrl": "https://www.google.com/maps/dir/44.12702800650004,20.148925781250004/42.779275,23.214111/42.6977,23.3219/43.4168,24.6069/42.15,24.75/42.4258,25.6345/42.6833,26.3167/43.2706,26.9221/43.2141,27.9147/43.5667,27.8333/43.604262,27.861328/42.112,24.713/42.6524,23.2856/42.4958,27.4726", "optionId": null, "objective": "houses_warehouses_only", "totalStops": 10, "totalMinutes": 2556, "supplierStops": [], "totalDistance": 1704, "fullyFulfilled": false, "warehouseStops": [{"id": 2, "lat": 42.112, "lng": 24.713, "name": "Central Depot Plovdiv", "location": "Plovdiv Industrial Zone, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 300.0, "availableQty": 300.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}, "3": {"name": "Boards", "unit": "unidades", "quantity": 100.0, "availableQty": 100.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 306}}}, {"id": 1, "lat": 42.6524, "lng": 23.2856, "name": "Central Depot Sofia", "location": "Bozhurishte, Sofia, Bulgaria", "contribution": {"1": {"name": "Lumber", "unit": "m²", "quantity": 180.0, "availableQty": 500.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}, "3": {"name": "Boards", "unit": "unidades", "quantity": 150.0, "availableQty": 150.0, "selectionReason": "warehouse_fallback", "distanceFromOrigin": 386}}}]}	2026-06-28 14:29:12.824119+03	2026-06-28 14:29:12.824119+03	1	2
-\.
-
-
---
--- Data for Name: order_event; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.order_event (id, order_id, option_id, event_type, at, app_user_id, metadata_json) FROM stdin;
-1	1	\N	created	2026-06-04 22:39:38.075757+03	\N	\N
-2	1	1	viewed	2026-06-04 22:39:38.241419+03	1	\N
-3	1	1	chosen	2026-06-04 22:39:43.39157+03	1	\N
-4	2	\N	created	2026-06-04 22:54:21.486371+03	\N	\N
-5	3	\N	created	2026-06-04 22:54:27.527427+03	\N	\N
-6	4	\N	created	2026-06-04 22:56:48.070577+03	\N	\N
-7	5	\N	created	2026-06-04 22:56:52.257519+03	\N	\N
-8	6	\N	created	2026-06-04 22:56:52.524287+03	\N	\N
-9	7	\N	created	2026-06-04 22:57:06.616784+03	\N	\N
-10	8	\N	created	2026-06-04 22:57:34.090044+03	\N	\N
-11	9	\N	created	2026-06-04 22:58:48.005463+03	\N	\N
-12	10	\N	created	2026-06-04 22:58:50.758398+03	\N	\N
-13	11	\N	created	2026-06-04 23:00:35.929172+03	\N	\N
-14	11	11	viewed	2026-06-04 23:00:36.127473+03	1	\N
-15	11	11	chosen	2026-06-04 23:00:39.304785+03	1	\N
-16	12	\N	created	2026-06-04 23:35:38.71839+03	\N	\N
-17	12	12	viewed	2026-06-04 23:35:38.903223+03	1	\N
-18	13	\N	created	2026-06-05 15:22:07.524259+03	\N	\N
-19	13	13	viewed	2026-06-05 15:22:07.593411+03	1	\N
-20	14	\N	created	2026-06-05 17:33:21.778221+03	\N	\N
-21	14	14	viewed	2026-06-05 17:33:22.028909+03	1	\N
-22	15	\N	created	2026-06-25 21:25:10.809491+03	\N	\N
-23	15	15	viewed	2026-06-25 21:25:10.984427+03	1	\N
-24	15	15	chosen	2026-06-25 21:25:32.231479+03	1	\N
-25	16	\N	created	2026-06-27 22:44:35.845607+03	\N	\N
-26	16	16	viewed	2026-06-27 22:44:36.073016+03	1	\N
-27	17	\N	created	2026-06-27 22:51:31.248434+03	\N	\N
-28	17	17	viewed	2026-06-27 22:51:31.306436+03	1	\N
-29	18	\N	created	2026-06-27 22:52:55.735616+03	\N	\N
-30	18	18	viewed	2026-06-27 22:52:55.811363+03	1	\N
-31	19	\N	created	2026-06-27 23:15:45.958268+03	\N	\N
-32	19	19	viewed	2026-06-27 23:15:46.116178+03	1	\N
-33	20	\N	created	2026-06-27 23:20:36.401877+03	\N	\N
-34	20	20	viewed	2026-06-27 23:20:36.723043+03	1	\N
-35	20	21	viewed	2026-06-27 23:21:04.636901+03	1	\N
-36	20	22	viewed	2026-06-27 23:21:10.292603+03	1	\N
-37	20	21	viewed	2026-06-27 23:22:19.8519+03	1	\N
-38	20	20	viewed	2026-06-27 23:22:22.966976+03	1	\N
-39	20	22	viewed	2026-06-27 23:22:26.077927+03	1	\N
-40	20	21	viewed	2026-06-27 23:22:27.312104+03	1	\N
-41	20	20	viewed	2026-06-27 23:22:28.482093+03	1	\N
-42	21	\N	created	2026-06-27 23:23:19.885175+03	\N	\N
-43	21	23	viewed	2026-06-27 23:23:19.967563+03	1	\N
-44	22	\N	created	2026-06-27 23:23:41.553097+03	\N	\N
-45	22	26	viewed	2026-06-27 23:23:41.668929+03	1	\N
-46	22	27	viewed	2026-06-27 23:23:55.287067+03	1	\N
-47	22	28	viewed	2026-06-27 23:24:01.070028+03	1	\N
-48	23	\N	created	2026-06-27 23:27:12.44402+03	\N	\N
-49	23	29	viewed	2026-06-27 23:27:12.760647+03	1	\N
-50	23	30	viewed	2026-06-27 23:27:39.033972+03	1	\N
-51	23	29	viewed	2026-06-27 23:27:41.98012+03	1	\N
-52	23	30	viewed	2026-06-27 23:27:43.118548+03	1	\N
-53	23	31	viewed	2026-06-27 23:27:57.423663+03	1	\N
-54	23	29	viewed	2026-06-27 23:28:10.927879+03	1	\N
-55	23	30	viewed	2026-06-27 23:28:19.193109+03	1	\N
-56	23	29	viewed	2026-06-27 23:28:25.812867+03	1	\N
-57	23	30	viewed	2026-06-27 23:28:45.481284+03	1	\N
-58	24	\N	created	2026-06-27 23:31:13.297663+03	\N	\N
-59	24	32	viewed	2026-06-27 23:31:13.382041+03	1	\N
-60	25	\N	created	2026-06-27 23:31:35.894072+03	\N	\N
-61	25	35	viewed	2026-06-27 23:31:35.967562+03	1	\N
-62	25	37	viewed	2026-06-27 23:32:37.114341+03	1	\N
-63	25	36	viewed	2026-06-27 23:32:46.817787+03	1	\N
-64	25	35	viewed	2026-06-27 23:32:53.99479+03	1	\N
-65	25	36	viewed	2026-06-27 23:33:00.615373+03	1	\N
-66	25	37	viewed	2026-06-27 23:33:03.660566+03	1	\N
-67	25	35	viewed	2026-06-27 23:33:07.812152+03	1	\N
-68	25	36	viewed	2026-06-27 23:33:22.118641+03	1	\N
-69	25	35	viewed	2026-06-27 23:33:28.198767+03	1	\N
-70	25	36	viewed	2026-06-27 23:33:32.072928+03	1	\N
-71	25	37	viewed	2026-06-27 23:33:36.056583+03	1	\N
-72	25	35	viewed	2026-06-27 23:33:44.421244+03	1	\N
-73	26	\N	created	2026-06-27 23:35:07.995992+03	\N	\N
-74	26	38	viewed	2026-06-27 23:35:08.147332+03	1	\N
-75	26	40	viewed	2026-06-27 23:35:14.956858+03	1	\N
-76	27	\N	created	2026-06-28 11:10:56.870382+03	\N	\N
-77	27	41	viewed	2026-06-28 11:10:56.989769+03	1	\N
-78	27	42	viewed	2026-06-28 11:11:06.835683+03	1	\N
-79	27	43	viewed	2026-06-28 11:11:09.164169+03	1	\N
-80	28	\N	created	2026-06-28 11:11:25.046861+03	\N	\N
-81	28	44	viewed	2026-06-28 11:11:25.127427+03	1	\N
-82	28	45	viewed	2026-06-28 11:11:43.234914+03	1	\N
-83	28	46	viewed	2026-06-28 11:11:50.135097+03	1	\N
-84	29	\N	created	2026-06-28 12:25:11.747943+03	\N	\N
-85	29	47	viewed	2026-06-28 12:25:12.000157+03	1	\N
-86	30	\N	created	2026-06-28 13:24:11.580345+03	\N	\N
-87	30	50	viewed	2026-06-28 13:24:11.855639+03	1	\N
-88	30	54	viewed	2026-06-28 13:24:37.491282+03	1	\N
-89	30	50	viewed	2026-06-28 13:24:41.415363+03	1	\N
-90	30	51	viewed	2026-06-28 13:24:43.523271+03	1	\N
-91	30	52	viewed	2026-06-28 13:24:44.154544+03	1	\N
-92	30	54	viewed	2026-06-28 13:24:47.81396+03	1	\N
-93	30	54	chosen	2026-06-28 13:24:48.960015+03	1	\N
-94	31	\N	created	2026-06-28 14:28:44.350746+03	\N	\N
-95	31	55	viewed	2026-06-28 14:28:47.351793+03	1	\N
-96	31	58	viewed	2026-06-28 14:29:12.90619+03	1	\N
-\.
-
-
---
--- Data for Name: scaffold; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.scaffold (id, status, start_date, end_date, house_id) FROM stdin;
-3	IN_USE	2026-05-15	2026-06-20	4
-4	AVAILABLE	2026-07-01	2026-09-01	7
-1	IN_USE	2026-05-20	2026-06-30	6
-6	AVAILABLE	\N	2026-06-06	2
-8	AVAILABLE	\N	\N	8
-\.
-
-
---
--- Data for Name: supplier; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.supplier (id, name, location, lat, lng) FROM stdin;
-1	BulgarBuild Sofia	Sofia, Bulgaria	42.697700	23.321900
-2	PlovdivMat EOOD	Plovdiv, Bulgaria	42.150000	24.750000
-3	Varna Construction Co	Varna, Bulgaria	43.214100	27.914700
-4	Burgas Materiali	Burgas, Bulgaria	42.495800	27.472600
-5	RuseBuild OOD	Ruse, Bulgaria	43.846800	25.954400
-6	Zagora Supplies	Stara Zagora, Bulgaria	42.425800	25.634500
-\.
-
-
---
--- Data for Name: supplier_inventory; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.supplier_inventory (id, supplier_id, material_id, quantity, unit_price) FROM stdin;
-1	1	1	800.00	31.00
-2	1	2	5000.00	0.18
-3	1	3	300.00	13.50
-4	1	4	2000.00	4.20
-5	2	1	600.00	30.50
-6	2	2	4000.00	0.17
-7	2	3	250.00	13.00
-8	2	4	1500.00	4.10
-9	3	1	900.00	32.00
-10	3	2	6000.00	0.19
-11	3	3	350.00	14.00
-12	3	4	2500.00	4.40
-13	4	1	500.00	31.50
-14	4	2	3500.00	0.18
-15	4	3	200.00	13.80
-16	4	4	1200.00	4.30
-17	5	1	700.00	30.00
-18	5	2	4500.00	0.16
-19	5	3	280.00	12.80
-20	5	4	1800.00	4.00
-21	6	1	650.00	31.20
-22	6	2	4200.00	0.18
-23	6	3	260.00	13.20
-24	6	4	1600.00	4.15
-\.
-
-
---
--- Data for Name: work_session; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.work_session (id, worker_id, house_id, session_date, checked_in_at, checked_out_at, device_id, check_in_lat, check_in_lng, check_out_lat, check_out_lng) FROM stdin;
-41	401	18	2026-07-07	2026-07-07 15:18:49.880137+03	2026-07-07 15:18:50.599873+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-42	399	18	2026-07-07	2026-07-07 15:20:04.890275+03	2026-07-07 15:20:05.730941+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-4	71	4	2026-07-01	2026-07-01 18:55:51.430616+03	2026-07-01 18:55:53.868654+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-11	69	4	2026-07-01	2026-07-01 19:13:52.707375+03	2026-07-01 19:13:55.209074+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-16	71	4	2026-07-01	2026-07-01 19:16:15.21725+03	2026-07-01 19:16:17.966706+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-17	71	4	2026-07-01	2026-07-01 19:16:25.012947+03	2026-07-01 19:16:27.280705+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-18	73	9	2026-07-01	2026-07-01 19:34:00.041165+03	2026-07-01 19:34:00.93301+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-19	73	24	2026-07-01	2026-07-01 19:34:14.26964+03	2026-07-01 19:34:15.641947+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-20	73	24	2026-07-01	2026-07-01 19:34:16.781012+03	2026-07-01 19:34:17.536453+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-21	66	25	2026-07-01	2026-07-01 21:13:44.836521+03	2026-07-01 21:13:46.013922+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-22	66	25	2026-07-01	2026-07-01 21:13:47.386325+03	2026-07-01 21:13:48.663705+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-23	66	25	2026-07-01	2026-07-01 21:13:50.032673+03	2026-07-01 21:13:50.863162+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-24	77	18	2026-07-01	2026-07-01 23:36:32.45097+03	2026-07-01 23:36:40.274556+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-25	77	18	2026-07-01	2026-07-01 23:37:03.469946+03	2026-07-01 23:37:12.744435+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-26	77	18	2026-07-01	2026-07-01 23:37:14.678197+03	\N	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-27	78	7	2026-07-02	2026-07-02 11:39:07.39989+03	2026-07-02 11:39:09.614139+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-28	78	7	2026-07-02	2026-07-02 11:39:11.678853+03	2026-07-02 11:39:13.585048+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-29	78	7	2026-07-02	2026-07-02 11:39:33.324573+03	2026-07-02 11:39:34.230204+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-30	78	7	2026-07-02	2026-07-02 11:42:03.102998+03	2026-07-02 11:42:04.009711+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-31	78	7	2026-07-02	2026-07-02 11:42:04.852684+03	2026-07-02 11:42:05.584328+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-32	78	7	2026-07-02	2026-07-02 11:42:06.201575+03	2026-07-02 11:42:06.901683+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-33	65	18	2026-07-02	2026-07-02 12:14:47.96928+03	2026-07-02 12:14:49.482148+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-34	65	18	2026-07-02	2026-07-02 12:14:50.199959+03	2026-07-02 12:14:50.760889+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-35	65	18	2026-07-02	2026-07-02 12:14:51.257558+03	2026-07-02 12:14:51.713231+03	6da856db-b193-492c-903a-700407152a9f	\N	\N	\N	\N
-36	77	18	2026-07-07	2026-07-07 15:02:09.727109+03	2026-07-07 15:02:10.689185+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-37	77	18	2026-07-07	2026-07-07 15:02:11.530812+03	2026-07-07 15:02:12.376038+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-38	77	18	2026-07-07	2026-07-07 15:02:13.288571+03	2026-07-07 15:02:14.192617+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-39	401	18	2026-07-07	2026-07-07 15:18:46.588215+03	2026-07-07 15:18:47.528796+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-40	401	18	2026-07-07	2026-07-07 15:18:48.350947+03	2026-07-07 15:18:49.265258+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-43	399	18	2026-07-07	2026-07-07 15:20:06.349454+03	2026-07-07 15:20:06.896622+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-44	401	30	2026-07-07	2026-07-07 17:30:09.132557+03	2026-07-07 17:30:14.484312+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-45	399	18	2026-07-10	2026-07-10 12:59:28.4115+03	2026-07-10 12:59:29.305492+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-46	399	18	2026-07-10	2026-07-10 12:59:30.116418+03	2026-07-10 12:59:30.719192+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-47	399	18	2026-07-10	2026-07-10 12:59:31.326661+03	2026-07-10 12:59:32.054843+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-48	399	18	2026-07-10	2026-07-10 12:59:33.032609+03	2026-07-10 12:59:33.57035+03	b40413cf-8b78-4cf6-8664-454e3ac4f284	\N	\N	\N	\N
-\.
-
-
---
--- Name: app_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.app_user_id_seq', 2, true);
-
-
---
--- Name: crew_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.crew_id_seq', 100, true);
-
-
---
--- Name: customer_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.customer_order_id_seq', 31, true);
-
-
---
--- Name: delivery_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.delivery_id_seq', 4, true);
-
-
---
--- Name: delivery_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.delivery_item_id_seq', 8, true);
-
-
---
--- Name: depot_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.depot_id_seq', 2, true);
-
-
---
--- Name: depot_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.depot_inventory_id_seq', 8, true);
-
-
---
--- Name: doc_document_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.doc_document_id_seq', 44, true);
-
-
---
--- Name: doc_folder_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.doc_folder_id_seq', 308, true);
-
-
---
--- Name: driver_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.driver_id_seq', 1, false);
-
-
---
--- Name: electric_box_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.electric_box_id_seq', 2, true);
-
-
---
--- Name: electric_circuit_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.electric_circuit_id_seq', 24, true);
-
-
---
--- Name: house_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.house_id_seq', 33, true);
-
-
---
--- Name: house_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.house_order_id_seq', 8, true);
-
-
---
--- Name: house_order_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.house_order_item_id_seq', 36, true);
-
-
---
--- Name: house_stage_crew_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.house_stage_crew_log_id_seq', 75, true);
-
-
---
--- Name: house_stage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.house_stage_id_seq', 720, true);
-
-
---
--- Name: inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.inventory_id_seq', 52, true);
-
-
---
--- Name: material_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.material_id_seq', 4, true);
-
-
---
--- Name: order_event_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.order_event_id_seq', 96, true);
-
-
---
--- Name: order_route_option_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.order_route_option_id_seq', 59, true);
-
-
---
--- Name: scaffold_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.scaffold_id_seq', 12, true);
-
-
---
--- Name: supplier_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.supplier_id_seq', 6, true);
-
-
---
--- Name: supplier_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.supplier_inventory_id_seq', 24, true);
-
-
---
--- Name: warehouse_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.warehouse_id_seq', 32, true);
-
-
---
--- Name: work_session_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.work_session_id_seq', 48, true);
-
-
---
--- Name: worker_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.worker_id_seq', 404, true);
-
-
---
--- PostgreSQL database dump complete
---
-
-
-
--- ============================================================
 -- FOREIGN KEY CONSTRAINTS
 -- ============================================================
 -- Name: crew crew_house_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
@@ -3935,3 +1851,263 @@ ALTER TABLE ONLY public.worker
 
 
 
+
+-- phone/email columns (absorbed from V3)
+ALTER TABLE public.worker ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
+ALTER TABLE public.worker ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+
+
+-- ============================================================
+-- SEED DATA
+-- ============================================================
+
+-- stage_type
+INSERT INTO public.stage_type (stage_order, stage_name, stage_name_en) VALUES
+  (1, 'Фундамент', 'Foundation'),
+  (2, 'Конструкция', 'Structure'),
+  (3, 'Покрив', 'Roof'),
+  (4, 'Ел', 'Electrical'),
+  (5, 'ВиК', 'Plumbing'),
+  (6, 'Изолация/Картон', 'Insulation'),
+  (7, 'Замазка', 'Screed'),
+  (8, 'Плочки', 'Tiles'),
+  (9, 'Ламинат', 'Laminate'),
+  (10, 'Дограма', 'Joinery');
+
+-- workers (crew_id set later)
+INSERT INTO public.worker (id, name, role, trade, phone, email, location, username, password_hash, password_plain)
+OVERRIDING SYSTEM VALUE
+VALUES
+  (411, 'Владимир Борисов', 'CREW_LEADER', 'Конструкция', '0888116422', 'timberbuildbg@gmail.com', 'София линк', 'владимир', '$2a$10$V3LD0D/VZsXEFycizSeykeAEH/8yJPagvWacLudO.ayyOOY6cOree', '6020'),
+  (412, 'Даниел Угринов', 'CREW_MEMBER', 'Конструкция', '0885687911', 'daniel9502@abv.bg', 'София', 'даниел', '$2a$10$6NWo51xGeNwI11bt6aSz0.ilxDtAkYXUdnxFtOzLRwCSV.Ea93X0C', '2662'),
+  (413, 'Стоян Малчев', 'CREW_MEMBER', 'Конструкция', '0885226047', 'marmotaplovdiv@gmail.com', 'София', 'стоян', '$2a$10$gJzO17vo5Yg.V854tMY4S.XG5Wod7klzYBIkMIeNnPJAXOIsYgJTW', '1407'),
+  (414, 'Мартин Иванов', 'CREW_MEMBER', 'Конструкция', '0897908337', 'martin_ivanov01@mail.bg', 'София', 'мартин', '$2a$10$8s68g/XrpJE1G.TajMd4I.A.PLMix8gQS/QLx5doHOzFrFNfAsmGO', '8876'),
+  (415, 'Владимир Денисенко', 'CREW_MEMBER', 'Конструкция', '0879936268', 'vladimir_denisenko@icloud.com', 'София', 'владимир2', '$2a$10$TR1MvyT76jIZ3MvGvQvEdurFCqatG6qtWXvBRQyh2tofwVPWqVALq', '2197'),
+  (416, 'Симеон Бардарски', 'CREW_MEMBER', 'Конструкция', '0988341421', 'Sbrdarski4@gmail.com', 'София', 'симеон', '$2a$10$ZLn39iwnw4.4VZ/rDt0X4ub931CUAuZn4Tv1hIROhQKbChqyxtvMG', '1087'),
+  (417, 'Найден Бенчев', 'CREW_MEMBER', 'Конструкция', '0876587809', 'pepperkilldevelopment@gmail.com', 'София', 'найден', '$2a$10$qi5pTB..smPweiO5ArPYbu3YmXJ8YRZn7nm.ANNSHXX9R5vUHAt7a', '4743'),
+  (418, 'Георги Раданов', 'CREW_MEMBER', 'Конструкция', '0888253399', 'radanov@mail.bg', 'София', 'георги', '$2a$10$QJJR6nbcoNGQP8d1sHhtE.fDd6d.JKBpoO/881dwMyvDuPIXyRuz2', '1235'),
+  (419, 'Цанко Кейбашиев', 'CREW_MEMBER', 'Конструкция', '0878500405', 'CankocK@gmail.com', 'София', 'цанко', '$2a$10$JKESwj/bjiKjxBw6rvbLnOGnzzUv1UlFNBPjM7FZdUSRN.0/dLIE.', '2362'),
+  (420, 'Лъчезар Лозанов', 'CREW_MEMBER', 'Конструкция', '0887668258', NULL, 'София', 'лъчезар', '$2a$10$pD.UlnORXkxNH6oN0XuwmOL/pH2EJq1s49yria19/lptbrcM9TYEu', '8406'),
+  (421, 'Николай Диков', 'CREW_MEMBER', 'Конструкция', '0879323844', NULL, 'София', 'николай', '$2a$10$OXw6mjaNDx9TlTR6YnVZIecjEnAIPc7m4KCT1SOuVbDbJ9sDzhi06', '2321'),
+  (422, 'Евгени Боянски', 'CREW_LEADER', 'Конструкция', '0887239182', 'evg0999@gmail.com', 'Благоевград', 'евгени', '$2a$10$QjefwAW1/2bb5JjTPvhXy.VYNpsgo8K5AE44rqhlW93J.RXAe8xuO', '4675'),
+  (423, 'Димитър Бъсин', 'CREW_MEMBER', 'Конструкция', '0885666942', NULL, 'София', 'димитър', '$2a$10$OG1UG1VtCghUR2Ciepdp3eWCC1z70AfyMj6gxxjaZ0GWLoX99IO9W', '2802'),
+  (424, 'Красимир Първанов', 'CREW_MEMBER', 'Конструкция', '0886957878', NULL, 'София', 'красимир', '$2a$10$rj5lkC36dY/QDtSY50xfcOwlmuNE3UPwDszmc5fM5SZMQ6yGw2.xa', '4228'),
+  (425, 'Георги Дюлгеров', 'CREW_MEMBER', 'Конструкция', '0892036847', 'georgidulgerov1978@gmail.com', 'София', 'георги2', '$2a$10$tHjLR1x8GtVwWSvaupZrzur1qavNAKWXrAIjpVoc1n7yAxtK94r2a', '1054'),
+  (426, 'Слави Боянски', 'CREW_MEMBER', 'Конструкция', '0887239148', 'slaviboyanski@gmail.com', 'София', 'слави', '$2a$10$6zXJMvdOgHcClXKWh6Gj1em7ldjuCYJkiEbGriA3PrlSXfujn02/e', '3378'),
+  (427, 'Георги Бачев', 'CREW_MEMBER', 'Конструкция', '0898550944', NULL, 'София', 'георги3', '$2a$10$TCLYxY8eM85j8NI5ymuOme8cE/Oz41M7HYmuKMNhpF4KHBmIXzvnu', '3081'),
+  (428, 'Димитър Папучиев', 'CREW_MEMBER', 'Конструкция', '0896793983', 'mitov@abv.bg', 'София', 'димитър2', '$2a$10$7x76c5Q.vhx8RgeJHwgvrOFPROnO8LJjEYrQ77a0ANgPpdQMswrZS', '3046'),
+  (429, 'Манол Крумов', 'CREW_MEMBER', 'Конструкция', '0899939598', NULL, 'София', 'манол', '$2a$10$GTeXvIH0WRdAzG.vLHM0gOSpD/1/xxD.qjmTgbrhZEGClQkW1DeJq', '2643'),
+  (430, 'Николай Митов', 'CREW_MEMBER', 'Конструкция', '0894338565', NULL, 'София', 'николай', '$2a$10$guuI52XLWCenZL.735W.au1BfecR.LWu/sg3GsRn3GQd1Z.1fHfh.', '8145'),
+  (431, 'Благо Михайлов', 'CREW_LEADER', 'Покрив', '0893236690', 'todorovanaza3@gmail.com', 'Самоков', 'благо', '$2a$10$iOQCJEUQmw2ZOHs4KGXqOunuiSOR.kWqgz/EiZRZag1Y20mL.V1GW', '4210'),
+  (432, 'Боян Славчев', 'CREW_MEMBER', 'Покрив', NULL, NULL, 'София', 'боян', '$2a$10$WSnzXQSAWx/56t8tBaIe4.epp7ptF5Est2TtHJOnyCqmW/UQGYH4W', '5700'),
+  (433, 'Янко Янков', 'CREW_MEMBER', 'Покрив', '0892392224', NULL, 'София', 'янко', '$2a$10$Oo3Nv9cTjl9oR0.QxKb1aeeP6E1eK2/qUALw.pVI7DjeBUwZPSDa6', '9631'),
+  (434, 'Георги Митев', 'CREW_LEADER', 'Покрив', '0886922866', 'g92924500@gmail.com', 'София', 'георги4', '$2a$10$O7isgYmdxXKf1iUlIYiPS.jNd9CERDDj3.KYPWVFTOSM3xHNlBLFG', '1126'),
+  (435, 'Георги Венков', 'CREW_MEMBER', 'Покрив', '0895367346', NULL, 'София', 'георги5', '$2a$10$YrYhkLrqpzvpHJKt/NdRH.S1Usad3PuKs4m3LzIVSIAEQTi9utro.', '2578'),
+  (436, 'Георги Величков', 'CREW_MEMBER', 'Покрив', '0886466134', NULL, 'София', 'георги6', '$2a$10$Ei2Fp1P8eMTjYswbLocFjeszOCB.vQ4/W/2YC3VpjbdEEV9gqntQC', '4653'),
+  (437, 'Борчо Найденов', 'CREW_MEMBER', 'Покрив', '0892905716', NULL, 'София', 'борчо', '$2a$10$EBBb6WesIxlXQowkpn0.A.ZlL6rm4pObwkehZSkU3KC5471hq6K3e', '3620'),
+  (438, 'Данчо Георгиев', 'CREW_MEMBER', 'Покрив', '0896967691', NULL, 'София', 'данчо', '$2a$10$37yit3xRH5RcGwik.Ce3ourbmXfVqyIbY3ul6SnvMJ68Jx0WdOAaa', '1871'),
+  (439, 'Наско Костов', 'CREW_MEMBER', 'Покрив', NULL, NULL, 'София', 'наско', '$2a$10$YdNt66gacXsMsUSRdMXazu7vFAoZaZ8SCeM9wIaoIb/TXvPGL2N.q', '1335'),
+  (440, 'Стоян Спасоф', 'CREW_LEADER', 'Покрив', '0896135475', 'stoqnspasof2@gmail.com', 'София', 'стоян2', '$2a$10$mSOLwxd4EnFXL0hmoS91AOpOwkD2Up9NZkdBPGMbhDRHS4W9Vz37K', '5484'),
+  (441, 'Рангел Рангелов', 'CREW_MEMBER', 'Покрив', '0879864899', 'rangelrangelov283@gmail.com', 'София', 'рангел', '$2a$10$7tXkQQ6m1VZk.OMV3m4.B..2Rp6z91eOmNAtrHFIx0G8NaTLnTHKq', '2908'),
+  (442, 'Кирил Христов', 'CREW_MEMBER', 'Покрив', '0888040006', 'u4038822933@gmail.com', 'София', 'кирил', '$2a$10$ZWK3ZiXY5cxLqSrJ/B4QG.HxfUMnt6g4Fgwyt9rRbo9eUZZrcidv.', '8948'),
+  (443, 'Борислав Арабаджиев', 'CREW_LEADER', 'Покрив', '0889904369', 'borkojeksa@gmail.com', 'София', 'борислав', '$2a$10$1FtkgKyh0ctI2Y9u4STd3.FtptDwvKXdgc6i4.RpHDroRf1Of/OT.', '8062'),
+  (444, 'Лазар', 'CREW_LEADER', 'Дограма', '0887697279', '80ivcho@gmail.com', 'София', 'лазар', '$2a$10$Kni8DbTcYncjDsRnu2LFHO/Agq0kJzlnlDCPq8XTeZ8QkTCyVoQL6', '2768'),
+  (445, 'Петър Иванов', 'CREW_LEADER', 'Ел', '0894354357', 'ivanovpiero@gmail.com', 'София', 'петър', '$2a$10$/4n7kRTk4V5TZx6skriSVuaECo3FpSjP4SxUpOyZkA5piBYuJdIsG', '3277'),
+  (446, 'Радослав Павлов', 'CREW_LEADER', 'Ел', '0893203601', 'radko5074@gmail.com', 'София', 'радослав', '$2a$10$1TeMrHbQXEpVNq.YBCCLNeO49sJRHEXZRr4PElCPoEkVuFvN5g46e', '3176'),
+  (447, 'Денис Стефанов', 'CREW_MEMBER', 'Ел', '0892313162', 'denisstefanovvv@abv.bg', 'София', 'денис', '$2a$10$nbpQ.wnYPM4ZZ8auf2PvVe.c5IYQSPW4zVyEFNX2jtzb9RN262W/q', '6802'),
+  (448, 'Кристиян Лозанов', 'CREW_LEADER', 'Ел', '0893001659', 'lozanov77777@gmail.com', 'София', 'кристиян', '$2a$10$fwvfj0dyoPbMX8Gd2jRp6.6NtQkpfLp.64j53uEN.VpB0dVzzmhPy', '7976'),
+  (449, 'Валентин Павлов', 'CREW_LEADER', 'Ел', '0882911509', 'vpavlovelectro@gmail.com', 'София', 'валентин', '$2a$10$EM7pH2GLhzGu8/.He1Z3k.I60I0zbq6e3tF2DPnniZO2vMvikW6iC', '3048'),
+  (450, 'Емил Павлов', 'CREW_MEMBER', 'Ел', '0895831627', NULL, 'София', 'емил', '$2a$10$F0yp0osbsdBd2PD3ytlHsODjrDzLGfVVCRS4/jX3UINfdBJWs2Rly', '4323'),
+  (451, 'Стоян Храдалиев', 'CREW_LEADER', 'ВиК', '0893844475', 'borislavovstoyan@gmail.com', 'София', 'стоян3', '$2a$10$vSJ9a/JBgCvyohYl4WW97uBxcXCzw1yw2QT.o65iLpPzKX927A2AG', '8641'),
+  (452, 'Ангел Щранков', 'CREW_MEMBER', 'ВиК', '0893724731', NULL, 'София', 'ангел', '$2a$10$M4myrcYWW2N.I6bFh4Yr9u2rMgJsC5..LoNtxpjt88tWzhHFYRmsq', '8290'),
+  (453, 'Георги Мурджев', 'CREW_MEMBER', 'ВиК', '0884612042', NULL, 'София', 'георги7', '$2a$10$Kc5GZaXo5QNKG4BgyeokoezI88r3ZkmKFD3.6GACAvPc81pYd56Ze', '7856'),
+  (454, 'Петър Илиев', 'CREW_MEMBER', 'ВиК', '0899131954', 'чакам', 'София', 'петър2', '$2a$10$9F1dFc3eiF.I0OKCWDbdQeA/oYutyGDYKhAGwjKoLoDzBUelMEsqO', '3481'),
+  (455, 'Огнян Пеев', 'CREW_LEADER', 'ВиК', '0887892220', 'vikssofiqq@gmail.com', 'София', 'огнян', '$2a$10$4fZOje/hjaq5XaSFW/T0SujA08DsgdrMhk1ORVWpovGlx2baTuySq', '4926'),
+  (456, 'Марио Петров', 'CREW_MEMBER', 'ВиК', '0885885860', 'plamenpeev270@gmail.com', 'София', 'марио', '$2a$10$PAAPhm0OYWDJTALNxEyyOOvw4rMHJBT.EYGa/qKbeglri8p38DaW2', '4399'),
+  (457, 'Пламен Пеев', 'CREW_MEMBER', 'ВиК', '0878327373', 'office@skyservice92.eu', 'София', 'пламен', '$2a$10$wIio5qFzrlDRwmVBRhRJXOeY7hIvWOvLzD1gIYVbeyu31xCqsXM4m', '1694'),
+  (458, 'Красимир Борисов', 'CREW_LEADER', 'ВиК', '0885502402', 'krelstroi1@gmail.com', 'София', 'красимир2', '$2a$10$gMb4EBo4hDyTzI07HexPOu5R3Afa3tJDKN7AXmULQ1uo8DZwU4A6i', '2248'),
+  (459, 'Георги Първанов', 'CREW_MEMBER', 'ВиК', '0884909650', NULL, 'София', 'георги8', '$2a$10$w3/4XWsxZLtsLmg.j91xJ..rzDziKXga9UeXJN0wqippBVQ04a6FC', '2399'),
+  (460, 'Слави Ризов', 'CREW_LEADER', 'Изолация/Картон', '0897609547', 'tranoniq89@gmail.com', 'София', 'слави2', '$2a$10$esPZB8m1Ro0xQmTxTWs4POO2xkYLKVbQ/TRoo8.Pom98zZOa0c966', '9934'),
+  (461, 'Митко Янев', 'CREW_MEMBER', 'Изолация/Картон', '0896492304', 'shisho_m@abv.bg', 'София', 'митко', '$2a$10$c5i.L/rQ8j5KWiUU7t9v7.yhIRfJxPk5.3d07cKz2QJ2Y6z4g5eCO', '9740'),
+  (462, 'Георги Милушев', 'CREW_MEMBER', 'Изолация/Картон', '0895328033', 'j0pe@abv.bg', 'София', 'георги9', '$2a$10$JIPE3miYve6fxv6Ymxs5jOVDRIFCut1nwYb4uhcE9s8IvareDvJiG', '9353'),
+  (463, 'Ивайло Славов', 'CREW_MEMBER', 'Изолация/Картон', '0899339929', 'slavoviv@abv.bg', 'София', 'ивайло', '$2a$10$OxZ0CyuDAVlGWIQ8J9nGwO.WgwxlUlzXsklSLpdDSteUStJ4wQ6YG', '2899'),
+  (464, 'Мариян Младенов', 'CREW_MEMBER', 'Изолация/Картон', '0896221407', 'mladenov161@gmail.com', 'София', 'мариян', '$2a$10$65IgWXjfPZfvhdOgZ01GO.YyGh7tqIOtBr42/iXVDli0/E2UxwSWC', '9594'),
+  (465, 'Венцислав Стефанов', 'CREW_MEMBER', 'Изолация/Картон', '0896616406', 'v_e_n_c_i86@abv.bg', 'София', 'венцислав', '$2a$10$zk/YCteE.cynPCKvdmve6.0zkfMWQ9WSaC2IbInOpjSnA0O8Hh4I6', '6294'),
+  (466, 'Слави Василев', 'CREW_LEADER', 'Изолация/Картон', '0896653866', 'slavims1985@gmail.com', 'София', 'слави3', '$2a$10$0FviE/CEWGPShNZSohEW4e7B7eoi1ksUZ75pR9LA2ngpuM384kE4C', '2378'),
+  (467, 'Цветелин Борисов', 'CREW_MEMBER', 'Изолация/Картон', '0899320327', 'borisov.cvetellin@abv.bg', 'София', 'цветелин', '$2a$10$JEYp9Hb1cUjy/ybXyOh.BOa21H9KzO/6UeK4zGLCaFG3rYOHrJC/S', '3633'),
+  (468, 'Красимир Найденов', 'CREW_LEADER', 'Изолация/Картон', '0876264564', 'krasimir.naidenov@gmail.com', 'София', 'красимир3', '$2a$10$MnTsWPiuZv.PgSb25u2haOwqzSlJQm.K6WOn6fNISlxh8YTHV4sCi', '5479'),
+  (469, 'Станислав Тачев', 'CREW_MEMBER', 'Изолация/Картон', '0893207307', 'Иска да говори с Теодор, няма да се зекира', 'София', 'станислав', '$2a$10$mOyoWyTWlC817k/JfEXAhuGfXXYBWDCaXTrMQQuKwMtTRHMJgEOTC', '3376'),
+  (470, 'Красимир Методиев', 'CREW_MEMBER', 'Изолация/Картон', '0894059992', 'Иска да говори с Теодор, няма да се зекира', 'София', 'красимир4', '$2a$10$JlrH0Fn9EV2yl.t/FBTd2.BDQ0GjWSx2Qv5cXVrxULwdgPtKaGeTW', '7579'),
+  (471, 'Кристиян Дочев', 'CREW_MEMBER', 'Изолация/Картон', '0882677777', 'Иска да говори с Теодор, няма да се зекира', 'София', 'кристиян2', '$2a$10$Y8PBIwBKx65ngnTT7a/mhejI6kPo6ABtZMOr1ZJbIMmZpX8Cazsai', '8268'),
+  (472, 'Иво Димитров', 'CREW_LEADER', 'Изолация/Картон', '0896399453', 'dimitrovemil966@gmail.com', 'София', 'иво', '$2a$10$CRmKFgXlLD/nwifOYPq/TuSLFvD6WNjv8xUk2lnmHK8GTb9oib8K.', '1406'),
+  (473, 'Марио Огнянов', 'CREW_MEMBER', 'Изолация/Картон', '0895094908', 'marioognyanov93@gmail.com', 'София', 'марио2', '$2a$10$jnnPz5Vg1xTx2MIA206sIe6fqJA7x9.lO2VdtUkJJcH6sm/E4aMCi', '7548'),
+  (474, 'Атанас Росенов', 'CREW_MEMBER', 'Изолация/Картон', '0895996503', 'atsnasrosenov6@gmail.com', 'София', 'атанас', '$2a$10$07PhWzfF8K1yAzJHH3z/xO2if0ezjV2CLpKaZ4kluqenqvpBQOava', '3719'),
+  (475, 'Румен', 'CREW_MEMBER', 'Изолация/Картон', NULL, NULL, 'София', 'румен', '$2a$10$C4B9a3LhuR1GSUgZDCbsKOC.UzxD6T4kXWix74s.3p0ClYoQsapI.', '6093'),
+  (476, 'Виктор Петков', 'CREW_LEADER', 'Изолация/Картон', '0894222868', 'petkovvip@gmail.com', 'София', 'виктор', '$2a$10$P8yrVKSUaTCFX1t2MlZc/.9QDUEAIyT934Q6ABzY3O3c3QUIXRSxO', '5944'),
+  (477, 'Радослав Димитров', 'CREW_MEMBER', 'Изолация/Картон', '0899219141', 'radislav_8912@mail.bg', 'София', 'радослав2', '$2a$10$b7Ughh5yNEBkNgrGc6XYEuNhEXjnNLwpnP6Gx1kD/ZtHn1FKK5T5u', '3763'),
+  (478, 'Сергей Стоянов', 'CREW_MEMBER', 'Изолация/Картон', '0876980257', 'arcanzas94@gmail.com', 'София', 'сергей', '$2a$10$jvYotR2iTjiOoxXLOIkyf.MzDr.x5y63KljkKFniXunrWePiWC7xa', '2108'),
+  (479, 'Жоро', 'CREW_LEADER', 'Изолация/Картон', '0886302431', 'diagonbuild@gmail.com', 'София', 'жоро', '$2a$10$jus0mErZwBar/suYP710We9A7x3QawOaM2vm8BjxITW3GKETdU5Pm', '2939'),
+  (480, 'Александър', 'CREW_LEADER', 'Замазка', NULL, 'emsistroy82@gmail.com', 'София', 'александър', '$2a$10$2PndhxrlgAu64KQs81lWcefLx.PmW1hGVO/bE5PScFnT0QBOdTCVS', '8303'),
+  (481, 'Мехмед Ахмед', 'CREW_LEADER', 'Плочки', '0876025175', 'cankoa4@gmail.com', 'София', 'мехмед', '$2a$10$.ARSWyAkNIkksg8Mf4iOve.gOl3mR1dwCvDRZdanE1zzKrMX1FMbO', '6855'),
+  (482, 'Мустафа Халиибрям', 'CREW_LEADER', 'Плочки', '0877874327', 'mustafahaliibryam79@gmail.com', 'София', 'мустафа', '$2a$10$mumtH0Zz/Og7o9FIyQ4.aOCnS8iVCEvw/IDiZ5smcARs8KeAleMze', '8384'),
+  (483, 'Неждет Шабан', 'CREW_LEADER', 'Плочки', '0889683142', 'nezhdet1968@gmail.com', 'София', 'неждет', '$2a$10$iiSiNJrjMX2HquBYjBmtY.K9Rtu3imrJc02FuqV5MT.anP8glqFuO', '9952'),
+  (484, 'Николай Тупавичарски', 'CREW_LEADER', 'Плочки', '0877072020', 'nikolaytupavicharski@gmail.com', 'София', 'николай2', '$2a$10$JUsO1OcMd05GHlzQwNynm.Plu7gkpwFMCihKjVLjl9LObRi.xTtoy', '3560'),
+  (485, 'Красимир Кюртов', 'CREW_MEMBER', 'Плочки', '0884449348', 'krasimir.winch3st3r@abv.bg', 'София', 'красимир5', '$2a$10$xP.i7gLa26mm.wkmvqWsQecMMCs9lxiODzxXg0W/6GUGLF/ETL8je', '7492'),
+  (486, 'Валентин Стоянов', 'CREW_LEADER', 'Ламинат', '0886187617', 'valyostoyanoff@gmail.com', 'София', 'валентин2', '$2a$10$lBQ61KWyl/3YbgObAqtJrebFbNdAc.ZV6OaDWfFkxaSm3XZkZKvsC', '7635'),
+  (487, 'Емануил Михов', 'CREW_MEMBER', 'Ламинат', '0896058028', 'emanuil.mihov@gmail.com', 'София', 'емануил', '$2a$10$FdBHptq9EdmS2gi.RBudnejjq70LUO9mtm5N4q0OeenYMSCBBnUXe', '2982');
+
+-- crews
+INSERT INTO public.crew (id, name, stage_order, location, leader_id)
+OVERRIDING SYSTEM VALUE
+VALUES
+  (102, 'Владимир Борисов', 2, '', 411),
+  (103, 'Евгени Боянски', 2, '', 422),
+  (104, 'Благо Михайлов', 3, '', 431),
+  (105, 'Георги Митев', 3, '', 434),
+  (106, 'Стоян Спасоф', 3, '', 440),
+  (107, 'Борислав Арабаджиев', 3, '', 443),
+  (108, 'Петър Иванов', 4, '', 445),
+  (109, 'Радослав Павлов', 4, '', 446),
+  (110, 'Кристиян Лозанов', 4, '', 448),
+  (111, 'Валентин Павлов', 4, '', 449),
+  (112, 'Стоян Храдалиев', 5, '', 451),
+  (113, 'Огнян Пеев', 5, '', 455),
+  (114, 'Красимир Борисов', 5, '', 458),
+  (115, 'Слави Ризов', 6, '', 460),
+  (116, 'Слави Василев', 6, '', 466),
+  (117, 'Красимир Найденов', 6, '', 468),
+  (118, 'Иво Димитров', 6, '', 472),
+  (119, 'Виктор Петков', 6, '', 476),
+  (120, 'Жоро', 6, '', 479),
+  (121, 'Александър', 7, '', 480),
+  (122, 'Мехмед Ахмед', 8, '', 481),
+  (123, 'Мустафа Халиибрям', 8, '', 482),
+  (124, 'Неждет Шабан', 8, '', 483),
+  (125, 'Николай Тупавичарски', 8, '', 484),
+  (126, 'Валентин Стоянов', 9, '', 486),
+  (128, 'Лазар', 10, '', 444);
+
+-- assign workers to crews
+UPDATE public.worker SET crew_id = 102 WHERE id IN (411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421);
+UPDATE public.worker SET crew_id = 103 WHERE id IN (422, 423, 424, 425, 426, 427, 428, 429, 430);
+UPDATE public.worker SET crew_id = 104 WHERE id IN (431, 432, 433);
+UPDATE public.worker SET crew_id = 105 WHERE id IN (434, 435, 436, 437, 438, 439);
+UPDATE public.worker SET crew_id = 106 WHERE id IN (440, 441, 442);
+UPDATE public.worker SET crew_id = 107 WHERE id IN (443);
+UPDATE public.worker SET crew_id = 108 WHERE id IN (445);
+UPDATE public.worker SET crew_id = 109 WHERE id IN (446, 447);
+UPDATE public.worker SET crew_id = 110 WHERE id IN (448);
+UPDATE public.worker SET crew_id = 111 WHERE id IN (449, 450);
+UPDATE public.worker SET crew_id = 112 WHERE id IN (451, 452, 453, 454);
+UPDATE public.worker SET crew_id = 113 WHERE id IN (455, 456, 457);
+UPDATE public.worker SET crew_id = 114 WHERE id IN (458, 459);
+UPDATE public.worker SET crew_id = 115 WHERE id IN (460, 461, 462, 463, 464, 465);
+UPDATE public.worker SET crew_id = 116 WHERE id IN (466, 467);
+UPDATE public.worker SET crew_id = 117 WHERE id IN (468, 469, 470, 471);
+UPDATE public.worker SET crew_id = 118 WHERE id IN (472, 473, 474, 475);
+UPDATE public.worker SET crew_id = 119 WHERE id IN (476, 477, 478);
+UPDATE public.worker SET crew_id = 120 WHERE id IN (479);
+UPDATE public.worker SET crew_id = 121 WHERE id IN (480);
+UPDATE public.worker SET crew_id = 122 WHERE id IN (481);
+UPDATE public.worker SET crew_id = 123 WHERE id IN (482);
+UPDATE public.worker SET crew_id = 124 WHERE id IN (483);
+UPDATE public.worker SET crew_id = 125 WHERE id IN (484, 485);
+UPDATE public.worker SET crew_id = 126 WHERE id IN (486, 487);
+UPDATE public.worker SET crew_id = 128 WHERE id IN (444);
+
+-- reset sequences
+SELECT setval('public.worker_id_seq', 487);
+SELECT setval('public.crew_id_seq', 128);
+
+-- app_user
+INSERT INTO public.app_user (id, username, password_hash, role)
+OVERRIDING SYSTEM VALUE
+VALUES
+  (1, 'admin', '$2b$10$t01RgPA7kYT3F0ML0zyNhuNAQIkq2m3p6gGwV.JtIJANEaXf0xBSS', 'admin'),
+  (2, 'user', '$2b$10$E1JpDkL3aFadFdQVsEc80./Jc/ifz6mhD.HbZYhOZtidx3EpMnS0m', 'user');
+
+SELECT setval('public.app_user_id_seq', (SELECT MAX(id) FROM public.app_user));
+
+-- doc_folder: company structure (top-level + department subfolders)
+INSERT INTO public.doc_folder (id, code, label_en, label_bg, icon, color, sort_order, parent_id) OVERRIDING SYSTEM VALUE VALUES
+-- top-level
+  (1,  '00', 'Control',              'Контрол',              '🛡️', '#4f8ef7', 0, NULL),
+  (2,  '01', 'Sales',                'Продажби',             '📈', '#3ecf6e', 1, NULL),
+  (3,  '02', 'Active Sites',         'Обекти в строеж',      '🏗️', '#f97316', 2, NULL),
+  (4,  '03', 'Finance',              'Финанси',              '🧮', '#a78bfa', 3, NULL),
+  (5,  '04', 'Administration & HR',  'Администрация и ЧР',   '👥', '#fb7185', 4, NULL),
+  (6,  '05', 'Standards & Templates','Стандарти и Шаблони',  '📋', '#00c9b1', 5, NULL),
+  (7,  '06', 'Marketing',            'Маркетинг',            '📣', '#f59e0b', 6, NULL),
+  (8,  '07', 'Completed Sites',      'Обекти завършени',     '🏠', '#4f8ef7', 7, NULL),
+  (9,  '08', 'Purchases',            'Покупки',              '🛒', '#00c9b1', 8, NULL),
+-- Control subfolders (parent=1)
+  (10, 'doc00_01', '01_OBJECTS_CONTROL',   '01_КОНТРОЛ_ОБЕКТИ',       '📂', '#4f8ef7', 0, 1),
+  (11, 'doc00_02', '02_EXPENSES_CONTROL',  '02_КОНТРОЛ_РАЗХОДИ',      '📂', '#4f8ef7', 1, 1),
+  (12, 'doc00_03', '03_CLIENTS_CONTROL',   '03_КОНТРОЛ_КЛИЕНТИ',      '📂', '#4f8ef7', 2, 1),
+  (13, 'doc00_04', '04_SUPPLIERS_CONTROL', '04_КОНТРОЛ_ДОСТАВЧИЦИ',   '📂', '#4f8ef7', 3, 1),
+  (14, 'doc00_05', '05_CREWS_CONTROL',     '05_КОНТРОЛ_БРИГАДИ',      '📂', '#4f8ef7', 4, 1),
+  (15, 'doc00_06', '06_FLEET_CONTROL',     '06_КОНТРОЛ_АВТОПАРК',     '📂', '#4f8ef7', 5, 1),
+  (16, 'doc00_07', '07_MATERIALS_CONTROL', '07_КОНТРОЛ_МАТЕРИАЛИ',    '📂', '#4f8ef7', 6, 1),
+-- Sales subfolders (parent=2)
+  (17, 'doc01_00a', '00_CRM',                     '00_CRM',                         '📂', '#3ecf6e',  0, 2),
+  (18, 'doc01_00b', '00_NEW_CLIENTS',              '00_НОВИ_КЛИЕНТИ',                '📂', '#3ecf6e',  1, 2),
+  (19, 'doc01_01',  '01_WITH_ARCHITECTS',          '01_ПРИ_АРХИТЕКТИ',               '📂', '#3ecf6e',  2, 2),
+  (20, 'doc01_02',  '02_FOR_OFFER',                '02_ЗА_ОФЕРТА',                   '📂', '#3ecf6e',  3, 2),
+  (21, 'doc01_03',  '03_OFFERS_FOR_APPROVAL',      '03_ОФЕРТИ_ЗА_ПОТВЪРЖДЕНИЕ',      '📂', '#3ecf6e',  4, 2),
+  (22, 'doc01_04',  '04_SENT_OFFERS',              '04_ИЗПРАТЕНИ_ОФЕРТИ',            '📂', '#3ecf6e',  5, 2),
+  (23, 'doc01_05',  '05_FOR_CONTRACT',             '05_ЗА_ДОГОВОР',                  '📂', '#3ecf6e',  6, 2),
+  (24, 'doc01_06',  '06_CONTRACTS_FOR_APPROVAL',   '06_ДОГОВОРИ_ЗА_ПОТВЪРЖДЕНИЕ',    '📂', '#3ecf6e',  7, 2),
+  (25, 'doc01_07',  '07_SENT_CONTRACTS',           '07_ИЗПРАТЕНИ_ДОГОВОРИ',          '📂', '#3ecf6e',  8, 2),
+  (26, 'doc01_08',  '08_CONTRACT_SIGNED',          '08_ДОГОВОР_ПОДПИСАН',            '📂', '#3ecf6e',  9, 2),
+  (27, 'doc01_09',  '09_AUDIO',                    '09_АУДИО',                       '📂', '#3ecf6e', 10, 2),
+  (28, 'doc01_10',  '10_CRM_ARCHIVE',              '10_CRM_АРХИВ',                   '📂', '#3ecf6e', 11, 2),
+-- Finance subfolders (parent=4)
+  (29, 'doc03_01', 'Accounting', 'Счетоводство', '📂', '#a78bfa', 0, 4),
+-- Administration subfolders (parent=5)
+  (30, 'doc04_01', '01_COMPANY_DOCUMENTS', '01_ФИРМЕНИ_ДОКУМЕНТИ', '📂', '#fb7185', 0, 5),
+  (31, 'doc04_02', '02_HR',               '02_HR',                 '📂', '#fb7185', 1, 5),
+  (32, 'doc04_03', '03_CONTRACTS',        '03_ДОГОВОРИ',           '📂', '#fb7185', 2, 5),
+  (33, 'doc04_07', '07_PERSONNEL',        '07_ПЕРСОНАЛ',           '📂', '#fb7185', 3, 5),
+-- Standards subfolders (parent=6)
+  (34, 'doc05_01', 'Technical standards',   'Технически стандарти',       '📂', '#00c9b1',  0, 6),
+  (35, 'doc05_02', 'TEMPLATE_CREW_MASTER',  'ШАБЛОН_БРИГАДА_МАСТЪР',      '📂', '#00c9b1',  1, 6),
+  (36, 'doc05_03', 'TEMPLATE_INVOICE_ISSUE','ШАБЛОН_ИЗДАВАНЕ_ФАКТУРИ',    '📂', '#00c9b1',  2, 6),
+  (37, 'doc05_04', 'TEMPLATE_MATERIALS',    'ШАБЛОН_МАТЕРИАЛИ',           '📂', '#00c9b1',  3, 6),
+  (38, 'doc05_05', 'TEMPLATE_REPORTS',      'ШАБЛОН_ОТЧЕТИ',              '📂', '#00c9b1',  4, 6),
+  (39, 'doc05_06', 'TEMPLATE_RECEIPT',      'ШАБЛОН_РАЗПИСКА',            '📂', '#00c9b1',  5, 6),
+  (40, 'doc05_07', 'TEMPLATE_CONTRACTS',    'ШАБЛОН_ДОГОВОРИ',            '📂', '#00c9b1',  6, 6),
+  (41, 'doc05_08', 'TEMPLATE_REQUEST',      'ШАБЛОН_ЗАЯВКА',              '📂', '#00c9b1',  7, 6),
+  (42, 'doc05_09', 'TEMPLATE_OFFERS',       'ШАБЛОН_ОФЕРТИ',              '📂', '#00c9b1',  8, 6),
+  (43, 'doc05_10', 'TEMPLATE_FOLDERS',      'ШАБЛОН_ПАПКИ',               '📂', '#00c9b1',  9, 6),
+  (44, 'doc05_11', 'TEMPLATE_COMPLETION',   'ШАБЛОН_ПРИКЛЮЧВАНЕ',         '📂', '#00c9b1', 10, 6);
+
+SELECT setval('public.doc_folder_id_seq', 44);
+
+-- doc_folder_template: configurable house folder template (replaces hardcoded Java array)
+CREATE TABLE public.doc_folder_template (
+    id         integer NOT NULL GENERATED BY DEFAULT AS IDENTITY,
+    code       character varying(30)  NOT NULL,
+    label_bg   character varying(255) NOT NULL,
+    label_en   character varying(255) NOT NULL,
+    parent_id  integer DEFAULT NULL,
+    sort_order integer NOT NULL DEFAULT 0,
+    icon       character varying(10)  NOT NULL DEFAULT '',
+    color      character varying(20)  NOT NULL DEFAULT '#4f8ef7',
+    CONSTRAINT doc_folder_template_pkey PRIMARY KEY (id),
+    CONSTRAINT doc_folder_template_code_unique UNIQUE (code),
+    CONSTRAINT doc_folder_template_parent_fk FOREIGN KEY (parent_id) REFERENCES public.doc_folder_template(id) ON DELETE CASCADE
+);
+
+INSERT INTO public.doc_folder_template (id, code, label_bg, label_en, parent_id, sort_order) OVERRIDING SYSTEM VALUE VALUES
+  (1,  '01',    '01_ЧЕРТЕЖИ',                         'Drawings',                 NULL, 1),
+  (2,  '02',    '02_ДОГОВОРИ_И_ПРИЛОЖЕНИЯ',            'Contracts & Annexes',      NULL, 2),
+  (3,  '03',    '03_СНИМКИ',                           'Photos',                   NULL, 3),
+  (4,  '04',    '04_Материали_и_Логистика',            'Materials & Logistics',    NULL, 4),
+  (5,  '04-01', 'Заявки',                              'Requests',                 4,    1),
+  (6,  '04-02', 'Остатъчен материал',                  'Residual material',        4,    2),
+  (7,  '05',    '05_Комуникация_с_Клиента',            'Client Communication',     NULL, 5),
+  (8,  '06',    '06_Работна_документация_и_Протоколи', 'Working Docs & Protocols', NULL, 6),
+  (9,  '07',    '07_ОТЧЕТИ_ТРУД',                      'Labour Reports',           NULL, 7),
+  (10, '08',    '08_РЕЗУЛТАТИ',                        'Results',                  NULL, 8),
+  (11, '09',    '09_КОНТРОЛ_КАЧЕСТВО',                 'Quality Control',          NULL, 9);
+SELECT setval('public.doc_folder_template_id_seq', 11);
