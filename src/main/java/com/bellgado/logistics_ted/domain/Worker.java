@@ -1,17 +1,9 @@
 package com.bellgado.logistics_ted.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,9 +31,6 @@ public class Worker {
     @Column(precision = 9, scale = 6)
     private BigDecimal lng;
 
-    @Column(length = 100)
-    private String trade;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private WorkerRole role = WorkerRole.CREW_MEMBER;
@@ -50,6 +39,12 @@ public class Worker {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crew_id")
     private Crew crew;
+
+    /** Stages this worker (LEADER/MEMBER) is responsible for — many-to-many via worker_stage_type. */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "worker_stage_type", joinColumns = @JoinColumn(name = "worker_id"))
+    @Column(name = "stage_order")
+    private List<Integer> stageOrders = new ArrayList<>();
 
     @Column(length = 50)
     private String phone;

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,13 +29,16 @@ public class WorkerController {
     private final CrewRepository          crews;
     private final HouseStageRepository    houseStages;
     private final WorkerCredentialSeeder  credentialSeeder;
+    private final JdbcTemplate            jdbc;
 
     public WorkerController(WorkerRepository workers, CrewRepository crews,
-                            HouseStageRepository houseStages, WorkerCredentialSeeder credentialSeeder) {
+                            HouseStageRepository houseStages, WorkerCredentialSeeder credentialSeeder,
+                            JdbcTemplate jdbc) {
         this.workers          = workers;
         this.crews            = crews;
         this.houseStages      = houseStages;
         this.credentialSeeder = credentialSeeder;
+        this.jdbc             = jdbc;
     }
 
     @GetMapping
@@ -48,6 +52,10 @@ public class WorkerController {
         for (Object[] row : houseStages.findAllStageNamesPerCrew()) {
             stageNamesPerCrew.put(((Number) row[0]).intValue(), (String) row[1]);
         }
+        // Pre-fetch all stage names (bg + en) by stage_order
+        Map<Integer, String[]> allStageNames = new HashMap<>();
+        jdbc.query("SELECT stage_order, stage_name, stage_name_en FROM stage_type",
+            rs -> { allStageNames.put(rs.getInt(1), new String[]{rs.getString(2), rs.getString(3)}); });
         Map<Integer, List<Map<String, Object>>> housesPerCrew = new HashMap<>();
         for (Object[] row : houseStages.findAllAssignedHousesPerCrew()) {
             int crewId = ((Number) row[0]).intValue();
@@ -56,7 +64,7 @@ public class WorkerController {
             h.put("houseName", row[2]);
             housesPerCrew.computeIfAbsent(crewId, k -> new java.util.ArrayList<>()).add(h);
         }
-        return all.stream().map(w -> toDto(w, stageNamesPerCrew, housesPerCrew)).toList();
+        return all.stream().map(w -> toDto(w, stageNamesPerCrew, housesPerCrew, allStageNames)).toList();
     }
 
     @PostMapping
@@ -103,12 +111,6 @@ public class WorkerController {
         if (requireName) {
             Object name = body.get("name");
             if (name == null || name.toString().isBlank()) return "Worker name is required.";
-            String role = body.get("role") != null ? body.get("role").toString() : "CREW_MEMBER";
-            boolean isManager = "CREW_MANAGER".equals(role);
-            if (!isManager) {
-                Object trade = body.get("trade");
-                if (trade == null || trade.toString().isBlank()) return "Trade is required for crew members and leaders.";
-            }
         }
         if (body.get("lat") != null && body.get("lng") != null) {
             try {
@@ -132,30 +134,33 @@ public class WorkerController {
         if (body.containsKey("email")) w.setEmail(body.get("email") != null ? body.get("email").toString() : null);
         if (body.get("role") != null)
             w.setRole(com.bellgado.logistics_ted.domain.WorkerRole.valueOf(body.get("role").toString()));
-        // managers have no trade; members and leaders do
-        if (w.getRole() == com.bellgado.logistics_ted.domain.WorkerRole.CREW_MANAGER) {
-            w.setTrade(null);
-        } else if (body.containsKey("trade")) {
-            w.setTrade(body.get("trade") != null ? body.get("trade").toString() : null);
+        if (body.containsKey("stageOrders")) {
+            Object so = body.get("stageOrders");
+            if (so instanceof java.util.List<?> list) {
+                w.setStageOrders(list.stream()
+                    .filter(java.util.Objects::nonNull)
+                    .map(v -> ((Number) v).intValue())
+                    .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new)));
+            }
         }
         // House is derived from the worker's crew — never set directly on the worker.
         return w;
     }
 
     private Map<String, Object> toDto(Worker w) {
-        return toDto(w, null, null);
+        return toDto(w, null, null, null);
     }
 
     private Map<String, Object> toDto(Worker w,
                                       Map<Integer, String> stageNamesPerCrew,
-                                      Map<Integer, List<Map<String, Object>>> housesPerCrew) {
+                                      Map<Integer, List<Map<String, Object>>> housesPerCrew,
+                                      Map<Integer, String[]> allStageNames) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id",       w.getId());
         m.put("name",     w.getName());
         m.put("location", w.getLocation());
         m.put("lat",      w.getLat());
         m.put("lng",      w.getLng());
-        m.put("trade",    w.getTrade());
         m.put("role",     w.getRole());
         m.put("phone",    w.getPhone());
         m.put("email",    w.getEmail());
@@ -175,6 +180,10 @@ public class WorkerController {
             m.put("crewStages", stageNamesPerCrew != null
                 ? stageNamesPerCrew.get(cid)
                 : houseStages.findStageNamesForCrew(cid));
+            List<Integer> orders = w.getStageOrders() != null ? w.getStageOrders() : List.of();
+            m.put("stageOrders", orders);
+            m.put("stageNamesBg", orders.stream().map(o -> { String[] s = allStageNames != null ? allStageNames.get(o) : null; return s != null ? s[0] : String.valueOf(o); }).toList());
+            m.put("stageNamesEn", orders.stream().map(o -> { String[] s = allStageNames != null ? allStageNames.get(o) : null; return s != null && s[1] != null ? s[1] : (s != null ? s[0] : String.valueOf(o)); }).toList());
             List<Map<String, Object>> houses = housesPerCrew != null
                 ? housesPerCrew.getOrDefault(cid, List.of())
                 : houseStages.findAssignedHousesForCrew(cid).stream().map(row -> {
@@ -188,6 +197,9 @@ public class WorkerController {
             m.put("houseName", houses.isEmpty() ? null : houses.get(0).get("houseName"));
         } else {
             m.put("crewStages",  null);
+            m.put("stageOrders", List.of());
+            m.put("stageNamesBg", List.of());
+            m.put("stageNamesEn", List.of());
             m.put("crewId",      null);
             m.put("crewName",    null);
             m.put("managerId",   null);

@@ -57,12 +57,15 @@ public class HouseStageController {
 
     @GetMapping("/stage-types")
     public List<Map<String, Object>> listStageTypes() {
-        var raw = jdbc.queryForList("SELECT stage_order, stage_name, stage_name_en FROM stage_type ORDER BY stage_order");
+        var raw = jdbc.queryForList("SELECT stage_order, stage_name, stage_name_en, main_stage_bg, main_stage_en, has_crew FROM stage_type ORDER BY stage_order");
         return raw.stream().map(row -> {
                 Map<String, Object> m = new LinkedHashMap<>();
-                m.put("stageOrder",  row.get("stage_order"));
-                m.put("stageName",   row.get("stage_name"));
-                m.put("stageNameEn", row.get("stage_name_en"));
+                m.put("stageOrder",   row.get("stage_order"));
+                m.put("stageName",    row.get("stage_name"));
+                m.put("stageNameEn",  row.get("stage_name_en"));
+                m.put("mainStageBg",  row.get("main_stage_bg"));
+                m.put("mainStageEn",  row.get("main_stage_en"));
+                m.put("hasCrew",      row.get("has_crew"));
                 return m;
             }).toList();
     }
@@ -214,7 +217,7 @@ public class HouseStageController {
             result.put("role",       w.getRole());
             result.put("crewId",     w.getCrew() != null ? w.getCrew().getId()   : null);
             result.put("crewName",   w.getCrew() != null ? w.getCrew().getName() : null);
-            result.put("trade",      w.getTrade());
+            result.put("stageOrders", w.getStageOrders());
             result.put("location",   w.getLocation());
             result.put("phone",      w.getPhone());
             result.put("email",      w.getEmail());
@@ -304,16 +307,16 @@ public class HouseStageController {
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("crewId",      c.getId());
             result.put("crewName",    c.getName());
-            result.put("stageOrder",  c.getStageOrder());
+            result.put("stageOrders", c.getStageOrders());
             result.put("leaderId",    c.getLeader() != null ? c.getLeader().getId()   : null);
             result.put("leaderName",  c.getLeader() != null ? c.getLeader().getName() : null);
             result.put("leaderPhone", c.getLeader() != null ? c.getLeader().getPhone() : null);
             result.put("leaderEmail", c.getLeader() != null ? c.getLeader().getEmail() : null);
-            result.put("stageName",   c.getStageOrder() != null ? stages.findStageNameByOrder(c.getStageOrder()) : null);
+            result.put("stageName",   null);
             List<Map<String, Object>> memberDtos = workers.findByCrewId(crewId).stream()
                 .filter(w -> w.getRole() == com.bellgado.logistics_ted.domain.WorkerRole.CREW_MEMBER)
                 .map(w -> { Map<String, Object> m2 = new LinkedHashMap<>();
-                    m2.put("id", w.getId()); m2.put("name", w.getName()); m2.put("phone", w.getPhone()); m2.put("trade", w.getTrade()); return m2; })
+                    m2.put("id", w.getId()); m2.put("name", w.getName()); m2.put("phone", w.getPhone()); m2.put("stageOrders", w.getStageOrders()); return m2; })
                 .toList();
             result.put("members", memberDtos);
 

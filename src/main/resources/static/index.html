@@ -1324,10 +1324,24 @@
     </div>
     <div class="field"><label>Phone</label><input id="wPhone" type="tel" placeholder="+359 ..." style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;box-sizing:border-box" /></div>
     <div class="field"><label>Email</label><input id="wEmail" type="email" placeholder="email@example.com" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;box-sizing:border-box" /></div>
-    <div class="field" id="wCrewField"><label id="wCrewLbl">Trade</label>
-      <select id="wCrew" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
-        <option value="">— Select trade —</option>
-      </select>
+    <div class="field" id="wStagesField">
+      <label>Stages</label>
+      <div style="position:relative">
+        <input id="wStageSearch" type="text" placeholder="Search stages…"
+          autocomplete="off"
+          oninput="filterWorkerStageDropdown()"
+          onfocus="showWorkerStageDropdown()"
+          style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;outline:none;transition:border-color .2s"
+          onfocusin="this.style.borderColor='var(--accent)'"
+          onfocusout="this.style.borderColor='var(--border)';setTimeout(hideWorkerStageDropdown,180)" />
+        <div id="wStageDropdown"
+          style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+            background:var(--card);border:1px solid var(--border);border-radius:8px;
+            z-index:600;max-height:200px;overflow-y:auto;
+            box-shadow:0 8px 24px rgba(0,0,0,0.35)">
+        </div>
+      </div>
+      <div id="wStagesList" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.3rem"></div>
     </div>
     <!-- House is derived from the worker's crew, not assigned directly -->
     <p class="modal-err" id="workerModalErr"></p>
@@ -1904,10 +1918,23 @@
         </select>
       </div>
       <input type="hidden" id="cHouse" value="" />
-      <div class="field"><label>Stage Responsible For</label>
-        <select id="cStage" onchange="onCrewStageChange()" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
-          <option value="">— No stage —</option>
-        </select>
+      <div class="field"><label>Stages Responsible For</label>
+        <div style="position:relative">
+          <input id="cStageSearch" type="text" placeholder="Search stages…"
+            autocomplete="off"
+            oninput="filterStageDropdown()"
+            onfocus="showStageDropdown()"
+            style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;outline:none;transition:border-color .2s"
+            onfocusin="this.style.borderColor='var(--accent)'"
+            onfocusout="this.style.borderColor='var(--border)';setTimeout(hideStageDropdown,180)" />
+          <div id="cStageDropdown"
+            style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+              background:var(--card);border:1px solid var(--border);border-radius:8px;
+              z-index:600;max-height:200px;overflow-y:auto;
+              box-shadow:0 8px 24px rgba(0,0,0,0.35)">
+          </div>
+        </div>
+        <div id="cStagesList" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.3rem"></div>
       </div>
       <div class="field"><label>Leader</label>
         <div style="position:relative;display:flex;align-items:center;gap:0.5rem">
@@ -3112,10 +3139,11 @@
     if (activeView === 'dashboard') {
       if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash();
       else if (_dashMode === 'docs') renderDocsDash();
+      else if (_dashMode === 'workers') { retranslateChipBar(); retranslateSearchBar(_dashMode); renderWorkerCards(); }
       else { retranslateChipBar(); retranslateSearchBar(_dashMode); }
     }
     else if (activeView === 'scaffold')    setDashMode('scaffold');
-    else if (activeView === 'crews')       { retranslateChipBar(); retranslateSearchBar('crews'); }
+    else if (activeView === 'crews')       { retranslateChipBar(); retranslateSearchBar('crews'); renderCrewCards(); }
     else if (activeView === 'warehouses')  renderFacilityList('warehouse');
     else if (activeView === 'suppliers')   renderFacilityList('supplier');
     else if (activeView === 'history')     loadHistory();
@@ -5750,7 +5778,7 @@
       const foundationDone = foundationCell?.status === 'DONE';
 
       const cells = row.stages.map(s => {
-        const isFoundation = s.stageOrder === 1;
+        const isFoundation = s.stageOrder === 1 || s.stageOrder === 27;
         const isLocked = !isFoundation && !foundationDone;
 
         if (isFoundation) {
@@ -6093,8 +6121,8 @@
           <span style="margin-right:0.3rem">${roleCfg.icon}</span><span onclick="openWorkerJourney(${w.id})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;color:var(--text)">${w.name}</span>
         </td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${roleCfg.color};font-weight:700">${roleCfg.icon} ${roleCfg.label}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#a78bfa;font-weight:600">${w.trade ? '🔧 ' + w.trade : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewId ? `<span onclick="openCrewHistory(${w.crewId})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">👥 ${w.crewName}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.8rem">${(() => { const names = (currentLang==='en' ? (w.stageNamesEn||w.stageNamesBg) : w.stageNamesBg)||[]; return names.length ? names.map(n=>`<div style="color:#3ecf6e;font-weight:600;white-space:nowrap">🔧 ${n}</div>`).join('') : '<span style="color:var(--muted)">—</span>'; })()}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.houses && w.houses.length > 0 ? w.houses.map(h => `<span onclick="openHouseDetail(${h.houseId})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">🏠 ${h.houseName}</span>`).join('<br>') : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.82rem">${w.phone ? `<a href="tel:${w.phone}" style="color:#4f8ef7;text-decoration:none">📞 ${w.phone}</a>` : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.82rem">${w.email ? `<a href="mailto:${w.email}" style="color:#3ecf6e;text-decoration:none">✉ ${w.email}</a>` : '<span style="color:var(--muted)">—</span>'}</td>
@@ -6118,8 +6146,8 @@
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
                 <th data-i18n="colWorker" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colWorker')}</th>
                 <th data-i18n="colRole" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colRole')}</th>
-                <th data-i18n="colTrade" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colTrade')}</th>
                 <th data-i18n="colCrew" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
+                <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Stages</th>
                 <th data-i18n="colHouse" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
                 <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Phone</th>
                 <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Email</th>
@@ -6254,7 +6282,12 @@
       const crewHasHouse = c.assignedHouses && c.assignedHouses.length ? '1' : '0';
       const crewHasMembers = members.length ? '1' : '0';
       const cName  = (c.name||'').toLowerCase();
-      const cStage = (c.stageNames||'').toLowerCase();
+      const isEn = currentLang === 'en';
+      const stageNamesList = (isEn ? (c.stageNamesEn || c.stageNamesBg) : c.stageNamesBg) || [];
+      const stagesHtml = stageNamesList.length
+        ? stageNamesList.map(n => `<div style="font-size:0.78rem;color:#3ecf6e;font-weight:600;white-space:nowrap">🔧 ${n}</div>`).join('')
+        : `<span style="color:var(--muted);font-size:0.8rem">—</span>`;
+      const cStage = stageNamesList.join(' ').toLowerCase();
       const cHouse = (c.assignedHouses||[]).map(h => h.name).join(' ').toLowerCase();
       return `<tr data-hashouse="${crewHasHouse}" data-hasmembers="${crewHasMembers}" data-name="${cName}" data-stage="${cStage}" data-house="${cHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
@@ -6263,7 +6296,7 @@
         </td>
         <td style="padding:0.7rem 1rem;color:#a78bfa;font-weight:600;font-size:0.85rem">${c.managerName ? '👔 ' + c.managerName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;color:#f5a623;font-weight:600;font-size:0.85rem">${c.leaderName ? '🦺 ' + c.leaderName : '<span style="color:var(--muted)">—</span>'}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${c.stageName ? '🔧 ' + c.stageName : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem">${stagesHtml}</td>
         <td style="padding:0.7rem 1rem">${housesHtml}</td>
         <td style="padding:0.7rem 1rem">${membersHtml}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
@@ -7283,6 +7316,8 @@
 
   // ── WORKER MODAL ─────────────────────────────────────────────────────────────
   let _editingWorkerId = null;
+  let _workerStages    = [];
+  let _workerStageTypeList = [];
 
   function saveWorkerModalState() {
     const state = {
@@ -7290,7 +7325,7 @@
       name:     document.getElementById('wName').value,
       role:     document.getElementById('wRole').value,
       location: document.getElementById('wLocation').value,
-      trade:    document.getElementById('wCrew').value,
+      stageOrders: _workerStages.slice(),
       phone:    document.getElementById('wPhone').value,
       email:    document.getElementById('wEmail').value,
       lat:      document.getElementById('wLat').value,
@@ -7315,24 +7350,20 @@
     _editingWorkerId = id || null;
     document.getElementById('workerModalTitle').textContent = id ? 'Edit Worker' : 'Add Worker';
     document.getElementById('workerModalErr').textContent = '';
-    // populate trade dropdown from live stage types
+    // load stage types for chip UI
     try {
       const stageTypes = await apiFetch('/api/stage-types').then(r => r.json());
-      const sel = document.getElementById('wCrew');
-      const current = sel.value;
-      sel.innerHTML = '<option value="">— Select trade —</option>' +
-        stageTypes.map(s => `<option value="${s.stageName}">${s.stageName}</option>`).join('');
-      if (current) sel.value = current;
+      _workerStageTypeList = stageTypes;
     } catch(e) {}
     if (savedState) {
       document.getElementById('wName').value     = savedState.name     || '';
       document.getElementById('wRole').value     = savedState.role     || 'CREW_MEMBER';
       document.getElementById('wLocation').value = savedState.location || '';
-      document.getElementById('wCrew').value     = savedState.trade    || '';
       document.getElementById('wPhone').value    = savedState.phone    || '';
       document.getElementById('wEmail').value    = savedState.email    || '';
       document.getElementById('wLat').value      = mapCoords ? mapCoords.lat : (savedState.lat || '');
       document.getElementById('wLng').value      = mapCoords ? mapCoords.lng : (savedState.lng || '');
+      _workerStages = (savedState.stageOrders || []).map(Number);
     } else if (id) {
       try {
         const list = await apiFetch('/api/workers').then(r => r.json());
@@ -7341,23 +7372,24 @@
           document.getElementById('wName').value     = w.name     || '';
           document.getElementById('wRole').value     = w.role     || 'CREW_MEMBER';
           document.getElementById('wLocation').value = w.location || '';
-          document.getElementById('wCrew').value     = w.trade    || '';
           document.getElementById('wPhone').value    = w.phone    || '';
           document.getElementById('wEmail').value    = w.email    || '';
           document.getElementById('wLat').value      = w.lat      || '';
           document.getElementById('wLng').value      = w.lng      || '';
+          _workerStages = (w.stageOrders || []).map(Number);
         }
       } catch(e) {}
     } else {
       document.getElementById('wName').value = '';
       document.getElementById('wRole').value = 'CREW_MEMBER';
       document.getElementById('wLocation').value = '';
-      document.getElementById('wCrew').value = '';
       document.getElementById('wPhone').value = '';
       document.getElementById('wEmail').value = '';
       document.getElementById('wLat').value = '';
       document.getElementById('wLng').value = '';
+      _workerStages = [];
     }
+    renderWorkerStages();
     onWorkerRoleChange();
     // update map pick button display
     const lat = parseFloat(document.getElementById('wLat').value);
@@ -7389,30 +7421,88 @@
   function closeWorkerModal() {
     document.getElementById('workerModal').classList.remove('open');
     _editingWorkerId = null;
+    _workerStages = [];
+  }
+
+  function renderWorkerStages() {
+    const el = document.getElementById('wStagesList');
+    if (!el) return;
+    el.innerHTML = _workerStages.map(order => {
+      const st = _workerStageTypeList.find(s => s.stageOrder === order);
+      const label = st ? `${st.stageOrder}. ${st.stageName}` : `Stage ${order}`;
+      return `<span style="display:inline-flex;align-items:center;gap:0.35rem;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:0.25rem 0.55rem;font-size:0.78rem;color:var(--text)">
+        🔨 ${label}
+        <span style="cursor:pointer;color:var(--red);font-weight:700;margin-left:0.1rem" onclick="_workerStages=_workerStages.filter(x=>x!==${order});renderWorkerStages();renderWorkerStageDropdown(document.getElementById('wStageSearch').value)">✕</span>
+      </span>`;
+    }).join('');
+  }
+
+  function renderWorkerStageDropdown(query) {
+    const dd = document.getElementById('wStageDropdown');
+    if (!dd) return;
+    const q = (query || '').toLowerCase().trim();
+    const available = _workerStageTypeList.filter(s =>
+      !_workerStages.includes(s.stageOrder) &&
+      (`${s.stageOrder}. ${s.stageName}`).toLowerCase().includes(q)
+    );
+    if (!available.length) {
+      dd.innerHTML = `<div style="padding:0.65rem 1rem;font-size:0.82rem;color:var(--muted)">${q ? 'No match' : 'All stages added'}</div>`;
+    } else {
+      dd.innerHTML = available.map(s => `
+        <div onmousedown="addWorkerStage(${s.stageOrder})"
+          style="padding:0.6rem 1rem;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid var(--border);transition:background .1s"
+          onmouseover="this.style.background='rgba(79,142,247,0.1)'"
+          onmouseout="this.style.background=''">
+          <span style="font-weight:600">${s.stageOrder}.</span>
+          <span style="flex:1">${s.stageName}</span>
+        </div>`).join('');
+    }
+  }
+
+  function addWorkerStage(order) {
+    if (!_workerStages.includes(order)) {
+      _workerStages.push(order);
+      _workerStages.sort((a, b) => a - b);
+      renderWorkerStages();
+    }
+    document.getElementById('wStageSearch').value = '';
+    renderWorkerStageDropdown('');
+    document.getElementById('wStageDropdown').style.display = 'none';
+  }
+
+  function filterWorkerStageDropdown() {
+    const q = document.getElementById('wStageSearch').value;
+    renderWorkerStageDropdown(q);
+    document.getElementById('wStageDropdown').style.display = '';
+  }
+
+  function showWorkerStageDropdown() {
+    renderWorkerStageDropdown(document.getElementById('wStageSearch').value);
+    document.getElementById('wStageDropdown').style.display = '';
+  }
+
+  function hideWorkerStageDropdown() {
+    const dd = document.getElementById('wStageDropdown');
+    if (dd) dd.style.display = 'none';
   }
 
   function onWorkerRoleChange() {
     const role = document.getElementById('wRole').value;
-    const crewField = document.getElementById('wCrewField');
-    if (role === 'CREW_MANAGER') {
-      crewField.style.display = 'none';
-      document.getElementById('wCrew').value = '';
-    } else {
-      crewField.style.display = '';
-    }
+    const stagesField = document.getElementById('wStagesField');
+    if (stagesField) stagesField.style.display = role === 'CREW_MANAGER' ? 'none' : '';
   }
 
   async function saveWorker() {
     const name     = document.getElementById('wName').value.trim();
     const role     = document.getElementById('wRole').value;
     const location = document.getElementById('wLocation').value.trim();
-    const trade    = role !== 'CREW_MANAGER' ? (document.getElementById('wCrew').value || null) : null;
     const lat      = document.getElementById('wLat').value  || null;
     const lng      = document.getElementById('wLng').value  || null;
     if (!name) { document.getElementById('workerModalErr').textContent = 'Name is required.'; return; }
     const phone = document.getElementById('wPhone').value.trim() || null;
     const email = document.getElementById('wEmail').value.trim() || null;
-    const body = { name, role, location, trade, phone, email,
+    const body = { name, role, location, phone, email,
+                   stageOrders: _workerStages.slice(),
                    lat: lat ? parseFloat(lat) : null, lng: lng ? parseFloat(lng) : null };
     try {
       let res;
@@ -7927,6 +8017,8 @@
   // ── CREW MODAL ─────────────────────────────────────────────────────────────
   let _editingCrewId = null;
   let _crewMembers = [];
+  let _crewStages  = [];
+  let _stageTypeList = [];
   let _memberSearchList = [];
   let _leaderSearchList = [];
 
@@ -7965,10 +8057,10 @@
     const state = {
       id:       _editingCrewId,
       name:     document.getElementById('cName').value,
-      managerId: document.getElementById('cManager').value,
-      leaderId:  document.getElementById('cLeader').value,
-      houseId:   document.getElementById('cHouse').value,
-      stageOrder: document.getElementById('cStage').value,
+      managerId:   document.getElementById('cManager').value,
+      leaderId:    document.getElementById('cLeader').value,
+      houseId:     document.getElementById('cHouse').value,
+      stageOrders: _crewStages.slice(),
       members:  _crewMembers,
       lat:      document.getElementById('cLat').value,
       lng:      document.getElementById('cLng').value,
@@ -8008,10 +8100,8 @@
       return;
     }
 
-    // populate stage dropdown
-    const stageSel = document.getElementById('cStage');
-    stageSel.innerHTML = `<option value="">— No stage —</option>` +
-      stageTypes.map(s => `<option value="${s.stageOrder}">${s.stageName}</option>`).join('');
+    // store stage types for chip UI (only stages with has_crew = true)
+    _stageTypeList = stageTypes.filter(s => s.hasCrew !== false);
     const managers = allWorkers.filter(w => w.role === 'CREW_MANAGER');
     const leaders  = allWorkers.filter(w => w.role === 'CREW_LEADER');
     const members  = allWorkers.filter(w => w.role === 'CREW_MEMBER');
@@ -8043,8 +8133,8 @@
       mgrSel.value   = savedState.managerId  || '';
       ldrSel.value   = savedState.leaderId   || '';
       houseSel.value = savedState.houseId    || '';
-      stageSel.value = savedState.stageOrder || '';
-      _crewMembers   = savedState.members    || [];
+      _crewStages  = (savedState.stageOrders || []).map(Number);
+      _crewMembers = savedState.members || [];
       const lat = mapCoords ? mapCoords.lat : (savedState.lat || '');
       const lng = mapCoords ? mapCoords.lng : (savedState.lng || '');
       document.getElementById('cLat').value      = lat;
@@ -8057,7 +8147,7 @@
       mgrSel.value   = crew.managerId  || '';
       ldrSel.value   = crew.leaderId   || '';
       houseSel.value = crew.houseId    || '';
-      stageSel.value = crew.stageOrder || '';
+      _crewStages  = (crew.stageOrders || []).map(Number);
       _crewMembers = (crew.members || []).map(m => m.id);
       document.getElementById('cLat').value      = crew.lat  || '';
       document.getElementById('cLng').value      = crew.lng  || '';
@@ -8068,15 +8158,21 @@
       mgrSel.value   = '';
       ldrSel.value   = '';
       houseSel.value = '';
-      stageSel.value = '';
+      _crewStages  = [];
       _crewMembers = [];
       document.getElementById('cLat').value      = '';
       document.getElementById('cLng').value      = '';
       document.getElementById('cLocation').value = '';
       _updateCrewMapBtn(null, null);
     }
+    renderCrewStages();
     renderCrewMembers();
     document.getElementById('crewModal').classList.add('open');
+  }
+
+  function _setMultiSelect(sel, values) {
+    const set = new Set(values.map(Number));
+    Array.from(sel.options).forEach(o => { o.selected = set.has(parseInt(o.value)); });
   }
 
   function renderCrewMembers() {
@@ -8102,23 +8198,76 @@
     return 'Finishing';
   }
 
-  function onCrewStageChange() {
-    document.getElementById('cMemberSearch').value = '';
-    renderMemberDropdown('');
+  function renderCrewStages() {
+    const el = document.getElementById('cStagesList');
+    if (!el) return;
+    el.innerHTML = _crewStages.map(order => {
+      const st = _stageTypeList.find(s => s.stageOrder === order);
+      const label = st ? `${st.stageOrder}. ${st.stageName}` : `Stage ${order}`;
+      return `<span style="display:inline-flex;align-items:center;gap:0.35rem;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:0.25rem 0.55rem;font-size:0.78rem;color:var(--text)">
+        🔨 ${label}
+        <span style="cursor:pointer;color:var(--red);font-weight:700;margin-left:0.1rem" onclick="_crewStages=_crewStages.filter(x=>x!==${order});renderCrewStages();renderStageDropdown(document.getElementById('cStageSearch').value)">✕</span>
+      </span>`;
+    }).join('');
+  }
+
+  function renderStageDropdown(query) {
+    const dd = document.getElementById('cStageDropdown');
+    if (!dd) return;
+    const q = (query || '').toLowerCase().trim();
+    const available = _stageTypeList.filter(s =>
+      !_crewStages.includes(s.stageOrder) &&
+      (`${s.stageOrder}. ${s.stageName}`).toLowerCase().includes(q)
+    );
+    if (!available.length) {
+      dd.innerHTML = `<div style="padding:0.65rem 1rem;font-size:0.82rem;color:var(--muted)">${q ? 'No match' : 'All stages added'}</div>`;
+    } else {
+      dd.innerHTML = available.map(s => `
+        <div onmousedown="addCrewStage(${s.stageOrder})"
+          style="padding:0.6rem 1rem;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid var(--border);transition:background .1s"
+          onmouseover="this.style.background='rgba(79,142,247,0.1)'"
+          onmouseout="this.style.background=''">
+          <span style="font-weight:600">${s.stageOrder}.</span>
+          <span style="flex:1">${s.stageName}</span>
+        </div>`).join('');
+    }
+  }
+
+  function addCrewStage(order) {
+    if (!_crewStages.includes(order)) {
+      _crewStages.push(order);
+      _crewStages.sort((a, b) => a - b);
+      renderCrewStages();
+    }
+    document.getElementById('cStageSearch').value = '';
+    renderStageDropdown('');
+    document.getElementById('cStageDropdown').style.display = 'none';
+  }
+
+  function filterStageDropdown() {
+    const q = document.getElementById('cStageSearch').value;
+    renderStageDropdown(q);
+    document.getElementById('cStageDropdown').style.display = '';
+  }
+
+  function showStageDropdown() {
+    renderStageDropdown(document.getElementById('cStageSearch').value);
+    document.getElementById('cStageDropdown').style.display = '';
+  }
+
+  function hideStageDropdown() {
+    const dd = document.getElementById('cStageDropdown');
+    if (dd) dd.style.display = 'none';
   }
 
   function renderMemberDropdown(query) {
     const dd = document.getElementById('cMemberDropdown');
     if (!dd) return;
     const q = (query || '').toLowerCase().trim();
-    const stageSel = document.getElementById('cStage');
-    const stageOpt = stageSel?.options[stageSel?.selectedIndex];
-    const stageTrade = stageOpt?.value ? stageOpt.text : null;
     const available = _memberSearchList.filter(m =>
       !_crewMembers.includes(m.id) &&
       (!m.crewId || m.crewId === _editingCrewId) &&
-      (!stageTrade || !m.trade || m.trade === stageTrade) &&
-      (m.name.toLowerCase().includes(q) || (m.trade||'').toLowerCase().includes(q))
+      m.name.toLowerCase().includes(q)
     );
     if (!available.length) {
       dd.innerHTML = `<div style="padding:0.65rem 1rem;font-size:0.82rem;color:var(--muted)">${q ? 'No match' : 'All members added'}</div>`;
@@ -8130,7 +8279,6 @@
           onmouseout="this.style.background=''">
           <span>👷</span>
           <span style="flex:1;font-weight:600">${m.name}</span>
-          ${m.trade ? `<span style="font-size:0.72rem;color:#9aa3be">🔧 ${m.trade}</span>` : ''}
         </div>`).join('');
     }
   }
@@ -8690,16 +8838,16 @@
     const houseId   = document.getElementById('cHouse').value   || null;
     if (!name) { document.getElementById('crewModalErr').textContent = t('crewSaveFail') + ': name required.'; return; }
 
-    const stageOrder = document.getElementById('cStage').value || null;
+    const stageOrders = _crewStages.slice();
     const cLat = document.getElementById('cLat').value;
     const cLng = document.getElementById('cLng').value;
     const cLoc = document.getElementById('cLocation').value;
     const body = {
       name,
-      leaderId:   leaderId   ? parseInt(leaderId)   : null,
-      managerId:  managerId  ? parseInt(managerId)  : null,
-      houseId:    houseId    ? parseInt(houseId)    : null,
-      stageOrder: stageOrder ? parseInt(stageOrder) : null,
+      leaderId:    leaderId   ? parseInt(leaderId)   : null,
+      managerId:   managerId  ? parseInt(managerId)  : null,
+      houseId:     houseId    ? parseInt(houseId)    : null,
+      stageOrders,
       location: cLoc || '',
       lat: cLat ? parseFloat(cLat) : null,
       lng: cLng ? parseFloat(cLng) : null,
@@ -10595,13 +10743,13 @@
 
   async function qrInit() {
     if (_qrInitDone) return;
-    _qrInitDone = true;
     const grid = document.getElementById('qrGrid');
     grid.innerHTML = '<p style="color:var(--muted);padding:2rem">Loading…</p>';
     try {
       const baseUrl = await getBaseUrl();
 
       const houses = await apiFetch('/api/houses').then(r => r.json());
+      _qrInitDone = true;
       grid.innerHTML = '';
       houses
         .filter(h => h.checkin_token)

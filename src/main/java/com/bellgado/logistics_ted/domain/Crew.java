@@ -1,19 +1,13 @@
 package com.bellgado.logistics_ted.domain;
 
 import com.bellgado.logistics_ted.domain.House;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "crew")
@@ -44,9 +38,11 @@ public class Crew {
     @JoinColumn(name = "house_id")
     private House house;
 
-    /** The stage type this crew is responsible for. */
+    /** The stages this crew is responsible for (many-to-many via crew_stage_type). */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "crew_stage_type", joinColumns = @JoinColumn(name = "crew_id"))
     @Column(name = "stage_order")
-    private Integer stageOrder;
+    private List<Integer> stageOrders = new ArrayList<>();
 
     @Column(nullable = false, length = 255, columnDefinition = "varchar(255) default ''")
     private String location = "";
