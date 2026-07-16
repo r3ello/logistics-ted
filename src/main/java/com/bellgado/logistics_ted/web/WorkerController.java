@@ -128,6 +128,8 @@ public class WorkerController {
         if (body.containsKey("location")) w.setLocation(body.getOrDefault("location", "").toString());
         if (body.get("lat")      != null) w.setLat(new java.math.BigDecimal(body.get("lat").toString()));
         if (body.get("lng")      != null) w.setLng(new java.math.BigDecimal(body.get("lng").toString()));
+        if (body.containsKey("phone")) w.setPhone(body.get("phone") != null ? body.get("phone").toString() : null);
+        if (body.containsKey("email")) w.setEmail(body.get("email") != null ? body.get("email").toString() : null);
         if (body.get("role") != null)
             w.setRole(com.bellgado.logistics_ted.domain.WorkerRole.valueOf(body.get("role").toString()));
         // managers have no trade; members and leaders do
@@ -155,6 +157,8 @@ public class WorkerController {
         m.put("lng",      w.getLng());
         m.put("trade",    w.getTrade());
         m.put("role",     w.getRole());
+        m.put("phone",    w.getPhone());
+        m.put("email",    w.getEmail());
         if (w.getCrew() != null) {
             m.put("crewId",   w.getCrew().getId());
             m.put("crewName", w.getCrew().getName());

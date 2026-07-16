@@ -51,6 +51,12 @@ public class Worker {
     @JoinColumn(name = "crew_id")
     private Crew crew;
 
+    @Column(length = 50)
+    private String phone;
+
+    @Column(length = 255)
+    private String email;
+
     @Column(unique = true, length = 60)
     private String username;
 

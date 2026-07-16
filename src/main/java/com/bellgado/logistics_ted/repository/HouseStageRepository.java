@@ -9,11 +9,13 @@ import org.springframework.data.jpa.repository.Query;
 public interface HouseStageRepository extends JpaRepository<HouseStage, Integer> {
     List<HouseStage> findByHouseIdOrderByStageOrder(Integer houseId);
 
+    java.util.Optional<HouseStage> findByHouseIdAndStageOrder(Integer houseId, Integer stageOrder);
+
     /** Every (house) stage cell assigned to a crew — what its leader may raise a material order for. */
     @Query("SELECT s FROM HouseStage s JOIN FETCH s.house WHERE s.crewId = :crewId ORDER BY s.house.name, s.stageOrder")
     List<HouseStage> findByCrewIdWithHouse(Integer crewId);
 
-    @Query(value = "SELECT DISTINCT ON (stage_order) stage_order, stage_name, stage_name_en FROM house_stage ORDER BY stage_order", nativeQuery = true)
+    @Query(value = "SELECT stage_order, stage_name, stage_name_en FROM stage_type ORDER BY stage_order", nativeQuery = true)
     List<Object[]> findDistinctStageTypes();
 
     List<HouseStage> findByStageOrder(Integer stageOrder);
@@ -68,7 +70,7 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
         """, nativeQuery = true)
     List<Object[]> findCrewsForStage(Integer stageOrder);
 
-    @Query(value = "SELECT DISTINCT ON (stage_order) stage_name FROM house_stage WHERE stage_order = :stageOrder LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT stage_name FROM stage_type WHERE stage_order = :stageOrder LIMIT 1", nativeQuery = true)
     String findStageNameByOrder(Integer stageOrder);
 
     /** All house→crew mappings: [house_id, crew_id, crew_name] for every crew assigned to any stage. */

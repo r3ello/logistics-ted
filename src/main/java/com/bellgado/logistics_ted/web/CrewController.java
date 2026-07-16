@@ -85,9 +85,45 @@ public class CrewController {
     @PostMapping
     @Transactional
     public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
-        String err = validate(body);
+        // leaderId is mandatory
+        if (body.get("leaderId") == null) return ResponseEntity.badRequest().body(Map.of("error", "leaderId is required."));
+        Integer leaderId = Integer.parseInt(body.get("leaderId").toString());
+        Worker leader = workers.findById(leaderId).orElse(null);
+        if (leader == null) return ResponseEntity.badRequest().body(Map.of("error", "Leader not found."));
+        if (leader.getRole() != WorkerRole.CREW_LEADER)
+            return ResponseEntity.badRequest().body(Map.of("error", "Specified worker is not a CREW_LEADER."));
+
+        // Use leader name as crew name if not provided
+        Map<String, Object> bodyMut = new LinkedHashMap<>(body);
+        if (bodyMut.get("name") == null || bodyMut.get("name").toString().isBlank()) {
+            bodyMut.put("name", leader.getName());
+        }
+
+        String err = validate(bodyMut);
         if (err != null) return ResponseEntity.badRequest().body(Map.of("error", err));
-        return ResponseEntity.ok(toDto(crews.save(applyBody(new Crew(), body))));
+
+        Crew crew = crews.save(applyBody(new Crew(), bodyMut));
+
+        // Assign leader
+        crew.setLeader(leader);
+        crews.save(crew);
+        houseStages.syncLeaderNameForCrew(crew.getId(), leader.getName());
+        leader.setCrew(crew);
+        workers.save(leader);
+
+        // Assign optional members
+        if (bodyMut.get("memberIds") instanceof List<?> memberIds) {
+            for (Object mid : memberIds) {
+                Integer memberId = Integer.parseInt(mid.toString());
+                Worker member = workers.findById(memberId).orElse(null);
+                if (member != null && member.getRole() == WorkerRole.CREW_MEMBER) {
+                    member.setCrew(crew);
+                    workers.save(member);
+                }
+            }
+        }
+
+        return ResponseEntity.ok(toDto(crew));
     }
 
     @PutMapping("/{id}")
@@ -160,6 +196,7 @@ public class CrewController {
         Object name = body.get("name");
         if (name == null || name.toString().isBlank()) return "Crew name is required.";
         if (body.get("stageOrder") == null) return "Stage type (stageOrder) is required.";
+        // Note: leaderId is validated before validate() is called in create()
         if (body.get("managerId") != null) {
             Integer mid = Integer.parseInt(body.get("managerId").toString());
             Worker m = workers.findById(mid).orElse(null);

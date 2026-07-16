@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,29 +39,32 @@ public class HouseStageController {
     private final CrewRepository              crews;
     private final WorkerRepository            workers;
     private final HouseStageCrewLogRepository stageLogs;
+    private final JdbcTemplate                jdbc;
 
     public HouseStageController(HouseStageRepository stages, HouseRepository houses,
                                 CrewRepository crews, WorkerRepository workers,
-                                HouseStageCrewLogRepository stageLogs) {
+                                HouseStageCrewLogRepository stageLogs,
+                                JdbcTemplate jdbc) {
         this.stages    = stages;
         this.houses    = houses;
         this.crews     = crews;
         this.workers   = workers;
         this.stageLogs = stageLogs;
+        this.jdbc      = jdbc;
     }
 
     // ── Stage type definitions ────────────────────────────────────────────────
 
     @GetMapping("/stage-types")
-    @Transactional(readOnly = true)
     public List<Map<String, Object>> listStageTypes() {
-        return stages.findDistinctStageTypes().stream().map(row -> {
-            Map<String, Object> m = new LinkedHashMap<>();
-            m.put("stageOrder",   row[0]);
-            m.put("stageName",    row[1]);
-            m.put("stageNameEn",  row[2]);
-            return m;
-        }).toList();
+        var raw = jdbc.queryForList("SELECT stage_order, stage_name, stage_name_en FROM stage_type ORDER BY stage_order");
+        return raw.stream().map(row -> {
+                Map<String, Object> m = new LinkedHashMap<>();
+                m.put("stageOrder",  row.get("stage_order"));
+                m.put("stageName",   row.get("stage_name"));
+                m.put("stageNameEn", row.get("stage_name_en"));
+                return m;
+            }).toList();
     }
 
     @PutMapping("/stage-types/{order}")
@@ -212,6 +216,8 @@ public class HouseStageController {
             result.put("crewName",   w.getCrew() != null ? w.getCrew().getName() : null);
             result.put("trade",      w.getTrade());
             result.put("location",   w.getLocation());
+            result.put("phone",      w.getPhone());
+            result.put("email",      w.getEmail());
 
             String fromDate = (from != null && !from.isBlank()) ? from : null;
             String toDate   = (to   != null && !to.isBlank())   ? to   : null;
@@ -301,6 +307,15 @@ public class HouseStageController {
             result.put("stageOrder",  c.getStageOrder());
             result.put("leaderId",    c.getLeader() != null ? c.getLeader().getId()   : null);
             result.put("leaderName",  c.getLeader() != null ? c.getLeader().getName() : null);
+            result.put("leaderPhone", c.getLeader() != null ? c.getLeader().getPhone() : null);
+            result.put("leaderEmail", c.getLeader() != null ? c.getLeader().getEmail() : null);
+            result.put("stageName",   c.getStageOrder() != null ? stages.findStageNameByOrder(c.getStageOrder()) : null);
+            List<Map<String, Object>> memberDtos = workers.findByCrewId(crewId).stream()
+                .filter(w -> w.getRole() == com.bellgado.logistics_ted.domain.WorkerRole.CREW_MEMBER)
+                .map(w -> { Map<String, Object> m2 = new LinkedHashMap<>();
+                    m2.put("id", w.getId()); m2.put("name", w.getName()); m2.put("phone", w.getPhone()); m2.put("trade", w.getTrade()); return m2; })
+                .toList();
+            result.put("members", memberDtos);
 
             String fromDate = (from != null && !from.isBlank()) ? from : null;
             String toDate   = (to   != null && !to.isBlank())   ? to   : null;
@@ -326,101 +341,113 @@ public class HouseStageController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    /** Upsert: find existing house_stage by houseId+stageOrder, or create one, then apply body. */
+    @PutMapping("/houses/{houseId}/stages/{stageOrder}")
+    @Transactional
+    public ResponseEntity<?> upsertStage(@PathVariable Integer houseId,
+                                         @PathVariable Integer stageOrder,
+                                         @RequestBody Map<String, Object> body) {
+        House house = houses.findById(houseId).orElse(null);
+        if (house == null) return ResponseEntity.notFound().build();
+
+        HouseStage s = stages.findByHouseIdAndStageOrder(houseId, stageOrder).orElseGet(() -> {
+            // Look up stage name from stage_type
+            String stageName = jdbc.queryForObject(
+                "SELECT stage_name FROM stage_type WHERE stage_order = ?", String.class, stageOrder);
+            String stageNameEn = jdbc.queryForObject(
+                "SELECT COALESCE(stage_name_en,'') FROM stage_type WHERE stage_order = ?", String.class, stageOrder);
+            HouseStage n = new HouseStage();
+            n.setHouse(house);
+            n.setStageOrder(stageOrder);
+            n.setStageName(stageName != null ? stageName : "Stage " + stageOrder);
+            n.setStageNameEn(stageNameEn);
+            n.setStatus("NOT_STARTED");
+            n.setUpdatedAt(LocalDateTime.now());
+            return n;
+        });
+
+        // Re-use PUT logic by delegating
+        return updateStage(s, body);
+    }
+
     @PutMapping("/house-stages/{id}")
     @Transactional
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
-        return stages.findById(id).map(s -> {
-            Integer oldCrewId = s.getCrewId();
+        return stages.findById(id).map(s -> updateStage(s, body))
+                     .orElse(ResponseEntity.notFound().build());
+    }
 
-            if (body.containsKey("crewId")) {
-                Integer newCrewId = body.get("crewId") != null ? Integer.valueOf(body.get("crewId").toString()) : null;
-                s.setCrewId(newCrewId);
+    private ResponseEntity<?> updateStage(HouseStage s, Map<String, Object> body) {
+        Integer oldCrewId = s.getCrewId();
 
-                // Assign new crew → house only if stage is active
-                if (newCrewId != null && "IN_PROGRESS".equals(s.getStatus())) {
-                    syncCrewHouse(newCrewId, s.getHouse());
-                }
+        if (body.containsKey("crewId")) {
+            Integer newCrewId = body.get("crewId") != null ? Integer.valueOf(body.get("crewId").toString()) : null;
+            s.setCrewId(newCrewId);
+            if (newCrewId != null && "IN_PROGRESS".equals(s.getStatus()))
+                syncCrewHouse(newCrewId, s.getHouse());
+            if (oldCrewId != null && !oldCrewId.equals(newCrewId))
+                resyncCrewHouseAfterRemoval(oldCrewId, s.getId() != null ? s.getId() : -1);
+        }
+        if (body.containsKey("workerName"))
+            s.setWorkerName(body.get("workerName") != null ? body.get("workerName").toString() : null);
+        if (body.containsKey("status") && body.get("status") != null) {
+            String newStatus = body.get("status").toString();
+            String oldStatus = s.getStatus();
+            s.setStatus(newStatus);
+            if ("IN_PROGRESS".equals(newStatus) && !"IN_PROGRESS".equals(oldStatus) && s.getStartDate() == null)
+                s.setStartDate(today());
+            if ("DONE".equals(newStatus) && !"DONE".equals(oldStatus) && s.getEndDate() == null)
+                s.setEndDate(today());
+            if ("NOT_STARTED".equals(newStatus)) { s.setStartDate(null); s.setEndDate(null); }
+            if ("IN_PROGRESS".equals(newStatus) && !"IN_PROGRESS".equals(oldStatus) && s.getCrewId() != null)
+                syncCrewHouse(s.getCrewId(), s.getHouse());
+            if (!"IN_PROGRESS".equals(newStatus) && "IN_PROGRESS".equals(oldStatus) && s.getCrewId() != null)
+                resyncCrewHouseAfterRemoval(s.getCrewId(), -1);
+        }
+        if (body.containsKey("notes"))
+            s.setNotes(body.get("notes") != null ? body.get("notes").toString() : null);
+        s.setUpdatedAt(LocalDateTime.now());
+        HouseStage saved = stages.save(s);
 
-                // Clear old crew's house if they have no remaining assignments on any house
-                if (oldCrewId != null && !oldCrewId.equals(newCrewId)) {
-                    resyncCrewHouseAfterRemoval(oldCrewId, id);
-                }
+        if (saved.getCrewId() != null && (saved.getStatus().equals("IN_PROGRESS") || saved.getStatus().equals("DONE"))) {
+            boolean shouldLog = true;
+            var latest = stageLogs.findLatest(saved.getHouse().getId(), saved.getStageOrder(), saved.getCrewId());
+            if (latest.isPresent()) {
+                String lastStatus = latest.get().getStatus();
+                if (lastStatus.equals(saved.getStatus()) && !"DONE".equals(lastStatus)) shouldLog = false;
             }
-            if (body.containsKey("workerName"))
-                s.setWorkerName(body.get("workerName") != null ? body.get("workerName").toString() : null);
-            if (body.containsKey("status") && body.get("status") != null) {
-                String newStatus = body.get("status").toString();
-                String oldStatus = s.getStatus();
-                s.setStatus(newStatus);
-                // Auto-populate dates on status transitions
-                if ("IN_PROGRESS".equals(newStatus) && !"IN_PROGRESS".equals(oldStatus) && s.getStartDate() == null)
-                    s.setStartDate(today());
-                if ("DONE".equals(newStatus) && !"DONE".equals(oldStatus) && s.getEndDate() == null)
-                    s.setEndDate(today());
-                if ("NOT_STARTED".equals(newStatus)) {
-                    s.setStartDate(null);
-                    s.setEndDate(null);
+            if (shouldLog) {
+                boolean isDone = "DONE".equals(saved.getStatus());
+                HouseStageCrewLog log = null;
+                if (isDone) {
+                    log = stageLogs.findLatest(saved.getHouse().getId(), saved.getStageOrder(), saved.getCrewId())
+                            .filter(l -> "IN_PROGRESS".equals(l.getStatus())).orElse(null);
                 }
-                // Sync crew.house_id on status transitions
-                if ("IN_PROGRESS".equals(newStatus) && !"IN_PROGRESS".equals(oldStatus) && s.getCrewId() != null)
-                    syncCrewHouse(s.getCrewId(), s.getHouse());
-                if (!"IN_PROGRESS".equals(newStatus) && "IN_PROGRESS".equals(oldStatus) && s.getCrewId() != null)
-                    resyncCrewHouseAfterRemoval(s.getCrewId(), -1);
+                if (log == null) {
+                    log = new HouseStageCrewLog();
+                    log.setHouseId(saved.getHouse().getId());
+                    log.setHouseName(saved.getHouse().getName());
+                    log.setStageOrder(saved.getStageOrder());
+                    log.setStageName(saved.getStageName());
+                    log.setStageNameEn(saved.getStageNameEn());
+                    log.setCrewId(saved.getCrewId());
+                    String crewName = crews.findById(saved.getCrewId()).map(c -> c.getName()).orElse(null);
+                    log.setCrewName(crewName);
+                    log.setStartDate(isDone ? saved.getStartDate() : today());
+                }
+                log.setStatus(saved.getStatus());
+                log.setEndDate(isDone ? today() : null);
+                log.setLoggedAt(OffsetDateTime.now());
+                stageLogs.save(log);
             }
-            if (body.containsKey("notes"))
-                s.setNotes(body.get("notes") != null ? body.get("notes").toString() : null);
-            s.setUpdatedAt(LocalDateTime.now());
-            HouseStage saved = stages.save(s);
+        }
 
-            // Append to history log when a crew is assigned and status is meaningful.
-            // Rule: log only if status changed OR the previous log entry was DONE (new cycle after completion).
-            if (saved.getCrewId() != null && (saved.getStatus().equals("IN_PROGRESS") || saved.getStatus().equals("DONE"))) {
-                boolean shouldLog = true;
-                var latest = stageLogs.findLatest(saved.getHouse().getId(), saved.getStageOrder(), saved.getCrewId());
-                if (latest.isPresent()) {
-                    String lastStatus = latest.get().getStatus();
-                    // Suppress duplicate: same status and last entry was not DONE (not a new cycle)
-                    if (lastStatus.equals(saved.getStatus()) && !"DONE".equals(lastStatus)) {
-                        shouldLog = false;
-                    }
-                }
-                if (shouldLog) {
-                    boolean isDone = "DONE".equals(saved.getStatus());
-                    // When DONE: update the existing IN_PROGRESS row so start_date is preserved
-                    // and end_date is filled in — gives accurate duration for the average.
-                    HouseStageCrewLog log = null;
-                    if (isDone) {
-                        log = stageLogs.findLatest(saved.getHouse().getId(), saved.getStageOrder(), saved.getCrewId())
-                                .filter(l -> "IN_PROGRESS".equals(l.getStatus()))
-                                .orElse(null);
-                    }
-                    if (log == null) {
-                        log = new HouseStageCrewLog();
-                        log.setHouseId(saved.getHouse().getId());
-                        log.setHouseName(saved.getHouse().getName());
-                        log.setStageOrder(saved.getStageOrder());
-                        log.setStageName(saved.getStageName());
-                        log.setStageNameEn(saved.getStageNameEn());
-                        log.setCrewId(saved.getCrewId());
-                        String crewName = crews.findById(saved.getCrewId()).map(c -> c.getName()).orElse(null);
-                        log.setCrewName(crewName);
-                        log.setStartDate(isDone ? saved.getStartDate() : today());
-                    }
-                    log.setStatus(saved.getStatus());
-                    log.setEndDate(isDone ? today() : null);
-                    log.setLoggedAt(OffsetDateTime.now());
-                    stageLogs.save(log);
-                }
-            }
+        House house = s.getHouse();
+        List<String> inProgress = stages.findAllInProgressStageNames(house.getId());
+        house.setCurrentPhase(inProgress.isEmpty() ? null : String.join(", ", inProgress));
+        houses.save(house);
 
-            // Sync house current_phase to all IN_PROGRESS stages
-            House house = s.getHouse();
-            List<String> inProgress = stages.findAllInProgressStageNames(house.getId());
-            house.setCurrentPhase(inProgress.isEmpty() ? null : String.join(", ", inProgress));
-            houses.save(house);
-
-            return ResponseEntity.ok(toDto(saved));
-        }).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(toDto(saved));
     }
 
     private void syncCrewHouse(Integer crewId, House house) {
