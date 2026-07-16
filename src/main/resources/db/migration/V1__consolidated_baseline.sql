@@ -585,10 +585,9 @@ INSERT INTO public.stage_type (stage_order, stage_name, stage_name_en, main_stag
 --  SEED DATA — app_user  (admin + user; passwords pre-hashed)
 -- ────────────────────────────────────────────────────────────
 
--- Passwords set to 'changeme' — change immediately after first deploy
 INSERT INTO public.app_user (id, username, password_hash, role, created_at) OVERRIDING SYSTEM VALUE VALUES
-(1, 'admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin', '2026-07-16 10:26:27.723524'),
-(2, 'user',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'user',  '2026-07-16 10:26:27.723524');
+(1, 'admin', '$2b$10$rvrz4BIB9c5FcbtNovvCuualB6izJY5APr5mQlPPQDcfiAPICHEZC', 'admin', '2026-07-16 10:26:27.723524'),
+(2, 'user',  '$2b$10$rvrz4BIB9c5FcbtNovvCuualB6izJY5APr5mQlPPQDcfiAPICHEZC', 'user',  '2026-07-16 10:26:27.723524');
 SELECT pg_catalog.setval('public.app_user_id_seq', 2, true);
 
 
