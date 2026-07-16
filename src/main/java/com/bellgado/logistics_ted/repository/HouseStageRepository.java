@@ -49,10 +49,10 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     List<Object[]> findAssignedHousesForCrew(Integer crewId);
 
     @Query(value = """
-        SELECT string_agg(DISTINCT hs.stage_name, ', ' ORDER BY hs.stage_name)
-        FROM crew c
-        JOIN house_stage hs ON hs.stage_order = c.stage_order
-        WHERE c.id = :crewId
+        SELECT string_agg(DISTINCT st.stage_name, ', ' ORDER BY st.stage_name)
+        FROM crew_stage_type cst
+        JOIN stage_type st ON st.stage_order = cst.stage_order
+        WHERE cst.crew_id = :crewId
         """, nativeQuery = true)
     String findStageNamesForCrew(Integer crewId);
 
@@ -61,10 +61,10 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
                w.id AS leader_id, w.name AS leader_name,
                string_agg(DISTINCT h2.name, ', ' ORDER BY h2.name) AS assigned_houses
         FROM crew c
+        JOIN crew_stage_type cst ON cst.crew_id = c.id AND cst.stage_order = :stageOrder
         LEFT JOIN worker w ON w.id = c.leader_id
         LEFT JOIN house_stage hs2 ON hs2.crew_id = c.id AND hs2.status <> 'NOT_STARTED'
         LEFT JOIN house h2 ON h2.id = hs2.house_id
-        WHERE c.stage_order = :stageOrder
         GROUP BY c.id, c.name, w.id, w.name
         ORDER BY c.name
         """, nativeQuery = true)
@@ -93,15 +93,14 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
         """, nativeQuery = true)
     List<Object[]> findAllAssignedHousesPerCrew();
 
-    /** Batch: for every crew, the comma-aggregated stage names via crew.stage_order.
+    /** Batch: for every crew, the comma-aggregated stage names via crew_stage_type.
      *  Returns [crew_id, stage_names]. */
     @Query(value = """
-        SELECT c.id,
-               string_agg(DISTINCT hs.stage_name, ', ' ORDER BY hs.stage_name) AS stage_names
-        FROM crew c
-        JOIN house_stage hs ON hs.stage_order = c.stage_order
-        WHERE c.stage_order IS NOT NULL
-        GROUP BY c.id
+        SELECT cst.crew_id,
+               string_agg(DISTINCT st.stage_name, ', ' ORDER BY st.stage_name) AS stage_names
+        FROM crew_stage_type cst
+        JOIN stage_type st ON st.stage_order = cst.stage_order
+        GROUP BY cst.crew_id
         """, nativeQuery = true)
     List<Object[]> findAllStageNamesPerCrew();
 
@@ -112,17 +111,17 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     /** Batch: all crews per stage type with leader and assigned houses.
      *  Returns [stage_order, crew_id, crew_name, leader_id, leader_name, assigned_houses, assigned_houses_json]. */
     @Query(value = """
-        SELECT c.stage_order, c.id, c.name,
+        SELECT cst.stage_order, c.id, c.name,
                w.id AS leader_id, w.name AS leader_name,
                string_agg(DISTINCT h2.name, ', ' ORDER BY h2.name) AS assigned_houses,
                COALESCE(json_agg(DISTINCT jsonb_build_object('id', h2.id, 'name', h2.name)) FILTER (WHERE h2.id IS NOT NULL), '[]') AS assigned_houses_json
-        FROM crew c
+        FROM crew_stage_type cst
+        JOIN crew c ON c.id = cst.crew_id
         LEFT JOIN worker w ON w.id = c.leader_id
         LEFT JOIN house_stage hs2 ON hs2.crew_id = c.id AND hs2.status = 'IN_PROGRESS'
         LEFT JOIN house h2 ON h2.id = hs2.house_id
-        WHERE c.stage_order IS NOT NULL
-        GROUP BY c.stage_order, c.id, c.name, w.id, w.name
-        ORDER BY c.stage_order, c.name
+        GROUP BY cst.stage_order, c.id, c.name, w.id, w.name
+        ORDER BY cst.stage_order, c.name
         """, nativeQuery = true)
     List<Object[]> findAllCrewsPerStage();
 }

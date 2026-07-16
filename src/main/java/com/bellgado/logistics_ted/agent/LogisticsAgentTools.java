@@ -496,7 +496,7 @@ public class LogisticsAgentTools {
         }
     }
 
-    @Tool(description = "Get one crew's full roster: manager, leader, and every member with their trade, " +
+    @Tool(description = "Get one crew's full roster: manager, leader, and every member with their stages, " +
             "plus the house the crew is assigned to.")
     @Transactional(readOnly = true)
     public String getCrewDetails(
@@ -516,7 +516,7 @@ public class LogisticsAgentTools {
         }
     }
 
-    @Tool(description = "List workers with their role (CREW_MANAGER, CREW_LEADER, CREW_MEMBER), trade, " +
+    @Tool(description = "List workers with their role (CREW_MANAGER, CREW_LEADER, CREW_MEMBER), " +
             "crew assignment and house. Pass a name fragment to filter (case-insensitive), or empty " +
             "string for everyone. Answers questions like 'which crew is Ivan in?'.")
     @Transactional(readOnly = true)
@@ -535,7 +535,7 @@ public class LogisticsAgentTools {
                 row.put("id", w.getId());
                 row.put("name", w.getName());
                 row.put("role", w.getRole());
-                row.put("trade", w.getTrade());
+                row.put("stageOrders", w.getStageOrders());
                 row.put("crewId", w.getCrew() != null ? w.getCrew().getId() : null);
                 row.put("crewName", w.getCrew() != null ? w.getCrew().getName() : null);
                 row.put("houseId",   w.getCrew() != null && w.getCrew().getHouse() != null ? w.getCrew().getHouse().getId()   : null);
@@ -829,7 +829,7 @@ public class LogisticsAgentTools {
                 Map<String, Object> mm = new LinkedHashMap<>();
                 mm.put("id", w.getId());
                 mm.put("name", w.getName());
-                mm.put("trade", w.getTrade());
+                mm.put("stageOrders", w.getStageOrders());
                 memberRows.add(mm);
             }
             row.put("members", memberRows);

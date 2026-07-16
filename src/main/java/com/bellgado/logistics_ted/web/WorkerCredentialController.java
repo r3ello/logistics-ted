@@ -56,10 +56,8 @@ public class WorkerCredentialController {
                 Map<String, Object> g = new LinkedHashMap<>();
                 g.put("crewId",    crew.getId());
                 g.put("crewName",  crew.getName());
-                g.put("stageOrder", crew.getStageOrder());
-                String stageName = crew.getStageOrder() != null
-                    ? houseStages.findStageNameByOrder(crew.getStageOrder()) : null;
-                g.put("stageName", stageName);
+                g.put("stageOrders", crew.getStageOrders());
+                g.put("stageName", null);
                 List<Map<String, Object>> members = workers.findByCrewId(crew.getId()).stream()
                     .map(w -> {
                         Map<String, Object> m = new LinkedHashMap<>();
