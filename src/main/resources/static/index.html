@@ -2301,14 +2301,13 @@
         <thead style="background:var(--surface2,#21252f)">
           <tr>
             <th style="border-bottom:1px solid var(--border);width:28px"></th>
-            <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Code</th>
             <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Folder</th>
             <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Label EN</th>
             <th style="padding:.6rem 1rem;text-align:center;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);width:60px">Sort</th>
             <th style="border-bottom:1px solid var(--border);width:80px"></th>
           </tr>
         </thead>
-        <tbody id="cfTbody"><tr><td colspan="6" style="padding:2.5rem;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
+        <tbody id="cfTbody"><tr><td colspan="5" style="padding:2.5rem;text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
       </table>
     </div>
     <!-- modal -->
@@ -2319,9 +2318,7 @@
           <button onclick="cfCloseForm()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
         </div>
         <div style="padding:1.25rem;display:flex;flex-direction:column;gap:.9rem">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Code *</label>
-              <input id="cfCode" placeholder="e.g. 10" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-family:var(--font-mono,'monospace');font-size:.85rem;outline:none"></div>
+          <div>
             <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Sort order</label>
               <input id="cfSort" type="number" value="0" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
           </div>
@@ -12292,7 +12289,6 @@
       : `<td style="padding:.6rem 1rem"><div style="display:flex;align-items:center;gap:.5rem">${icon}${name}</div></td>`;
     return `<tr draggable="true" data-id="${r.id}" data-parent="${r.parentId||''}" style="border-bottom:1px solid var(--border);transition:background .1s">
       <td style="padding:.4rem .5rem;width:28px;text-align:center"><span class="dd-handle" draggable="true" style="cursor:grab;color:var(--muted);font-size:1rem;user-select:none;display:inline-block;line-height:1;padding:2px 4px" title="Drag to reorder">⠿</span></td>
-      <td style="padding:.6rem 1rem"><span style="font-family:var(--font-mono,'monospace');font-size:.78rem;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2);border-radius:4px;padding:1px 6px">${esc(r.code)}</span></td>
       ${cell}
       <td style="padding:.6rem 1rem;color:var(--muted);font-size:.82rem">${esc(r.labelEn)}</td>
       <td style="padding:.6rem 1rem;text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:var(--surface2,#21252f);color:var(--muted);font-size:.75rem;font-weight:600">${r.sortOrder}</span></td>
@@ -12307,7 +12303,7 @@
     const sel = document.getElementById('cfParent');
     sel.innerHTML = '<option value="">— top level —</option>';
     _cfData.filter(r => !r.parentId && r.id !== excludeId).sort((a,b) => a.sortOrder - b.sortOrder)
-      .forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = `${r.icon||''} ${r.code} — ${r.labelEn}`; sel.appendChild(o); });
+      .forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = `${r.icon||''} ${r.labelEn}`; sel.appendChild(o); });
   }
 
   function cfSyncPreview() {
@@ -12320,7 +12316,7 @@
   function cfOpenAdd() {
     _cfEditId = null;
     document.getElementById('cfFormTitle').textContent = 'Add Folder';
-    ['cfCode','cfLabelBg','cfLabelEn'].forEach(id => document.getElementById(id).value = '');
+    ['cfLabelBg','cfLabelEn'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('cfSort').value = '0';
     document.getElementById('cfIcon').value = '📁';
     document.getElementById('cfColor').value = '#4f8ef7';
@@ -12328,14 +12324,13 @@
     document.getElementById('cfParent').value = '';
     cfSyncPreview();
     document.getElementById('cfOverlay').style.display = 'flex';
-    setTimeout(() => document.getElementById('cfCode').focus(), 50);
+    setTimeout(() => document.getElementById('cfLabelEn').focus(), 50);
   }
 
   function cfOpenEdit(id) {
     const r = _cfData.find(x => x.id === id); if (!r) return;
     _cfEditId = id;
     document.getElementById('cfFormTitle').textContent = 'Edit Folder';
-    document.getElementById('cfCode').value    = r.code;
     document.getElementById('cfLabelBg').value = r.labelBg;
     document.getElementById('cfLabelEn').value = r.labelEn;
     document.getElementById('cfSort').value    = r.sortOrder;
@@ -12369,7 +12364,7 @@
   function cfOpenDel(id) {
     _cfDelId = id;
     const r = _cfData.find(x => x.id === id);
-    document.getElementById('cfDelName').textContent = `"${r.icon||''} ${r.code} — ${r.labelEn}"`;
+    document.getElementById('cfDelName').textContent = `"${r.icon||''} ${r.labelEn}"`;
     document.getElementById('cfDelOverlay').style.display = 'flex';
   }
   function cfCloseDel() { document.getElementById('cfDelOverlay').style.display = 'none'; }
