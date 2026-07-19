@@ -94,7 +94,11 @@ public class MyCrewController {
         w.setPhone(body.get("phone") != null ? body.get("phone").toString().trim() : null);
         w.setEmail(body.get("email") != null ? body.get("email").toString().trim() : null);
         w.setRole(WorkerRole.CREW_MEMBER);
-        w.setCrew(me.getCrew());
+        Crew crew = me.getCrew();
+        w.setCrew(crew);
+        // Always inherit crew's stages — crew leader cannot override per-member
+        List<Integer> crewStages = crew.getStageOrders();
+        w.setStageOrders(crewStages != null ? new java.util.ArrayList<>(crewStages) : new java.util.ArrayList<>());
 
         // auto-generate credentials from worker name
         Worker saved = workers.save(w);
@@ -118,6 +122,7 @@ public class MyCrewController {
         if (body.containsKey("phone"))    w.setPhone(body.get("phone") != null ? body.get("phone").toString().trim() : null);
         if (body.containsKey("email"))    w.setEmail(body.get("email") != null ? body.get("email").toString().trim() : null);
         if (body.containsKey("location") && body.get("location") != null) w.setLocation(body.get("location").toString().trim());
+        applyStageOrders(w, body);
         return ResponseEntity.ok(workerDto(workers.save(w)));
     }
 
@@ -223,23 +228,35 @@ public class MyCrewController {
         m.put("name",    c.getName());
         m.put("leaderId",   c.getLeader() != null ? c.getLeader().getId()   : null);
         m.put("leaderName", c.getLeader() != null ? c.getLeader().getName() : null);
-        m.put("houseId",   c.getHouse() != null ? c.getHouse().getId()   : null);
-        m.put("houseName", c.getHouse() != null ? c.getHouse().getName() : null);
+        m.put("houseId",    c.getHouse() != null ? c.getHouse().getId()   : null);
+        m.put("houseName",  c.getHouse() != null ? c.getHouse().getName() : null);
+        m.put("stageOrders", c.getStageOrders() != null ? c.getStageOrders() : List.of());
         m.put("members", workers.findByCrewId(c.getId()).stream().map(this::workerDto).toList());
         return m;
     }
 
     private Map<String, Object> workerDto(Worker w) {
         Map<String, Object> m = new LinkedHashMap<>();
-        m.put("id",       w.getId());
-        m.put("name",     w.getName());
-        m.put("role",     w.getRole().name());
-        m.put("phone",    w.getPhone());
-        m.put("email",    w.getEmail());
-        m.put("location", w.getLocation());
-        m.put("username", w.getUsername());
+        m.put("id",          w.getId());
+        m.put("name",        w.getName());
+        m.put("role",        w.getRole().name());
+        m.put("phone",       w.getPhone());
+        m.put("email",       w.getEmail());
+        m.put("location",    w.getLocation());
+        m.put("username",    w.getUsername());
         m.put("hasPassword", w.getPasswordHash() != null);
+        m.put("stageOrders", w.getStageOrders());
         return m;
+    }
+
+    private static void applyStageOrders(Worker w, Map<String, Object> body) {
+        if (!body.containsKey("stageOrders")) return;
+        List<Integer> orders = new java.util.ArrayList<>();
+        Object raw = body.get("stageOrders");
+        if (raw instanceof List<?> list) {
+            for (Object o : list) { if (o != null) orders.add(Integer.parseInt(o.toString())); }
+        }
+        w.setStageOrders(orders);
     }
 
     private Map<String, Object> credentialDto(Worker w) {

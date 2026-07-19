@@ -2503,6 +2503,8 @@
       navDashboard:'Dashboard', navOrder:'Order Route', navMap:'Location Overview',
       pageTitle_dashboard:'Dashboard', pageSub_dashboard:'Surplus materials inventory',
       pageTitle_myorders:'My Orders', pageSub_myorders:'Request materials for your assigned house & stage',
+      pageTitle_mycrew:'My Crew', pageSub_mycrew:'Manage your crew members',
+      pageTitle_myworkeraccess:'Worker Access', pageSub_myworkeraccess:'Manage check-in credentials for your crew members',
       pageTitle_order:'Route Calculator', pageSub_order:'Calculate optimal pickup route',
       pageTitle_map:'Location Overview', pageSub_map:'Houses on map',
       pageTitle_history:'Order Route History', pageSub_history:'Past route recommendations — immutable record',
@@ -2809,6 +2811,8 @@
       navDashboard:'Табло', navOrder:'Маршрут на поръчка', navMap:'Преглед на локации',
       pageTitle_dashboard:'Табло', pageSub_dashboard:'Инвентар на излишни материали',
       pageTitle_myorders:'Моите заявки', pageSub_myorders:'Заявете материали за вашия обект и етап',
+      pageTitle_mycrew:'Моят екип', pageSub_mycrew:'Управлявай членовете на екипа',
+      pageTitle_myworkeraccess:'Достъп', pageSub_myworkeraccess:'Управление на данни за вход на членовете на екипа',
       pageTitle_order:'Калкулатор на маршрут', pageSub_order:'Изчисли оптимален маршрут',
       pageTitle_map:'Преглед на локации', pageSub_map:'Къщи на картата',
       pageTitle_history:'История на маршрута на поръчката', pageSub_history:'Минали препоръки за маршрут — неизменен запис',
@@ -3153,7 +3157,25 @@
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
     else if (activeView === 'workeraccess') { if (_waGroups) waRender(_waGroups); }
     else if (activeView === 'housedetail') { if (_houseDetailId) loadHouseDetail(); }
+    else if (activeView === 'myorders')       renderMyOrders();
+    else if (activeView === 'mycrew')         { if (_mcData) mcRender(); }
+    else if (activeView === 'myworkeraccess') mwaRender();
+    // Re-label crew leader nav items on language switch
+    if (document.getElementById('navMyorders')) {
+      document.getElementById('navMyorders').querySelector('span:last-child').textContent       = currentLang === 'bg' ? 'Моите заявки' : 'My Orders';
+      document.getElementById('navMycrew').querySelector('span:last-child').textContent         = currentLang === 'bg' ? 'Моят екип'    : 'My Crew';
+      document.getElementById('navMyworkeraccess').querySelector('span:last-child').textContent = currentLang === 'bg' ? 'Достъп'       : 'Worker Access';
+    }
     else if (activeView === 'workerjourney' && _wjWorkerId) loadWorkerJourney(_wjWorkerId);
+    // Re-apply page title/sub for current view in new language
+    const titleEl = document.getElementById('pageTitle');
+    const subEl   = document.getElementById('pageSub');
+    if (titleEl && subEl) {
+      const tk = 'pageTitle_' + activeView;
+      const sk = 'pageSub_' + activeView;
+      if (i18n[currentLang] && i18n[currentLang][tk]) titleEl.textContent = t(tk);
+      if (i18n[currentLang] && i18n[currentLang][sk]) subEl.textContent   = t(sk);
+    }
     else if (activeView === 'crewhistory'   && _chCrewId)   loadCrewHistory(_chCrewId);
     if (_dashMode === 'docs') {
       document.querySelectorAll('.doc-dept-label[data-labelkey]').forEach(el => { el.textContent = t(el.dataset.labelkey); });
@@ -10399,7 +10421,7 @@
     // Nav visibility by role, set explicitly every login so it's restored for admin/user after a
     // crew-leader session (inline display would otherwise stick). Crew leaders get only their workspace.
     const navMenu = document.querySelector('#mainNav .nav-menu');
-    if (navMenu) navMenu.style.display = (user.role === 'crew_leader') ? 'none' : '';
+    if (navMenu) navMenu.style.display = '';
   }
 
   async function doLogin() {
@@ -10428,28 +10450,24 @@
   }
 
   async function doLogout() {
-    // Logout is client-side: drop the token. The server call is a courtesy / future hook.
     try { await apiFetch('/api/logout', { method: 'POST' }); } catch (_) { /* ignore */ }
     setToken(null);
-    currentUser = null;
-    document.getElementById('userBadge').style.display  = 'none';
-    document.getElementById('logoutBtn').style.display  = 'none';
-    document.getElementById('loginUser').value = '';
-    document.getElementById('loginPass').value = '';
-    document.getElementById('loginErr').textContent = '';
-    document.getElementById('loginScreen').classList.remove('hidden');
+    window.location.href = '/';
   }
 
   async function initCrewLeader() {
     applyStoredTheme();
-    // Build crew-leader nav
-    const nav = document.getElementById('navItems');
-    if (nav) {
-      nav.innerHTML = `
-        <a class="nav-item" id="navMyorders" onclick="showView('myorders')" href="#">📋 My Orders</a>
-        <a class="nav-item" id="navMycrew" onclick="showView('mycrew')" href="#">👥 My Crew</a>
-        <a class="nav-item" id="navMyworkeraccess" onclick="showView('myworkeraccess')" href="#">🔑 Worker Access</a>`;
+    const navMenu = document.querySelector('#mainNav .nav-menu');
+    if (navMenu) {
+      navMenu.innerHTML = `
+        <a class="nav-item" id="navMyorders" href="#myorders" onclick="showView('myorders');return false;"><span class="nav-icon">📋</span> <span>My Orders</span></a>
+        <a class="nav-item" id="navMycrew" href="#mycrew" onclick="showView('mycrew');return false;"><span class="nav-icon">👥</span> <span>My Crew</span></a>
+        <a class="nav-item" id="navMyworkeraccess" href="#myworkeraccess" onclick="showView('myworkeraccess');return false;"><span class="nav-icon">🔑</span> <span>Worker Access</span></a>`;
     }
+    // Pre-load stage types so the Add Member modal stage picker works
+    try {
+      _workerStageTypeList = await apiFetch('/api/stage-types').then(r => r.json());
+    } catch(e) {}
     showView('myorders');
   }
 
@@ -10464,7 +10482,7 @@
 
   const MO_T = {
     en: { col_house:'Site (house)', col_stage:'Stage', col_status:'Status', col_request:'Materials',
-          col_dates:'Dates', col_actions:'Progress',
+          col_dates:'Start Date', col_photo_start:'Start Photo', col_photo_end:'End Photo', col_actions:'End Date', col_report:'Report',
           request:'Request', ordersWord:'request(s)', existingOrders:'Existing requests', cancel:'Cancel',
           start:'Start', finish:'Finish', finished:'Finished', confirmFinish:'Mark this stage as finished?',
           status_NOT_STARTED:'Not started', status_IN_PROGRESS:'In progress', status_DONE:'Done',
@@ -10473,7 +10491,7 @@
           noAssignments:'You have no assigned house/stage yet. Ask an admin to assign your crew in the stage matrix.',
           need:'Add at least one material with a quantity.' },
     bg: { col_house:'Обект', col_stage:'Етап', col_status:'Статус', col_request:'Материали',
-          col_dates:'Дати', col_actions:'Прогрес',
+          col_dates:'Начална дата', col_photo_start:'Начална снимка', col_photo_end:'Крайна снимка', col_actions:'Крайна дата', col_report:'Доклад',
           request:'Заявка', ordersWord:'заявки', existingOrders:'Съществуващи заявки', cancel:'Отказ',
           start:'Старт', finish:'Финал', finished:'Завършен', confirmFinish:'Да отбележа ли етапа като завършен?',
           status_NOT_STARTED:'Не е започнат', status_IN_PROGRESS:'В процес', status_DONE:'Завършен',
@@ -10484,7 +10502,7 @@
   };
   const mot = k => (MO_T[(typeof currentLang !== 'undefined' && currentLang) || 'en'] || MO_T.en)[k] || k;
   const moEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
-  const moTd = 'padding:0.6rem 0.8rem;vertical-align:top';
+  const moTd = 'padding:0.6rem 0.8rem;vertical-align:middle';
   const moTh = 'padding:0.5rem 0.8rem;font-weight:600;font-size:0.78rem;white-space:nowrap';
   const moBadge = st => `display:inline-block;padding:0.15rem 0.55rem;border-radius:999px;font-size:0.74rem;font-weight:700;color:#fff;background:${st === 'DONE' ? '#065f46' : st === 'IN_PROGRESS' ? '#b45309' : '#3a4060'}`;
   const moBtnAct = bg => `background:${bg};color:#fff;border:none;border-radius:7px;padding:0.35rem 0.85rem;font-weight:700;cursor:pointer;font-size:0.82rem;white-space:nowrap`;
@@ -10587,17 +10605,13 @@
     const rows = s.assignments.map(a => {
       const stageOrders = s.orders.filter(o => o.houseStageId === a.houseStageId);
       const st = a.status || 'NOT_STARTED';
-      const dates = `${a.startDate || '—'}${a.endDate ? ' → ' + a.endDate : ''}`;
+      const dates = a.startDate || '—';
+      const endDate = a.endDate || '—';
       const orderCell = `
         <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-start">
           ${stageOrders.length ? `<span style="font-size:0.78rem;color:var(--muted,#8b949e)">${stageOrders.length} ${mot('ordersWord')}</span>` : ''}
           <button onclick="moOpenOrder(${a.houseStageId})" style="${_moBtnG}">＋ ${mot('request')}</button>
         </div>`;
-      const actionCell = st === 'DONE'
-        ? `<span style="color:#3ecf6e;font-size:0.82rem;font-weight:600">✓ ${mot('finished')}</span>`
-        : st === 'IN_PROGRESS'
-          ? `<button onclick="moFinishStage(${a.houseStageId})" style="${moBtnAct('#065f46')}">${mot('finish')}</button>`
-          : `<button onclick="moStartStage(${a.houseStageId})" style="${moBtnAct('#b45309')}">${mot('start')}</button>`;
       const mainRow = `
         <tr style="border-bottom:1px solid var(--border,#30363d)">
           <td style="${moTd};font-weight:700">🏠 ${moEsc(a.houseName)}</td>
@@ -10605,10 +10619,13 @@
           <td style="${moTd}"><span style="${moBadge(st)}">${mot('status_' + st)}</span></td>
           <td style="${moTd}">${orderCell}</td>
           <td style="${moTd};white-space:nowrap;font-size:0.82rem;color:var(--muted,#8b949e)">${moEsc(dates)}</td>
-          <td style="${moTd};text-align:right">${actionCell}</td>
+          <td style="${moTd}"><label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.8rem;color:var(--muted,#8b949e);border:1px dashed var(--border,#30363d);border-radius:6px;padding:.3rem .6rem;white-space:nowrap">📷 <input type="file" accept="image/*" style="display:none" onchange="moPhotoSelected(this,${a.houseStageId},'start')"><span>Upload</span></label></td>
+          <td style="${moTd}"><label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.8rem;color:var(--muted,#8b949e);border:1px dashed var(--border,#30363d);border-radius:6px;padding:.3rem .6rem;white-space:nowrap">📷 <input type="file" accept="image/*" style="display:none" onchange="moPhotoSelected(this,${a.houseStageId},'end')"><span>Upload</span></label></td>
+          <td style="${moTd};white-space:nowrap;font-size:0.82rem;color:var(--muted,#8b949e)">${moEsc(endDate)}</td>
+          <td style="${moTd}"><label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.8rem;color:var(--muted,#8b949e);border:1px dashed var(--border,#30363d);border-radius:6px;padding:.3rem .6rem;white-space:nowrap">📄 <input type="file" accept="application/pdf" style="display:none" onchange="moReportSelected(this,${a.houseStageId})"><span>Upload</span></label></td>
         </tr>`;
       const expand = s.openStage === a.houseStageId
-        ? `<tr><td colspan="6" style="padding:0;background:rgba(167,139,250,.05)">${moOrderPanel(a, stageOrders)}</td></tr>`
+        ? `<tr><td colspan="9" style="padding:0;background:rgba(167,139,250,.05)">${moOrderPanel(a, stageOrders)}</td></tr>`
         : '';
       return mainRow + expand;
     }).join('');
@@ -10621,11 +10638,32 @@
             <th style="${moTh}">${mot('col_status')}</th>
             <th style="${moTh}">${mot('col_request')}</th>
             <th style="${moTh}">${mot('col_dates')}</th>
-            <th style="${moTh};text-align:right">${mot('col_actions')}</th>
+            <th style="${moTh}">${mot('col_photo_start')}</th>
+            <th style="${moTh}">${mot('col_photo_end')}</th>
+            <th style="${moTh}">${mot('col_actions')}</th>
+            <th style="${moTh}">${mot('col_report')}</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>`;
+  }
+
+  function moReportSelected(input, houseStageId) {
+    const file = input.files[0];
+    if (!file) return;
+    const label = input.parentElement.querySelector('span');
+    label.textContent = file.name.length > 16 ? file.name.slice(0,14)+'…' : file.name;
+    label.style.color = 'var(--accent)';
+    // Storage TBD — PDF captured here, ready to upload to house Photos/Reports folder
+  }
+
+  function moPhotoSelected(input, houseStageId, type) {
+    const file = input.files[0];
+    if (!file) return;
+    const label = input.parentElement.querySelector('span');
+    label.textContent = file.name.length > 16 ? file.name.slice(0,14)+'…' : file.name;
+    label.style.color = 'var(--accent)';
+    // Storage TBD — file is captured here, ready to upload to house Photos folder
   }
 
   async function moSubmit() {
@@ -10653,6 +10691,7 @@
   function initApp() {
     if (currentUser?.role === 'crew_leader') { initCrewLeader(); return; }
     applyStoredTheme();
+    showView('dashboard');
     loadMaterialFields().then(applyPendingMapPin);
 
     if (localStorage.getItem('returnToHouseModal')) {
@@ -12499,14 +12538,46 @@
   }
 
   // ══════════════════════════════════════ CREW LEADER — MY CREW ═══════════════
+  const CL_T = {
+    en: {
+      leader:'Leader', member:'Member', editName:'✏️ Edit Name', addMember:'＋ Add Member',
+      colName:'Name', colRole:'Role', colPhone:'Phone', colEmail:'Email',
+      noMembers:'No members yet.', leaderLabel:'Leader:', houseLabel:'House:',
+      editCrewTitle:'Edit Crew Name', crewNameLabel:'Crew Name',
+      cancel:'Cancel', save:'Save', remove:'Remove',
+      addMemberTitle:'Add Member', editMemberTitle:'Edit Member',
+      nameRequired:'Name *', phone:'Phone', email:'Email', stages:'Stages',
+      removeFromCrew:'Remove from crew', removeConfirm:'Remove from crew? The worker will not be deleted.',
+      export:'⬇️ Export', reset:'Reset',
+      colUsername:'Username', colPin:'PIN',
+      loading:'Loading…', failedCrew:'Failed to load crew.', failedAccess:'Failed to load.',
+      crewNameUpdated:'Crew name updated', memberAdded:'Member added', memberUpdated:'Member updated', memberRemoved:'Member removed from crew',
+    },
+    bg: {
+      leader:'Лидер', member:'Член', editName:'✏️ Редактирай', addMember:'＋ Добави член',
+      colName:'Име', colRole:'Роля', colPhone:'Телефон', colEmail:'Имейл',
+      noMembers:'Няма членове.', leaderLabel:'Лидер:', houseLabel:'Обект:',
+      editCrewTitle:'Редактирай екипа', crewNameLabel:'Име на екипа',
+      cancel:'Отказ', save:'Запази', remove:'Премахни',
+      addMemberTitle:'Добави член', editMemberTitle:'Редактирай член',
+      nameRequired:'Име *', phone:'Телефон', email:'Имейл', stages:'Етапи',
+      removeFromCrew:'Премахни от екипа', removeConfirm:'Премахване от екипа? Работникът няма да бъде изтрит.',
+      export:'⬇️ Експорт', reset:'Промени',
+      colUsername:'Потребител', colPin:'Парола',
+      loading:'Зареждане…', failedCrew:'Грешка при зареждане.', failedAccess:'Грешка при зареждане.',
+      crewNameUpdated:'Името на екипа е обновено', memberAdded:'Членът е добавен', memberUpdated:'Членът е обновен', memberRemoved:'Членът е премахнат от екипа',
+    }
+  };
+  const clt = k => (CL_T[(typeof currentLang !== 'undefined' && currentLang) || 'en'] || CL_T.en)[k] || k;
+
   let _mcData = null;
   let _mcEditMemberId = null, _mcDelMemberId = null;
 
   async function mcLoad() {
     const root = document.getElementById('mcRoot');
-    root.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)"><div class="spinner"></div><br>Loading…</div>';
+    root.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)"><div class="spinner"></div><br>${clt('loading')}</div>`;
     const res = await apiFetch('/api/my/crew').then(r => r.json()).catch(() => null);
-    if (!res || res.error) { root.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">${res?.error || 'Failed to load crew.'}</div>`; return; }
+    if (!res || res.error) { root.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">${res?.error || clt('failedCrew')}</div>`; return; }
     _mcData = res;
     mcRender();
   }
@@ -12520,33 +12591,33 @@
           <div>
             <h2 style="margin:0;font-size:1.25rem;font-weight:700">👥 ${esc(c.name)}</h2>
             <p style="margin:.25rem 0 0;font-size:.82rem;color:var(--muted)">
-              ${c.leaderName ? '👷 Leader: ' + esc(c.leaderName) : ''}
+              ${c.leaderName ? '👷 ' + clt('leaderLabel') + ' ' + esc(c.leaderName) : ''}
               ${c.houseName  ? ' &nbsp;·&nbsp; 🏠 ' + esc(c.houseName) : ''}
             </p>
           </div>
           <div style="display:flex;gap:.5rem">
-            <button onclick="mcOpenEditCrew()" style="background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-size:.85rem;font-weight:600">✏️ Edit Name</button>
-            <button onclick="mcOpenAddMember()" style="background:var(--accent);color:#0F1117;border:none;border-radius:8px;padding:.5rem 1.1rem;font-weight:600;font-size:.85rem;cursor:pointer">＋ Add Member</button>
+            <button onclick="mcOpenEditCrew()" style="background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-size:.85rem;font-weight:600">${clt('editName')}</button>
+            <button onclick="mcOpenAddMember()" style="background:var(--accent);color:#0F1117;border:none;border-radius:8px;padding:.5rem 1.1rem;font-weight:600;font-size:.85rem;cursor:pointer">${clt('addMember')}</button>
           </div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
           <table style="width:100%;border-collapse:collapse">
             <thead style="background:var(--surface2,#21252f)">
               <tr>
-                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Name</th>
-                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Role</th>
-                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Phone</th>
-                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Email</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">${clt('colName')}</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">${clt('colRole')}</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">${clt('colPhone')}</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">${clt('colEmail')}</th>
                 <th style="border-bottom:1px solid var(--border);width:80px"></th>
               </tr>
             </thead>
             <tbody>
               ${c.members.length === 0
-                ? `<tr><td colspan="5" style="padding:2.5rem;text-align:center;color:var(--muted)">No members yet.</td></tr>`
+                ? `<tr><td colspan="5" style="padding:2.5rem;text-align:center;color:var(--muted)">${clt('noMembers')}</td></tr>`
                 : c.members.map(w => `
                 <tr style="border-bottom:1px solid var(--border)">
                   <td style="padding:.65rem 1rem;font-weight:500;font-size:.875rem">${esc(w.name)}</td>
-                  <td style="padding:.65rem 1rem"><span style="font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:4px;background:${w.role==='CREW_LEADER'?'rgba(167,139,250,.15)':'rgba(62,207,110,.12)'};color:${w.role==='CREW_LEADER'?'#a78bfa':'#3ecf6e'}">${w.role==='CREW_LEADER'?'Leader':'Member'}</span></td>
+                  <td style="padding:.65rem 1rem"><span style="font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:4px;background:${w.role==='CREW_LEADER'?'rgba(167,139,250,.15)':'rgba(62,207,110,.12)'};color:${w.role==='CREW_LEADER'?'#a78bfa':'#3ecf6e'}">${w.role==='CREW_LEADER'?clt('leader'):clt('member')}</span></td>
                   <td style="padding:.65rem 1rem;font-size:.85rem;color:var(--muted)">${w.phone ? esc(w.phone) : '—'}</td>
                   <td style="padding:.65rem 1rem;font-size:.85rem;color:var(--muted)">${w.email ? esc(w.email) : '—'}</td>
                   <td style="padding:.65rem 1rem"><div style="display:flex;gap:.25rem;justify-content:flex-end">
@@ -12563,16 +12634,16 @@
       <div id="mcCrewOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)mcCloseCrewForm()">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:380px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
-            <h3 style="margin:0;font-size:.95rem;font-weight:600">Edit Crew Name</h3>
+            <h3 style="margin:0;font-size:.95rem;font-weight:600">${clt('editCrewTitle')}</h3>
             <button onclick="mcCloseCrewForm()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
           </div>
           <div style="padding:1.25rem">
-            <label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Crew Name</label>
+            <label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">${clt('crewNameLabel')}</label>
             <input id="mcCrewName" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none">
           </div>
           <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
-            <button onclick="mcCloseCrewForm()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
-            <button onclick="mcSaveCrew()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Save</button>
+            <button onclick="mcCloseCrewForm()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">${clt('cancel')}</button>
+            <button onclick="mcSaveCrew()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">${clt('save')}</button>
           </div>
         </div>
       </div>
@@ -12581,20 +12652,20 @@
       <div id="mcMemberOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)mcCloseMemberForm()">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:420px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
-            <h3 id="mcMemberFormTitle" style="margin:0;font-size:.95rem;font-weight:600">Add Member</h3>
+            <h3 id="mcMemberFormTitle" style="margin:0;font-size:.95rem;font-weight:600">${clt('addMemberTitle')}</h3>
             <button onclick="mcCloseMemberForm()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
           </div>
           <div style="padding:1.25rem;display:flex;flex-direction:column;gap:.75rem">
-            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Name *</label>
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">${clt('nameRequired')}</label>
               <input id="mcMemberName" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
-            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Phone</label>
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">${clt('phone')}</label>
               <input id="mcMemberPhone" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
-            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Email</label>
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">${clt('email')}</label>
               <input id="mcMemberEmail" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
           </div>
           <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
-            <button onclick="mcCloseMemberForm()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
-            <button onclick="mcSaveMember()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Save</button>
+            <button onclick="mcCloseMemberForm()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">${clt('cancel')}</button>
+            <button onclick="mcSaveMember()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">${clt('save')}</button>
           </div>
         </div>
       </div>
@@ -12603,13 +12674,13 @@
       <div id="mcDelOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)mcCloseDel()">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:360px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
-            <h3 style="margin:0;font-size:.95rem;font-weight:600">Remove from crew</h3>
+            <h3 style="margin:0;font-size:.95rem;font-weight:600">${clt('removeFromCrew')}</h3>
             <button onclick="mcCloseDel()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
           </div>
-          <div style="padding:1.25rem;font-size:.875rem;color:var(--muted);line-height:1.6">Remove <strong id="mcDelName" style="color:var(--text)"></strong> from your crew? The worker will not be deleted.</div>
+          <div style="padding:1.25rem;font-size:.875rem;color:var(--muted);line-height:1.6"><strong id="mcDelName" style="color:var(--text)"></strong> — ${clt('removeConfirm')}</div>
           <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
-            <button onclick="mcCloseDel()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
-            <button onclick="mcConfirmDel()" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Remove</button>
+            <button onclick="mcCloseDel()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">${clt('cancel')}</button>
+            <button onclick="mcConfirmDel()" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">${clt('remove')}</button>
           </div>
         </div>
       </div>`;
@@ -12623,18 +12694,19 @@
   function mcCloseCrewForm() { document.getElementById('mcCrewOverlay').style.display = 'none'; }
   async function mcSaveCrew() {
     const name = document.getElementById('mcCrewName').value.trim();
-    if (!name) { showToast('Name is required', 'error'); return; }
+    if (!name) { showToast(clt('nameRequired'), 'error'); return; }
     const res = await apiFetch('/api/my/crew', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name }) }).then(r => r.json()).catch(e => e);
     if (res?.error) { showToast(res.error, 'error'); return; }
     _mcData = res;
     mcCloseCrewForm();
     mcRender();
-    showToast('Crew name updated');
+    showToast(clt('crewNameUpdated'));
   }
 
   function mcOpenAddMember() {
     _mcEditMemberId = null;
-    document.getElementById('mcMemberFormTitle').textContent = 'Add Member';
+    _mcMemberStages = [];
+    document.getElementById('mcMemberFormTitle').textContent = clt('addMemberTitle');
     ['mcMemberName','mcMemberPhone','mcMemberEmail'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('mcMemberOverlay').style.display = 'flex';
     setTimeout(() => document.getElementById('mcMemberName').focus(), 50);
@@ -12642,19 +12714,20 @@
   function mcOpenEditMember(id) {
     const w = _mcData.members.find(x => x.id === id); if (!w) return;
     _mcEditMemberId = id;
-    document.getElementById('mcMemberFormTitle').textContent = 'Edit Member';
+    document.getElementById('mcMemberFormTitle').textContent = clt('editMemberTitle');
     document.getElementById('mcMemberName').value  = w.name;
     document.getElementById('mcMemberPhone').value = w.phone || '';
     document.getElementById('mcMemberEmail').value = w.email || '';
     document.getElementById('mcMemberOverlay').style.display = 'flex';
     setTimeout(() => document.getElementById('mcMemberName').focus(), 50);
   }
-  function mcCloseMemberForm() { document.getElementById('mcMemberOverlay').style.display = 'none'; }
+  function mcCloseMemberForm() { document.getElementById('mcMemberOverlay').style.display = 'none'; _mcMemberStages = []; }
   async function mcSaveMember() {
     const body = {
-      name:  document.getElementById('mcMemberName').value.trim(),
-      phone: document.getElementById('mcMemberPhone').value.trim() || null,
-      email: document.getElementById('mcMemberEmail').value.trim() || null,
+      name:        document.getElementById('mcMemberName').value.trim(),
+      phone:       document.getElementById('mcMemberPhone').value.trim() || null,
+      email:       document.getElementById('mcMemberEmail').value.trim() || null,
+      stageOrders: (_mcData?.stageOrders || []).map(Number),
     };
     if (!body.name) { showToast('Name is required', 'error'); return; }
     const url    = _mcEditMemberId ? `/api/my/crew/members/${_mcEditMemberId}` : '/api/my/crew/members';
@@ -12663,7 +12736,56 @@
     if (res?.error) { showToast(res.error, 'error'); return; }
     mcCloseMemberForm();
     await mcLoad();
-    showToast(_mcEditMemberId ? 'Member updated' : 'Member added');
+    showToast(_mcEditMemberId ? clt('memberUpdated') : clt('memberAdded'));
+  }
+
+  let _mcMemberStages = [];
+  function mcRenderMemberStages() {
+    const el = document.getElementById('mcMemberStagesList'); if (!el) return;
+    el.innerHTML = _mcMemberStages.map(order => {
+      const st = _workerStageTypeList.find(s => s.stageOrder === order);
+      const label = st ? `${st.stageOrder}. ${st.stageName}` : `Stage ${order}`;
+      return `<span style="display:inline-flex;align-items:center;gap:.35rem;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;padding:.25rem .55rem;font-size:.78rem;color:var(--text)">
+        🔨 ${label}
+        <span style="cursor:pointer;color:var(--red);font-weight:700;margin-left:.1rem" onclick="_mcMemberStages=_mcMemberStages.filter(x=>x!==${order});mcRenderMemberStages();mcRenderMemberStageDropdown(document.getElementById('mcMemberStageSearch').value)">✕</span>
+      </span>`;
+    }).join('');
+  }
+  function mcRenderMemberStageDropdown(query) {
+    const dd = document.getElementById('mcMemberStageDropdown'); if (!dd) return;
+    const q = (query || '').toLowerCase().trim();
+    const available = _workerStageTypeList.filter(s =>
+      !_mcMemberStages.includes(s.stageOrder) &&
+      (`${s.stageOrder}. ${s.stageName}`).toLowerCase().includes(q)
+    );
+    if (!available.length) {
+      dd.innerHTML = `<div style="padding:.65rem 1rem;font-size:.82rem;color:var(--muted)">${q ? 'No match' : 'All stages added'}</div>`;
+    } else {
+      dd.innerHTML = available.map(s => `
+        <div onmousedown="mcAddMemberStage(${s.stageOrder})"
+          style="padding:.6rem 1rem;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--border)"
+          onmouseover="this.style.background='rgba(79,142,247,0.1)'" onmouseout="this.style.background=''">
+          <span style="font-weight:600">${s.stageOrder}.</span><span style="flex:1">${s.stageName}</span>
+        </div>`).join('');
+    }
+  }
+  function mcAddMemberStage(order) {
+    if (!_mcMemberStages.includes(order)) { _mcMemberStages.push(order); _mcMemberStages.sort((a,b) => a-b); mcRenderMemberStages(); }
+    document.getElementById('mcMemberStageSearch').value = '';
+    mcRenderMemberStageDropdown('');
+    document.getElementById('mcMemberStageDropdown').style.display = 'none';
+  }
+  function mcFilterStageDropdown() {
+    mcRenderMemberStageDropdown(document.getElementById('mcMemberStageSearch').value);
+    document.getElementById('mcMemberStageDropdown').style.display = '';
+  }
+  function mcShowStageDropdown() {
+    mcRenderMemberStageDropdown(document.getElementById('mcMemberStageSearch').value);
+    document.getElementById('mcMemberStageDropdown').style.display = '';
+  }
+  function mcHideStageDropdown() {
+    const dd = document.getElementById('mcMemberStageDropdown');
+    if (dd) dd.style.display = 'none';
   }
 
   function mcOpenDelMember(id, name) {
@@ -12676,7 +12798,7 @@
     await apiFetch(`/api/my/crew/members/${_mcDelMemberId}`, { method:'DELETE' });
     mcCloseDel();
     await mcLoad();
-    showToast('Member removed from crew');
+    showToast(clt('memberRemoved'));
   }
 
   // ══════════════════════════════════════ CREW LEADER — WORKER ACCESS ══════════
@@ -12686,7 +12808,7 @@
     const root = document.getElementById('mwaRoot');
     root.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)"><div class="spinner"></div><br>Loading…</div>';
     const res = await apiFetch('/api/my/crew/members/credentials').then(r => r.json()).catch(() => null);
-    if (!res) { root.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)">Failed to load.</div>'; return; }
+    if (!res) { root.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">${clt('failedAccess')}</div>`; return; }
     _mwaData = res;
     mwaRender();
   }
@@ -12697,29 +12819,29 @@
       <div style="max-width:750px">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap">
           <div>
-            <h2 style="margin:0;font-size:1.25rem;font-weight:700">🔑 Worker Access</h2>
-            <p style="margin:.25rem 0 0;font-size:.82rem;color:var(--muted)">Manage check-in credentials for your crew members</p>
+            <h2 style="margin:0;font-size:1.25rem;font-weight:700">🔑 ${clt('colUsername') === 'Потребител' ? 'Достъп' : 'Worker Access'}</h2>
+            <p style="margin:.25rem 0 0;font-size:.82rem;color:var(--muted)">${t('pageSub_myworkeraccess')}</p>
           </div>
-          <button onclick="mwaExport()" style="background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-size:.85rem;font-weight:600">⬇️ Export</button>
+          <button onclick="mwaExport()" style="background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-size:.85rem;font-weight:600">${clt('export')}</button>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
           <table style="width:100%;border-collapse:collapse">
             <thead style="background:var(--surface2,#21252f)">
               <tr>
-                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Name</th>
-                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Username</th>
-                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">PIN</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">${clt('colName')}</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">${clt('colUsername')}</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">${clt('colPin')}</th>
                 <th style="border-bottom:1px solid var(--border);width:80px"></th>
               </tr>
             </thead>
             <tbody>
               ${_mwaData.length === 0
-                ? `<tr><td colspan="4" style="padding:2.5rem;text-align:center;color:var(--muted)">No members.</td></tr>`
+                ? `<tr><td colspan="4" style="padding:2.5rem;text-align:center;color:var(--muted)">${clt('noMembers')}</td></tr>`
                 : _mwaData.map(w => `
                 <tr style="border-bottom:1px solid var(--border)">
                   <td style="padding:.65rem 1rem;font-weight:500;font-size:.875rem">
                     ${esc(w.name)}
-                    <span style="font-size:.7rem;margin-left:.4rem;padding:1px 6px;border-radius:4px;background:${w.role==='CREW_LEADER'?'rgba(167,139,250,.15)':'rgba(62,207,110,.12)'};color:${w.role==='CREW_LEADER'?'#a78bfa':'#3ecf6e'}">${w.role==='CREW_LEADER'?'Leader':'Member'}</span>
+                    <span style="font-size:.7rem;margin-left:.4rem;padding:1px 6px;border-radius:4px;background:${w.role==='CREW_LEADER'?'rgba(167,139,250,.15)':'rgba(62,207,110,.12)'};color:${w.role==='CREW_LEADER'?'#a78bfa':'#3ecf6e'}">${w.role==='CREW_LEADER'?clt('leader'):clt('member')}</span>
                   </td>
                   <td style="padding:.65rem 1rem;font-family:var(--font-mono,'monospace');font-size:.82rem">${w.username ? esc(w.username) : '<span style="color:var(--muted)">—</span>'}</td>
                   <td style="padding:.65rem 1rem;font-family:var(--font-mono,'monospace');font-size:.82rem">${w.passwordPlain ? esc(w.passwordPlain) : '<span style="color:var(--muted)">—</span>'}</td>
@@ -12736,16 +12858,16 @@
       <div id="mwaResetOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)mwaCloseReset()">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:380px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
-            <h3 style="margin:0;font-size:.95rem;font-weight:600">Reset PIN — <span id="mwaResetName"></span></h3>
+            <h3 style="margin:0;font-size:.95rem;font-weight:600">${clt('reset')} — <span id="mwaResetName"></span></h3>
             <button onclick="mwaCloseReset()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
           </div>
           <div style="padding:1.25rem">
-            <label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">New PIN (min 4 chars)</label>
+            <label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">${clt('colPin')} (min 4)</label>
             <input id="mwaNewPin" type="text" maxlength="20" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-family:var(--font-mono,'monospace');font-size:.95rem;outline:none">
           </div>
           <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
-            <button onclick="mwaCloseReset()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
-            <button onclick="mwaSaveReset()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Reset</button>
+            <button onclick="mwaCloseReset()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">${clt('cancel')}</button>
+            <button onclick="mwaSaveReset()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">${clt('reset')}</button>
           </div>
         </div>
       </div>`;
@@ -12762,24 +12884,41 @@
   function mwaCloseReset() { document.getElementById('mwaResetOverlay').style.display = 'none'; }
   async function mwaSaveReset() {
     const password = document.getElementById('mwaNewPin').value.trim();
-    if (password.length < 4) { showToast('PIN must be at least 4 characters', 'error'); return; }
+    if (password.length < 4) { showToast(clt('colPin') + ' min 4', 'error'); return; }
     const res = await apiFetch(`/api/my/crew/members/${_mwaResetId}/password`, {
       method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password })
     }).then(r => r.json()).catch(e => e);
     if (res?.error) { showToast(res.error, 'error'); return; }
     mwaCloseReset();
     await mwaLoad();
-    showToast('PIN reset successfully');
+    showToast(clt('reset') + ' ✓');
   }
 
   function mwaExport() {
-    const rows = [['Name','Role','Username','PIN']];
-    _mwaData.forEach(w => rows.push([w.name, w.role==='CREW_LEADER'?'Leader':'Member', w.username||'', w.passwordPlain||'']));
-    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-    const a = document.createElement('a');
-    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    a.download = 'crew-worker-access.csv';
-    a.click();
+    const rows = _mwaData.map(w => {
+      const role = w.role === 'CREW_LEADER' ? 'Лидер' : 'Член';
+      return `<tr><td>${w.name}</td><td>${w.username||'—'}</td><td>${role}</td><td>${w.passwordPlain||'—'}</td></tr>`;
+    });
+    const win = window.open('', '_blank', 'width=800,height=600');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Worker Access</title>
+    <style>
+      body{font-family:Arial,sans-serif;font-size:12px;color:#111;margin:2rem}
+      h1{font-size:18px;margin-bottom:0.25rem}
+      .sub{font-size:11px;color:#666;margin-bottom:1.5rem}
+      table{width:100%;border-collapse:collapse;margin-top:1rem}
+      th{background:#4f8ef7;color:#fff;text-align:left;padding:6px 10px;font-size:11px}
+      td{padding:6px 10px;border-bottom:1px solid #ddd;font-size:12px}
+      tr:last-child td{border-bottom:none}
+      @media print{body{margin:1rem}}
+    </style></head><body>
+      <h1>Worker Access List</h1>
+      <div class="sub">TEDHOUSE · ${new Date().toLocaleDateString()}</div>
+      <table>
+        <thead><tr><th>Име</th><th>Потребител</th><th>Роля</th><th>Парола</th></tr></thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>
+    <script>window.onload=function(){window.print();}<\/script></body></html>`);
+    win.document.close();
   }
 
 </script>
