@@ -401,6 +401,8 @@ public class HouseStageController {
                 s.setStartDate(today());
             if ("DONE".equals(newStatus) && !"DONE".equals(oldStatus) && s.getEndDate() == null)
                 s.setEndDate(today());
+            if ("DONE".equals(newStatus) && s.getStageOrder() == 1 && s.getHouse().getStartDate() == null)
+                s.getHouse().setStartDate(s.getStartDate() != null ? s.getStartDate() : today());
             if ("NOT_STARTED".equals(newStatus)) { s.setStartDate(null); s.setEndDate(null); }
             if ("IN_PROGRESS".equals(newStatus) && !"IN_PROGRESS".equals(oldStatus) && s.getCrewId() != null)
                 syncCrewHouse(s.getCrewId(), s.getHouse());
