@@ -2470,6 +2470,16 @@
     <div id="moRoot"></div>
   </div>
 
+  <!-- CREW LEADER: MY CREW -->
+  <div class="view" id="view-mycrew">
+    <div id="mcRoot"></div>
+  </div>
+
+  <!-- CREW LEADER: MY WORKER ACCESS -->
+  <div class="view" id="view-myworkeraccess">
+    <div id="mwaRoot"></div>
+  </div>
+
   <!-- WORKER JOURNEY -->
   <div class="view" id="view-workerjourney">
     <div id="workerJourneyContent" style="max-width:100%;padding:1.5rem 2rem">
@@ -3442,7 +3452,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false };
   const _navGroupConfig = {
@@ -3470,7 +3480,7 @@
 
   function showView(name) {
     // Crew leaders are confined to their own workspace, even via hash / back button.
-    if (currentUser?.role === 'crew_leader') name = 'myorders';
+    if (currentUser?.role === 'crew_leader' && !['myorders','mycrew','myworkeraccess'].includes(name)) name = 'myorders';
     // Audit log is admin-only — bounce anyone else, even via hash.
     if (name === 'auditlog' && currentUser?.role !== 'admin') name = 'dashboard';
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
@@ -3502,7 +3512,9 @@
     if (name === 'companyfolders')     cfLoad();
     if (name === 'housefoldertemplate') hftLoad();
     if (name === 'housedetail') loadHouseDetail();
-    if (name === 'myorders')    loadMyOrders();
+    if (name === 'myorders')       loadMyOrders();
+    if (name === 'mycrew')         mcLoad();
+    if (name === 'myworkeraccess') mwaLoad();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -10430,7 +10442,14 @@
 
   async function initCrewLeader() {
     applyStoredTheme();
-    // Crew leaders land on their scoped "My Orders" surface (assignments + material ordering).
+    // Build crew-leader nav
+    const nav = document.getElementById('navItems');
+    if (nav) {
+      nav.innerHTML = `
+        <a class="nav-item" id="navMyorders" onclick="showView('myorders')" href="#">📋 My Orders</a>
+        <a class="nav-item" id="navMycrew" onclick="showView('mycrew')" href="#">👥 My Crew</a>
+        <a class="nav-item" id="navMyworkeraccess" onclick="showView('myworkeraccess')" href="#">🔑 Worker Access</a>`;
+    }
     showView('myorders');
   }
 
@@ -12477,6 +12496,290 @@
   async function hftConfirmDel() {
     await apiFetch(`/api/folder-templates/${_hftDelId}`, { method:'DELETE' });
     hftCloseDel(); await hftLoad(); showToast('Template deleted');
+  }
+
+  // ══════════════════════════════════════ CREW LEADER — MY CREW ═══════════════
+  let _mcData = null;
+  let _mcEditMemberId = null, _mcDelMemberId = null;
+
+  async function mcLoad() {
+    const root = document.getElementById('mcRoot');
+    root.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)"><div class="spinner"></div><br>Loading…</div>';
+    const res = await apiFetch('/api/my/crew').then(r => r.json()).catch(() => null);
+    if (!res || res.error) { root.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">${res?.error || 'Failed to load crew.'}</div>`; return; }
+    _mcData = res;
+    mcRender();
+  }
+
+  function mcRender() {
+    const c = _mcData;
+    const root = document.getElementById('mcRoot');
+    root.innerHTML = `
+      <div style="max-width:700px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap">
+          <div>
+            <h2 style="margin:0;font-size:1.25rem;font-weight:700">👥 ${esc(c.name)}</h2>
+            <p style="margin:.25rem 0 0;font-size:.82rem;color:var(--muted)">
+              ${c.leaderName ? '👷 Leader: ' + esc(c.leaderName) : ''}
+              ${c.houseName  ? ' &nbsp;·&nbsp; 🏠 ' + esc(c.houseName) : ''}
+            </p>
+          </div>
+          <div style="display:flex;gap:.5rem">
+            <button onclick="mcOpenEditCrew()" style="background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-size:.85rem;font-weight:600">✏️ Edit Name</button>
+            <button onclick="mcOpenAddMember()" style="background:var(--accent);color:#0F1117;border:none;border-radius:8px;padding:.5rem 1.1rem;font-weight:600;font-size:.85rem;cursor:pointer">＋ Add Member</button>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <table style="width:100%;border-collapse:collapse">
+            <thead style="background:var(--surface2,#21252f)">
+              <tr>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Name</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Role</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Phone</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Email</th>
+                <th style="border-bottom:1px solid var(--border);width:80px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${c.members.length === 0
+                ? `<tr><td colspan="5" style="padding:2.5rem;text-align:center;color:var(--muted)">No members yet.</td></tr>`
+                : c.members.map(w => `
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:.65rem 1rem;font-weight:500;font-size:.875rem">${esc(w.name)}</td>
+                  <td style="padding:.65rem 1rem"><span style="font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:4px;background:${w.role==='CREW_LEADER'?'rgba(167,139,250,.15)':'rgba(62,207,110,.12)'};color:${w.role==='CREW_LEADER'?'#a78bfa':'#3ecf6e'}">${w.role==='CREW_LEADER'?'Leader':'Member'}</span></td>
+                  <td style="padding:.65rem 1rem;font-size:.85rem;color:var(--muted)">${w.phone ? esc(w.phone) : '—'}</td>
+                  <td style="padding:.65rem 1rem;font-size:.85rem;color:var(--muted)">${w.email ? esc(w.email) : '—'}</td>
+                  <td style="padding:.65rem 1rem"><div style="display:flex;gap:.25rem;justify-content:flex-end">
+                    <button onclick="mcOpenEditMember(${w.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 7px;border-radius:5px" title="Edit">✏️</button>
+                    <button onclick="mcOpenDelMember(${w.id},'${esc(w.name)}')" style="background:none;border:none;cursor:pointer;color:#f87171;padding:4px 7px;border-radius:5px" title="Remove from crew">🗑️</button>
+                  </div></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Edit crew name modal -->
+      <div id="mcCrewOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)mcCloseCrewForm()">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:380px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
+            <h3 style="margin:0;font-size:.95rem;font-weight:600">Edit Crew Name</h3>
+            <button onclick="mcCloseCrewForm()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
+          </div>
+          <div style="padding:1.25rem">
+            <label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Crew Name</label>
+            <input id="mcCrewName" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none">
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
+            <button onclick="mcCloseCrewForm()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
+            <button onclick="mcSaveCrew()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add/Edit member modal -->
+      <div id="mcMemberOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)mcCloseMemberForm()">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:420px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
+            <h3 id="mcMemberFormTitle" style="margin:0;font-size:.95rem;font-weight:600">Add Member</h3>
+            <button onclick="mcCloseMemberForm()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
+          </div>
+          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:.75rem">
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Name *</label>
+              <input id="mcMemberName" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Phone</label>
+              <input id="mcMemberPhone" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
+            <div><label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">Email</label>
+              <input id="mcMemberEmail" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.85rem;outline:none"></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
+            <button onclick="mcCloseMemberForm()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
+            <button onclick="mcSaveMember()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remove member confirm -->
+      <div id="mcDelOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)mcCloseDel()">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:360px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
+            <h3 style="margin:0;font-size:.95rem;font-weight:600">Remove from crew</h3>
+            <button onclick="mcCloseDel()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
+          </div>
+          <div style="padding:1.25rem;font-size:.875rem;color:var(--muted);line-height:1.6">Remove <strong id="mcDelName" style="color:var(--text)"></strong> from your crew? The worker will not be deleted.</div>
+          <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
+            <button onclick="mcCloseDel()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
+            <button onclick="mcConfirmDel()" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Remove</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function mcOpenEditCrew() {
+    document.getElementById('mcCrewName').value = _mcData.name;
+    document.getElementById('mcCrewOverlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('mcCrewName').focus(), 50);
+  }
+  function mcCloseCrewForm() { document.getElementById('mcCrewOverlay').style.display = 'none'; }
+  async function mcSaveCrew() {
+    const name = document.getElementById('mcCrewName').value.trim();
+    if (!name) { showToast('Name is required', 'error'); return; }
+    const res = await apiFetch('/api/my/crew', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name }) }).then(r => r.json()).catch(e => e);
+    if (res?.error) { showToast(res.error, 'error'); return; }
+    _mcData = res;
+    mcCloseCrewForm();
+    mcRender();
+    showToast('Crew name updated');
+  }
+
+  function mcOpenAddMember() {
+    _mcEditMemberId = null;
+    document.getElementById('mcMemberFormTitle').textContent = 'Add Member';
+    ['mcMemberName','mcMemberPhone','mcMemberEmail'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('mcMemberOverlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('mcMemberName').focus(), 50);
+  }
+  function mcOpenEditMember(id) {
+    const w = _mcData.members.find(x => x.id === id); if (!w) return;
+    _mcEditMemberId = id;
+    document.getElementById('mcMemberFormTitle').textContent = 'Edit Member';
+    document.getElementById('mcMemberName').value  = w.name;
+    document.getElementById('mcMemberPhone').value = w.phone || '';
+    document.getElementById('mcMemberEmail').value = w.email || '';
+    document.getElementById('mcMemberOverlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('mcMemberName').focus(), 50);
+  }
+  function mcCloseMemberForm() { document.getElementById('mcMemberOverlay').style.display = 'none'; }
+  async function mcSaveMember() {
+    const body = {
+      name:  document.getElementById('mcMemberName').value.trim(),
+      phone: document.getElementById('mcMemberPhone').value.trim() || null,
+      email: document.getElementById('mcMemberEmail').value.trim() || null,
+    };
+    if (!body.name) { showToast('Name is required', 'error'); return; }
+    const url    = _mcEditMemberId ? `/api/my/crew/members/${_mcEditMemberId}` : '/api/my/crew/members';
+    const method = _mcEditMemberId ? 'PUT' : 'POST';
+    const res = await apiFetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).then(r => r.json()).catch(e => e);
+    if (res?.error) { showToast(res.error, 'error'); return; }
+    mcCloseMemberForm();
+    await mcLoad();
+    showToast(_mcEditMemberId ? 'Member updated' : 'Member added');
+  }
+
+  function mcOpenDelMember(id, name) {
+    _mcDelMemberId = id;
+    document.getElementById('mcDelName').textContent = name;
+    document.getElementById('mcDelOverlay').style.display = 'flex';
+  }
+  function mcCloseDel() { document.getElementById('mcDelOverlay').style.display = 'none'; }
+  async function mcConfirmDel() {
+    await apiFetch(`/api/my/crew/members/${_mcDelMemberId}`, { method:'DELETE' });
+    mcCloseDel();
+    await mcLoad();
+    showToast('Member removed from crew');
+  }
+
+  // ══════════════════════════════════════ CREW LEADER — WORKER ACCESS ══════════
+  let _mwaData = [];
+
+  async function mwaLoad() {
+    const root = document.getElementById('mwaRoot');
+    root.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)"><div class="spinner"></div><br>Loading…</div>';
+    const res = await apiFetch('/api/my/crew/members/credentials').then(r => r.json()).catch(() => null);
+    if (!res) { root.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)">Failed to load.</div>'; return; }
+    _mwaData = res;
+    mwaRender();
+  }
+
+  function mwaRender() {
+    const root = document.getElementById('mwaRoot');
+    root.innerHTML = `
+      <div style="max-width:750px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap">
+          <div>
+            <h2 style="margin:0;font-size:1.25rem;font-weight:700">🔑 Worker Access</h2>
+            <p style="margin:.25rem 0 0;font-size:.82rem;color:var(--muted)">Manage check-in credentials for your crew members</p>
+          </div>
+          <button onclick="mwaExport()" style="background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-size:.85rem;font-weight:600">⬇️ Export</button>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <table style="width:100%;border-collapse:collapse">
+            <thead style="background:var(--surface2,#21252f)">
+              <tr>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Name</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Username</th>
+                <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">PIN</th>
+                <th style="border-bottom:1px solid var(--border);width:80px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${_mwaData.length === 0
+                ? `<tr><td colspan="4" style="padding:2.5rem;text-align:center;color:var(--muted)">No members.</td></tr>`
+                : _mwaData.map(w => `
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:.65rem 1rem;font-weight:500;font-size:.875rem">
+                    ${esc(w.name)}
+                    <span style="font-size:.7rem;margin-left:.4rem;padding:1px 6px;border-radius:4px;background:${w.role==='CREW_LEADER'?'rgba(167,139,250,.15)':'rgba(62,207,110,.12)'};color:${w.role==='CREW_LEADER'?'#a78bfa':'#3ecf6e'}">${w.role==='CREW_LEADER'?'Leader':'Member'}</span>
+                  </td>
+                  <td style="padding:.65rem 1rem;font-family:var(--font-mono,'monospace');font-size:.82rem">${w.username ? esc(w.username) : '<span style="color:var(--muted)">—</span>'}</td>
+                  <td style="padding:.65rem 1rem;font-family:var(--font-mono,'monospace');font-size:.82rem">${w.passwordPlain ? esc(w.passwordPlain) : '<span style="color:var(--muted)">—</span>'}</td>
+                  <td style="padding:.65rem 1rem"><div style="display:flex;gap:.25rem;justify-content:flex-end">
+                    <button onclick="mwaOpenReset(${w.id},'${esc(w.name)}')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 7px;border-radius:5px;font-size:.8rem" title="Reset PIN">🔑</button>
+                  </div></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Reset PIN modal -->
+      <div id="mwaResetOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)mwaCloseReset()">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:380px;max-width:calc(100vw - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem .9rem;border-bottom:1px solid var(--border)">
+            <h3 style="margin:0;font-size:.95rem;font-weight:600">Reset PIN — <span id="mwaResetName"></span></h3>
+            <button onclick="mwaCloseReset()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
+          </div>
+          <div style="padding:1.25rem">
+            <label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.3rem">New PIN (min 4 chars)</label>
+            <input id="mwaNewPin" type="text" maxlength="20" style="width:100%;background:var(--surface2,#21252f);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-family:var(--font-mono,'monospace');font-size:.95rem;outline:none">
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:.5rem;padding:.9rem 1.25rem;border-top:1px solid var(--border)">
+            <button onclick="mwaCloseReset()" style="background:var(--surface2,#21252f);border:none;border-radius:6px;color:var(--text);padding:.5rem 1rem;cursor:pointer;font-weight:500">Cancel</button>
+            <button onclick="mwaSaveReset()" style="background:var(--accent);color:#0F1117;border:none;border-radius:6px;padding:.5rem 1.1rem;cursor:pointer;font-weight:600">Reset</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  let _mwaResetId = null;
+  function mwaOpenReset(id, name) {
+    _mwaResetId = id;
+    document.getElementById('mwaResetName').textContent = name;
+    document.getElementById('mwaNewPin').value = '';
+    document.getElementById('mwaResetOverlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('mwaNewPin').focus(), 50);
+  }
+  function mwaCloseReset() { document.getElementById('mwaResetOverlay').style.display = 'none'; }
+  async function mwaSaveReset() {
+    const password = document.getElementById('mwaNewPin').value.trim();
+    if (password.length < 4) { showToast('PIN must be at least 4 characters', 'error'); return; }
+    const res = await apiFetch(`/api/my/crew/members/${_mwaResetId}/password`, {
+      method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password })
+    }).then(r => r.json()).catch(e => e);
+    if (res?.error) { showToast(res.error, 'error'); return; }
+    mwaCloseReset();
+    await mwaLoad();
+    showToast('PIN reset successfully');
+  }
+
+  function mwaExport() {
+    const rows = [['Name','Role','Username','PIN']];
+    _mwaData.forEach(w => rows.push([w.name, w.role==='CREW_LEADER'?'Leader':'Member', w.username||'', w.passwordPlain||'']));
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'crew-worker-access.csv';
+    a.click();
   }
 
 </script>
