@@ -2807,6 +2807,8 @@
       // documentation
       docTab:'Company Documentation', navDocsLabel:'Company Documentation', navDocsGroupLabel:'Documentation',
       docComingSoon:'— Coming soon —',
+      // menu management
+      pageTitle_menuconfig:'Menu Management', pageSub_menuconfig:'Toggle visibility and reorder nav items and dashboard tabs',
       // company folders admin
       pageTitle_companyfolders:'Company Folders Template', pageSub_companyfolders:'Global document folder structure shared across the company',
       navCompanyFolders:'Company Folders Template',
@@ -3115,6 +3117,8 @@
       // documentation
       docTab:'Фирмена документация', navDocsLabel:'Фирмена документация', navDocsGroupLabel:'Документация',
       docComingSoon:'— Очаквайте скоро —',
+      // menu management
+      pageTitle_menuconfig:'Управление на менюто', pageSub_menuconfig:'Управлявай видимостта и реда на елементите в навигацията и таблото',
       // company folders admin
       pageTitle_companyfolders:'Шаблон за фирмени папки', pageSub_companyfolders:'Обща структура на документни папки за цялата фирма',
       navCompanyFolders:'Шаблон за фирмени папки',
@@ -13050,7 +13054,7 @@
     icon.textContent = item.icon;
     icon.style.fontSize = '1rem';
     const label = document.createElement('span');
-    label.textContent = item.label_en;
+    label.textContent = currentLang === 'bg' ? item.label_bg : item.label_en;
     label.style.cssText = `flex:1;font-size:${isGroup ? '0.82rem' : '0.88rem'};font-weight:${isGroup ? '700' : '600'};text-transform:${isGroup ? 'uppercase' : 'none'};letter-spacing:${isGroup ? '0.06em' : 'normal'}`;
     row.appendChild(handle);
     row.appendChild(icon);
