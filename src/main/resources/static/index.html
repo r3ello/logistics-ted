@@ -1695,6 +1695,9 @@
         <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
       </a>
     </div>
+    <a class="nav-item admin-only" id="navMenuConfig" href="#menuconfig" onclick="showView('menuconfig');return false;" style="margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem">
+      <span class="nav-icon">🎛️</span> <span>Menu Management</span>
+    </a>
   </div>
 </nav>
 
@@ -2459,6 +2462,22 @@
   <div class="view" id="view-housedetail">
     <div id="houseDetailContent">
       <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
+    </div>
+  </div>
+
+  <!-- VIEW: MENU CONFIG -->
+  <div class="view" id="view-menuconfig">
+    <div style="max-width:700px">
+      <h2 style="margin:0 0 0.25rem;font-size:1.1rem;font-weight:700">🎛️ Menu Management</h2>
+      <p style="color:var(--muted);font-size:0.85rem;margin:0 0 1.5rem">Toggle visibility and drag to reorder nav items and dashboard tabs.</p>
+      <div id="mcNavSection">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.6rem">📌 Left Navigation</div>
+        <div id="mcNavList" style="display:flex;flex-direction:column;gap:4px"></div>
+      </div>
+      <div style="margin-top:1.5rem" id="mcDashSection">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.6rem">📊 Dashboard Tabs</div>
+        <div id="mcDashList" style="display:flex;flex-direction:column;gap:4px"></div>
+      </div>
     </div>
   </div>
 
@@ -3470,7 +3489,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false };
   const _navGroupConfig = {
@@ -3533,6 +3552,7 @@
     if (name === 'myorders')       loadMyOrders();
     if (name === 'mycrew')         mcLoad();
     if (name === 'myworkeraccess') mwaLoad();
+    if (name === 'menuconfig')     mcfgLoad();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -10686,6 +10706,11 @@
   function initApp() {
     if (currentUser?.role === 'crew_leader') { initCrewLeader(); return; }
     applyStoredTheme();
+    // Load menu config and apply visibility/ordering before showing the first view
+    apiFetch('/api/menu-config').then(r => r.json()).then(data => {
+      _mcfgData = data;
+      applyMenuConfig();
+    }).catch(() => {});
     showView('stagematrix');
     setNavActive('navStageMatrix');
     loadMaterialFields().then(applyPendingMapPin);
@@ -12918,6 +12943,140 @@
       </table>
     <script>window.onload=function(){window.print();}<\/script></body></html>`);
     win.document.close();
+  }
+
+  // ── MENU CONFIG ──────────────────────────────────────────────────────────────
+
+  let _mcfgData = [];
+
+  async function mcfgLoad() {
+    try {
+      _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
+    } catch(e) { return; }
+    mcfgRender('nav',  'mcNavList');
+    mcfgRender('dash', 'mcDashList');
+  }
+
+  function mcfgRender(section, containerId) {
+    const container = document.getElementById(containerId);
+    const items = _mcfgData.filter(i => i.section === section).sort((a,b) => a.sort_order - b.sort_order);
+    container.innerHTML = '';
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.dataset.key = item.menu_key;
+      row.draggable = true;
+      row.style.cssText = 'display:flex;align-items:center;gap:0.75rem;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.9rem;cursor:grab;user-select:none';
+      row.innerHTML = `
+        <span style="color:var(--muted);font-size:0.9rem;cursor:grab">⠿</span>
+        <span style="font-size:1rem">${item.icon}</span>
+        <span style="flex:1;font-size:0.88rem;font-weight:600">${item.label_en}</span>
+        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer">
+          <span style="font-size:0.78rem;color:var(--muted)">${item.visible ? 'Visible' : 'Hidden'}</span>
+          <div onclick="mcfgToggle('${item.menu_key}','${section}','${containerId}',this)" style="width:36px;height:20px;border-radius:10px;background:${item.visible ? 'var(--accent)' : 'var(--border)'};position:relative;cursor:pointer;transition:background 0.2s">
+            <div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:${item.visible ? '18px' : '2px'};transition:left 0.2s"></div>
+          </div>
+        </label>`;
+      // drag-and-drop
+      row.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', item.menu_key); row.style.opacity = '0.4'; });
+      row.addEventListener('dragend',   () => { row.style.opacity = '1'; });
+      row.addEventListener('dragover',  e => { e.preventDefault(); row.style.background = 'rgba(79,142,247,0.1)'; });
+      row.addEventListener('dragleave', () => { row.style.background = 'var(--card)'; });
+      row.addEventListener('drop', e => {
+        e.preventDefault();
+        row.style.background = 'var(--card)';
+        const fromKey = e.dataTransfer.getData('text/plain');
+        const fromEl  = container.querySelector(`[data-key="${fromKey}"]`);
+        if (fromEl && fromEl !== row) container.insertBefore(fromEl, row);
+        mcfgSaveOrder(section, containerId);
+      });
+      container.appendChild(row);
+    });
+  }
+
+  async function mcfgToggle(key, section, containerId, toggleEl) {
+    const item = _mcfgData.find(i => i.menu_key === key);
+    if (!item) return;
+    item.visible = !item.visible;
+    try {
+      await apiFetch(`/api/menu-config/${key}/visible`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ visible: item.visible }) });
+      applyMenuConfig();
+      mcfgRender(section, containerId);
+    } catch(e) {}
+  }
+
+  async function mcfgSaveOrder(section, containerId) {
+    const container = document.getElementById(containerId);
+    const keys = [...container.querySelectorAll('[data-key]')].map((el, i) => ({ menuKey: el.dataset.key }));
+    try {
+      await apiFetch('/api/menu-config/reorder', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(keys) });
+      _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
+      applyMenuConfig();
+    } catch(e) {}
+  }
+
+  function applyMenuConfig() {
+    if (!_mcfgData.length) return;
+    const byKey = Object.fromEntries(_mcfgData.map(i => [i.menu_key, i]));
+
+    // Nav items
+    const navMap = {
+      nav_stagematrix:        'navStageMatrix',
+      nav_houses:             'navHouses',
+      nav_workers:            'navWorkers',
+      nav_crews:              'navCrewsDash',
+      nav_orders:             'navOrders',
+      nav_deliveries:         'navDeliveries',
+      nav_warehouses:         'navWarehouses',
+      nav_suppliers:          'navSuppliers',
+      nav_scaffold:           'navScaffold',
+      nav_stages:             'navStages',
+      nav_docs:               'navDocs',
+      nav_companyfolders:     'navCompanyFolders',
+      nav_housefoldertemplate:'navHouseFolderTemplates',
+      nav_attendance:         'navAttendance',
+      nav_qrcodes:            'navQrcodes',
+      nav_workeraccess:       'navWorkerAccess',
+      nav_travelpay:          'navTravelAllowance',
+      nav_map:                'navMap',
+      nav_order:              'navOrder',
+      nav_scaffold_route:     'navScaffoldRoute',
+      nav_history:            'navHistory',
+      nav_crews_full:         'navCrews',
+      nav_electric:           'navElectric',
+    };
+    Object.entries(navMap).forEach(([key, elId]) => {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      const cfg = byKey[key];
+      if (cfg) el.style.display = cfg.visible ? '' : 'none';
+    });
+
+    // Dashboard tabs
+    const dashTabMap = {
+      dash_stagematrix: 'dashModeStageMatrix',
+      dash_houses:      'dashModeHouses',
+      dash_workers:     'dashModeWorkers',
+      dash_crews:       'dashModeCrews',
+      dash_orders:      'dashModeOrders',
+      dash_deliveries:  'dashModeDeliveries',
+      dash_warehouses:  'dashModeDashWarehouses',
+      dash_suppliers:   'dashModeDashSuppliers',
+      dash_travelpay:   'dashModeTravelpay',
+      dash_docs:        'dashModeDocs',
+    };
+
+    // Reorder and show/hide dash tab buttons by sort_order
+    const dashBar = document.querySelector('#dashTabBar > div');
+    if (dashBar) {
+      const dashItems = _mcfgData.filter(i => i.section === 'dash').sort((a,b) => a.sort_order - b.sort_order);
+      dashItems.forEach(item => {
+        const elId = dashTabMap[item.menu_key];
+        const el = elId ? document.getElementById(elId) : null;
+        if (!el) return;
+        el.style.display = item.visible ? '' : 'none';
+        dashBar.appendChild(el);
+      });
+    }
   }
 
 </script>
