@@ -100,6 +100,9 @@ public class HouseStageController {
             s.setUpdatedAt(LocalDateTime.now());
             toSave.add(s);
         }
+        jdbc.update(
+            "INSERT INTO stage_type (stage_order, stage_name, stage_name_en, has_crew) VALUES (?, ?, ?, false)",
+            newOrder, name, nameEn);
         stages.saveAll(toSave);
         return ResponseEntity.ok(Map.of("stageOrder", newOrder, "stageName", name));
     }

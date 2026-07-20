@@ -8120,8 +8120,7 @@
       return;
     }
 
-    // store stage types for chip UI (only stages with has_crew = true)
-    _stageTypeList = stageTypes.filter(s => s.hasCrew !== false);
+    _stageTypeList = stageTypes;
     const managers = allWorkers.filter(w => w.role === 'CREW_MANAGER');
     const leaders  = allWorkers.filter(w => w.role === 'CREW_LEADER');
     const members  = allWorkers.filter(w => w.role === 'CREW_MEMBER');
