@@ -57,7 +57,7 @@ public class HouseStageController {
 
     @GetMapping("/stage-types")
     public List<Map<String, Object>> listStageTypes() {
-        var raw = jdbc.queryForList("SELECT stage_order, stage_name, stage_name_en, main_stage_bg, main_stage_en, has_crew FROM stage_type ORDER BY stage_order");
+        var raw = jdbc.queryForList("SELECT stage_order, stage_name, stage_name_en, main_stage_bg, main_stage_en, has_crew FROM stage_type ORDER BY CASE WHEN stage_name_en = 'Completion' THEN 1 ELSE 0 END, stage_order");
         return raw.stream().map(row -> {
                 Map<String, Object> m = new LinkedHashMap<>();
                 m.put("stageOrder",   row.get("stage_order"));
@@ -100,6 +100,9 @@ public class HouseStageController {
             s.setUpdatedAt(LocalDateTime.now());
             toSave.add(s);
         }
+        jdbc.update(
+            "INSERT INTO stage_type (stage_order, stage_name, stage_name_en, has_crew) VALUES (?, ?, ?, false)",
+            newOrder, name, nameEn);
         stages.saveAll(toSave);
         return ResponseEntity.ok(Map.of("stageOrder", newOrder, "stageName", name));
     }
@@ -108,6 +111,7 @@ public class HouseStageController {
     @Transactional
     public ResponseEntity<?> deleteStageType(@PathVariable Integer order) {
         stages.deleteByStageOrder(order);
+        jdbc.update("DELETE FROM stage_type WHERE stage_order = ?", order);
         return ResponseEntity.noContent().build();
     }
 
