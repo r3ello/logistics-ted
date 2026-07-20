@@ -13189,23 +13189,35 @@
       return true;
     }
 
-    // Apply nav leaf items
-    Object.entries(_navElMap).forEach(([key, elId]) => {
-      const el = document.getElementById(elId);
-      if (!el) return;
-      const cfg = byKey[key];
-      if (!cfg) return;
-      if (cfg.is_group) {
-        // group header: hide if explicitly hidden OR all children are hidden
-        // never touch childDiv — expand/collapse is handled by toggleNavGroup()
-        const children = _mcfgData.filter(i => i.parent_key === key);
-        const allChildrenHidden = children.length > 0 && children.every(c => !isVisible(c));
-        const groupEl = document.getElementById(elId);
-        const show = cfg.visible && !allChildrenHidden;
-        if (groupEl) groupEl.style.display = show ? '' : 'none';
-      } else {
-        el.style.display = isVisible(cfg) ? '' : 'none';
-      }
+    // Apply nav groups: show/hide header only (never touch expand/collapse)
+    _mcfgData.filter(i => i.is_group && i.section === 'nav').forEach(cfg => {
+      const elId = _navElMap[cfg.menu_key];
+      const groupEl = elId ? document.getElementById(elId) : null;
+      if (!groupEl) return;
+      const children = _mcfgData.filter(i => i.parent_key === cfg.menu_key);
+      const allChildrenHidden = children.length > 0 && children.every(c => !isVisible(c));
+      groupEl.style.display = (cfg.visible && !allChildrenHidden) ? '' : 'none';
+    });
+
+    // Apply nav children: show/hide + reorder within their group container
+    Object.entries(_navChildrenMap).forEach(([groupKey, childDivId]) => {
+      const childDiv = document.getElementById(childDivId);
+      if (!childDiv) return;
+      const children = _mcfgData.filter(i => i.parent_key === groupKey).sort((a,b) => a.sort_order - b.sort_order);
+      children.forEach(item => {
+        const elId = _navElMap[item.menu_key];
+        const el = elId ? document.getElementById(elId) : null;
+        if (!el) return;
+        el.style.display = isVisible(item) ? '' : 'none';
+        childDiv.appendChild(el); // moves to end in sort order
+      });
+    });
+
+    // Standalone nav items (no parent group): show/hide only
+    _mcfgData.filter(i => i.section === 'nav' && !i.is_group && !i.parent_key).forEach(item => {
+      const elId = _navElMap[item.menu_key];
+      const el = elId ? document.getElementById(elId) : null;
+      if (el) el.style.display = isVisible(item) ? '' : 'none';
     });
 
     // Dashboard tabs: show/hide + reorder
