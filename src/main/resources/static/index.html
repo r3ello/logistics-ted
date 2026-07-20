@@ -1696,7 +1696,7 @@
       </a>
     </div>
     <a class="nav-item admin-only" id="navMenuConfig" href="#menuconfig" onclick="showView('menuconfig');return false;" style="margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem">
-      <span class="nav-icon">🎛️</span> <span>Menu Management</span>
+      <span class="nav-icon">🎛️</span> <span id="navMenuConfigLabel">Menu Management</span>
     </a>
   </div>
 </nav>
@@ -2468,14 +2468,12 @@
   <!-- VIEW: MENU CONFIG -->
   <div class="view" id="view-menuconfig">
     <div style="max-width:700px">
-      <h2 style="margin:0 0 0.25rem;font-size:1.1rem;font-weight:700">🎛️ Menu Management</h2>
-      <p style="color:var(--muted);font-size:0.85rem;margin:0 0 1.5rem">Toggle visibility and drag to reorder nav items and dashboard tabs.</p>
       <div id="mcNavSection">
-        <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.6rem">📌 Left Navigation</div>
+        <div id="mcNavSectionLabel" style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.6rem">📌 Left Navigation</div>
         <div id="mcNavList" style="display:flex;flex-direction:column;gap:4px"></div>
       </div>
       <div style="margin-top:1.5rem" id="mcDashSection">
-        <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.6rem">📊 Dashboard Tabs</div>
+        <div id="mcDashSectionLabel" style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.6rem">📊 Dashboard Tabs</div>
         <div id="mcDashList" style="display:flex;flex-direction:column;gap:4px"></div>
       </div>
     </div>
@@ -2807,6 +2805,8 @@
       // documentation
       docTab:'Company Documentation', navDocsLabel:'Company Documentation', navDocsGroupLabel:'Documentation',
       docComingSoon:'— Coming soon —',
+      // menu management
+      pageTitle_menuconfig:'Menu Management', pageSub_menuconfig:'Toggle visibility and reorder nav items and dashboard tabs', navMenuConfig:'Menu Management', mcNavSection:'📌 Left Navigation', mcDashSection:'📊 Dashboard Tabs',
       // company folders admin
       pageTitle_companyfolders:'Company Folders Template', pageSub_companyfolders:'Global document folder structure shared across the company',
       navCompanyFolders:'Company Folders Template',
@@ -3115,6 +3115,8 @@
       // documentation
       docTab:'Фирмена документация', navDocsLabel:'Фирмена документация', navDocsGroupLabel:'Документация',
       docComingSoon:'— Очаквайте скоро —',
+      // menu management
+      pageTitle_menuconfig:'Управление на менюто', pageSub_menuconfig:'Управлявай видимостта и реда на елементите в навигацията и таблото', navMenuConfig:'Управление на менюто', mcNavSection:'📌 Лява навигация', mcDashSection:'📊 Табове на таблото',
       // company folders admin
       pageTitle_companyfolders:'Шаблон за фирмени папки', pageSub_companyfolders:'Обща структура на документни папки за цялата фирма',
       navCompanyFolders:'Шаблон за фирмени папки',
@@ -3176,6 +3178,15 @@
     else if (activeView === 'myorders')       renderMyOrders();
     else if (activeView === 'mycrew')         { if (_mcData) mcRender(); }
     else if (activeView === 'myworkeraccess') mwaRender();
+    // Re-label Menu Management nav item and section headers
+    const navMcLabel = document.getElementById('navMenuConfigLabel');
+    if (navMcLabel) navMcLabel.textContent = t('navMenuConfig');
+    const mcNavLbl  = document.getElementById('mcNavSectionLabel');
+    const mcDashLbl = document.getElementById('mcDashSectionLabel');
+    if (mcNavLbl)  mcNavLbl.textContent  = t('mcNavSection');
+    if (mcDashLbl) mcDashLbl.textContent = t('mcDashSection');
+    // Re-render menu config items in new language if view is open
+    if (activeView === 'menuconfig') mcfgRender();
     // Re-label crew leader nav items on language switch
     if (document.getElementById('navMyorders')) {
       document.getElementById('navMyorders').querySelector('span:last-child').textContent       = currentLang === 'bg' ? 'Моите заявки' : 'My Orders';
@@ -13050,7 +13061,7 @@
     icon.textContent = item.icon;
     icon.style.fontSize = '1rem';
     const label = document.createElement('span');
-    label.textContent = item.label_en;
+    label.textContent = currentLang === 'bg' ? item.label_bg : item.label_en;
     label.style.cssText = `flex:1;font-size:${isGroup ? '0.82rem' : '0.88rem'};font-weight:${isGroup ? '700' : '600'};text-transform:${isGroup ? 'uppercase' : 'none'};letter-spacing:${isGroup ? '0.06em' : 'normal'}`;
     row.appendChild(handle);
     row.appendChild(icon);
