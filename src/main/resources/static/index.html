@@ -12949,128 +12949,266 @@
 
   let _mcfgData = [];
 
+  // map menu_key -> DOM element id
+  const _navElMap = {
+    nav_stagematrix:         'navStageMatrix',
+    nav_houses:              'navHouses',
+    nav_workers:             'navWorkers',
+    nav_crews:               'navCrewsDash',
+    nav_orders:              'navOrders',
+    nav_deliveries:          'navDeliveries',
+    nav_warehouses:          'navWarehouses',
+    nav_suppliers:           'navSuppliers',
+    nav_scaffold:            'navScaffold',
+    nav_stages:              'navStages',
+    nav_docs:                'navDocs',
+    nav_companyfolders:      'navCompanyFolders',
+    nav_housefoldertemplate: 'navHouseFolderTemplates',
+    nav_attendance:          'navAttendance',
+    nav_qrcodes:             'navQrcodes',
+    nav_workeraccess:        'navWorkerAccess',
+    nav_travelpay:           'navTravelAllowance',
+    nav_map:                 'navMap',
+    nav_order:               'navOrder',
+    nav_scaffold_route:      'navScaffoldRoute',
+    nav_history:             'navHistory',
+    nav_crews_full:          'navCrews',
+    nav_electric:            'navElectric',
+    nav_group_management:    'navManagementGroup',
+    nav_group_docs:          'navDocsGroup',
+    nav_group_attendance:    'navAttendanceGroup',
+  };
+  const _navChildrenMap = {
+    nav_group_management: 'navManagementChildren',
+    nav_group_docs:       'navDocsChildren',
+    nav_group_attendance: 'navAttendanceChildren',
+  };
+  const _dashElMap = {
+    dash_stagematrix: 'dashModeStageMatrix',
+    dash_houses:      'dashModeHouses',
+    dash_workers:     'dashModeWorkers',
+    dash_crews:       'dashModeCrews',
+    dash_orders:      'dashModeOrders',
+    dash_deliveries:  'dashModeDeliveries',
+    dash_warehouses:  'dashModeDashWarehouses',
+    dash_suppliers:   'dashModeDashSuppliers',
+    dash_travelpay:   'dashModeTravelpay',
+    dash_docs:        'dashModeDocs',
+  };
+
   async function mcfgLoad() {
     try {
       _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
     } catch(e) { return; }
-    mcfgRender('nav',  'mcNavList');
-    mcfgRender('dash', 'mcDashList');
+    mcfgRender();
   }
 
-  function mcfgRender(section, containerId) {
-    const container = document.getElementById(containerId);
-    const items = _mcfgData.filter(i => i.section === section).sort((a,b) => a.sort_order - b.sort_order);
+  function mcfgRender() {
+    _mcfgRenderNav();
+    _mcfgRenderDash();
+  }
+
+  function _mcfgToggleEl(key, visible) {
+    const toggle = document.getElementById(`mcToggle_${key}`);
+    if (!toggle) return;
+    const knob = toggle.querySelector('div');
+    toggle.style.background = visible ? 'var(--accent)' : 'var(--border)';
+    if (knob) knob.style.left = visible ? '18px' : '2px';
+    const lbl = toggle.previousElementSibling;
+    if (lbl) lbl.textContent = visible ? 'Visible' : 'Hidden';
+  }
+
+  function _mcfgMakeToggle(key, visible, disabled) {
+    const wrap = document.createElement('label');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:0.4rem;cursor:pointer';
+    wrap.innerHTML = `
+      <span style="font-size:0.78rem;color:var(--muted)">${visible ? 'Visible' : 'Hidden'}</span>
+      <div id="mcToggle_${key}" style="width:36px;height:20px;border-radius:10px;background:${visible ? 'var(--accent)' : 'var(--border)'};position:relative;cursor:pointer;transition:background 0.2s;opacity:${disabled ? 0.4 : 1};pointer-events:${disabled ? 'none' : 'auto'}">
+        <div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:${visible ? '18px' : '2px'};transition:left 0.2s"></div>
+      </div>`;
+    wrap.querySelector('div').addEventListener('click', () => mcfgToggle(key));
+    return wrap;
+  }
+
+  function _mcfgMakeRow(item, indent, dropTarget) {
+    const row = document.createElement('div');
+    row.dataset.key = item.menu_key;
+    row.dataset.parent = item.parent_key || '';
+    row.draggable = true;
+    const isGroup = item.is_group;
+    row.style.cssText = `display:flex;align-items:center;gap:0.75rem;background:var(--card);border:1px solid ${isGroup ? 'var(--accent)' : 'var(--border)'};border-radius:8px;padding:0.6rem 0.9rem;cursor:grab;user-select:none;margin-left:${indent ? '1.5rem' : '0'};opacity:${item.visible ? 1 : 0.55}`;
+    const handle = document.createElement('span');
+    handle.textContent = '⠿';
+    handle.style.cssText = 'color:var(--muted);font-size:0.9rem;flex-shrink:0';
+    const icon = document.createElement('span');
+    icon.textContent = item.icon;
+    icon.style.fontSize = '1rem';
+    const label = document.createElement('span');
+    label.textContent = item.label_en;
+    label.style.cssText = `flex:1;font-size:${isGroup ? '0.82rem' : '0.88rem'};font-weight:${isGroup ? '700' : '600'};text-transform:${isGroup ? 'uppercase' : 'none'};letter-spacing:${isGroup ? '0.06em' : 'normal'}`;
+    row.appendChild(handle);
+    row.appendChild(icon);
+    row.appendChild(label);
+    // group toggle disables children visually
+    const parentItem = item.parent_key ? _mcfgData.find(i => i.menu_key === item.parent_key) : null;
+    const disabledByParent = parentItem && !parentItem.visible;
+    row.appendChild(_mcfgMakeToggle(item.menu_key, item.visible, disabledByParent));
+
+    row.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', item.menu_key);
+      e.dataTransfer.setData('is_group', item.is_group ? '1' : '0');
+      row.style.opacity = '0.4';
+    });
+    row.addEventListener('dragend', () => { row.style.opacity = item.visible ? '1' : '0.55'; });
+    row.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); row.style.outline = '2px solid var(--accent)'; });
+    row.addEventListener('dragleave', () => { row.style.outline = ''; });
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      row.style.outline = '';
+      const fromKey   = e.dataTransfer.getData('text/plain');
+      const fromIsGrp = e.dataTransfer.getData('is_group') === '1';
+      if (fromKey === item.menu_key) return;
+      if (fromIsGrp && item.is_group) {
+        // reorder groups among themselves
+        mcfgMoveGroup(fromKey, item.menu_key);
+      } else if (!fromIsGrp && item.is_group) {
+        // drop child onto group header → move child into that group
+        mcfgReparent(fromKey, item.menu_key);
+      } else if (!fromIsGrp && !item.is_group) {
+        // reorder within same group, or cross-group move
+        const fromItem = _mcfgData.find(i => i.menu_key === fromKey);
+        const sameGroup = fromItem && fromItem.parent_key === item.parent_key;
+        if (sameGroup) {
+          mcfgReorderSiblings(fromKey, item.menu_key);
+        } else {
+          mcfgReparent(fromKey, item.parent_key || null, item.menu_key);
+        }
+      }
+    });
+    return row;
+  }
+
+  function _mcfgRenderNav() {
+    const container = document.getElementById('mcNavList');
     container.innerHTML = '';
-    items.forEach(item => {
-      const row = document.createElement('div');
-      row.dataset.key = item.menu_key;
-      row.draggable = true;
-      row.style.cssText = 'display:flex;align-items:center;gap:0.75rem;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.9rem;cursor:grab;user-select:none';
-      row.innerHTML = `
-        <span style="color:var(--muted);font-size:0.9rem;cursor:grab">⠿</span>
-        <span style="font-size:1rem">${item.icon}</span>
-        <span style="flex:1;font-size:0.88rem;font-weight:600">${item.label_en}</span>
-        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer">
-          <span style="font-size:0.78rem;color:var(--muted)">${item.visible ? 'Visible' : 'Hidden'}</span>
-          <div onclick="mcfgToggle('${item.menu_key}','${section}','${containerId}',this)" style="width:36px;height:20px;border-radius:10px;background:${item.visible ? 'var(--accent)' : 'var(--border)'};position:relative;cursor:pointer;transition:background 0.2s">
-            <div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:${item.visible ? '18px' : '2px'};transition:left 0.2s"></div>
-          </div>
-        </label>`;
-      // drag-and-drop
-      row.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', item.menu_key); row.style.opacity = '0.4'; });
-      row.addEventListener('dragend',   () => { row.style.opacity = '1'; });
-      row.addEventListener('dragover',  e => { e.preventDefault(); row.style.background = 'rgba(79,142,247,0.1)'; });
-      row.addEventListener('dragleave', () => { row.style.background = 'var(--card)'; });
-      row.addEventListener('drop', e => {
-        e.preventDefault();
-        row.style.background = 'var(--card)';
-        const fromKey = e.dataTransfer.getData('text/plain');
-        const fromEl  = container.querySelector(`[data-key="${fromKey}"]`);
-        if (fromEl && fromEl !== row) container.insertBefore(fromEl, row);
-        mcfgSaveOrder(section, containerId);
-      });
-      container.appendChild(row);
+    // top-level: groups + standalone items, sorted by sort_order
+    const topLevel = _mcfgData.filter(i => i.section === 'nav' && !i.parent_key).sort((a,b) => a.sort_order - b.sort_order);
+    topLevel.forEach(item => {
+      container.appendChild(_mcfgMakeRow(item, false, true));
+      if (item.is_group) {
+        const children = _mcfgData.filter(i => i.parent_key === item.menu_key).sort((a,b) => a.sort_order - b.sort_order);
+        children.forEach(child => container.appendChild(_mcfgMakeRow(child, true, false)));
+      }
     });
   }
 
-  async function mcfgToggle(key, section, containerId, toggleEl) {
+  function _mcfgRenderDash() {
+    const container = document.getElementById('mcDashList');
+    container.innerHTML = '';
+    const items = _mcfgData.filter(i => i.section === 'dash' && !i.parent_key).sort((a,b) => a.sort_order - b.sort_order);
+    items.forEach(item => container.appendChild(_mcfgMakeRow(item, false, false)));
+  }
+
+  async function mcfgToggle(key) {
     const item = _mcfgData.find(i => i.menu_key === key);
     if (!item) return;
     item.visible = !item.visible;
+    // if group toggled off, propagate to children in local data
+    if (item.is_group) {
+      _mcfgData.filter(i => i.parent_key === key).forEach(child => { child._parentHidden = !item.visible; });
+    }
     try {
       await apiFetch(`/api/menu-config/${key}/visible`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ visible: item.visible }) });
       applyMenuConfig();
-      mcfgRender(section, containerId);
+      mcfgRender();
     } catch(e) {}
   }
 
-  async function mcfgSaveOrder(section, containerId) {
-    const container = document.getElementById(containerId);
-    const keys = [...container.querySelectorAll('[data-key]')].map((el, i) => ({ menuKey: el.dataset.key }));
-    try {
-      await apiFetch('/api/menu-config/reorder', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(keys) });
-      _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
-      applyMenuConfig();
-    } catch(e) {}
+  async function mcfgMoveGroup(fromKey, beforeKey) {
+    const groups = _mcfgData.filter(i => i.section === 'nav' && i.is_group && !i.parent_key).sort((a,b) => a.sort_order - b.sort_order);
+    const fromIdx = groups.findIndex(i => i.menu_key === fromKey);
+    const toIdx   = groups.findIndex(i => i.menu_key === beforeKey);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const [moved] = groups.splice(fromIdx, 1);
+    groups.splice(toIdx, 0, moved);
+    await _mcfgSaveTopLevelOrder(groups);
+  }
+
+  async function mcfgReorderSiblings(fromKey, beforeKey) {
+    const fromItem  = _mcfgData.find(i => i.menu_key === fromKey);
+    if (!fromItem) return;
+    const siblings  = _mcfgData.filter(i => i.parent_key === fromItem.parent_key && i.section === fromItem.section).sort((a,b) => a.sort_order - b.sort_order);
+    const fromIdx   = siblings.findIndex(i => i.menu_key === fromKey);
+    const toIdx     = siblings.findIndex(i => i.menu_key === beforeKey);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const [moved] = siblings.splice(fromIdx, 1);
+    siblings.splice(toIdx, 0, moved);
+    const payload = siblings.map((it, idx) => ({ menuKey: it.menu_key, sortOrder: idx + 1, parentKey: it.parent_key || null }));
+    await apiFetch('/api/menu-config/reorder', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
+    applyMenuConfig();
+    mcfgRender();
+  }
+
+  async function mcfgReparent(fromKey, newParentKey, beforeKey) {
+    const payload = [{ menuKey: fromKey, parentKey: newParentKey || null, sortOrder: null, insertBefore: beforeKey || null }];
+    await apiFetch('/api/menu-config/reparent', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
+    applyMenuConfig();
+    mcfgRender();
+  }
+
+  async function _mcfgSaveTopLevelOrder(groups) {
+    const standalones = _mcfgData.filter(i => i.section === 'nav' && !i.is_group && !i.parent_key).sort((a,b) => a.sort_order - b.sort_order);
+    const all = [...groups, ...standalones];
+    const payload = all.map((it, idx) => ({ menuKey: it.menu_key, sortOrder: idx + 1, parentKey: null }));
+    await apiFetch('/api/menu-config/reorder', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
+    applyMenuConfig();
+    mcfgRender();
   }
 
   function applyMenuConfig() {
     if (!_mcfgData.length) return;
     const byKey = Object.fromEntries(_mcfgData.map(i => [i.menu_key, i]));
 
-    // Nav items
-    const navMap = {
-      nav_stagematrix:        'navStageMatrix',
-      nav_houses:             'navHouses',
-      nav_workers:            'navWorkers',
-      nav_crews:              'navCrewsDash',
-      nav_orders:             'navOrders',
-      nav_deliveries:         'navDeliveries',
-      nav_warehouses:         'navWarehouses',
-      nav_suppliers:          'navSuppliers',
-      nav_scaffold:           'navScaffold',
-      nav_stages:             'navStages',
-      nav_docs:               'navDocs',
-      nav_companyfolders:     'navCompanyFolders',
-      nav_housefoldertemplate:'navHouseFolderTemplates',
-      nav_attendance:         'navAttendance',
-      nav_qrcodes:            'navQrcodes',
-      nav_workeraccess:       'navWorkerAccess',
-      nav_travelpay:          'navTravelAllowance',
-      nav_map:                'navMap',
-      nav_order:              'navOrder',
-      nav_scaffold_route:     'navScaffoldRoute',
-      nav_history:            'navHistory',
-      nav_crews_full:         'navCrews',
-      nav_electric:           'navElectric',
-    };
-    Object.entries(navMap).forEach(([key, elId]) => {
+    // Determine effective visibility: hidden if self hidden OR parent group hidden
+    function isVisible(item) {
+      if (!item.visible) return false;
+      if (item.parent_key) {
+        const parent = byKey[item.parent_key];
+        if (parent && !parent.visible) return false;
+      }
+      return true;
+    }
+
+    // Apply nav leaf items
+    Object.entries(_navElMap).forEach(([key, elId]) => {
       const el = document.getElementById(elId);
       if (!el) return;
       const cfg = byKey[key];
-      if (cfg) el.style.display = cfg.visible ? '' : 'none';
+      if (!cfg) return;
+      if (cfg.is_group) {
+        // group header: hide if explicitly hidden OR all children are hidden
+        const children = _mcfgData.filter(i => i.parent_key === key);
+        const allChildrenHidden = children.length > 0 && children.every(c => !isVisible(c));
+        const groupEl  = document.getElementById(elId);
+        const childDiv = _navChildrenMap[key] ? document.getElementById(_navChildrenMap[key]) : null;
+        const show = cfg.visible && !allChildrenHidden;
+        if (groupEl)  groupEl.style.display  = show ? '' : 'none';
+        if (childDiv) childDiv.style.display  = show ? '' : 'none';
+      } else {
+        el.style.display = isVisible(cfg) ? '' : 'none';
+      }
     });
 
-    // Dashboard tabs
-    const dashTabMap = {
-      dash_stagematrix: 'dashModeStageMatrix',
-      dash_houses:      'dashModeHouses',
-      dash_workers:     'dashModeWorkers',
-      dash_crews:       'dashModeCrews',
-      dash_orders:      'dashModeOrders',
-      dash_deliveries:  'dashModeDeliveries',
-      dash_warehouses:  'dashModeDashWarehouses',
-      dash_suppliers:   'dashModeDashSuppliers',
-      dash_travelpay:   'dashModeTravelpay',
-      dash_docs:        'dashModeDocs',
-    };
-
-    // Reorder and show/hide dash tab buttons by sort_order
+    // Dashboard tabs: show/hide + reorder
     const dashBar = document.querySelector('#dashTabBar > div');
     if (dashBar) {
       const dashItems = _mcfgData.filter(i => i.section === 'dash').sort((a,b) => a.sort_order - b.sort_order);
       dashItems.forEach(item => {
-        const elId = dashTabMap[item.menu_key];
+        const elId = _dashElMap[item.menu_key];
         const el = elId ? document.getElementById(elId) : null;
         if (!el) return;
         el.style.display = item.visible ? '' : 'none';

@@ -20,7 +20,7 @@ public class MenuConfigController {
     @GetMapping
     public List<Map<String, Object>> list() {
         return jdbc.queryForList(
-            "SELECT menu_key, section, label_en, label_bg, icon, visible, sort_order " +
+            "SELECT menu_key, section, label_en, label_bg, icon, visible, sort_order, is_group, parent_key " +
             "FROM menu_config ORDER BY section, sort_order");
     }
 
@@ -34,12 +34,48 @@ public class MenuConfigController {
         return ResponseEntity.ok(Map.of("ok", true));
     }
 
+    /** Reorder items — payload: [{menuKey, sortOrder, parentKey}] */
     @PutMapping("/reorder")
     @Transactional
     public ResponseEntity<?> reorder(@RequestBody List<Map<String, Object>> items) {
         for (int i = 0; i < items.size(); i++) {
             String key = items.get(i).get("menuKey").toString();
-            jdbc.update("UPDATE menu_config SET sort_order = ? WHERE menu_key = ?", i + 1, key);
+            Object parentKey = items.get(i).get("parentKey");
+            int sortOrder = items.get(i).get("sortOrder") instanceof Number n
+                ? n.intValue() : (i + 1);
+            if (parentKey != null) {
+                jdbc.update("UPDATE menu_config SET sort_order = ?, parent_key = ? WHERE menu_key = ?",
+                    sortOrder, parentKey.toString(), key);
+            } else {
+                jdbc.update("UPDATE menu_config SET sort_order = ?, parent_key = NULL WHERE menu_key = ?",
+                    sortOrder, key);
+            }
+        }
+        return ResponseEntity.ok(Map.of("ok", true));
+    }
+
+    /** Move a child item to a different parent group, inserting before a given sibling */
+    @PutMapping("/reparent")
+    @Transactional
+    public ResponseEntity<?> reparent(@RequestBody List<Map<String, Object>> items) {
+        for (Map<String, Object> item : items) {
+            String key       = item.get("menuKey").toString();
+            Object parentKey = item.get("parentKey");
+            // compute new sort_order: max of siblings + 1
+            Integer maxOrder;
+            if (parentKey != null) {
+                maxOrder = jdbc.queryForObject(
+                    "SELECT COALESCE(MAX(sort_order),0) FROM menu_config WHERE parent_key = ?",
+                    Integer.class, parentKey.toString());
+                jdbc.update("UPDATE menu_config SET parent_key = ?, sort_order = ? WHERE menu_key = ?",
+                    parentKey.toString(), (maxOrder == null ? 0 : maxOrder) + 1, key);
+            } else {
+                maxOrder = jdbc.queryForObject(
+                    "SELECT COALESCE(MAX(sort_order),0) FROM menu_config WHERE parent_key IS NULL AND section = (SELECT section FROM menu_config WHERE menu_key = ?)",
+                    Integer.class, key);
+                jdbc.update("UPDATE menu_config SET parent_key = NULL, sort_order = ? WHERE menu_key = ?",
+                    (maxOrder == null ? 0 : maxOrder) + 1, key);
+            }
         }
         return ResponseEntity.ok(Map.of("ok", true));
     }
