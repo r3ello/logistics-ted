@@ -13197,13 +13197,12 @@
       if (!cfg) return;
       if (cfg.is_group) {
         // group header: hide if explicitly hidden OR all children are hidden
+        // never touch childDiv — expand/collapse is handled by toggleNavGroup()
         const children = _mcfgData.filter(i => i.parent_key === key);
         const allChildrenHidden = children.length > 0 && children.every(c => !isVisible(c));
-        const groupEl  = document.getElementById(elId);
-        const childDiv = _navChildrenMap[key] ? document.getElementById(_navChildrenMap[key]) : null;
+        const groupEl = document.getElementById(elId);
         const show = cfg.visible && !allChildrenHidden;
-        if (groupEl)  groupEl.style.display  = show ? '' : 'none';
-        if (childDiv) childDiv.style.display  = show ? '' : 'none';
+        if (groupEl) groupEl.style.display = show ? '' : 'none';
       } else {
         el.style.display = isVisible(cfg) ? '' : 'none';
       }
