@@ -32,7 +32,7 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query("DELETE FROM HouseStage s WHERE s.stageOrder = :order")
     void deleteByStageOrder(Integer order);
 
-    @Query("SELECT MAX(s.stageOrder) FROM HouseStage s")
+    @Query(value = "SELECT MAX(stage_order) FROM stage_type", nativeQuery = true)
     Integer maxStageOrder();
 
     @Modifying
