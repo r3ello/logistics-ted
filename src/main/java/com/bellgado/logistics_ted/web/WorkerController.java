@@ -197,9 +197,10 @@ public class WorkerController {
             m.put("houseName", houses.isEmpty() ? null : houses.get(0).get("houseName"));
         } else {
             m.put("crewStages",  null);
-            m.put("stageOrders", List.of());
-            m.put("stageNamesBg", List.of());
-            m.put("stageNamesEn", List.of());
+            List<Integer> orders = w.getStageOrders() != null ? w.getStageOrders() : List.of();
+            m.put("stageOrders", orders);
+            m.put("stageNamesBg", orders.stream().map(o -> { String[] s = allStageNames != null ? allStageNames.get(o) : null; return s != null ? s[0] : String.valueOf(o); }).toList());
+            m.put("stageNamesEn", orders.stream().map(o -> { String[] s = allStageNames != null ? allStageNames.get(o) : null; return s != null && s[1] != null ? s[1] : (s != null ? s[0] : String.valueOf(o)); }).toList());
             m.put("crewId",      null);
             m.put("crewName",    null);
             m.put("managerId",   null);

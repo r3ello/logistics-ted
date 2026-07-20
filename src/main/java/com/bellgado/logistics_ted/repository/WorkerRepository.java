@@ -21,6 +21,7 @@ public interface WorkerRepository extends JpaRepository<Worker, Integer> {
         LEFT JOIN FETCH c.house
         LEFT JOIN FETCH c.manager
         LEFT JOIN FETCH c.leader
+        LEFT JOIN FETCH w.stageOrders
         ORDER BY w.name
         """)
     List<Worker> findAllWithCrew();

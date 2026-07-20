@@ -15,7 +15,7 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query("SELECT s FROM HouseStage s JOIN FETCH s.house WHERE s.crewId = :crewId ORDER BY s.house.name, s.stageOrder")
     List<HouseStage> findByCrewIdWithHouse(Integer crewId);
 
-    @Query(value = "SELECT stage_order, stage_name, stage_name_en FROM stage_type ORDER BY stage_order", nativeQuery = true)
+    @Query(value = "SELECT stage_order, stage_name, stage_name_en FROM stage_type ORDER BY CASE WHEN stage_name_en = 'Completion' THEN 1 ELSE 0 END, stage_order", nativeQuery = true)
     List<Object[]> findDistinctStageTypes();
 
     List<HouseStage> findByStageOrder(Integer stageOrder);
