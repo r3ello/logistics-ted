@@ -1695,6 +1695,9 @@
         <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
       </a>
     </div>
+    <a class="nav-item admin-only" id="navMenuConfig" href="#menuconfig" onclick="showView('menuconfig');return false;" style="margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem">
+      <span class="nav-icon">🎛️</span> <span>Menu Management</span>
+    </a>
   </div>
 </nav>
 
@@ -2459,6 +2462,22 @@
   <div class="view" id="view-housedetail">
     <div id="houseDetailContent">
       <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
+    </div>
+  </div>
+
+  <!-- VIEW: MENU CONFIG -->
+  <div class="view" id="view-menuconfig">
+    <div style="max-width:700px">
+      <h2 style="margin:0 0 0.25rem;font-size:1.1rem;font-weight:700">🎛️ Menu Management</h2>
+      <p style="color:var(--muted);font-size:0.85rem;margin:0 0 1.5rem">Toggle visibility and drag to reorder nav items and dashboard tabs.</p>
+      <div id="mcNavSection">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.6rem">📌 Left Navigation</div>
+        <div id="mcNavList" style="display:flex;flex-direction:column;gap:4px"></div>
+      </div>
+      <div style="margin-top:1.5rem" id="mcDashSection">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.6rem">📊 Dashboard Tabs</div>
+        <div id="mcDashList" style="display:flex;flex-direction:column;gap:4px"></div>
+      </div>
     </div>
   </div>
 
@@ -3470,7 +3489,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false };
   const _navGroupConfig = {
@@ -3533,6 +3552,7 @@
     if (name === 'myorders')       loadMyOrders();
     if (name === 'mycrew')         mcLoad();
     if (name === 'myworkeraccess') mwaLoad();
+    if (name === 'menuconfig')     mcfgLoad();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -10686,6 +10706,11 @@
   function initApp() {
     if (currentUser?.role === 'crew_leader') { initCrewLeader(); return; }
     applyStoredTheme();
+    // Load menu config and apply visibility/ordering before showing the first view
+    apiFetch('/api/menu-config').then(r => r.json()).then(data => {
+      _mcfgData = data;
+      applyMenuConfig();
+    }).catch(() => {});
     showView('stagematrix');
     setNavActive('navStageMatrix');
     loadMaterialFields().then(applyPendingMapPin);
@@ -12918,6 +12943,295 @@
       </table>
     <script>window.onload=function(){window.print();}<\/script></body></html>`);
     win.document.close();
+  }
+
+  // ── MENU CONFIG ──────────────────────────────────────────────────────────────
+
+  let _mcfgData = [];
+
+  // map menu_key -> DOM element id
+  const _navElMap = {
+    nav_stagematrix:         'navStageMatrix',
+    nav_houses:              'navHouses',
+    nav_workers:             'navWorkers',
+    nav_crews:               'navCrewsDash',
+    nav_orders:              'navOrders',
+    nav_deliveries:          'navDeliveries',
+    nav_warehouses:          'navWarehouses',
+    nav_suppliers:           'navSuppliers',
+    nav_scaffold:            'navScaffold',
+    nav_stages:              'navStages',
+    nav_docs:                'navDocs',
+    nav_companyfolders:      'navCompanyFolders',
+    nav_housefoldertemplate: 'navHouseFolderTemplates',
+    nav_attendance:          'navAttendance',
+    nav_qrcodes:             'navQrcodes',
+    nav_workeraccess:        'navWorkerAccess',
+    nav_travelpay:           'navTravelAllowance',
+    nav_map:                 'navMap',
+    nav_order:               'navOrder',
+    nav_scaffold_route:      'navScaffoldRoute',
+    nav_history:             'navHistory',
+    nav_crews_full:          'navCrews',
+    nav_electric:            'navElectric',
+    nav_group_management:     'navManagementGroup',
+    nav_group_docs:           'navDocsGroup',
+    nav_group_attendance:     'navAttendanceGroup',
+    nav_group_routes:         'navRoutesGroup',
+    nav_group_orgchart:       'navOrgChartGroup',
+    nav_group_clientservices: 'navClientServicesGroup',
+  };
+  const _navChildrenMap = {
+    nav_group_management:     'navManagementChildren',
+    nav_group_docs:           'navDocsChildren',
+    nav_group_attendance:     'navAttendanceChildren',
+    nav_group_routes:         'navRoutesChildren',
+    nav_group_orgchart:       'navOrgChartChildren',
+    nav_group_clientservices: 'navClientServicesChildren',
+  };
+  const _dashElMap = {
+    dash_stagematrix: 'dashModeStageMatrix',
+    dash_houses:      'dashModeHouses',
+    dash_workers:     'dashModeWorkers',
+    dash_crews:       'dashModeCrews',
+    dash_orders:      'dashModeOrders',
+    dash_deliveries:  'dashModeDeliveries',
+    dash_warehouses:  'dashModeDashWarehouses',
+    dash_suppliers:   'dashModeDashSuppliers',
+    dash_travelpay:   'dashModeTravelpay',
+    dash_docs:        'dashModeDocs',
+  };
+
+  async function mcfgLoad() {
+    try {
+      _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
+    } catch(e) { return; }
+    mcfgRender();
+  }
+
+  function mcfgRender() {
+    _mcfgRenderNav();
+    _mcfgRenderDash();
+  }
+
+  function _mcfgToggleEl(key, visible) {
+    const toggle = document.getElementById(`mcToggle_${key}`);
+    if (!toggle) return;
+    const knob = toggle.querySelector('div');
+    toggle.style.background = visible ? 'var(--accent)' : 'var(--border)';
+    if (knob) knob.style.left = visible ? '18px' : '2px';
+    const lbl = toggle.previousElementSibling;
+    if (lbl) lbl.textContent = visible ? 'Visible' : 'Hidden';
+  }
+
+  function _mcfgMakeToggle(key, visible, disabled) {
+    const wrap = document.createElement('label');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:0.4rem;cursor:pointer';
+    wrap.innerHTML = `
+      <span style="font-size:0.78rem;color:var(--muted)">${visible ? 'Visible' : 'Hidden'}</span>
+      <div id="mcToggle_${key}" style="width:36px;height:20px;border-radius:10px;background:${visible ? 'var(--accent)' : 'var(--border)'};position:relative;cursor:pointer;transition:background 0.2s;opacity:${disabled ? 0.4 : 1};pointer-events:${disabled ? 'none' : 'auto'}">
+        <div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:${visible ? '18px' : '2px'};transition:left 0.2s"></div>
+      </div>`;
+    wrap.querySelector('div').addEventListener('click', () => mcfgToggle(key));
+    return wrap;
+  }
+
+  function _mcfgMakeRow(item, indent, dropTarget) {
+    const row = document.createElement('div');
+    row.dataset.key = item.menu_key;
+    row.dataset.parent = item.parent_key || '';
+    row.draggable = true;
+    const isGroup = item.is_group;
+    row.style.cssText = `display:flex;align-items:center;gap:0.75rem;background:var(--card);border:1px solid ${isGroup ? 'var(--accent)' : 'var(--border)'};border-radius:8px;padding:0.6rem 0.9rem;cursor:grab;user-select:none;margin-left:${indent ? '1.5rem' : '0'};opacity:${item.visible ? 1 : 0.55}`;
+    const handle = document.createElement('span');
+    handle.textContent = '⠿';
+    handle.style.cssText = 'color:var(--muted);font-size:0.9rem;flex-shrink:0';
+    const icon = document.createElement('span');
+    icon.textContent = item.icon;
+    icon.style.fontSize = '1rem';
+    const label = document.createElement('span');
+    label.textContent = item.label_en;
+    label.style.cssText = `flex:1;font-size:${isGroup ? '0.82rem' : '0.88rem'};font-weight:${isGroup ? '700' : '600'};text-transform:${isGroup ? 'uppercase' : 'none'};letter-spacing:${isGroup ? '0.06em' : 'normal'}`;
+    row.appendChild(handle);
+    row.appendChild(icon);
+    row.appendChild(label);
+    // group toggle disables children visually
+    const parentItem = item.parent_key ? _mcfgData.find(i => i.menu_key === item.parent_key) : null;
+    const disabledByParent = parentItem && !parentItem.visible;
+    row.appendChild(_mcfgMakeToggle(item.menu_key, item.visible, disabledByParent));
+
+    row.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', item.menu_key);
+      e.dataTransfer.setData('is_group', item.is_group ? '1' : '0');
+      row.style.opacity = '0.4';
+    });
+    row.addEventListener('dragend', () => { row.style.opacity = item.visible ? '1' : '0.55'; });
+    row.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); row.style.outline = '2px solid var(--accent)'; });
+    row.addEventListener('dragleave', () => { row.style.outline = ''; });
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      row.style.outline = '';
+      const fromKey   = e.dataTransfer.getData('text/plain');
+      const fromIsGrp = e.dataTransfer.getData('is_group') === '1';
+      if (fromKey === item.menu_key) return;
+      if (fromIsGrp && item.is_group) {
+        // reorder groups among themselves
+        mcfgMoveGroup(fromKey, item.menu_key);
+      } else if (!fromIsGrp && item.is_group) {
+        // drop child onto group header → move child into that group
+        mcfgReparent(fromKey, item.menu_key);
+      } else if (!fromIsGrp && !item.is_group) {
+        // reorder within same group, or cross-group move
+        const fromItem = _mcfgData.find(i => i.menu_key === fromKey);
+        const sameGroup = fromItem && fromItem.parent_key === item.parent_key;
+        if (sameGroup) {
+          mcfgReorderSiblings(fromKey, item.menu_key);
+        } else {
+          mcfgReparent(fromKey, item.parent_key || null, item.menu_key);
+        }
+      }
+    });
+    return row;
+  }
+
+  function _mcfgRenderNav() {
+    const container = document.getElementById('mcNavList');
+    container.innerHTML = '';
+    // top-level: groups + standalone items, sorted by sort_order
+    const topLevel = _mcfgData.filter(i => i.section === 'nav' && !i.parent_key).sort((a,b) => a.sort_order - b.sort_order);
+    topLevel.forEach(item => {
+      container.appendChild(_mcfgMakeRow(item, false, true));
+      if (item.is_group) {
+        const children = _mcfgData.filter(i => i.parent_key === item.menu_key).sort((a,b) => a.sort_order - b.sort_order);
+        children.forEach(child => container.appendChild(_mcfgMakeRow(child, true, false)));
+      }
+    });
+  }
+
+  function _mcfgRenderDash() {
+    const container = document.getElementById('mcDashList');
+    container.innerHTML = '';
+    const items = _mcfgData.filter(i => i.section === 'dash' && !i.parent_key).sort((a,b) => a.sort_order - b.sort_order);
+    items.forEach(item => container.appendChild(_mcfgMakeRow(item, false, false)));
+  }
+
+  async function mcfgToggle(key) {
+    const item = _mcfgData.find(i => i.menu_key === key);
+    if (!item) return;
+    item.visible = !item.visible;
+    // if group toggled off, propagate to children in local data
+    if (item.is_group) {
+      _mcfgData.filter(i => i.parent_key === key).forEach(child => { child._parentHidden = !item.visible; });
+    }
+    try {
+      await apiFetch(`/api/menu-config/${key}/visible`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ visible: item.visible }) });
+      applyMenuConfig();
+      mcfgRender();
+    } catch(e) {}
+  }
+
+  async function mcfgMoveGroup(fromKey, beforeKey) {
+    const groups = _mcfgData.filter(i => i.section === 'nav' && i.is_group && !i.parent_key).sort((a,b) => a.sort_order - b.sort_order);
+    const fromIdx = groups.findIndex(i => i.menu_key === fromKey);
+    const toIdx   = groups.findIndex(i => i.menu_key === beforeKey);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const [moved] = groups.splice(fromIdx, 1);
+    groups.splice(toIdx, 0, moved);
+    await _mcfgSaveTopLevelOrder(groups);
+  }
+
+  async function mcfgReorderSiblings(fromKey, beforeKey) {
+    const fromItem  = _mcfgData.find(i => i.menu_key === fromKey);
+    if (!fromItem) return;
+    const siblings  = _mcfgData.filter(i => i.parent_key === fromItem.parent_key && i.section === fromItem.section).sort((a,b) => a.sort_order - b.sort_order);
+    const fromIdx   = siblings.findIndex(i => i.menu_key === fromKey);
+    const toIdx     = siblings.findIndex(i => i.menu_key === beforeKey);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const [moved] = siblings.splice(fromIdx, 1);
+    siblings.splice(toIdx, 0, moved);
+    const payload = siblings.map((it, idx) => ({ menuKey: it.menu_key, sortOrder: idx + 1, parentKey: it.parent_key || null }));
+    await apiFetch('/api/menu-config/reorder', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
+    applyMenuConfig();
+    mcfgRender();
+  }
+
+  async function mcfgReparent(fromKey, newParentKey, beforeKey) {
+    const payload = [{ menuKey: fromKey, parentKey: newParentKey || null, sortOrder: null, insertBefore: beforeKey || null }];
+    await apiFetch('/api/menu-config/reparent', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
+    applyMenuConfig();
+    mcfgRender();
+  }
+
+  async function _mcfgSaveTopLevelOrder(groups) {
+    const standalones = _mcfgData.filter(i => i.section === 'nav' && !i.is_group && !i.parent_key).sort((a,b) => a.sort_order - b.sort_order);
+    const all = [...groups, ...standalones];
+    const payload = all.map((it, idx) => ({ menuKey: it.menu_key, sortOrder: idx + 1, parentKey: null }));
+    await apiFetch('/api/menu-config/reorder', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    _mcfgData = await apiFetch('/api/menu-config').then(r => r.json());
+    applyMenuConfig();
+    mcfgRender();
+  }
+
+  function applyMenuConfig() {
+    if (!_mcfgData.length) return;
+    const byKey = Object.fromEntries(_mcfgData.map(i => [i.menu_key, i]));
+
+    // Determine effective visibility: hidden if self hidden OR parent group hidden
+    function isVisible(item) {
+      if (!item.visible) return false;
+      if (item.parent_key) {
+        const parent = byKey[item.parent_key];
+        if (parent && !parent.visible) return false;
+      }
+      return true;
+    }
+
+    // Apply nav groups: show/hide header only (never touch expand/collapse)
+    _mcfgData.filter(i => i.is_group && i.section === 'nav').forEach(cfg => {
+      const elId = _navElMap[cfg.menu_key];
+      const groupEl = elId ? document.getElementById(elId) : null;
+      if (!groupEl) return;
+      const children = _mcfgData.filter(i => i.parent_key === cfg.menu_key);
+      const allChildrenHidden = children.length > 0 && children.every(c => !isVisible(c));
+      groupEl.style.display = (cfg.visible && !allChildrenHidden) ? '' : 'none';
+    });
+
+    // Apply nav children: show/hide + reorder within their group container
+    Object.entries(_navChildrenMap).forEach(([groupKey, childDivId]) => {
+      const childDiv = document.getElementById(childDivId);
+      if (!childDiv) return;
+      const children = _mcfgData.filter(i => i.parent_key === groupKey).sort((a,b) => a.sort_order - b.sort_order);
+      children.forEach(item => {
+        const elId = _navElMap[item.menu_key];
+        const el = elId ? document.getElementById(elId) : null;
+        if (!el) return;
+        el.style.display = isVisible(item) ? '' : 'none';
+        childDiv.appendChild(el); // moves to end in sort order
+      });
+    });
+
+    // Standalone nav items (no parent group): show/hide only
+    _mcfgData.filter(i => i.section === 'nav' && !i.is_group && !i.parent_key).forEach(item => {
+      const elId = _navElMap[item.menu_key];
+      const el = elId ? document.getElementById(elId) : null;
+      if (el) el.style.display = isVisible(item) ? '' : 'none';
+    });
+
+    // Dashboard tabs: show/hide + reorder
+    const dashBar = document.querySelector('#dashTabBar > div');
+    if (dashBar) {
+      const dashItems = _mcfgData.filter(i => i.section === 'dash').sort((a,b) => a.sort_order - b.sort_order);
+      dashItems.forEach(item => {
+        const elId = _dashElMap[item.menu_key];
+        const el = elId ? document.getElementById(elId) : null;
+        if (!el) return;
+        el.style.display = item.visible ? '' : 'none';
+        dashBar.appendChild(el);
+      });
+    }
   }
 
 </script>
