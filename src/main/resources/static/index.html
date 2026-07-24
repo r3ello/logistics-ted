@@ -3164,6 +3164,7 @@
       if (typeof _dashMode !== 'undefined' && _dashMode === 'stages') renderStagesDash();
       else if (_dashMode === 'docs') renderDocsDash();
       else if (_dashMode === 'workers') { retranslateChipBar(); retranslateSearchBar(_dashMode); renderWorkerCards(); }
+      else if (_dashMode === 'crews')   { retranslateChipBar(); retranslateSearchBar(_dashMode); renderCrewCards(); }
       else { retranslateChipBar(); retranslateSearchBar(_dashMode); }
     }
     else if (activeView === 'scaffold')    setDashMode('scaffold');
