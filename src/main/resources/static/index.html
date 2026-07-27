@@ -1464,8 +1464,8 @@
     <div class="modal-field">
       <label id="mCoordLabel">Coordinates <span id="mCoordOptional" style="font-weight:400;color:var(--muted)">(optional)</span></label>
       <div class="modal-coords">
-        <input id="mLat" type="number" step="any" placeholder="Latitude" />
-        <input id="mLng" type="number" step="any" placeholder="Longitude" />
+        <input id="mLat" type="number" step="any" placeholder="Latitude" onblur="houseCoordBlur()" />
+        <input id="mLng" type="number" step="any" placeholder="Longitude" onblur="houseCoordBlur()" />
       </div>
     </div>
     <div class="modal-coords" style="gap:0.75rem;display:grid;grid-template-columns:1fr 1fr;margin-bottom:1rem">
@@ -9684,6 +9684,22 @@
 
   // ── HOUSE CRUD ───────────────────────────────────────────────────────────────
   let _editingHouseId = null;
+
+  async function houseCoordBlur() {
+    const lat = parseFloat(document.getElementById('mLat').value);
+    const lng = parseFloat(document.getElementById('mLng').value);
+    if (isNaN(lat) || isNaN(lng)) return;
+    const locEl = document.getElementById('mLocation');
+    locEl.placeholder = '…';
+    try {
+      const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: { 'Accept-Language': currentLang === 'bg' ? 'bg,en' : 'en' } });
+      const data = await res.json();
+      const a    = data.address || {};
+      const parts = [a.city || a.town || a.village || a.municipality, a.state || a.county, a.country].filter(Boolean);
+      if (parts.length) locEl.value = parts.join(', ');
+    } catch(_) {}
+    locEl.placeholder = t('phCityRegion');
+  }
 
   function openHouseModal(houseId) {
     const house = houseId != null ? dashHouses.find(h => h.id === houseId) : null;
