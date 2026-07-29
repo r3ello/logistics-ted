@@ -1,9 +1,14 @@
 package com.bellgado.logistics_ted.web;
 
 import com.bellgado.logistics_ted.domain.House;
+import com.bellgado.logistics_ted.domain.HouseStage;
+import com.bellgado.logistics_ted.domain.HouseStageCrewLog;
 import com.bellgado.logistics_ted.domain.WorkSession;
 import com.bellgado.logistics_ted.domain.Worker;
+import com.bellgado.logistics_ted.repository.CrewRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
+import com.bellgado.logistics_ted.repository.HouseStageCrewLogRepository;
+import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkSessionRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +25,28 @@ import java.util.*;
 @RestController
 public class AttendanceController {
 
-    private final HouseRepository       houses;
-    private final WorkerRepository      workers;
-    private final WorkSessionRepository sessions;
+    private final HouseRepository            houses;
+    private final WorkerRepository           workers;
+    private final WorkSessionRepository      sessions;
+    private final HouseStageRepository       stages;
+    private final CrewRepository             crews;
+    private final HouseStageCrewLogRepository stageLogs;
 
     @org.springframework.beans.factory.annotation.Value("${app.timezone:Europe/Sofia}")
     private String appTimezone;
 
     public AttendanceController(HouseRepository houses,
                                 WorkerRepository workers,
-                                WorkSessionRepository sessions) {
-        this.houses   = houses;
-        this.workers  = workers;
-        this.sessions = sessions;
+                                WorkSessionRepository sessions,
+                                HouseStageRepository stages,
+                                CrewRepository crews,
+                                HouseStageCrewLogRepository stageLogs) {
+        this.houses    = houses;
+        this.workers   = workers;
+        this.sessions  = sessions;
+        this.stages    = stages;
+        this.crews     = crews;
+        this.stageLogs = stageLogs;
     }
 
     /** Returns today's date in the configured app timezone. */
@@ -109,10 +123,11 @@ public class AttendanceController {
         House house = houses.findByCheckinToken(token).orElse(null);
         if (house == null) return ResponseEntity.notFound().build();
 
-        Integer workerId = (Integer) body.get("workerId");
-        String  deviceId = (String)  body.get("deviceId");
-        Double  lat      = toDouble(body.get("lat"));
-        Double  lng      = toDouble(body.get("lng"));
+        Integer workerId        = (Integer) body.get("workerId");
+        String  deviceId        = (String)  body.get("deviceId");
+        Double  lat             = toDouble(body.get("lat"));
+        Double  lng             = toDouble(body.get("lng"));
+        boolean skipDeviceCheck = Boolean.TRUE.equals(body.get("skipDeviceCheck"));
 
         if (workerId == null || deviceId == null || deviceId.isBlank())
             return error("Missing workerId or deviceId");
@@ -127,9 +142,11 @@ public class AttendanceController {
             return error("Already checked in — check out first");
 
         // Validation 2: device not currently in use by another worker at this house
-        Optional<WorkSession> deviceSession = sessions.findOpenSessionByDevice(deviceId, house.getId(), today);
-        if (deviceSession.isPresent() && !deviceSession.get().getWorker().getId().equals(workerId))
-            return error("This device is currently checked in as " + deviceSession.get().getWorker().getName());
+        if (!skipDeviceCheck) {
+            Optional<WorkSession> deviceSession = sessions.findOpenSessionByDevice(deviceId, house.getId(), today);
+            if (deviceSession.isPresent() && !deviceSession.get().getWorker().getId().equals(workerId))
+                return error("This device is currently checked in as " + deviceSession.get().getWorker().getName());
+        }
 
         // Validation 3: GPS within 200m of house
         if (house.getLat() != null && lat != null) {
@@ -146,6 +163,40 @@ public class AttendanceController {
         if (lat != null) { s.setCheckInLat(BigDecimal.valueOf(lat)); s.setCheckInLng(BigDecimal.valueOf(lng)); }
         sessions.save(s);
 
+        // Auto-promote the lowest ASSIGNED stage for this worker's crew on this house to IN_PROGRESS
+        if (worker.getCrew() != null) {
+            List<HouseStage> assignedStages = stages.findAssignedStagesForCrewOnHouse(house.getId(), worker.getCrew().getId());
+            if (!assignedStages.isEmpty()) {
+                HouseStage hs = assignedStages.get(0);
+                hs.setStatus("IN_PROGRESS");
+                if (hs.getStartDate() == null) hs.setStartDate(today());
+                hs.setUpdatedAt(java.time.LocalDateTime.now());
+                stages.save(hs);
+
+                // sync crew.house_id
+                crews.findById(hs.getCrewId()).ifPresent(crew -> { crew.setHouse(house); crews.save(crew); });
+
+                // update house current phase
+                List<String> inProgress = stages.findAllInProgressStageNames(house.getId());
+                house.setCurrentPhase(inProgress.isEmpty() ? null : String.join(", ", inProgress));
+                houses.save(house);
+
+                // log the IN_PROGRESS transition
+                HouseStageCrewLog log = new HouseStageCrewLog();
+                log.setHouseId(house.getId());
+                log.setHouseName(house.getName());
+                log.setStageOrder(hs.getStageOrder());
+                log.setStageName(hs.getStageName());
+                log.setStageNameEn(hs.getStageNameEn());
+                log.setCrewId(hs.getCrewId());
+                crews.findById(hs.getCrewId()).ifPresent(crew -> log.setCrewName(crew.getName()));
+                log.setStatus("IN_PROGRESS");
+                log.setStartDate(hs.getStartDate());
+                log.setLoggedAt(OffsetDateTime.now());
+                stageLogs.save(log);
+            }
+        }
+
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("sessionId",   s.getId());
         res.put("checkedInAt", s.getCheckedInAt().toString());
@@ -161,9 +212,10 @@ public class AttendanceController {
         House house = houses.findByCheckinToken(token).orElse(null);
         if (house == null) return ResponseEntity.notFound().build();
 
-        String deviceId = (String) body.get("deviceId");
-        Double lat      = toDouble(body.get("lat"));
-        Double lng      = toDouble(body.get("lng"));
+        String  deviceId        = (String) body.get("deviceId");
+        Double  lat             = toDouble(body.get("lat"));
+        Double  lng             = toDouble(body.get("lng"));
+        boolean skipDeviceCheck = Boolean.TRUE.equals(body.get("skipDeviceCheck"));
 
         WorkSession s = sessions.findById(sessionId).orElse(null);
         if (s == null) return error("Session not found");
@@ -175,7 +227,7 @@ public class AttendanceController {
         if (s.getCheckedOutAt() != null) return error("Already checked out");
 
         // Validation 3: same device
-        if (!s.getDeviceId().equals(deviceId))
+        if (!skipDeviceCheck && !s.getDeviceId().equals(deviceId))
             return error("Check out must be done from the same phone used to check in");
 
         // Validation 4: GPS

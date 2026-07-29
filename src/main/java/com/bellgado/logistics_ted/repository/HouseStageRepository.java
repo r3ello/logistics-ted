@@ -45,8 +45,12 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query(value = "SELECT stage_name FROM house_stage WHERE house_id = :houseId AND status = 'IN_PROGRESS' ORDER BY stage_order", nativeQuery = true)
     List<String> findAllInProgressStageNames(Integer houseId);
 
-    @Query(value = "SELECT DISTINCT h.id, h.name FROM house_stage hs JOIN house h ON h.id = hs.house_id WHERE hs.crew_id = :crewId AND hs.status = 'IN_PROGRESS' ORDER BY h.name", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT h.id, h.name FROM house_stage hs JOIN house h ON h.id = hs.house_id WHERE hs.crew_id = :crewId AND hs.status IN ('ASSIGNED', 'IN_PROGRESS') ORDER BY h.name", nativeQuery = true)
     List<Object[]> findAssignedHousesForCrew(Integer crewId);
+
+    /** Lowest ASSIGNED stage for a crew on a specific house — candidate for auto-promote on check-in. */
+    @Query("SELECT s FROM HouseStage s JOIN FETCH s.house WHERE s.house.id = :houseId AND s.crewId = :crewId AND s.status = 'ASSIGNED' ORDER BY s.stageOrder ASC")
+    List<HouseStage> findAssignedStagesForCrewOnHouse(Integer houseId, Integer crewId);
 
     @Query(value = """
         SELECT string_agg(DISTINCT st.stage_name, ', ' ORDER BY st.stage_name)
@@ -88,7 +92,7 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
         SELECT DISTINCT hs.crew_id, h.id, h.name
         FROM house_stage hs
         JOIN house h ON h.id = hs.house_id
-        WHERE hs.crew_id IS NOT NULL AND hs.status = 'IN_PROGRESS'
+        WHERE hs.crew_id IS NOT NULL AND hs.status IN ('ASSIGNED', 'IN_PROGRESS')
         ORDER BY hs.crew_id, h.name
         """, nativeQuery = true)
     List<Object[]> findAllAssignedHousesPerCrew();
@@ -118,7 +122,7 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
         FROM crew_stage_type cst
         JOIN crew c ON c.id = cst.crew_id
         LEFT JOIN worker w ON w.id = c.leader_id
-        LEFT JOIN house_stage hs2 ON hs2.crew_id = c.id AND hs2.status = 'IN_PROGRESS'
+        LEFT JOIN house_stage hs2 ON hs2.crew_id = c.id AND hs2.status IN ('ASSIGNED', 'IN_PROGRESS')
         LEFT JOIN house h2 ON h2.id = hs2.house_id
         GROUP BY cst.stage_order, c.id, c.name, w.id, w.name
         ORDER BY cst.stage_order, c.name
