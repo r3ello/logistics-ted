@@ -348,6 +348,67 @@ public class HouseStageController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    /** Daily work hours per house for a crew.
+     *  Returns [{houseId, houseName, days:[{date, totalMinutes, workerCount}]}] */
+    @GetMapping("/crews/{crewId}/work-hours")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> crewWorkHours(@PathVariable Integer crewId) {
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+            SELECT h.id AS house_id, h.name AS house_name,
+                   ws.session_date::text AS date,
+                   SUM(EXTRACT(EPOCH FROM (ws.checked_out_at - ws.checked_in_at)) / 60)::int AS total_minutes,
+                   COUNT(DISTINCT ws.worker_id) AS worker_count
+            FROM work_session ws
+            JOIN worker w ON w.id = ws.worker_id
+            JOIN house h ON h.id = ws.house_id
+            WHERE w.crew_id = ?
+              AND ws.checked_out_at IS NOT NULL
+            GROUP BY h.id, h.name, ws.session_date
+            ORDER BY h.name, ws.session_date
+            """, crewId);
+
+        // Group by house
+        Map<Integer, Map<String, Object>> byHouse = new java.util.LinkedHashMap<>();
+        for (Map<String, Object> row : rows) {
+            int houseId = ((Number) row.get("house_id")).intValue();
+            byHouse.computeIfAbsent(houseId, k -> {
+                Map<String, Object> h = new LinkedHashMap<>();
+                h.put("houseId",   houseId);
+                h.put("houseName", row.get("house_name"));
+                h.put("days",      new java.util.ArrayList<>());
+                return h;
+            });
+            Map<String, Object> day = new LinkedHashMap<>();
+            day.put("date",         row.get("date"));
+            day.put("totalMinutes", ((Number) row.get("total_minutes")).intValue());
+            day.put("workerCount",  ((Number) row.get("worker_count")).intValue());
+            ((java.util.List<Object>) byHouse.get(houseId).get("days")).add(day);
+        }
+        return ResponseEntity.ok(byHouse.values());
+    }
+
+    /** Per-worker breakdown for a crew on a house on a specific date.
+     *  Returns [{workerId, workerName, totalMinutes}] for all crew members (0 if no session). */
+    @GetMapping("/crews/{crewId}/work-hours/{houseId}/{date}")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> crewDayBreakdown(@PathVariable Integer crewId,
+                                               @PathVariable Integer houseId,
+                                               @PathVariable String date) {
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+            SELECT w.id AS worker_id, w.name AS worker_name,
+                   COALESCE(SUM(EXTRACT(EPOCH FROM (ws.checked_out_at - ws.checked_in_at)) / 60)::int, 0) AS total_minutes
+            FROM worker w
+            LEFT JOIN work_session ws ON ws.worker_id = w.id
+              AND ws.house_id = ?
+              AND ws.session_date = ?::date
+              AND ws.checked_out_at IS NOT NULL
+            WHERE w.crew_id = ?
+            GROUP BY w.id, w.name
+            ORDER BY total_minutes DESC, w.name
+            """, houseId, date, crewId);
+        return ResponseEntity.ok(rows);
+    }
+
     /** Upsert: find existing house_stage by houseId+stageOrder, or create one, then apply body. */
     @PutMapping("/houses/{houseId}/stages/{stageOrder}")
     @Transactional

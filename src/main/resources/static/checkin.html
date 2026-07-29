@@ -76,9 +76,15 @@
     </div>
     <div id="actionArea"></div>
     <div id="msgBox" style="display:none" class="msg"></div>
-    <div style="margin-top:1.25rem;display:flex;align-items:center;gap:.5rem;opacity:.55">
-      <input type="checkbox" id="skipGps" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
-      <label for="skipGps" style="font-size:.72rem;margin:0;text-transform:none;letter-spacing:0;cursor:pointer">Skip location check (testing only)</label>
+    <div style="margin-top:1.25rem;display:flex;flex-direction:column;gap:.5rem;opacity:.55">
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <input type="checkbox" id="skipGps" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+        <label for="skipGps" style="font-size:.72rem;margin:0;text-transform:none;letter-spacing:0;cursor:pointer">Skip location check (testing only)</label>
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <input type="checkbox" id="skipDeviceCheck" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent)">
+        <label for="skipDeviceCheck" style="font-size:.72rem;margin:0;text-transform:none;letter-spacing:0;cursor:pointer">Skip device check (testing only)</label>
+      </div>
     </div>
   </div>
 </div>
@@ -217,7 +223,7 @@ async function doCheckIn() {
   try {
     const res  = await fetch(`/api/public/checkin/${houseToken}/session`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ workerId: currentWorkerId, deviceId, lat, lng })
+      body: JSON.stringify({ workerId: currentWorkerId, deviceId, lat, lng, skipDeviceCheck: document.getElementById('skipDeviceCheck').checked })
     });
     const data = await res.json();
     if (!res.ok) { showMsg('❌ ' + data.error, 'err'); return; }
@@ -243,7 +249,7 @@ async function doCheckOut(sessionId) {
   try {
     const res  = await fetch(`/api/public/checkin/${houseToken}/session/${sessionId}/checkout`, {
       method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ deviceId, lat, lng })
+      body: JSON.stringify({ deviceId, lat, lng, skipDeviceCheck: document.getElementById('skipDeviceCheck').checked })
     });
     const data = await res.json();
     if (!res.ok) { showMsg('❌ ' + data.error, 'err'); return; }

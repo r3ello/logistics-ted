@@ -26,12 +26,12 @@ public interface WorkerRepository extends JpaRepository<Worker, Integer> {
         """)
     List<Worker> findAllWithCrew();
 
-    /** Workers whose crew has an IN_PROGRESS stage on this house (via house_stage). */
+    /** Workers whose crew has an ASSIGNED or IN_PROGRESS stage on this house (via house_stage). */
     @Query(value = """
         SELECT DISTINCT w.* FROM worker w
         JOIN crew c ON c.id = w.crew_id
         JOIN house_stage hs ON hs.crew_id = c.id AND hs.house_id = :houseId
-        WHERE hs.status = 'IN_PROGRESS'
+        WHERE hs.status IN ('ASSIGNED', 'IN_PROGRESS')
         ORDER BY w.name
         """, nativeQuery = true)
     List<Worker> findByHouseId(@Param("houseId") Integer houseId);
