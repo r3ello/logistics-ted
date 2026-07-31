@@ -1,0 +1,196 @@
+### CSV import API — /api/import/**
+# IntelliJ HTTP Client syntax. For the VS Code "REST Client" extension, replace the
+# `> {% ... %}` handler below with `# @name login` and use {{login.response.body.token}}.
+#
+# mode=validate (the default) writes no business data. mode=apply writes to DB_URL.
+
+@host = http://localhost:3002
+
+### 0. Log in — stores the JWT in {{token}}
+POST http://localhost:8080/api/login
+Content-Type: application/json
+
+{ "username": "admin", "password": "admin" }
+
+> {% client.global.set("token", response.body.token); %}
+
+### 1. Catalogue — which entities/columns the sync owns
+GET http://localhost:8080/api/import/entities
+Authorization: Bearer {{token}}
+
+### 2. Blank template (text/csv, UTF-8 BOM)
+GET http://localhost:8080/api/import/templates/materials
+Authorization: Bearer {{token}}
+
+### 3. Dry run of the first sync — expect created:3, nothing written
+POST http://localhost:8080/api/import/materials?mode=validate
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials.csv"
+Content-Type: text/csv
+
+< ./materials.csv
+--Boundary--
+
+### 4. Apply it — expect created:3
+POST http://localhost:8080/api/import/materials?mode=apply
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials.csv"
+Content-Type: text/csv
+
+< ./materials.csv
+--Boundary--
+
+### 5. Same file again — expect unchanged:3 (the idempotence check)
+POST http://localhost:8080/api/import/materials?mode=apply
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials.csv"
+Content-Type: text/csv
+
+< ./materials.csv
+--Boundary--
+
+### 6. Sheet moved: one price edited + one new material — expect created:1, updated:1, unchanged:2
+POST http://localhost:8080/api/import/materials?mode=apply
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials-v2.csv"
+Content-Type: text/csv
+
+< ./materials-v2.csv
+--Boundary--
+
+### 7. Now edit the app side by hand, then run #8:
+#   UPDATE material SET price = 27.50
+#    WHERE id IN (SELECT entity_id FROM import_ref
+#                  WHERE entity_type = 'material' AND external_key = 'MAT-001');
+
+### 8. Both sides moved — expect status:partial, conflicts:1, nothing written for MAT-001
+POST {{host}}/api/import/materials?mode=apply
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials-conflict.csv"
+Content-Type: text/csv
+
+< ./materials-conflict.csv
+--Boundary--
+
+### 9. Sheet is stale, app wins — expect keptApp:1, unchanged:3
+POST {{host}}/api/import/materials?mode=apply
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials-v2.csv"
+Content-Type: text/csv
+
+< ./materials-v2.csv
+--Boundary--
+
+### 10. Once more — expect unchanged:4, price still 27.50 (the two-baseline property)
+POST {{host}}/api/import/materials?mode=apply
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials-v2.csv"
+Content-Type: text/csv
+
+< ./materials-v2.csv
+--Boundary--
+
+### 11. Row-level errors — expect failed:3, one UNKNOWN_COLUMN warning, status:partial
+POST {{host}}/api/import/materials?mode=validate
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials-errors.csv"
+Content-Type: text/csv
+
+< ./materials-errors.csv
+--Boundary--
+
+### 12. Same file, onError=abort — same report, but the file is rolled back
+POST {{host}}/api/import/materials?mode=apply&onError=abort
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials-errors.csv"
+Content-Type: text/csv
+
+< ./materials-errors.csv
+--Boundary--
+
+### 13. Bulgarian locale: ';' separator, ',' decimals — expect unchanged:4 after #10
+POST {{host}}/api/import/materials?mode=validate&delimiter=semicolon&decimal=comma
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials-bg-semicolon.csv"
+Content-Type: text/csv
+
+< ./materials-bg-semicolon.csv
+--Boundary--
+
+### 14a. Forgot decimal=comma — file parses, all 4 prices fail INVALID_NUMBER (status: failed)
+POST {{host}}/api/import/materials?mode=validate&delimiter=semicolon
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials-bg-semicolon.csv"
+Content-Type: text/csv
+
+< ./materials-bg-semicolon.csv
+--Boundary--
+
+### 14b. Forgot delimiter=semicolon — header reads as one column, 400 MISSING_COLUMN
+POST {{host}}/api/import/materials?mode=validate
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials-bg-semicolon.csv"
+Content-Type: text/csv
+
+< ./materials-bg-semicolon.csv
+--Boundary--
+
+### 15. File-level failure — 400 MISSING_COLUMN, no report
+POST {{host}}/api/import/materials?mode=validate
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials-missing-columns.csv"
+Content-Type: text/csv
+
+< ./materials-missing-columns.csv
+--Boundary--
+
+### 16. Unknown entity — 400, lists what is registered
+POST {{host}}/api/import/houses?mode=validate
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="file"; filename="materials.csv"
+Content-Type: text/csv
+
+< ./materials.csv
+--Boundary--

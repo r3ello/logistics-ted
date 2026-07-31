@@ -10820,6 +10820,12 @@
 
   function initApp() {
     if (currentUser?.role === 'crew_leader') { initCrewLeader(); return; }
+    // The importer role exists to keep whoever maintains the client's spreadsheets out of the
+    // dispatcher/admin surface, so it must never land on this dashboard — every call here would
+    // 403 anyway, and the nav alone would disclose the app's structure. Their entire surface today
+    // is the import API; send them to its documentation, which reads the same stored token.
+    // When an import UI lands (DATA_IMPORT_PLAN.md phase 9) this redirect becomes that view.
+    if (currentUser?.role === 'importer') { location.replace('/import-docs.html'); return; }
     applyStoredTheme();
     // Load menu config and apply visibility/ordering before showing the first view
     apiFetch('/api/menu-config').then(r => r.json()).then(data => {

@@ -1,0 +1,796 @@
+openapi: 3.0.3
+
+info:
+  title: Tedhouse — CSV Data Import API
+  version: "1.0.0"
+  description: |
+    Recurring synchronisation of operational data from spreadsheets into the Tedhouse logistics
+    database. Files are uploaded as CSV; each run reports, per row, exactly what it did.
+
+    This document covers **only** the data-import surface. The rest of the application's API is
+    internal and not part of any integration contract.
+
+    ---
+
+    ## The model in five points
+
+    **1. Rows are matched by an external key, never by name.**
+    Almost no table in this schema has a natural unique key — `material.name`, `house.name`,
+    `supplier.name` and `worker.name` are all non-unique (there are already nine workers called
+    *Георги …*). So every importable row carries a `key` column owned by **your** spreadsheet, and the
+    mapping `key → internal id` is stored on our side. The same key in a later run updates the same
+    record; a new key creates a new record.
+
+    > **The `key` column is the contract.** Changing a row's key detaches it from its record and
+    > creates a duplicate. Reusing a key for a different real-world entity re-points it at the wrong
+    > record. Freeze and protect that column in the source sheet.
+
+    **2. Nothing is ever deleted.** A row that disappears from the sheet is left untouched in the
+    database. Removals are performed by hand in the application.
+
+    **3. Every run is a three-way merge, not an overwrite.** Between two runs both sides move: you
+    edit the sheet, and dispatchers and crew leaders edit the same records in the app. Each column is
+    therefore compared three ways — the incoming CSV value, the current database value, and the
+    baseline that the last run recorded:
+
+    | App changed | Sheet changed | Outcome     | Written |
+    |-------------|---------------|-------------|---------|
+    | no          | no            | `unchanged` | no      |
+    | no          | yes           | `updated`   | yes     |
+    | yes         | no            | `kept_app`  | no      |
+    | yes         | yes           | `conflict`  | no      |
+
+    Detection is per column, but **application is per row**: once any column conflicts the whole row
+    is skipped, because fields here are coupled (status with start/end date, quantity with unit) and
+    writing half of them would leave an inconsistent record.
+
+    **4. Conflicts are reported, never guessed.** A conflicting row is left exactly as it was and
+    reported with all three values so a human can decide.
+
+    **5. `mode=validate` is the default.** A validate run parses the file, resolves keys and performs
+    the complete merge, then reports every outcome **without a single write**. The report is
+    byte-identical to what `mode=apply` would produce. Always dry-run first.
+
+    ---
+
+    ## CSV format
+
+    - **UTF-8 only.** A byte-order mark is tolerated and stripped. A file in another encoding is
+      rejected outright (`ENCODING`) rather than transcoded on a guess — the data is Cyrillic and a
+      wrong guess produces plausible-looking mojibake that then reaches the database.
+    - **RFC 4180** quoting (`"` doubled inside quoted fields), CRLF or LF, embedded newlines allowed
+      inside quoted cells.
+    - **Header row required on line 1**, matched case-insensitively and order-independently.
+      Fully blank lines are skipped. Unknown columns are ignored and reported as warnings.
+    - **An absent column is not an empty cell.** A column missing from the header means *this file
+      does not manage that field*, and the field is excluded from the merge entirely. An empty cell in
+      a column that **is** present means NULL, and that is a value the merge will apply.
+    - **Delimiter and decimal separator are explicit request parameters**, never auto-detected —
+      `1,234` is genuinely ambiguous between 1234 and 1.234. Grouping separators are not supported.
+      A comma-decimal file must use `;` as its delimiter, which is what Bulgarian-locale spreadsheets
+      export anyway.
+    - **Dates** ISO `YYYY-MM-DD` (`DD.MM.YYYY`, `DD/MM/YYYY` and `YYYY/MM/DD` are also accepted).
+    - **Booleans**: `true`/`false`, `1`/`0`, `yes`/`no`, `да`/`не`.
+    - **Multi-value cells** are pipe-separated: `3|4|5|6|19`.
+    - **No `id` columns, ever.** Identity is the `key`.
+    - Maximum 50 000 data rows and 10 MB per file.
+
+    Call `GET /api/import/entities` for the authoritative list of importable entities and the exact
+    columns each one manages — it is generated from the code, so it cannot drift from what the server
+    actually accepts.
+
+    ---
+
+    ## Authentication
+
+    Every endpoint requires a JWT bearer token. Obtain one from `POST /api/login` and send it as
+    `Authorization: Bearer <token>` on each request. Tokens expire (8 hours by default); there is no
+    refresh endpoint — log in again.
+
+    You will be issued an account with the **`importer`** role. That role reaches this API and
+    nothing else: every other endpoint of the application rejects it with `403`. This is deliberate —
+    the data import needs no access to the dispatcher and administration surface, so it is not
+    granted any. Administrators can also call these endpoints.
+
+  contact:
+    name: Tedhouse
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:3002
+    description: Local development
+  - url: https://{host}
+    description: Deployed instance
+    variables:
+      host:
+        default: example.tedhouse.bg
+        description: Ask your Tedhouse contact for the real host
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Authentication
+    description: Obtaining a token. Not part of the import surface, but required to use it.
+  - name: Import
+    description: Uploading and dry-running CSV files.
+  - name: Documentation
+    description: This document, machine-readable.
+
+paths:
+
+  /api/login:
+    post:
+      tags: [Authentication]
+      summary: Obtain a JWT bearer token
+      description: |
+        Returns a token to be sent as `Authorization: Bearer <token>` on every other call. The
+        account must have the `importer` role (or `admin`) to use the import endpoints.
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: importer
+              password: "s3cret"
+      responses:
+        '200':
+          description: Authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpbXBvcnRlciJ9.xxxxx
+                tokenType: Bearer
+                expiresIn: 28800
+                user: { id: 3, username: importer, role: importer }
+        '400':
+          description: Username or password missing.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              example: { error: "Username and password required." }
+        '401':
+          description: Wrong credentials.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              example: { error: "Invalid credentials." }
+
+  /api/import/entities:
+    get:
+      tags: [Import]
+      summary: List the importable entities and their columns
+      description: |
+        The self-describing catalogue of the sync, in dependency order — files must be imported in
+        the order returned, because a child file can only reference keys a previous file created.
+
+        It is derived from the server's own importer registry, so it cannot describe an entity that
+        does not exist or omit one that does. Treat it as the source of truth for column names and
+        build your export against it.
+
+        `columns` is the complete set of fields the sync **owns** for that entity. A field that is
+        not listed can never be written by an import and can never conflict — worker credentials, for
+        example, are deliberately absent so a recurring run cannot rotate every crew's PIN.
+      operationId: listImportEntities
+      responses:
+        '200':
+          description: The catalogue.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/EntityDescriptor' }
+              example:
+                - name: materials
+                  entityType: material
+                  keyColumn: key
+                  required: [name, unit]
+                  columns: { name: text, price: decimal, unit: text }
+                  dependsOn: []
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/import/templates/{entity}:
+    get:
+      tags: [Import]
+      summary: Download a blank CSV template
+      description: |
+        A header-only CSV for the entity, prefixed with a UTF-8 byte-order mark so that Excel on
+        Windows opens the Cyrillic correctly instead of mangling it.
+
+        Columns are emitted alphabetically after the key column; order does not matter on upload.
+      operationId: getImportTemplate
+      parameters:
+        - $ref: '#/components/parameters/Entity'
+      responses:
+        '200':
+          description: The template.
+          headers:
+            Content-Disposition:
+              description: 'Always `attachment; filename="<entity>.csv"`.'
+              schema: { type: string }
+          content:
+            text/csv:
+              schema: { type: string }
+              example: "key,name,price,unit\n"
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: No importer is registered under that name. Empty body — call `/api/import/entities` for the valid list.
+
+  /api/import/{entity}:
+    post:
+      tags: [Import]
+      summary: Run one CSV file
+      description: |
+        Uploads one file as `multipart/form-data` under the field name **`file`**, and returns the
+        run report.
+
+        **The response is `200 OK` whenever the *file* parsed**, even when individual rows failed or
+        conflicted — the verdict is in `status`, and the per-row detail is in `errors`,
+        `conflictDetails` and `warnings`. A `4xx` means the file itself could not be processed at all
+        and nothing was attempted.
+
+        Errors are addressed by line and column, because a recurring sync is a standing conversation
+        with whoever maintains the spreadsheet and *"constraint violation on row 402"* is useless to
+        them. `line` is the physical line number in the uploaded file, so it matches what they see.
+
+        ### Recommended procedure for each run
+
+        1. `POST` the file with `mode=validate` (the default) and read the report.
+        2. Fix whatever it reports in the source sheet — errors first, then conflicts.
+        3. Re-run with `mode=validate` until only `created` / `updated` / `unchanged` remain.
+        4. `POST` the same file with `mode=apply`.
+        5. `POST` it once more with `mode=apply`. **Everything should now report `unchanged`.**
+           If it does not, stop and report it: a steady-state run that still writes means the
+           synchronisation state is wrong and every future run will rewrite rows it should not.
+      operationId: importFile
+      parameters:
+        - $ref: '#/components/parameters/Entity'
+        - name: mode
+          in: query
+          required: false
+          description: |
+            `validate` (default) performs the entire run — parsing, key resolution, validation and
+            the full merge — and reports every outcome **without writing anything**. `apply` performs
+            the writes. The report shape is identical either way.
+
+            A validate run does record one entry in the import history; that is deliberate, so every
+            attempt is accounted for.
+          schema:
+            type: string
+            enum: [validate, apply]
+            default: validate
+        - name: onError
+          in: query
+          required: false
+          description: |
+            `skip` (default) commits the rows that succeeded and reports the rest — the right
+            behaviour for a recurring run, where one bad row should not block the week's data.
+            `abort` rolls the entire file back if any row failed. The report is the same in both
+            cases, and the run is recorded in the history either way.
+          schema:
+            type: string
+            enum: [skip, abort]
+            default: skip
+        - name: delimiter
+          in: query
+          required: false
+          description: Field separator. Bulgarian-locale spreadsheets export `semicolon`.
+          schema:
+            type: string
+            enum: [comma, semicolon, tab]
+            default: comma
+        - name: decimal
+          in: query
+          required: false
+          description: |
+            Decimal separator. Never auto-detected. A file using `comma` decimals must also use
+            `semicolon` as its delimiter — comma decimals with comma delimiters are unparseable by
+            construction.
+          schema:
+            type: string
+            enum: [dot, comma]
+            default: dot
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV file. UTF-8, max 10 MB, max 50 000 data rows.
+            encoding:
+              file:
+                contentType: text/csv
+      responses:
+        '200':
+          description: |
+            The file parsed and the run completed. Check `status` — `ok`, `partial` (some rows failed
+            or conflicted) or `failed` (every row failed).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ImportReport' }
+              examples:
+                firstRun:
+                  summary: First sync, dry run — three new materials
+                  value:
+                    batchId: 0f6a1c8e-3b52-4a1d-9f2c-7d41e0a9b511
+                    entity: materials
+                    mode: validate
+                    status: ok
+                    rowsRead: 3
+                    created: 3
+                    updated: 0
+                    unchanged: 0
+                    keptApp: 0
+                    conflicts: 0
+                    failed: 0
+                    warnings: []
+                    conflictDetails: []
+                    errors: []
+                steadyState:
+                  summary: Re-run of an unchanged file — the property to check after every apply
+                  value:
+                    batchId: 2b7e4f10-9c31-4d5a-8e02-1f9a3c7b6d42
+                    entity: materials
+                    mode: apply
+                    status: ok
+                    rowsRead: 4
+                    created: 0
+                    updated: 0
+                    unchanged: 4
+                    keptApp: 0
+                    conflicts: 0
+                    failed: 0
+                    warnings: []
+                    conflictDetails: []
+                    errors: []
+                conflict:
+                  summary: A column edited on both sides — the row is left untouched
+                  value:
+                    batchId: 7c2d9a44-6b18-4f3e-9a51-0c8e2d1b4f37
+                    entity: materials
+                    mode: apply
+                    status: partial
+                    rowsRead: 4
+                    created: 0
+                    updated: 0
+                    unchanged: 3
+                    keptApp: 0
+                    conflicts: 1
+                    failed: 0
+                    warnings: []
+                    conflictDetails:
+                      - conflictId: 1
+                        line: 2
+                        key: MAT-001
+                        column: price
+                        base: "26.9"
+                        app: "27.5"
+                        sheet: "29.9"
+                        message: Changed in both the app and the sheet since the last sync. Row left untouched.
+                    errors: []
+                rowErrors:
+                  summary: Bad input — three rejected rows and one ignored column
+                  value:
+                    batchId: 91f0c6b2-3d47-4e88-b1a9-5f2c7e0d3a16
+                    entity: materials
+                    mode: validate
+                    status: partial
+                    rowsRead: 4
+                    created: 1
+                    updated: 0
+                    unchanged: 0
+                    keptApp: 0
+                    conflicts: 0
+                    failed: 3
+                    warnings:
+                      - line: 0
+                        code: UNKNOWN_COLUMN
+                        column: коментар
+                        message: Column is not managed by the 'materials' importer and was ignored.
+                    conflictDetails: []
+                    errors:
+                      - line: 3
+                        column: key
+                        value: MAT-010
+                        code: DUPLICATE_KEY
+                        message: Key 'MAT-010' appears more than once in this file.
+                      - line: 4
+                        column: name
+                        value: null
+                        code: EMPTY_REQUIRED
+                        message: Column 'name' is required.
+                      - line: 5
+                        column: price
+                        value: "12,34"
+                        code: INVALID_NUMBER
+                        message: >-
+                          Contains ',', but this file is being read with '.' as the decimal
+                          separator. Re-send with decimal=comma if the sheet uses ',' for decimals.
+        '400':
+          description: |
+            The file could not be processed at all — nothing was attempted and there is no report.
+            When the failure came from parsing, the body carries a `code` from the file-level set
+            (`ENCODING`, `MALFORMED_CSV`, `NO_HEADER`, `DUPLICATE_COLUMN`, `MISSING_COLUMN`,
+            `ROW_LIMIT_EXCEEDED`).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FileError' }
+              examples:
+                missingColumn:
+                  summary: A required column is not in the header
+                  value:
+                    error: "Missing required column(s): name, unit. Found: key, price."
+                    code: MISSING_COLUMN
+                encoding:
+                  summary: The file is not UTF-8
+                  value:
+                    error: >-
+                      The file is not valid UTF-8. Re-export it as CSV UTF-8 — Cyrillic text in
+                      another encoding cannot be recovered reliably.
+                    code: ENCODING
+                rowLimit:
+                  summary: Too many rows
+                  value:
+                    error: "The file has 61240 rows; the limit is 50000 per import."
+                    code: ROW_LIMIT_EXCEEDED
+                unknownEntity:
+                  summary: No importer registered under that name (no `code`)
+                  value:
+                    error: "Unknown import entity 'houses'. Known: [materials]."
+                noFile:
+                  summary: The `file` part is missing or empty (no `code`)
+                  value:
+                    error: "No file uploaded."
+                badMode:
+                  summary: Unrecognised `mode` (no `code`)
+                  value:
+                    error: "mode must be 'validate' or 'apply'."
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '415':
+          description: The request was not `multipart/form-data`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          description: |
+            Unexpected server error. **Note:** a file larger than the 10 MB upload limit currently
+            surfaces here rather than as a `413`. Check the file size before assuming a server fault.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              example:
+                error: Internal server error
+                requestId: 3f9c1a7e-88d2-4b06-9e51-7a2c4d0b6e13
+
+  /api/import/openapi.yaml:
+    get:
+      tags: [Documentation]
+      summary: This document, as YAML
+      description: The source of truth for this contract. Feed it to a client generator if you like.
+      operationId: getOpenApiYaml
+      responses:
+        '200':
+          description: The specification.
+          content:
+            application/yaml:
+              schema: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/import/openapi.json:
+    get:
+      tags: [Documentation]
+      summary: This document, as JSON
+      operationId: getOpenApiJson
+      responses:
+        '200':
+          description: The specification.
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        A token from `POST /api/login`, sent as `Authorization: Bearer <token>`. The account must
+        have the `importer` role (or `admin`).
+
+  parameters:
+    Entity:
+      name: entity
+      in: path
+      required: true
+      description: |
+        The importer name, plural and lower-case, as returned by `GET /api/import/entities`.
+        Currently only `materials` is available; the remaining entities are being rolled out.
+      schema:
+        type: string
+        example: materials
+
+  responses:
+    Unauthorized:
+      description: No token, or an expired/invalid one.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          example: { error: Unauthorized }
+    Forbidden:
+      description: Authenticated, but the account has neither the `importer` nor the `admin` role.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          example: { error: Forbidden }
+
+  schemas:
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string, format: password }
+
+    LoginResponse:
+      type: object
+      properties:
+        token: { type: string, description: The JWT to send as a bearer token. }
+        tokenType: { type: string, example: Bearer }
+        expiresIn:
+          type: integer
+          format: int64
+          description: Lifetime in seconds (28800 = 8 hours by default).
+        user: { $ref: '#/components/schemas/UserSummary' }
+
+    UserSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        role:
+          type: string
+          description: |
+            Must be `importer` or `admin` to use the import endpoints. An `importer` account is
+            scoped to this API and is rejected everywhere else in the application.
+          enum: [importer, admin]
+          example: importer
+
+    EntityDescriptor:
+      type: object
+      description: One importable entity, as described by the server's importer registry.
+      properties:
+        name:
+          type: string
+          description: The importer name — the `{entity}` path segment, and the conventional file name.
+          example: materials
+        entityType:
+          type: string
+          description: Singular namespace under which this entity's external keys are unique.
+          example: material
+        keyColumn:
+          type: string
+          description: The CSV column carrying your external key.
+          default: key
+        required:
+          type: array
+          description: Columns that must be present in the header **and** non-blank in every row.
+          items: { type: string }
+          example: [name, unit]
+        columns:
+          type: object
+          description: |
+            Every column this importer manages, mapped to how the value is canonicalised before
+            comparison. Columns outside this set are ignored with a warning.
+          additionalProperties:
+            type: string
+            enum: [text, decimal, integer, date, timestamp, enum, boolean, pipe_set]
+          example: { name: text, price: decimal, unit: text }
+        dependsOn:
+          type: array
+          description: |
+            Importers whose files must be applied before this one, by name. A file referencing a key
+            that its dependency has not created yet fails with `UNRESOLVED_REF`.
+          items: { type: string }
+          example: []
+
+    ImportReport:
+      type: object
+      description: |
+        The result of one run. The counters partition the rows read: every row lands in exactly one
+        of `created`, `updated`, `unchanged`, `keptApp`, `conflicts` or `failed`.
+      properties:
+        batchId:
+          type: string
+          format: uuid
+          description: Identifies this run in the import history. Quote it when reporting a problem.
+        entity:
+          type: string
+          example: materials
+        mode:
+          type: string
+          enum: [validate, apply]
+        status:
+          type: string
+          enum: [ok, partial, failed]
+          description: |
+            `ok` — no failures and no conflicts.
+            `partial` — some rows failed or conflicted; the rest were processed.
+            `failed` — every row failed.
+        rowsRead:
+          type: integer
+          description: Data rows read, excluding the header and blank lines.
+        created:
+          type: integer
+          description: Keys not seen before — a new record was (or would be) inserted.
+        updated:
+          type: integer
+          description: The sheet changed and the app did not — the sheet value was applied.
+        unchanged:
+          type: integer
+          description: Neither side moved. No write at all, which is what a steady-state run should be.
+        keptApp:
+          type: integer
+          description: |
+            The app changed and the sheet did not, so the sheet value is stale and the existing
+            record wins. Nothing is written and this is **not** an error — it is the sync protecting
+            live operational data. If the sheet value is in fact the correct one, edit the sheet so
+            it differs from what the previous run saw.
+        conflicts:
+          type: integer
+          description: Rows where a column moved on both sides. Nothing written; see `conflictDetails`.
+        failed:
+          type: integer
+          description: Rows rejected by validation. See `errors`.
+        warnings:
+          type: array
+          items: { $ref: '#/components/schemas/Warning' }
+        conflictDetails:
+          type: array
+          items: { $ref: '#/components/schemas/ConflictDetail' }
+        errors:
+          type: array
+          items: { $ref: '#/components/schemas/RowError' }
+
+    Warning:
+      type: object
+      description: Non-fatal — the run continued.
+      properties:
+        line:
+          type: integer
+          description: Physical line in the file. `0` means the warning is about the file as a whole.
+        code: { $ref: '#/components/schemas/ImportErrorCode' }
+        column: { type: string, nullable: true }
+        message: { type: string }
+
+    ConflictDetail:
+      type: object
+      description: |
+        One column that moved on both sides since the last run. All three values are given so the
+        decision can be made by a human. The row is left exactly as it was.
+      properties:
+        conflictId:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Identifier of the stored conflict. Conflicts are only persisted in `mode=apply`; in
+            `mode=validate` this is `null` because a dry run leaves no trace.
+        line: { type: integer, description: Physical line in the file. }
+        key: { type: string, description: Your external key for the row. }
+        column: { type: string }
+        base:
+          type: string
+          nullable: true
+          description: The value as of the last run — what both sides agreed on.
+        app:
+          type: string
+          nullable: true
+          description: What the database holds now.
+        sheet:
+          type: string
+          nullable: true
+          description: What this file brings.
+        message: { type: string }
+
+    RowError:
+      type: object
+      description: A row that could not be accepted. It was skipped; the rest of the file continued.
+      properties:
+        line: { type: integer, description: Physical line in the file, matching the spreadsheet. }
+        column:
+          type: string
+          nullable: true
+          description: The offending column, or `null` when the failure is not attributable to one.
+        value:
+          type: string
+          nullable: true
+          description: The offending value, or `null` when the cell was empty.
+        code: { $ref: '#/components/schemas/ImportErrorCode' }
+        message: { type: string, description: Human-readable, safe to show to whoever maintains the sheet. }
+
+    ImportErrorCode:
+      type: string
+      description: |
+        Stable codes — map them to your own messages if you localise.
+
+        **File level** (returned as a `4xx`, no report):
+        `ENCODING` not valid UTF-8 ·
+        `MALFORMED_CSV` unparseable, or an unsupported delimiter ·
+        `NO_HEADER` empty file, or a first row with no usable column names ·
+        `DUPLICATE_COLUMN` the same column name twice in the header ·
+        `MISSING_COLUMN` a required column is absent ·
+        `ROW_LIMIT_EXCEEDED` more than 50 000 data rows
+
+        **Row level** (reported in `errors`, the run continues):
+        `EMPTY_REQUIRED` a required cell is blank ·
+        `DUPLICATE_KEY` the same key appears twice in one file — not silently last-wins, because the
+        result would then depend on row order ·
+        `UNRESOLVED_REF` a `*_key` column points at a key no previous file created ·
+        `INVALID_NUMBER` · `INVALID_DATE` · `INVALID_ENUM` (allowed values are listed in the message) ·
+        `INVALID_BOOLEAN` · `OUT_OF_RANGE` latitude/longitude outside the valid range ·
+        `TOO_LONG` the column's length limit is named in the message ·
+        `CONSTRAINT_VIOLATION` rejected by the database ·
+        `KEY_REUSED` a key whose identity fields changed wholesale — reserved, not yet emitted
+
+        **Warning** (reported in `warnings`, nothing is rejected):
+        `UNKNOWN_COLUMN` a column this importer does not manage; it was ignored
+      enum:
+        - ENCODING
+        - MALFORMED_CSV
+        - NO_HEADER
+        - DUPLICATE_COLUMN
+        - MISSING_COLUMN
+        - ROW_LIMIT_EXCEEDED
+        - EMPTY_REQUIRED
+        - DUPLICATE_KEY
+        - UNRESOLVED_REF
+        - INVALID_NUMBER
+        - INVALID_DATE
+        - INVALID_ENUM
+        - INVALID_BOOLEAN
+        - OUT_OF_RANGE
+        - TOO_LONG
+        - CONSTRAINT_VIOLATION
+        - KEY_REUSED
+        - UNKNOWN_COLUMN
+
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
+        requestId:
+          type: string
+          nullable: true
+          description: Present on 5xx. Quote it when reporting the problem.
+
+    FileError:
+      type: object
+      description: A file-level rejection. Nothing was attempted, so there is no report.
+      properties:
+        error: { type: string }
+        code:
+          allOf:
+            - $ref: '#/components/schemas/ImportErrorCode'
+          nullable: true
+          description: Absent when the rejection came from the request itself rather than from parsing.

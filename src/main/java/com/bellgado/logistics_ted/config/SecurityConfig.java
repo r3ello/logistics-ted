@@ -63,6 +63,12 @@ public class SecurityConfig {
                 // material order is built from — their assignments/orders live under /api/my, plus the
                 // material catalog and house list. Everything else under /api is the admin/dispatcher
                 // app and a crew-leader token must NOT reach it (real BE guard, not just a hidden nav).
+                // Separation of duties: the CSV import is operated by whoever maintains the
+                // client's spreadsheets, who must not reach the dispatcher/admin surface. This is
+                // the only place an IMPORTER token is accepted — every other /api/** path falls
+                // through to the ADMIN/USER rule below and is rejected by the filter chain, not
+                // merely hidden in the UI. Must stay ABOVE the generic /api/** matcher.
+                .requestMatchers("/api/import/**").hasAnyRole("ADMIN", "IMPORTER")
                 .requestMatchers("/api/my/**").hasRole("CREW_LEADER")
                 .requestMatchers(HttpMethod.GET, "/api/me").authenticated()
                 .requestMatchers(HttpMethod.GET,
