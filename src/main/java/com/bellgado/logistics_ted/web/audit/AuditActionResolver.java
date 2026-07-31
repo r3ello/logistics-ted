@@ -34,7 +34,8 @@ public final class AuditActionResolver {
         Map.entry("house-stages", "house_stage"),
         Map.entry("stages", "house_stage"),
         Map.entry("orders", "order"),
-        Map.entry("crew-logins", "crew_login"));
+        Map.entry("crew-logins", "crew_login"),
+        Map.entry("import", "import"));
 
     /** Trailing path segments that name the operation rather than a subresource. */
     private static final Set<String> VERB_SEGMENTS = Set.of("start", "finish", "view", "choose");

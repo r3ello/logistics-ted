@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Tedhouse — CSV Data Import API</title>
+<!--
+  Viewer for the CSV import API contract.
+
+  This shell is public because a bearer-token API cannot gate a page the browser navigates to (no
+  Authorization header is sent on navigation). It contains no contract information: the specification
+  itself is fetched from GET /api/import/openapi.json, which is admin-only. Without an admin token
+  this page shows a login form and nothing else.
+
+  Redoc is vendored (redoc.standalone.js) rather than loaded from a CDN, matching how leaflet.js is
+  vendored, so the documentation works offline and does not depend on a third party staying up.
+-->
+<script src="/redoc.standalone.js"></script>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --panel: #ffffff;
+    --text: #1c2331;
+    --muted: #667085;
+    --border: #dfe3e8;
+    --accent: #1f6feb;
+    --danger: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161c;
+      --panel: #1a1f27;
+      --text: #e6e9ef;
+      --muted: #98a2b3;
+      --border: #2b323d;
+      --accent: #4d90fe;
+      --danger: #f97066;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  #gate {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .card h1 { margin: 0 0 6px; font-size: 19px; }
+  .card p.sub { margin: 0 0 22px; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+  label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+  }
+  input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+  button {
+    width: 100%;
+    padding: 11px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  button:disabled { opacity: .6; cursor: default; }
+  .msg { margin-top: 14px; font-size: 13px; color: var(--danger); line-height: 1.5; min-height: 1em; }
+  #docs { display: none; }
+  #loading { color: var(--muted); font-size: 13.5px; text-align: center; padding: 48px 24px; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="card">
+    <h1>CSV Data Import API</h1>
+    <p class="sub">This documentation is restricted. Sign in with your <strong>importer</strong> account to view the contract.</p>
+    <form id="loginForm" autocomplete="on">
+      <label for="u">Username</label>
+      <input id="u" name="username" type="text" autocomplete="username" required autofocus>
+      <label for="p">Password</label>
+      <input id="p" name="password" type="password" autocomplete="current-password" required>
+      <button id="go" type="submit">Sign in</button>
+      <div class="msg" id="msg"></div>
+    </form>
+  </div>
+</div>
+
+<div id="loading" style="display:none">Loading the specification…</div>
+<div id="docs"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // Same key the dashboard uses, so an admin already signed in there is not asked twice.
+  var TOKEN_KEY = 'tedhouse_auth_token';
+  var SPEC_URL  = '/api/import/openapi.json';
+
+  var gate    = document.getElementById('gate');
+  var loading = document.getElementById('loading');
+  var docs    = document.getElementById('docs');
+  var msg     = document.getElementById('msg');
+  var form    = document.getElementById('loginForm');
+  var button  = document.getElementById('go');
+
+  function show(el) { el.style.display = el === gate ? 'flex' : 'block'; }
+  function hide(el) { el.style.display = 'none'; }
+
+  function render(spec) {
+    hide(gate);
+    hide(loading);
+    show(docs);
+    Redoc.init(spec, {
+      hideDownloadButton: false,
+      expandResponses: '200',
+      jsonSampleExpandLevel: 4,
+      pathInMiddlePanel: true,
+      theme: { typography: { fontSize: '15px', code: { fontSize: '13px' } } }
+    }, docs);
+  }
+
+  // Fetches the contract with the given token. Resolves to the spec, or rejects with a message
+  // suitable for showing to the user.
+  function loadSpec(token) {
+    return fetch(SPEC_URL, { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function (res) {
+        if (res.status === 401) throw new Error('expired');
+        if (res.status === 403) {
+          throw new Error('This account does not have the importer or administrator role, so it cannot view the import API documentation.');
+        }
+        if (!res.ok) throw new Error('Could not load the specification (HTTP ' + res.status + ').');
+        return res.json();
+      });
+  }
+
+  function attempt(token, isStoredToken) {
+    hide(gate);
+    show(loading);
+    loadSpec(token).then(render).catch(function (err) {
+      hide(loading);
+      show(gate);
+      if (err.message === 'expired') {
+        localStorage.removeItem(TOKEN_KEY);
+        // A silently expired stored token is not the user's mistake — don't accuse them of one.
+        msg.textContent = isStoredToken ? '' : 'Session expired. Please sign in again.';
+      } else {
+        msg.textContent = err.message;
+      }
+    });
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    msg.textContent = '';
+    button.disabled = true;
+
+    fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.getElementById('u').value,
+        password: document.getElementById('p').value
+      })
+    })
+      .then(function (res) {
+        return res.json().then(function (body) {
+          if (!res.ok) throw new Error(body.error || 'Sign-in failed.');
+          return body;
+        });
+      })
+      .then(function (body) {
+        localStorage.setItem(TOKEN_KEY, body.token);
+        attempt(body.token, false);
+      })
+      .catch(function (err) {
+        msg.textContent = err.message;
+      })
+      .finally(function () {
+        button.disabled = false;
+      });
+  });
+
+  var stored = localStorage.getItem(TOKEN_KEY);
+  if (stored) {
+    attempt(stored, true);
+  }
+})();
+</script>
+
+</body>
+</html>
