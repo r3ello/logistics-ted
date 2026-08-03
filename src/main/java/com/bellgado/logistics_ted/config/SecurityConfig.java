@@ -75,6 +75,7 @@ public class SecurityConfig {
                         "/api/materials", "/api/materials/**",
                         "/api/houses", "/api/houses/**")
                     .hasAnyRole("ADMIN", "USER", "CREW_LEADER")
+                .requestMatchers("/api/qa/**").hasAnyRole("ADMIN", "USER", "QA_INSPECTOR")
                 .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().permitAll()
             )
