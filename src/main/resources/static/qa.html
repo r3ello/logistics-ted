@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TEDHOUSE – Quality Assurance</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f1117;--surface:#1a1d27;--card:#21253a;--border:#2e3250;
+      --accent:#4f8ef7;--green:#3ecf6e;--red:#f76f6f;--yellow:#f5c842;
+      --muted:#9aa3be;--text:#e2e8f0;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+
+    /* ── Header ── */
+    .header{display:flex;align-items:center;justify-content:space-between;
+      padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:var(--surface)}
+    .header-left{display:flex;flex-direction:column;gap:2px}
+    .header-title{font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:0.04em}
+    .header-sub{font-size:0.78rem;color:var(--muted)}
+    .header-right{display:flex;align-items:center;gap:0.6rem}
+    .btn-lang{background:transparent;border:1px solid var(--border);color:var(--muted);
+      border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:700;cursor:pointer;letter-spacing:0.05em}
+    .btn-lang:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);
+      border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer}
+    .btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+    /* ── Stage list ── */
+    .content{padding:1.25rem;max-width:700px;margin:0 auto}
+    .section-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
+      color:var(--muted);margin-bottom:0.6rem;margin-top:1.2rem}
+    .section-label:first-child{margin-top:0}
+    .stage-card{display:flex;align-items:center;justify-content:space-between;
+      background:var(--surface);border:1px solid var(--border);border-radius:12px;
+      padding:1rem 1.1rem;margin-bottom:0.6rem;cursor:pointer;transition:border-color 0.15s,background 0.15s}
+    .stage-card:hover{border-color:var(--accent);background:var(--card)}
+    .stage-name{font-size:1rem;font-weight:600}
+    .badge{font-size:0.75rem;font-weight:700;padding:3px 12px;border-radius:20px;white-space:nowrap}
+    .badge-pending{background:rgba(245,200,66,0.15);color:var(--yellow);border:1px solid rgba(245,200,66,0.3)}
+    .badge-pass{background:rgba(62,207,110,0.15);color:var(--green);border:1px solid rgba(62,207,110,0.3)}
+    .badge-fail{background:rgba(247,111,111,0.15);color:var(--red);border:1px solid rgba(247,111,111,0.3)}
+
+    /* ── Modal ── */
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
+      z-index:100;align-items:flex-end;justify-content:center}
+    .modal-backdrop.open{display:flex}
+    @media(min-width:600px){
+      .modal-backdrop{align-items:center}
+      .modal{border-radius:16px!important;max-height:85vh!important}
+    }
+    .modal{background:var(--surface);border:1px solid var(--border);
+      border-radius:16px 16px 0 0;width:100%;max-width:640px;
+      max-height:92vh;display:flex;flex-direction:column}
+    .modal-header{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .modal-header-title{font-size:1.05rem;font-weight:700}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1}
+    .modal-body{overflow-y:auto;flex:1;padding:1.1rem 1.25rem}
+    .modal-footer{padding:1rem 1.25rem;border-top:1px solid var(--border);
+      display:flex;gap:0.6rem;flex-shrink:0}
+
+    /* ── Checklist item ── */
+    .item-card{border:1px solid var(--border);border-radius:10px;padding:0.9rem 1rem;margin-bottom:0.75rem}
+    .item-text{font-size:0.95rem;font-weight:600;margin-bottom:0.7rem;line-height:1.4}
+    .item-actions{display:flex;gap:0.5rem;margin-bottom:0.6rem}
+    .item-btn{flex:1;padding:0.55rem;border-radius:8px;border:2px solid var(--border);
+      background:transparent;color:var(--muted);cursor:pointer;font-size:0.88rem;font-weight:700;transition:all 0.15s}
+    .item-btn.pass-active{border-color:var(--green);background:rgba(62,207,110,0.12);color:var(--green)}
+    .item-btn.fail-active{border-color:var(--red);background:rgba(247,111,111,0.12);color:var(--red)}
+    .item-note{width:100%;background:var(--card);border:1px solid var(--border);border-radius:6px;
+      color:var(--text);font-size:0.82rem;padding:0.4rem 0.6rem;outline:none;font-family:inherit}
+    .item-note:focus{border-color:var(--accent)}
+
+    /* ── Footer buttons ── */
+    .btn-save{flex:1;padding:0.75rem;border:none;border-radius:10px;
+      background:var(--green);color:#0f1117;font-size:1rem;font-weight:700;cursor:pointer}
+    .btn-cancel{flex:1;padding:0.75rem;border:1px solid var(--border);border-radius:10px;
+      background:transparent;color:var(--muted);font-size:1rem;cursor:pointer}
+
+    /* ── Misc ── */
+    .msg{padding:0.75rem 1rem;border-radius:8px;margin:0.75rem 0;font-size:0.88rem;font-weight:600;text-align:center}
+    .msg-ok  {background:#1a3d28;color:var(--green);border:1px solid rgba(62,207,110,.4)}
+    .msg-err {background:#3d1a1a;color:#ffb0b0;border:1px solid rgba(247,111,111,.4)}
+    .msg-info{background:#1a2a4a;color:#a8c8ff;border:1px solid rgba(79,142,247,.4)}
+    .empty{padding:2.5rem 1rem;text-align:center;color:var(--muted);font-size:0.9rem}
+    .spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--border);
+      border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .overall-note{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;
+      color:var(--text);font-size:0.88rem;padding:0.6rem 0.8rem;outline:none;
+      font-family:inherit;resize:vertical;min-height:64px}
+    .overall-note:focus{border-color:var(--accent)}
+    .note-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;
+      color:var(--muted);margin-bottom:0.4rem;display:block}
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-title">⚡ TEDHOUSE</div>
+    <div class="header-sub" id="hdrHouseName"></div>
+  </div>
+  <div class="header-right">
+    <button class="btn-lang" onclick="toggleLang()" id="langBtn">BG</button>
+    <button class="btn-logout" onclick="doLogout()" id="btnLogout" data-en="Logout" data-bg="Изход">Logout</button>
+  </div>
+</div>
+
+<!-- Inspector info bar -->
+<div style="padding:0.6rem 1.25rem;background:var(--card);border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--muted)">
+  🔍 <span id="inspectorName"></span>
+</div>
+
+<!-- Stage list -->
+<div class="content" id="stageList">
+  <div class="empty"><div class="spinner"></div></div>
+</div>
+
+<!-- Toast message -->
+<div id="toastArea" style="position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:200;min-width:240px;max-width:90vw"></div>
+
+<!-- Checklist Modal -->
+<div class="modal-backdrop" id="qaModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-header-title" id="modalTitle"></span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-save" id="btnSave" onclick="qaSubmit()"></button>
+      <button class="btn-cancel" id="btnCancel" onclick="closeModal()"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Params from URL ────────────────────────────────────────────────────────────
+const params   = new URLSearchParams(location.search);
+const houseToken = params.get('house') || '';
+const houseName  = params.get('name')  || '';
+const inspectorName = params.get('uname') || '';
+const qaToken    = params.get('token') || '';
+let   houseId    = null;
+
+// ── i18n ──────────────────────────────────────────────────────────────────────
+let lang = localStorage.getItem('qaLang') || 'en';
+const i18n = {
+  en: {
+    pending:'Pending QA', inspected:'Already Inspected',
+    noStages:'No completed stages with checklists found for this house.',
+    save:'Save', cancel:'Cancel',
+    saving:'Saving…', saved:'Inspection saved',
+    pass:'✔ Pass', fail:'✘ Fail',
+    resultPass:'PASS', resultFail:'FAIL',
+    noteLabel:'Overall notes', notePlaceholder:'Optional notes…',
+    itemNote:'Note…', logout:'Logout',
+    loading:'Loading…',
+    errUnselected:'All items must be marked Pass or Fail before saving.',
+  },
+  bg: {
+    pending:'Очакващи проверка', inspected:'Вече проверени',
+    noStages:'Няма завършени етапи с контролни списъци за тази сграда.',
+    save:'Запази', cancel:'Откажи',
+    saving:'Запазване…', saved:'Проверката е запазена',
+    pass:'✔ Одобрено', fail:'✘ Неодобрено',
+    resultPass:'ОДОБРЕНО', resultFail:'НЕОДОБРЕНО',
+    noteLabel:'Общи бележки', notePlaceholder:'Незадължителни бележки…',
+    itemNote:'Бележка…', logout:'Изход',
+    loading:'Зареждане…',
+    errUnselected:'Всички елементи трябва да бъдат маркирани преди запазване.',
+  }
+};
+const t = k => i18n[lang][k] || i18n.en[k] || k;
+
+function applyLang() {
+  document.getElementById('langBtn').textContent = lang === 'en' ? 'BG' : 'EN';
+  document.getElementById('btnLogout').textContent = t('logout');
+  document.getElementById('btnSave').textContent   = t('save');
+  document.getElementById('btnCancel').textContent = t('cancel');
+  loadStages();
+}
+
+function toggleLang() {
+  lang = lang === 'en' ? 'bg' : 'en';
+  localStorage.setItem('qaLang', lang);
+  applyLang();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.getElementById('hdrHouseName').textContent = '📍 ' + houseName;
+document.getElementById('inspectorName').textContent = inspectorName;
+
+async function init() {
+  if (!qaToken) { location.href = '/checkin/' + houseToken; return; }
+  // resolve houseId
+  try {
+    const res = await apiFetch(`/api/public/checkin/${houseToken}`);
+    const d   = await res.json();
+    houseId   = d.houseId;
+  } catch(e) {}
+  applyLang();
+}
+
+// ── API helper ────────────────────────────────────────────────────────────────
+function apiFetch(url, opts = {}) {
+  const headers = { ...(opts.headers || {}), ...(qaToken ? { Authorization: 'Bearer ' + qaToken } : {}) };
+  return fetch(url, { ...opts, headers });
+}
+
+// ── Stage list ────────────────────────────────────────────────────────────────
+let _stages = [];
+
+async function loadStages() {
+  const list = document.getElementById('stageList');
+  list.innerHTML = `<div class="empty"><div class="spinner"></div></div>`;
+  if (!houseId) { list.innerHTML = `<div class="empty">${t('noStages')}</div>`; return; }
+  try {
+    const res    = await apiFetch(`/api/qa/houses/${houseId}/pending-stages`);
+    _stages      = await res.json();
+    renderStages();
+  } catch(e) { list.innerHTML = `<div class="empty" style="color:var(--red)">❌ ${e.message}</div>`; }
+}
+
+function renderStages() {
+  const list    = document.getElementById('stageList');
+  const pending   = _stages.filter(s => !s.inspection_id);
+  const inspected = _stages.filter(s =>  s.inspection_id);
+
+  if (!_stages.length) { list.innerHTML = `<div class="empty">${t('noStages')}</div>`; return; }
+
+  function card(s) {
+    const name = lang === 'bg' ? (s.stage_name || s.stage_name_en) : (s.stage_name_en || s.stage_name);
+    let badge;
+    if (!s.inspection_id) badge = `<span class="badge badge-pending">${t('pending')}</span>`;
+    else if (s.result === 'PASS') badge = `<span class="badge badge-pass">${t('resultPass')}</span>`;
+    else badge = `<span class="badge badge-fail">${t('resultFail')}</span>`;
+    return `<div class="stage-card" onclick="openChecklist(${s.stage_order})">
+      <span class="stage-name">${name}</span>${badge}
+    </div>`;
+  }
+
+  let html = '';
+  if (pending.length) {
+    html += `<div class="section-label">${t('pending')}</div>`;
+    html += pending.map(card).join('');
+  }
+  if (inspected.length) {
+    html += `<div class="section-label">${t('inspected')}</div>`;
+    html += inspected.map(card).join('');
+  }
+  list.innerHTML = html;
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+let _items = [];
+let _activeStageOrder = null;
+
+async function openChecklist(stageOrder) {
+  _activeStageOrder = stageOrder;
+  const stage = _stages.find(s => s.stage_order === stageOrder);
+  const name  = stage ? (lang === 'bg' ? (stage.stage_name || stage.stage_name_en) : (stage.stage_name_en || stage.stage_name)) : stageOrder;
+
+  document.getElementById('modalTitle').textContent = name;
+  document.getElementById('modalBody').innerHTML = `<div class="empty"><div class="spinner"></div></div>`;
+  document.getElementById('qaModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  try {
+    const res  = await apiFetch(`/api/qa/houses/${houseId}/stages/${stageOrder}/checklist`);
+    const data = await res.json();
+    _items = data.items.map(it => ({ ...it, _passed: it.passed ?? null }));
+    renderChecklist(data.inspection);
+  } catch(e) {
+    document.getElementById('modalBody').innerHTML = `<div class="empty" style="color:var(--red)">❌ ${e.message}</div>`;
+  }
+}
+
+function renderChecklist(existing) {
+  const body = document.getElementById('modalBody');
+  const rows = _items.map((it, i) => {
+    const text = lang === 'bg' ? (it.item_text_bg || it.item_text_en) : (it.item_text_en || it.item_text_bg);
+    const passClass = it._passed === true  ? 'item-btn pass-active' : 'item-btn';
+    const failClass = it._passed === false ? 'item-btn fail-active' : 'item-btn';
+    const note = (it.note || '').replace(/"/g, '&quot;');
+    return `<div class="item-card" id="qaItem_${it.id}">
+      <div class="item-text">${i+1}. ${text}</div>
+      <div class="item-actions">
+        <button class="${passClass}" id="qaPass_${it.id}" onclick="markItem(${it.id},true)">${t('pass')}</button>
+        <button class="${failClass}" id="qaFail_${it.id}" onclick="markItem(${it.id},false)">${t('fail')}</button>
+      </div>
+      <input type="text" class="item-note" id="qaNote_${it.id}" placeholder="${t('itemNote')}" value="${note}" />
+    </div>`;
+  }).join('');
+
+  const noteVal = (existing?.notes || '').replace(/"/g, '&quot;');
+  body.innerHTML = rows + `
+    <div style="margin-top:0.5rem">
+      <span class="note-label">${t('noteLabel')}</span>
+      <textarea class="overall-note" id="qaOverallNote" placeholder="${t('notePlaceholder')}">${existing?.notes || ''}</textarea>
+    </div>`;
+}
+
+function markItem(id, passed) {
+  const item = _items.find(i => i.id === id);
+  if (item) item._passed = passed;
+  const pb = document.getElementById(`qaPass_${id}`);
+  const fb = document.getElementById(`qaFail_${id}`);
+  if (pb) pb.className = passed  ? 'item-btn pass-active' : 'item-btn';
+  if (fb) fb.className = !passed ? 'item-btn fail-active' : 'item-btn';
+}
+
+function closeModal() {
+  document.getElementById('qaModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function qaSubmit() {
+  if (_items.some(it => it._passed === null)) { showToast(t('errUnselected'), 'err'); return; }
+  const anyFailed = _items.some(it => it._passed === false);
+  const result = anyFailed ? 'FAIL' : 'PASS';
+  const items  = _items.map(it => ({
+    checklistItemId: it.id,
+    passed: it._passed,
+    note: (document.getElementById(`qaNote_${it.id}`)?.value || '').trim() || null
+  }));
+  const notes = (document.getElementById('qaOverallNote')?.value || '').trim() || null;
+  showToast(t('saving'), 'info');
+  try {
+    const res  = await apiFetch(`/api/qa/houses/${houseId}/stages/${_activeStageOrder}/inspect`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ result, notes, items })
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast('❌ ' + (data.error || 'Error'), 'err'); return; }
+    showToast(`${t('saved')} — ${result}`, result === 'PASS' ? 'ok' : 'err');
+    closeModal();
+    await loadStages();
+  } catch(e) { showToast('❌ ' + e.message, 'err'); }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let _toastTimer = null;
+function showToast(text, type) {
+  const area = document.getElementById('toastArea');
+  area.innerHTML = `<div class="msg msg-${type}">${text}</div>`;
+  clearTimeout(_toastTimer);
+  if (type !== 'info') _toastTimer = setTimeout(() => area.innerHTML = '', 3000);
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+function doLogout() {
+  location.href = '/checkin/' + houseToken;
+}
+
+// ── Resolve houseId from public endpoint ──────────────────────────────────────
+// The public checkin endpoint returns houseId — we need to add it if not present.
+// Fallback: search stages by token via a direct DB call.
+
+init();
+</script>
+</body>
+</html>

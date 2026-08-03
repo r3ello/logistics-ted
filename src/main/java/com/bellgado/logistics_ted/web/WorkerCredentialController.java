@@ -1,7 +1,9 @@
 package com.bellgado.logistics_ted.web;
 
+import com.bellgado.logistics_ted.domain.AppUser;
 import com.bellgado.logistics_ted.domain.Worker;
 import com.bellgado.logistics_ted.domain.WorkerRole;
+import com.bellgado.logistics_ted.repository.AppUserRepository;
 import com.bellgado.logistics_ted.repository.CrewRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
@@ -26,6 +28,7 @@ public class WorkerCredentialController {
     private static final Logger log = LoggerFactory.getLogger(WorkerCredentialController.class);
 
     private final WorkerRepository     workers;
+    private final AppUserRepository    appUsers;
     private final CrewRepository       crews;
     private final HouseStageRepository houseStages;
     private final HouseRepository      houses;
@@ -33,11 +36,12 @@ public class WorkerCredentialController {
     private final JwtService           jwt;
     private final AuditLogService      audit;
 
-    public WorkerCredentialController(WorkerRepository workers, CrewRepository crews,
-                                      HouseStageRepository houseStages, HouseRepository houses,
-                                      PasswordEncoder encoder, JwtService jwt,
-                                      AuditLogService audit) {
+    public WorkerCredentialController(WorkerRepository workers, AppUserRepository appUsers,
+                                      CrewRepository crews, HouseStageRepository houseStages,
+                                      HouseRepository houses, PasswordEncoder encoder,
+                                      JwtService jwt, AuditLogService audit) {
         this.workers     = workers;
+        this.appUsers    = appUsers;
         this.crews       = crews;
         this.houseStages = houseStages;
         this.houses      = houses;
@@ -149,6 +153,37 @@ public class WorkerCredentialController {
         if (username == null || password == null)
             return ResponseEntity.badRequest().body(Map.of("error", "Username and password required."));
 
+        // QA inspector lives in app_user table
+        AppUser qa = appUsers.findByUsername(username).orElse(null);
+        if (qa != null && "qa_inspector".equals(qa.getRole())) {
+            if (qa.getPasswordHash() == null || !encoder.matches(password, qa.getPasswordHash())) {
+                auditLoginFailure(username, "bad_credentials", 401);
+                return ResponseEntity.status(401).body(Map.of("error", "Invalid username or password."));
+            }
+            String scannedToken = body.get("houseToken") != null ? body.get("houseToken").toString() : null;
+            String houseName = null;
+            Integer houseId = null;
+            if (scannedToken != null && !scannedToken.isBlank()) {
+                var house = houses.findByCheckinToken(scannedToken).orElse(null);
+                if (house == null) {
+                    auditLoginFailure(username, "invalid_checkin_token", 403);
+                    return ResponseEntity.status(403).body(Map.of("error", "Invalid check-in point."));
+                }
+                houseName = house.getName();
+                houseId   = house.getId();
+            }
+            var issued = jwt.issue(qa.getId(), qa.getUsername(), "qa_inspector");
+            Map<String, Object> res = new LinkedHashMap<>();
+            res.put("token",      issued.token());
+            res.put("workerId",   qa.getId());
+            res.put("workerName", qa.getUsername());
+            res.put("houseToken", scannedToken);
+            res.put("houseName",  houseName);
+            res.put("houseId",    houseId);
+            res.put("role",       "qa_inspector");
+            return ResponseEntity.ok(res);
+        }
+
         Worker w = workers.findByUsername(username).orElse(null);
         if (w == null || w.getPasswordHash() == null || !encoder.matches(password, w.getPasswordHash())) {
             auditLoginFailure(username, "bad_credentials", 401);
@@ -193,6 +228,7 @@ public class WorkerCredentialController {
         res.put("workerName", w.getName());
         res.put("houseToken", houseToken);
         res.put("houseName",  houseName);
+        res.put("role",       "worker");
         return ResponseEntity.ok(res);
     }
 

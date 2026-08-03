@@ -60,7 +60,7 @@ public class AuditLogService {
      */
     public static Actor actorOf(AuthenticatedUser u) {
         String role = u.getRoleLabel();
-        boolean appUser = "admin".equalsIgnoreCase(role) || "user".equalsIgnoreCase(role);
+        boolean appUser = "admin".equalsIgnoreCase(role) || "user".equalsIgnoreCase(role) || "qa_inspector".equalsIgnoreCase(role);
         return appUser
             ? new Actor("app_user", u.getUserId(), null, null, u.getUsername(), role)
             : new Actor("worker", null, u.getUserId(), null, u.getUsername(), role);

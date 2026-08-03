@@ -18,6 +18,7 @@
     .header p{font-size:.85rem;color:var(--gray);margin-top:.3rem}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
       padding:1.5rem;width:100%;max-width:420px}
+    .card.qa-wide{max-width:680px}
     label{display:block;font-size:.75rem;font-weight:700;text-transform:uppercase;
       letter-spacing:.07em;color:var(--gray);margin-bottom:.5rem}
     input[type=text],input[type=password]{
@@ -93,6 +94,7 @@
 const houseToken = location.pathname.split('/').filter(Boolean).pop();
 let deviceId = null;
 let currentWorkerId = null;
+let _qaToken = null;
 
 function getDeviceId() {
   let id = localStorage.getItem('tdhDeviceId');
@@ -141,7 +143,8 @@ async function doLogin() {
     if (!res.ok) { showErr('❌ ' + (data.error || 'Login failed.')); return; }
 
     currentWorkerId = data.workerId;
-    document.getElementById('workerName').textContent = '👷 ' + data.workerName;
+    if (data.token) _qaToken = data.token;
+    document.getElementById('workerName').textContent = (data.role === 'qa_inspector' ? '🔍 ' : '👷 ') + data.workerName;
     document.getElementById('workerRole').textContent = data.houseName ? '📍 ' + data.houseName : '';
     document.getElementById('loginUser').value = '';
     document.getElementById('loginPass').value = '';
@@ -150,7 +153,11 @@ async function doLogin() {
     document.getElementById('screenLogin').style.display = 'none';
     document.getElementById('screenAction').style.display = 'block';
 
-    await loadTodayStatus();
+    if (data.role === 'qa_inspector') {
+      location.href = `/qa.html?house=${houseToken}&name=${encodeURIComponent(data.houseName||'')}&uid=${data.workerId}&uname=${encodeURIComponent(data.workerName||'')}&token=${encodeURIComponent(data.token)}`;
+    } else {
+      await loadTodayStatus();
+    }
   } catch(e) { showErr('❌ ' + e.message); }
 }
 
@@ -255,6 +262,151 @@ async function doCheckOut(sessionId) {
     if (!res.ok) { showMsg('❌ ' + data.error, 'err'); return; }
     showMsg('✅ Checked out — ' + fmtDuration(data.durationMinutes) + ' today', 'ok');
     await loadTodayStatus();
+  } catch(e) { showMsg('❌ ' + e.message, 'err'); }
+}
+
+// ── QA Inspector ─────────────────────────────────────────────────────────────
+let _qaHouseId = null;
+let _qaItems   = [];
+let _qaInspectionStageOrder = null;
+
+const _qaL = {
+  pending:      { en: 'Pending',      bg: 'Изчакващ' },
+  selectStage:  { en: 'Stages to inspect — tap one to open the checklist:', bg: 'Етапи за проверка — натисни за отваряне на списъка:' },
+  noStages:     { en: 'No completed stages with checklists found for this house.', bg: 'Няма завършени етапи с контролни списъци за тази сграда.' },
+  back:         { en: '← Back', bg: '← Назад' },
+  noteLabel:    { en: 'Overall notes', bg: 'Общи бележки' },
+  notePlaceholder: { en: 'Optional notes…', bg: 'Незадължителни бележки…' },
+  itemNote:     { en: 'Note…', bg: 'Бележка…' },
+  save:         { en: 'Save / Запази', bg: 'Запази' },
+  cancel:       { en: 'Cancel / Откажи', bg: 'Откажи' },
+  saving:       { en: 'Saving…', bg: 'Запазване…' },
+  saved:        { en: '✅ Inspection saved', bg: '✅ Проверката е запазена' },
+  pass:         { en: '✔ Pass', bg: '✔ Одобрено' },
+  fail:         { en: '✘ Fail', bg: '✘ Неодобрено' },
+};
+function _qaT(k) { const lang = document.documentElement.lang || 'en'; return (_qaL[k]||{})[lang] || _qaL[k]?.en || k; }
+
+async function loadQaStages(houseId) {
+  _qaHouseId = houseId;
+  const area = document.getElementById('actionArea');
+  area.innerHTML = '<div style="text-align:center;padding:2rem;color:#9aa3be">Loading…</div>';
+  hideMsg();
+  try {
+    const res = await fetch(`/api/qa/houses/${houseId}/pending-stages`, {
+      headers: _qaToken ? { Authorization: 'Bearer ' + _qaToken } : {}
+    });
+    const stages = await res.json();
+    if (!stages.length) {
+      area.innerHTML = `<div style="padding:2rem;text-align:center;color:#9aa3be">${_qaT('noStages')}</div>`;
+      return;
+    }
+    const pending   = stages.filter(s => !s.inspection_id);
+    const inspected = stages.filter(s =>  s.inspection_id);
+
+    function stageRow(s) {
+      const name = s.stage_name_en || s.stage_name;
+      const hasBadge = s.inspection_id != null;
+      const badge = hasBadge
+        ? `<span style="font-size:0.8rem;padding:3px 10px;border-radius:12px;font-weight:700;background:${s.result==='PASS'?'#3ecf6e':'#f76f6f'};color:#fff">${s.result}</span>`
+        : `<span style="font-size:0.8rem;padding:3px 10px;border-radius:12px;font-weight:700;background:#f0a500;color:#fff">${_qaT('pending')}</span>`;
+      return `<div onclick="loadQaChecklist(${s.stage_order},'${name.replace(/'/g,"\\'")}')"
+        style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.1rem;border-radius:10px;border:1px solid #2e3250;margin-bottom:0.6rem;cursor:pointer;background:#1a1d27;transition:background 0.15s"
+        onmouseover="this.style.background='#22263a'" onmouseout="this.style.background='#1a1d27'">
+        <span style="font-size:1rem;font-weight:600">${name}</span>${badge}
+      </div>`;
+    }
+
+    let html = `<div style="font-size:0.82rem;color:#9aa3be;margin-bottom:1rem">${_qaT('selectStage')}</div>`;
+    if (pending.length) html += pending.map(stageRow).join('');
+    if (inspected.length) {
+      html += `<div style="font-size:0.75rem;color:#9aa3be;text-transform:uppercase;letter-spacing:0.06em;margin:1.2rem 0 0.6rem">Already inspected</div>`;
+      html += inspected.map(stageRow).join('');
+    }
+    area.innerHTML = html;
+  } catch(e) { area.innerHTML = `<div style="padding:2rem;text-align:center;color:#f76f6f">❌ ${e.message}</div>`; }
+}
+
+async function loadQaChecklist(stageOrder, stageName) {
+  _qaInspectionStageOrder = stageOrder;
+  const area = document.getElementById('actionArea');
+  area.innerHTML = '<div style="text-align:center;padding:2rem;color:#9aa3be">Loading…</div>';
+  try {
+    const res = await fetch(`/api/qa/houses/${_qaHouseId}/stages/${stageOrder}/checklist`, {
+      headers: _qaToken ? { Authorization: 'Bearer ' + _qaToken } : {}
+    });
+    const data = await res.json();
+    _qaItems = data.items.map(it => ({ ...it, _passed: it.passed ?? null }));
+    const existing = data.inspection;
+
+    const itemRows = _qaItems.map((it, i) => `
+      <div style="border:1px solid #2e3250;border-radius:10px;padding:1rem;margin-bottom:0.75rem">
+        <div style="font-size:0.95rem;font-weight:600;margin-bottom:0.75rem">${i+1}. ${it.item_text_en || it.item_text_bg}</div>
+        <div style="display:flex;gap:0.6rem;margin-bottom:0.6rem">
+          <button onclick="qaMarkItem(${it.id},true)" id="qaPass_${it.id}"
+            style="flex:1;padding:0.6rem;border-radius:8px;border:2px solid ${it._passed===true?'#3ecf6e':'#2e3250'};background:${it._passed===true?'#3ecf6e22':'transparent'};color:${it._passed===true?'#3ecf6e':'#9aa3be'};cursor:pointer;font-size:0.9rem;font-weight:700">${_qaT('pass')}</button>
+          <button onclick="qaMarkItem(${it.id},false)" id="qaFail_${it.id}"
+            style="flex:1;padding:0.6rem;border-radius:8px;border:2px solid ${it._passed===false?'#f76f6f':'#2e3250'};background:${it._passed===false?'#f76f6f22':'transparent'};color:${it._passed===false?'#f76f6f':'#9aa3be'};cursor:pointer;font-size:0.9rem;font-weight:700">${_qaT('fail')}</button>
+        </div>
+        <input type="text" id="qaNote_${it.id}" placeholder="${_qaT('itemNote')}" value="${(it.note||'').replace(/"/g,'&quot;')}"
+          style="width:100%;box-sizing:border-box;font-size:0.82rem;padding:0.4rem 0.6rem;border-radius:6px;border:1px solid #2e3250;background:#0e1120;color:#e2e8f0" />
+      </div>`).join('');
+
+    area.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid #2e3250">
+        <button onclick="loadQaStages(${_qaHouseId})" style="background:none;border:none;color:#4f8ef7;cursor:pointer;font-size:1rem;padding:0">${_qaT('back')}</button>
+        <span style="font-size:1.05rem;font-weight:700">${stageName}</span>
+      </div>
+      ${itemRows}
+      <div style="margin-top:0.5rem">
+        <div style="font-size:0.75rem;color:#9aa3be;margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.05em">${_qaT('noteLabel')}</div>
+        <textarea id="qaOverallNote" placeholder="${_qaT('notePlaceholder')}" rows="2"
+          style="width:100%;box-sizing:border-box;font-size:0.85rem;padding:0.5rem 0.6rem;border-radius:8px;border:1px solid #2e3250;background:#0e1120;color:#e2e8f0;resize:vertical;margin-bottom:0.75rem">${existing?.notes||''}</textarea>
+        <div style="display:flex;gap:0.6rem">
+          <button onclick="qaSubmit()" class="btn btn-in" style="flex:1;font-size:1rem">${_qaT('save')}</button>
+          <button onclick="loadQaStages(${_qaHouseId})" style="flex:1;padding:0.75rem;border-radius:8px;border:1px solid #2e3250;background:transparent;color:#9aa3be;font-size:1rem;cursor:pointer">${_qaT('cancel')}</button>
+        </div>
+      </div>`;
+  } catch(e) { area.innerHTML = `<div style="padding:2rem;text-align:center;color:#f76f6f">❌ ${e.message}</div>`; }
+}
+
+function qaMarkItem(itemId, passed) {
+  const item = _qaItems.find(i => i.id === itemId);
+  if (item) item._passed = passed;
+  const passBtn = document.getElementById(`qaPass_${itemId}`);
+  const failBtn = document.getElementById(`qaFail_${itemId}`);
+  if (passBtn) {
+    passBtn.style.borderColor = passed ? '#3ecf6e' : '#2e3250';
+    passBtn.style.background  = passed ? '#3ecf6e22' : 'transparent';
+    passBtn.style.color       = passed ? '#3ecf6e' : '#9aa3be';
+  }
+  if (failBtn) {
+    failBtn.style.borderColor = !passed ? '#f76f6f' : '#2e3250';
+    failBtn.style.background  = !passed ? '#f76f6f22' : 'transparent';
+    failBtn.style.color       = !passed ? '#f76f6f' : '#9aa3be';
+  }
+}
+
+async function qaSubmit() {
+  const anyFailed = _qaItems.some(it => it._passed === false);
+  const result = anyFailed ? 'FAIL' : 'PASS';
+  const items = _qaItems.map(it => ({
+    checklistItemId: it.id,
+    passed: it._passed,
+    note: (document.getElementById(`qaNote_${it.id}`)?.value || '').trim() || null
+  }));
+  const notes = (document.getElementById('qaOverallNote')?.value || '').trim() || null;
+  showMsg(_qaT('saving'), 'info');
+  try {
+    const res = await fetch(`/api/qa/houses/${_qaHouseId}/stages/${_qaInspectionStageOrder}/inspect`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(_qaToken ? { Authorization: 'Bearer ' + _qaToken } : {}) },
+      body: JSON.stringify({ result, notes, items })
+    });
+    const data = await res.json();
+    if (!res.ok) { showMsg('❌ ' + (data.error || 'Error'), 'err'); return; }
+    showMsg(_qaT('saved'), 'ok');
+    await loadQaStages(_qaHouseId);
   } catch(e) { showMsg('❌ ' + e.message, 'err'); }
 }
 

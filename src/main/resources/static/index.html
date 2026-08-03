@@ -1559,6 +1559,24 @@
   </div>
 </div>
 
+<!-- QA CHECKLIST MODAL -->
+<div class="modal-backdrop" id="qaclModal" onclick="if(event.target===this)closeQaChecklist()">
+  <div class="modal" style="max-width:560px;width:95%" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      <span>📋 <span id="qaclModalTitle"></span></span>
+      <button class="modal-close" onclick="closeQaChecklist()">✕</button>
+    </div>
+    <div id="qaclModalBody" style="max-height:60vh;overflow-y:auto;padding:0.5rem 0"></div>
+    <div style="border-top:1px solid var(--border);padding-top:0.75rem;margin-top:0.5rem">
+      <div style="display:flex;gap:0.5rem">
+        <input id="qaclNewBg" type="text" placeholder="New item text (BG)" style="flex:1;font-size:0.85rem" onkeydown="if(event.key==='Enter')_qaclModalAdd()" />
+        <input id="qaclNewEn" type="text" placeholder="EN (optional)" style="flex:1;font-size:0.85rem" onkeydown="if(event.key==='Enter')_qaclModalAdd()" />
+        <button class="btn btn-primary" style="white-space:nowrap" onclick="_qaclModalAdd()">+ Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <div class="login-card">
@@ -1695,6 +1713,16 @@
         <span class="nav-icon">⚡</span> <span id="navElectricLabel">Electric Boxes</span>
       </a>
     </div>
+    <div class="nav-item" id="navQaGroup" onclick="toggleNavGroup('qa')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">✅</span><span id="navQaGroupLabel">Quality Assurance</span></span>
+      <span id="navQaChevron" style="font-size:0.7rem;color:var(--muted)">▸</span>
+    </div>
+    <div id="navQaChildren" style="display:none;flex-direction:column">
+      <a class="nav-item nav-sub" id="navQaChecklists" href="#qachecklists" onclick="showView('qachecklists');return false;">
+        <span class="nav-icon">📋</span> <span id="navQaChecklistsLabel">Stage Checklists</span>
+      </a>
+    </div>
+
     <a class="nav-item admin-only" id="navMenuConfig" href="#menuconfig" onclick="showView('menuconfig');return false;" style="margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem">
       <span class="nav-icon">🎛️</span> <span id="navMenuConfigLabel">Menu Management</span>
     </a>
@@ -2465,6 +2493,15 @@
     </div>
   </div>
 
+  <!-- VIEW: QA CHECKLISTS -->
+  <div class="view" id="view-qachecklists">
+    <div style="max-width:900px">
+      <div id="qaclContent">
+        <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
+      </div>
+    </div>
+  </div>
+
   <!-- VIEW: MENU CONFIG -->
   <div class="view" id="view-menuconfig">
     <div style="max-width:700px">
@@ -2807,6 +2844,9 @@
       docComingSoon:'— Coming soon —',
       // menu management
       pageTitle_menuconfig:'Menu Management', pageSub_menuconfig:'Toggle visibility and reorder nav items and dashboard tabs', navMenuConfig:'Menu Management', mcNavSection:'📌 Left Navigation', mcDashSection:'📊 Dashboard Tabs', mcVisible:'Visible', mcHidden:'Hidden',
+      pageTitle_qachecklists:'Stage Checklists', pageSub_qachecklists:'Define quality checklist items per construction stage',
+      navQaGroupLabel:'Quality Assurance', navQaChecklists:'Stage Checklists',
+      qaclAddItem:'Add Item', qaclItemTextBg:'Text (BG)', qaclItemTextEn:'Text (EN)', qaclSave:'Save', qaclCancel:'Cancel', qaclEdit:'Edit', qaclDelete:'Delete', qaclActive:'Active', qaclInactive:'Inactive', qaclNoItems:'No checklist items yet.',
       // company folders admin
       pageTitle_companyfolders:'Company Folders Template', pageSub_companyfolders:'Global document folder structure shared across the company',
       navCompanyFolders:'Company Folders Template',
@@ -3117,6 +3157,9 @@
       docComingSoon:'— Очаквайте скоро —',
       // menu management
       pageTitle_menuconfig:'Управление на менюто', pageSub_menuconfig:'Управлявай видимостта и реда на елементите в навигацията и таблото', navMenuConfig:'Управление на менюто', mcNavSection:'📌 Лява навигация', mcDashSection:'📊 Табове на таблото', mcVisible:'Видим', mcHidden:'Скрит',
+      pageTitle_qachecklists:'Контролни списъци', pageSub_qachecklists:'Определи елементи на контролния списък за всеки строителен етап',
+      navQaGroupLabel:'Контрол на качеството', navQaChecklists:'Контролни списъци',
+      qaclAddItem:'Добави елемент', qaclItemTextBg:'Текст (БГ)', qaclItemTextEn:'Текст (EN)', qaclSave:'Запази', qaclCancel:'Откажи', qaclEdit:'Редактирай', qaclDelete:'Изтрий', qaclActive:'Активен', qaclInactive:'Неактивен', qaclNoItems:'Няма добавени елементи.',
       // company folders admin
       pageTitle_companyfolders:'Шаблон за фирмени папки', pageSub_companyfolders:'Обща структура на документни папки за цялата фирма',
       navCompanyFolders:'Шаблон за фирмени папки',
@@ -3179,6 +3222,12 @@
     else if (activeView === 'myorders')       renderMyOrders();
     else if (activeView === 'mycrew')         { if (_mcData) mcRender(); }
     else if (activeView === 'myworkeraccess') mwaRender();
+    // Re-label QA nav items
+    const navQaGrpLbl = document.getElementById('navQaGroupLabel');
+    if (navQaGrpLbl) navQaGrpLbl.textContent = t('navQaGroupLabel');
+    const navQaClLbl = document.getElementById('navQaChecklistsLabel');
+    if (navQaClLbl) navQaClLbl.textContent = t('navQaChecklists');
+    if (activeView === 'qachecklists') _qaclRender();
     // Re-label Menu Management nav item and section headers
     const navMcLabel = document.getElementById('navMenuConfigLabel');
     if (navMcLabel) navMcLabel.textContent = t('navMenuConfig');
@@ -3501,9 +3550,9 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists'];
 
-  const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false };
+  const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false, qa: false };
   const _navGroupConfig = {
     routes:         { children: 'navRoutesChildren',          chevron: 'navRoutesChevron' },
     attendance:     { children: 'navAttendanceChildren',      chevron: 'navAttendanceChevron' },
@@ -3511,6 +3560,7 @@
     docs:           { children: 'navDocsChildren',            chevron: 'navDocsChevron' },
     orgchart:       { children: 'navOrgChartChildren',        chevron: 'navOrgChartChevron' },
     clientservices: { children: 'navClientServicesChildren',  chevron: 'navClientServicesChevron' },
+    qa:             { children: 'navQaChildren',              chevron: 'navQaChevron' },
   };
   function setNavActive(id) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -3565,6 +3615,7 @@
     if (name === 'mycrew')         mcLoad();
     if (name === 'myworkeraccess') mwaLoad();
     if (name === 'menuconfig')     mcfgLoad();
+    if (name === 'qachecklists')   qaclInit();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -3842,6 +3893,12 @@
             ${crewCards || `<div style="color:var(--muted)">${currentLang==='bg'?'Няма назначени екипи.':'No crews assigned.'}</div>`}
           </div>
 
+          <!-- QA Inspections -->
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:1.2rem 0 0.5rem">${currentLang==='bg'?'Качествен Контрол':'Quality Assurance'}</div>
+          <div id="houseQaSection">
+            <div class="state-msg" style="padding:0.5rem 0"><div class="spinner" style="width:18px;height:18px"></div></div>
+          </div>
+
           <!-- House documents -->
           <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:1.2rem 0 0.5rem">${currentLang==='bg'?'Документи':'Documents'}</div>
           <div id="houseFolderSection">
@@ -3859,9 +3916,44 @@
         const sec = document.getElementById('houseFolderSection');
         if (sec) sec.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">Failed to load documents.</div>';
       }
+      // Load QA inspections
+      try {
+        const qaData = await apiFetch('/api/qa/houses/' + _houseDetailId + '/pending-stages').then(r => r.json());
+        renderHouseQaSection(qaData);
+      } catch(e3) {
+        console.error('QA section error:', e3);
+        const sec = document.getElementById('houseQaSection');
+        if (sec) sec.innerHTML = '<div style="color:var(--red);font-size:0.85rem">QA error: ' + e3.message + '</div>';
+      }
     } catch(e) {
       el.innerHTML = `<div class="state-msg">Error loading house details.</div>`;
     }
+  }
+
+  function renderHouseQaSection(stages) {
+    const sec = document.getElementById('houseQaSection');
+    if (!sec) return;
+    const en = currentLang !== 'bg';
+    const inspected = (stages || []).filter(s => s.inspection_id);
+    if (!inspected.length) {
+      sec.innerHTML = `<div style="color:var(--muted);font-size:0.85rem;padding:0.25rem 0">${en ? 'No stages inspected yet.' : 'Няма проверени етапи.'}</div>`;
+      return;
+    }
+    const rows = inspected.map(s => {
+      const name = en ? (s.stage_name_en || s.stage_name) : (s.stage_name || s.stage_name_en);
+      const isPass = s.result === 'PASS';
+      const resultColor = isPass ? '#3ecf6e' : '#f76f6f';
+      const resultLabel = isPass ? (en ? 'PASS' : 'ОДОБРЕНО') : (en ? 'FAIL' : 'НЕОДОБРЕНО');
+      const date = s.inspected_at ? new Date(s.inspected_at).toLocaleDateString('bg-BG', {day:'2-digit',month:'short',year:'numeric'}) : '—';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.55rem 0.9rem;border-bottom:1px solid var(--border)">
+        <div style="font-size:0.88rem;font-weight:600">${name}</div>
+        <div style="display:flex;align-items:center;gap:0.75rem;flex-shrink:0">
+          <span style="font-size:0.7rem;color:var(--muted)">${date}</span>
+          <span style="font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:20px;background:${isPass?'rgba(62,207,110,0.12)':'rgba(247,111,111,0.12)'};color:${resultColor};border:1px solid ${isPass?'rgba(62,207,110,0.3)':'rgba(247,111,111,0.3)'}">${resultLabel}</span>
+        </div>
+      </div>`;
+    }).join('');
+    sec.innerHTML = `<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--card)">${rows}</div>`;
   }
 
   let _hdRootFolderId = null; // house folder id (not house entity id) — set in renderHouseDocSection
@@ -13086,6 +13178,146 @@
     win.document.close();
   }
 
+  // ── QA CHECKLISTS ────────────────────────────────────────────────────────────
+  let _qaclStages = [];
+  let _qaclItems  = {};
+  let _qaclActiveStage = null;
+
+  function _esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  async function qaclInit() {
+    const content = document.getElementById('qaclContent');
+    content.innerHTML = '<div class="state-msg"><div class="spinner"></div><br>Loading…</div>';
+    try {
+      const [stages, items] = await Promise.all([
+        apiFetch('/api/stage-types').then(r => r.json()),
+        apiFetch('/api/qa/checklist-items').then(r => r.json()),
+      ]);
+      _qaclStages = stages;
+      _qaclItems = {};
+      stages.forEach(s => { _qaclItems[s.stageOrder] = []; });
+      items.forEach(it => {
+        const key = it.stage_order;
+        if (_qaclItems[key]) _qaclItems[key].push(it);
+      });
+      if (!_qaclActiveStage && stages.length) _qaclActiveStage = stages[0].stageOrder;
+      _qaclRender();
+    } catch(e) {
+      content.innerHTML = `<div class="state-msg" style="color:var(--danger)">Error loading data</div>`;
+    }
+  }
+
+  function _qaclRender() {
+    const isEn = currentLang === 'en';
+    const stageListHtml = _qaclStages.map(s => {
+      const name = isEn ? (s.stageNameEn || s.stageName) : s.stageName;
+      const active = s.stageOrder === _qaclActiveStage;
+      return `<div onclick="_qaclSelect(${s.stageOrder})" style="padding:0.5rem 0.75rem;cursor:pointer;border-radius:6px;font-size:0.85rem;font-weight:${active?'700':'400'};background:${active?'var(--accent)':'transparent'};color:${active?'#fff':'var(--text)'}">${_esc(name)}</div>`;
+    }).join('');
+
+    document.getElementById('qaclContent').innerHTML = `
+      <div style="display:flex;gap:1.5rem;min-height:400px">
+        <div style="width:200px;flex-shrink:0;border-right:1px solid var(--border);padding-right:1rem;display:flex;flex-direction:column;gap:2px">
+          ${stageListHtml}
+        </div>
+        <div style="flex:1" id="qaclItemsPanel"></div>
+      </div>`;
+
+    _qaclRenderItems();
+  }
+
+  function _qaclSelect(stageOrder) {
+    _qaclActiveStage = stageOrder;
+    _qaclRender();
+  }
+
+  function _qaclRenderItems() {
+    const panel = document.getElementById('qaclItemsPanel');
+    if (!panel) return;
+    const stage = _qaclStages.find(s => s.stageOrder === _qaclActiveStage);
+    const isEn = currentLang === 'en';
+    const stageName = stage ? (isEn ? (stage.stageNameEn || stage.stageName) : stage.stageName) : '';
+    const items = _qaclItems[_qaclActiveStage] || [];
+
+    const rows = items.map((it, idx) => `
+      <tr id="qaclRow_${it.id}" style="border-bottom:1px solid var(--border)">
+        <td style="padding:6px 8px;color:var(--muted);font-size:0.78rem;width:32px">${idx + 1}</td>
+        <td style="padding:6px 8px;font-size:0.85rem" id="qaclTdText_${it.id}">${_esc(isEn ? (it.item_text_en || it.item_text_bg) : it.item_text_bg)}</td>
+        <td style="padding:6px 8px;text-align:right;white-space:nowrap;width:90px">
+          <button style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.9rem" onclick="_qaclStartEdit(${it.id})">✎</button>
+          <button style="background:none;border:none;color:var(--danger,#f76f6f);cursor:pointer;font-size:0.9rem" onclick="_qaclDelete(${it.id})">🗑</button>
+        </td>
+      </tr>`).join('');
+
+    panel.innerHTML = `
+      <div style="font-size:0.95rem;font-weight:700;margin-bottom:1rem">${_esc(stageName)}</div>
+      <div id="qaclAddForm" style="display:flex;gap:0.5rem;align-items:flex-end;margin-bottom:1rem">
+        <div class="field" style="flex:1;margin:0"><label style="font-size:0.72rem">${t('qaclItemTextBg')} *</label><input id="qaclInBg" type="text" placeholder="${t('qaclItemTextBg')}" /></div>
+        <div class="field" style="flex:1;margin:0"><label style="font-size:0.72rem">${t('qaclItemTextEn')}</label><input id="qaclInEn" type="text" placeholder="${t('qaclItemTextEn')}" /></div>
+        <button class="btn" onclick="_qaclSaveNew(${_qaclActiveStage})">+ ${t('qaclAddItem')}</button>
+      </div>
+      ${items.length ? `
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="border-bottom:2px solid var(--border)">
+            <th style="padding:4px 8px;text-align:left;font-size:0.7rem;color:var(--muted);text-transform:uppercase">#</th>
+            <th style="padding:4px 8px;text-align:left;font-size:0.7rem;color:var(--muted);text-transform:uppercase">${isEn ? 'EN' : 'BG'}</th>
+            <th></th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>` : `<div style="color:var(--muted);font-size:0.85rem">No items yet.</div>`}`;
+  }
+
+  async function _qaclSaveNew(stageOrder) {
+    const bg = document.getElementById('qaclInBg').value.trim();
+    const en = document.getElementById('qaclInEn').value.trim();
+    if (!bg) { document.getElementById('qaclInBg').focus(); return; }
+    try {
+      const item = await apiFetch('/api/qa/checklist-items', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ stageOrder, itemTextBg: bg, itemTextEn: en || bg }) }).then(r => r.json());
+      if (!_qaclItems[stageOrder]) _qaclItems[stageOrder] = [];
+      _qaclItems[stageOrder].push(item);
+      _qaclRenderItems();
+    } catch(e) { alert('Error saving item'); }
+  }
+
+  function _qaclStartEdit(id) {
+    let item;
+    for (const arr of Object.values(_qaclItems)) { item = arr.find(x => x.id === id); if (item) break; }
+    if (!item) return;
+    document.getElementById(`qaclTdBg_${id}`).innerHTML = `<input id="qaclEditBg_${id}" type="text" value="${_esc(item.item_text_bg)}" style="width:100%;font-size:0.85rem" />`;
+    document.getElementById(`qaclTdEn_${id}`).innerHTML = `<input id="qaclEditEn_${id}" type="text" value="${_esc(item.item_text_en)}" style="width:100%;font-size:0.85rem" />`;
+    const row = document.getElementById(`qaclRow_${id}`);
+    row.querySelector('td:last-child').innerHTML = `
+      <button style="background:none;border:none;color:var(--accent);cursor:pointer" onclick="_qaclSaveEdit(${id})">✔</button>
+      <button style="background:none;border:none;color:var(--muted);cursor:pointer" onclick="_qaclRenderItems()">✕</button>`;
+    document.getElementById(`qaclEditBg_${id}`).focus();
+  }
+
+  async function _qaclSaveEdit(id) {
+    const bg = document.getElementById(`qaclEditBg_${id}`).value.trim();
+    const en = document.getElementById(`qaclEditEn_${id}`).value.trim();
+    if (!bg) return;
+    try {
+      const updated = await apiFetch(`/api/qa/checklist-items/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ itemTextBg: bg, itemTextEn: en || bg }) }).then(r => r.json());
+      for (const arr of Object.values(_qaclItems)) {
+        const idx = arr.findIndex(x => x.id === id);
+        if (idx !== -1) { arr[idx] = updated; break; }
+      }
+      _qaclRenderItems();
+    } catch(e) { alert('Error saving'); }
+  }
+
+  async function _qaclDelete(id) {
+    if (!confirm('Delete this checklist item?')) return;
+    try {
+      await apiFetch(`/api/qa/checklist-items/${id}`, { method:'DELETE' });
+      for (const arr of Object.values(_qaclItems)) {
+        const idx = arr.findIndex(x => x.id === id);
+        if (idx !== -1) { arr.splice(idx, 1); break; }
+      }
+      _qaclRenderItems();
+    } catch(e) { alert('Error deleting'); }
+  }
+
   // ── MENU CONFIG ──────────────────────────────────────────────────────────────
 
   let _mcfgData = [];
@@ -13121,6 +13353,8 @@
     nav_group_routes:         'navRoutesGroup',
     nav_group_orgchart:       'navOrgChartGroup',
     nav_group_clientservices: 'navClientServicesGroup',
+    nav_group_qa:             'navQaGroup',
+    nav_qa_checklists:        'navQaChecklists',
   };
   const _navChildrenMap = {
     nav_group_management:     'navManagementChildren',
@@ -13129,6 +13363,7 @@
     nav_group_routes:         'navRoutesChildren',
     nav_group_orgchart:       'navOrgChartChildren',
     nav_group_clientservices: 'navClientServicesChildren',
+    nav_group_qa:             'navQaChildren',
   };
   const _dashElMap = {
     dash_stagematrix: 'dashModeStageMatrix',
