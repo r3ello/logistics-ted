@@ -1,6 +1,6 @@
 -- Extend app_user role to include qa_inspector
 ALTER TABLE app_user DROP CONSTRAINT IF EXISTS chk_app_user_role;
-ALTER TABLE app_user ADD CONSTRAINT chk_app_user_role CHECK (role IN ('admin','user','qa_inspector'));
+ALTER TABLE app_user ADD CONSTRAINT chk_app_user_role CHECK (role IN ('admin','user','importer','qa_inspector'));
 
 -- QA inspection tables and role
 
