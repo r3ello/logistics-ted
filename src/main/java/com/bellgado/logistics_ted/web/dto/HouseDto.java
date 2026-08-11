@@ -10,6 +10,7 @@ import java.util.List;
 public record HouseDto(
     Integer id,
     String name,
+    String address,
     String location,
     BigDecimal lat,
     BigDecimal lng,
@@ -41,6 +42,7 @@ public record HouseDto(
             return new HouseDto(
                 source.getId(),
                 source.getName(),
+                source.getAddress(),
                 source.getLocation(),
                 source.getLat(),
                 source.getLng(),

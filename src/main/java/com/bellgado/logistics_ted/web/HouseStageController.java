@@ -293,7 +293,7 @@ public class HouseStageController {
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("houseId",   h.getId());
             result.put("houseName", h.getName());
-            result.put("location",  h.getLocation());
+            result.put("address",   h.getAddress());
             result.put("stages",    stageList);
             return ResponseEntity.ok(result);
         }).orElse(ResponseEntity.notFound().build());

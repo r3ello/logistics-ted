@@ -188,6 +188,14 @@ paths:
                 type: array
                 items: { $ref: '#/components/schemas/EntityDescriptor' }
               example:
+                - name: houses
+                  entityType: house
+                  keyColumn: key
+                  required: [address, name]
+                  columns: { address: text, lat: decimal, lng: decimal, location: text, name: text,
+                             scaffold_end_date: date, scaffold_start_date: date,
+                             scaffold_status: enum, start_date: date }
+                  dependsOn: []
                 - name: materials
                   entityType: material
                   keyColumn: key
@@ -450,7 +458,7 @@ paths:
                 unknownEntity:
                   summary: No importer registered under that name (no `code`)
                   value:
-                    error: "Unknown import entity 'houses'. Known: [materials]."
+                    error: "Unknown import entity 'inventories'. Known: [houses, materials]."
                 noFile:
                   summary: The `file` part is missing or empty (no `code`)
                   value:
@@ -524,7 +532,18 @@ components:
       required: true
       description: |
         The importer name, plural and lower-case, as returned by `GET /api/import/entities`.
-        Currently only `materials` is available; the remaining entities are being rolled out.
+        Currently `materials` and `houses` are available; the remaining entities are being
+        rolled out.
+
+        For `houses`: `name` and `address` are required. `address` is the address text; `location`
+        is optional and holds the Google Maps link for the site — it is stored exactly as given and
+        never resolved, so it does not populate `lat`/`lng`. Coordinates come from `lat`/`lng`,
+        validated against `-90..90` / `-180..180` and rounded to 6 decimals; `scaffold_status` is
+        one of `NONE`, `AVAILABLE`, `IN_USE`. Creating a house also provisions its internal
+        warehouse, stage checklist and check-in code automatically — the CSV only carries the
+        fields listed in the catalogue. There is deliberately no column for the house's current
+        phase (the application derives it from stage progress) and no way to carry
+        client-personal data.
       schema:
         type: string
         example: materials

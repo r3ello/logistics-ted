@@ -157,7 +157,8 @@ public class RouteOptimizationService {
             properties.provider());
 
         LocationDto originDto = new LocationDto("gps", originName, originLocation);
-        LocationDto destDto = new LocationDto(dest.getId(), dest.getName(), dest.getLocation());
+        // The address, not house.location — that column is a Google Maps link now (Flyway V8).
+        LocationDto destDto = new LocationDto(dest.getId(), dest.getName(), dest.getAddress());
 
         List<ObjectiveSpec> objectives = List.of(
             ObjectiveSpec.shortestDistance(),
@@ -456,7 +457,7 @@ public class RouteOptimizationService {
         for (Inventory inv : inventories.findCandidatesForOrder(destinationHouseId)) {
             House h = inv.getWarehouse().getHouse();
             CandidateStop c = byHouse.computeIfAbsent(h.getId(), k -> new CandidateStop(
-                h.getId(), h.getName(), h.getLocation(),
+                h.getId(), h.getName(), h.getAddress(),
                 h.getLat().doubleValue(), h.getLng().doubleValue()
             ));
             Material m = inv.getMaterial();

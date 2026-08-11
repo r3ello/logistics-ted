@@ -175,16 +175,18 @@ public class HouseService {
     }
 
     private static void validateNameLocation(HouseUpsertRequest req) {
+        // `address` is the required one, not `location`: location is now the optional Maps link.
         if (req == null
             || req.name() == null || req.name().isBlank()
-            || req.location() == null || req.location().isBlank()) {
-            throw new IllegalArgumentException("Name and location are required.");
+            || req.address() == null || req.address().isBlank()) {
+            throw new IllegalArgumentException("Name and address are required.");
         }
     }
 
     private static void applyFields(House h, HouseUpsertRequest req) {
         if (req.name()     != null) h.setName(req.name().trim());
-        if (req.location() != null) h.setLocation(req.location().trim());
+        if (req.address()  != null) h.setAddress(req.address().trim());
+        if (req.location() != null) h.setLocation(req.location().isBlank() ? null : req.location().trim());
         if (req.lat()      != null) h.setLat(req.lat());
         if (req.lng()      != null) h.setLng(req.lng());
         if (req.startDate()    != null || req.name() != null) h.setStartDate(parseDate(req.startDate()));
@@ -209,7 +211,7 @@ public class HouseService {
 
     private static HouseResponse toResponse(House h) {
         return new HouseResponse(
-            h.getId(), h.getName(), h.getLocation(), h.getLat(), h.getLng(),
+            h.getId(), h.getName(), h.getAddress(), h.getLocation(), h.getLat(), h.getLng(),
             h.getStartDate() == null ? null : h.getStartDate().toString(),
             h.getCurrentPhase()
         );
@@ -232,7 +234,8 @@ public class HouseService {
         return docFolders.save(f);
     }
 
-    private void syncHouseDocFolderName(House h) {
+    /** Public because {@code HouseImporter} applies renames directly and must keep the folder in step. */
+    public void syncHouseDocFolderName(House h) {
         docFolders.findByFolderType("ACTIVE_SITES").ifPresent(dept ->
             docFolders.findByCodeAndParentId("house_" + h.getId(), dept.getId()).ifPresent(f -> {
                 f.setLabelEn(h.getName());

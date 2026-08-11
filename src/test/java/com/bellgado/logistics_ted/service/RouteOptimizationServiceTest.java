@@ -464,7 +464,7 @@ class RouteOptimizationServiceTest {
         House dest = new House();
         dest.setId(DEST_ID);
         dest.setName("D");
-        dest.setLocation("addr");
+        dest.setAddress("addr");
         when(houses.findById(DEST_ID)).thenReturn(Optional.of(dest));
 
         assertThatThrownBy(() -> service.calculate(new OrderRequest(0.0, 0.0, "Origin", DEST_ID,
@@ -495,11 +495,11 @@ class RouteOptimizationServiceTest {
         when(inventories.findCandidatesForOrder(destination.getId())).thenReturn(invs);
     }
 
-    private static House house(int id, String name, String location, double lat, double lng) {
+    private static House house(int id, String name, String address, double lat, double lng) {
         House h = new House();
         h.setId(id);
         h.setName(name);
-        h.setLocation(location);
+        h.setAddress(address);
         h.setLat(BigDecimal.valueOf(lat));
         h.setLng(BigDecimal.valueOf(lng));
         return h;

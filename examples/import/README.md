@@ -17,7 +17,7 @@ Design rationale lives in `DATA_IMPORT_PLAN.md`; this file is only *how to call 
 - **Role `importer` or `admin`** (`@PreAuthorize("hasAnyRole('ADMIN','IMPORTER')")` plus an explicit
   `SecurityConfig` matcher), JWT bearer on every call. An `importer` token reaches `/api/import/**`
   and is rejected with `403` everywhere else — see "The importer role" below.
-- Only entity implemented today: **`materials`**
+- Entities implemented today: **`materials`** and **`houses`** (§9)
 - Upload field name: **`file`**, `multipart/form-data`, max 10 MB / 50 000 rows
 
 > `mode=validate` is the default, so a call without `?mode=` never writes business data.
@@ -82,6 +82,18 @@ curl -s http://localhost:3002/api/import/entities -H "Authorization: Bearer $TOK
 
 ```json
 [
+  {
+    "name": "houses",
+    "entityType": "house",
+    "keyColumn": "key",
+    "required": [ "address", "name" ],
+    "columns": {
+      "address": "text", "lat": "decimal", "lng": "decimal", "location": "text", "name": "text",
+      "scaffold_end_date": "date", "scaffold_start_date": "date",
+      "scaffold_status": "enum", "start_date": "date"
+    },
+    "dependsOn": []
+  },
   {
     "name": "materials",
     "entityType": "material",
@@ -351,7 +363,7 @@ And without a `code`:
 
 ```jsonc
 // unknown entity
-{ "error": "Unknown import entity 'houses'. Known: [materials]." }
+{ "error": "Unknown import entity 'inventories'. Known: [houses, materials]." }
 // no file part, or an empty file
 { "error": "No file uploaded." }
 // mode=dryrun
@@ -445,6 +457,90 @@ exist**, so calls to them 404:
 | `POST /api/import/batch` (multi-file / zip, advisory lock) | phase 7 |
 | `POST /api/import/batches/{publicId}/revert` | phase 7 |
 
-Entities other than `materials` — houses, workers, crews, inventories, house stages, orders,
-deliveries — are phases 4b and 6. `GET /api/import/entities` is the authority on what exists: it is
-generated from the beans, so it cannot claim an importer that isn't there.
+Entities other than `materials` and `houses` — workers, crews, suppliers, warehouses, inventories,
+house stages, orders, deliveries — are the rest of phases 4b and 6. `GET /api/import/entities` is the
+authority on what exists: it is generated from the beans, so it cannot claim an importer that isn't
+there.
+
+---
+
+## 9. Houses
+
+The second vertical, and the first whose create path is a **service**, not a repository.
+`HouseImporter.create` calls `HouseService.create`, which is not an implementation detail: a house is
+five things, not one row (the 1:1 warehouse, 27 `house_stage` rows, the check-in QR token, the doc
+folder under ACTIVE_SITES and its template tree). A raw insert here — copying `MaterialImporter`,
+which is the documented exception rather than the pattern — yields a site with no stock, no stage
+matrix and no attendance check-in. `update` writes the entity directly instead, because the merge
+hands over explicit nulls (an empty cell clears a coordinate) and `HouseService.update`'s
+null-means-untouched `applyFields` cannot express that; the rename side effect is preserved by
+calling `syncHouseDocFolderName`.
+
+### Columns
+
+| Column | Required | Notes |
+|---|---|---|
+| `key` | yes | The client's `CRM_ID` |
+| `name` | yes | ≤150 |
+| `address` | yes | ≤255, **NOT NULL** — the address text, the client's `Address` |
+| `location` | no | ≤512 — the Google Maps link, the client's `Location`. Stored verbatim, never resolved |
+| `lat`, `lng` | no | `numeric(9,6)`, range-checked `-90..90` / `-180..180`, rounded to 6 decimals |
+| `start_date` | no | |
+| `scaffold_status` | no | `NONE` \| `AVAILABLE` \| `IN_USE`; empty cell resets to `NONE` (NOT NULL) |
+| `scaffold_start_date`, `scaffold_end_date` | no | |
+
+`current_phase` is deliberately **not** a column — the app derives it from `house_stage` progress and
+the sync must not fight it. Nor is there any column for client-personal data.
+
+### Mapping the client's CRM export
+
+`examples/house-example.csv` is the real export: 28 columns, of which exactly three map here.
+
+The entity keeps the CRM's own vocabulary, so the two columns do not swap meaning in transit:
+`Address` is the text, `Location` is the link.
+
+| CRM column | → | Note |
+|---|---|---|
+| `CRM_ID` | `key` | Unique client-side; confirmed as the external key |
+| `Project_Name` | `name` | e.g. `Рударци Йордан` |
+| `Address` | `address` | e.g. `Рударци` |
+| `Location` | `location` | A Google Maps **short link**, e.g. `https://maps.app.goo.gl/nRDmHHrUMxXvW9FXA`. Stored as given; it does **not** fill `lat`/`lng`, which would mean resolving each URL over the network (plan §7 — never geocode inline). Coordinates keep coming from the map picker |
+| `EGN` | — | The client's personal ID number. **Must never gain a mapping.** |
+| `Expected_RZP`, `Total_Price`, `Пакет`, `Client_Name`, `Phone`, `Email`, Drive links, … | — | No target column today; reported as `UNKNOWN_COLUMN` warnings and ignored |
+
+The client keeps a derived tab in Sheets (`=ARRAYFORMULA` over the CRM tab) exporting
+`key,name,address,location`. `examples/import/houses.csv` is that output for the three example rows —
+the third has no Maps link, which is legal.
+
+**Extending later costs nothing on their side.** When a CRM field earns a place in the app (say
+`Пакет`), it is a Flyway migration + one entry in `HouseImporter.columns()` + one more formula
+column in their tab — and the next ordinary run backfills every house, because the merge sees a new
+managed column with a sheet value, no app value and no baseline. Nothing has to be requested again;
+the sheet *is* the archive. The rule that follows: **their sheet may never delete a column.**
+
+### Before the first apply — link the houses that already exist
+
+**Skip this on a clean database.** No migration seeds `house`, so a freshly migrated DB has none, and
+a scratch DB whose test rows are disposable needs nothing either — every row simply comes back
+`created`.
+
+It matters only when houses worth keeping already exist. There is no matching by name, so a house
+entered by hand in the dashboard is invisible to the sync and would be **duplicated**. Pair them
+first with `examples/import/preseed-house-refs.sql` (it has a tripwire and refuses to run until the
+id list is edited), then dry-run:
+
+```sh
+curl -s -X POST "http://localhost:3002/api/import/houses?mode=validate" \
+  -H "Authorization: Bearer $TOKEN" -F "file=@houses.csv;type=text/csv"
+```
+
+Pre-seeded rows must report `updated` or `unchanged` — **never `created`**. A `created` there means a
+mapping is missing and an apply would duplicate that house.
+
+### Numbers in the client's export
+
+The CRM writes `"313,00"` (comma decimals) and `143 581` (space-grouped thousands). Neither reaches a
+numeric column in this vertical — `lat`/`lng` are the only decimals and the client's export has none
+— but if such a column is added later: a comma-decimal file must be sent with
+`?delimiter=semicolon&decimal=comma`, and **grouping separators are rejected outright**
+(`INVALID_NUMBER`), never stripped. Stripping would turn `42,6977` into `426977` silently.

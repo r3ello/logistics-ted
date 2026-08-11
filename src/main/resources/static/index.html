@@ -1458,8 +1458,12 @@
       <input id="mName" type="text" placeholder="House name" />
     </div>
     <div class="modal-field">
-      <label id="mLocationLabel">Location</label>
-      <input id="mLocation" type="text" placeholder="City, region…" />
+      <label id="mAddressLabel">Address</label>
+      <input id="mAddress" type="text" placeholder="City, region…" />
+    </div>
+    <div class="modal-field">
+      <label id="mLocationLabel">Google Maps link <span id="mLocationOptional" style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <input id="mLocation" type="url" placeholder="https://maps.app.goo.gl/…" />
     </div>
     <div class="modal-field">
       <label id="mCoordLabel">Coordinates <span id="mCoordOptional" style="font-weight:400;color:var(--muted)">(optional)</span></label>
@@ -2639,13 +2643,15 @@
       addHouseBtnLabel:'＋ Add house',
       modalAddTitle:'Add house', modalEditPrefix:'Edit — ',
       modalUpdateStockPrefix:'📦 Update Stock — ',
-      fieldName:'Name', fieldLocation:'Location', fieldCoordinates:'Coordinates',
+      fieldName:'Name', fieldLocation:'Location', fieldAddress:'Address', fieldMapLink:'Google Maps link',
+      openInMaps:'Open in Maps', fieldCoordinates:'Coordinates',
       fieldOptional:'(optional)', fieldStartDate:'Start date', fieldPhase:'Current phase',
       phaseNone:'— none —',
       Foundation:'Foundation', Framing:'Framing', Roofing:'Roofing',
       Electrical:'Electrical', Plumbing:'Plumbing', Insulation:'Insulation',
       Drywall:'Drywall', Finishing:'Finishing', Landscaping:'Landscaping', Completed:'Completed',
-      phHouseName:'House name', phCityRegion:'City, region…', phLat:'Latitude', phLng:'Longitude',
+      phHouseName:'House name', phCityRegion:'City, region…', phMapLink:'https://maps.app.goo.gl/…',
+      phLat:'Latitude', phLng:'Longitude',
       pickOnMap:'🗺 Pick on map', useMyLocation:'📍 Use my location',
       locating:'📍 Locating…', locationFilled:'📍 Location filled ✓', locationError:'📍 Could not get location',
       // login
@@ -2660,7 +2666,7 @@
       // delete confirm
       deleteConfirmPrefix:'Delete ', btnNo:'Cancel', btnYesDelete:'Yes, delete', confirmTitle:'Are you sure?',
       // validation / errors
-      nameLocationRequired:'Name and location are required.', errorPrefix:'Error:',
+      nameLocationRequired:'Name and address are required.', errorPrefix:'Error:',
       // route reasons
       algoNote:'All pickup stops are chosen as the subset of warehouses that minimises total route distance while covering the full order. Stop order is then optimised with Nearest Neighbor + 2-opt.',
       reasonOptimalSingle:'Nearest single warehouse covering the full order — {dist} km from origin',
@@ -2823,7 +2829,7 @@
       stageFoundationRequired:'Foundation required',
       matrixLoading:'Loading…',
       // search field labels
-      sfName:'Name', sfCrew:'Crew', sfHouse:'House', sfStage:'Stage', sfMaterial:'Material', sfLocation:'Location',
+      sfName:'Name', sfCrew:'Crew', sfHouse:'House', sfStage:'Stage', sfMaterial:'Material', sfLocation:'Location', sfAddress:'Address',
       // chip group labels
       chipGrpRole:'Role', chipGrpCrew:'Crew', chipGrpHouse:'House', chipGrpMembers:'Members',
       chipGrpPassword:'Password', chipGrpStatus:'Status', chipGrpPhase:'Phase',
@@ -2952,13 +2958,15 @@
       addHouseBtnLabel:'＋ Добави къща',
       modalAddTitle:'Добави къща', modalEditPrefix:'Редактирай — ',
       modalUpdateStockPrefix:'📦 Обнови склад — ',
-      fieldName:'Име', fieldLocation:'Локация', fieldCoordinates:'Координати',
+      fieldName:'Име', fieldLocation:'Локация', fieldAddress:'Адрес', fieldMapLink:'Google Maps линк',
+      openInMaps:'Отвори в Maps', fieldCoordinates:'Координати',
       fieldOptional:'(незадължително)', fieldStartDate:'Начална дата', fieldPhase:'Текуща фаза',
       phaseNone:'— без —',
       Foundation:'Основи', Framing:'Конструкция', Roofing:'Покрив',
       Electrical:'Електричество', Plumbing:'ВиК', Insulation:'Изолация',
       Drywall:'Гипсокартон', Finishing:'Довършителни', Landscaping:'Озеленяване', Completed:'Завършена',
-      phHouseName:'Наименование на къща', phCityRegion:'Град, регион…', phLat:'Ширина', phLng:'Дължина',
+      phHouseName:'Наименование на къща', phCityRegion:'Град, регион…', phMapLink:'https://maps.app.goo.gl/…',
+      phLat:'Ширина', phLng:'Дължина',
       pickOnMap:'🗺 Избери на карта', useMyLocation:'📍 Използвай моята локация',
       locating:'📍 Локализиране…', locationFilled:'📍 Локацията е зададена ✓', locationError:'📍 Неуспешна локализация',
       // login
@@ -2973,7 +2981,7 @@
       // delete confirm
       deleteConfirmPrefix:'Изтрий ', btnNo:'Отказ', btnYesDelete:'Да, изтрий', confirmTitle:'Сигурни ли?',
       // validation / errors
-      nameLocationRequired:'Необходими са Ime и Locация.', errorPrefix:'Грешка:',
+      nameLocationRequired:'Необходими са име и адрес.', errorPrefix:'Грешка:',
       // route reasons
       algoNote:'Спирките са избрани като комбинацията от складове с най-кратко общо разстояние, покриваща цялата поръчка. Редът е оптимизиран с Nearest Neighbor + 2-opt.',
       reasonOptimalSingle:'Единственият склад, покриващ цялата поръчка с най-кратко разстояние — {dist} км от начало',
@@ -3136,7 +3144,7 @@
       stageFoundationRequired:'Необходим фундамент',
       matrixLoading:'Зареждане…',
       // search field labels
-      sfName:'Наименование', sfCrew:'Екип', sfHouse:'Обект', sfStage:'Етап', sfMaterial:'Материал', sfLocation:'Локация',
+      sfName:'Наименование', sfCrew:'Екип', sfHouse:'Обект', sfStage:'Етап', sfMaterial:'Материал', sfLocation:'Локация', sfAddress:'Адрес',
       // chip group labels
       chipGrpRole:'Роля', chipGrpCrew:'Екип', chipGrpHouse:'Обект', chipGrpMembers:'Членове',
       chipGrpPassword:'Парола', chipGrpStatus:'Статус', chipGrpPhase:'Фаза',
@@ -3484,14 +3492,16 @@
     ftp('loginUser','phUsername'); ftp('loginPass','phPassword');
 
     // house modal labels & placeholders
-    fts('mNameLabel','fieldName'); fts('mLocationLabel','fieldLocation');
+    fts('mNameLabel','fieldName'); fts('mAddressLabel','fieldAddress');
+    const mLocationLabel = document.getElementById('mLocationLabel'); if (mLocationLabel?.firstChild) mLocationLabel.firstChild.textContent = t('fieldMapLink') + ' ';
+    fts('mLocationOptional','fieldOptional');
     const mCoordLabel = document.getElementById('mCoordLabel'); if (mCoordLabel?.firstChild) mCoordLabel.firstChild.textContent = t('fieldCoordinates') + ' ';
     fts('mCoordOptional','fieldOptional');
     const mStartDateLabel = document.getElementById('mStartDateLabel'); if (mStartDateLabel?.firstChild) mStartDateLabel.firstChild.textContent = t('fieldStartDate') + ' ';
     fts('mStartOptional','fieldOptional');
     const mPhaseLabel = document.getElementById('mPhaseLabel'); if (mPhaseLabel?.firstChild) mPhaseLabel.firstChild.textContent = t('fieldPhase') + ' ';
     fts('mPhaseOptional','fieldOptional');
-    ftp('mName','phHouseName'); ftp('mLocation','phCityRegion');
+    ftp('mName','phHouseName'); ftp('mAddress','phCityRegion'); ftp('mLocation','phMapLink');
     ftp('mLat','phLat'); ftp('mLng','phLng');
     fts('mLocBtn','useMyLocation'); fts('mPickMapBtn','pickOnMap');
     fts('houseCancelBtn','cancel'); fts('houseSaveBtn','save');
@@ -3661,7 +3671,17 @@
       const titleEl = document.getElementById('pageTitle');
       const subEl   = document.getElementById('pageSub');
       if (titleEl) titleEl.textContent = h.name;
-      if (subEl)   subEl.textContent   = h.location || '';
+      if (subEl) {
+        subEl.textContent = h.address || '';
+        // The Maps link, when the client's sheet supplied one.
+        if (h.location) {
+          const a = document.createElement('a');
+          a.href = h.location; a.target = '_blank'; a.rel = 'noopener';
+          a.textContent = '🗺 ' + t('openInMaps');
+          a.style.cssText = 'margin-left:0.6rem;color:#4f8ef7;text-decoration:none;font-size:0.8rem';
+          subEl.appendChild(a);
+        }
+      }
 
       const matrixRow = (stageMatrix.rows || []).find(r => r.houseId == _houseDetailId || r.houseName === h.name);
       const columns = stageMatrix.columns || [];
@@ -3777,7 +3797,7 @@
             </div>
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
               <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelLocation')}</div>
-              <div style="font-weight:600;font-size:0.9rem">📍 ${h.location || '—'}</div>
+              <div style="font-weight:600;font-size:0.9rem">📍 ${h.address || '—'}</div>
             </div>
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
               <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelStartDate')}</div>
@@ -4180,7 +4200,7 @@
       const popupHeader = `
         <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
           <div style="font-size:0.97rem;font-weight:700">${h.name}</div>
-          <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${h.location}</div>
+          <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${h.address}</div>
         </div>`;
 
       const popupContent = _mapMode === 'scaffold' ? `
@@ -4258,7 +4278,7 @@
         .bindTooltip(tooltipText, { permanent: true, direction: 'top', offset: [0, -10],
           className: tooltipClass });
       const ssSearchLabel = { AVAILABLE: 'available', IN_USE: 'in use inuse', NONE: 'none' }[h.scaffold_status] || '';
-      marker._searchText = (h.name + ' ' + h.location + ' ' + (h.current_phase||'') + ' ' + ssSearchLabel).toLowerCase();
+      marker._searchText = (h.name + ' ' + h.address + ' ' + (h.current_phase||'') + ' ' + ssSearchLabel).toLowerCase();
       _hMapMarkers.push(marker);
     });
 
@@ -4837,7 +4857,7 @@
     const hSel = document.getElementById('mapChHouseSelect');
     const cSel = document.getElementById('mapChCrewSelect');
     hSel.innerHTML = '<option value="">🏠 Select a house…</option>' +
-      houses.map(h => `<option value="${h.id}">🏠 ${h.name} — ${h.location}</option>`).join('');
+      houses.map(h => `<option value="${h.id}">🏠 ${h.name} — ${h.address}</option>`).join('');
     cSel.innerHTML = '<option value="">👥 Select a crew…</option>' +
       crews.map(c => `<option value="${c.id}">👥 ${c.name}</option>`).join('');
 
@@ -4914,14 +4934,14 @@
           <div style="font-family:'Segoe UI',sans-serif;width:200px;background:#21253a;color:#e2e8f0;border-radius:10px;overflow:hidden;margin:-13px -19px">
             <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
               <div style="font-size:0.97rem;font-weight:700">🏠 ${house.name}</div>
-              <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${house.location}</div>
+              <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${house.address}</div>
             </div>
           </div>`;
         const m = L.marker([house.lat, house.lng], { icon: hIcon })
           .addTo(_hMap)
           .bindPopup(popup, { maxWidth:220, minWidth:200, className:'house-map-popup' })
           .bindTooltip(house.name, { permanent:true, direction:'top', offset:[0,-10], className:'house-map-label' });
-        m._searchText = (house.name + ' ' + house.location).toLowerCase();
+        m._searchText = (house.name + ' ' + house.address).toLowerCase();
         _hMapMarkers.push(m);
         bounds.push([house.lat, house.lng]);
       }
@@ -5060,7 +5080,7 @@
     return `<div style="font-family:'Segoe UI',sans-serif;width:260px;background:#21253a;color:#e2e8f0;border-radius:10px;overflow:hidden;margin:-13px -19px">
       <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
         <div style="font-size:0.97rem;font-weight:700">${h.name}</div>
-        <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${h.location}</div>
+        <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${h.address}</div>
       </div>
       <div style="padding:0.75rem 1rem">
         <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.75rem">
@@ -5122,7 +5142,7 @@
         .bindPopup(buildHousePopup(h, houseMax), { maxWidth: 300, minWidth: 280, className: 'house-map-popup' })
         .bindTooltip(h.name, { permanent: true, direction: 'top', offset: [0, -10],
           className: 'house-map-label house-map-label--green' });
-      marker._searchText = (h.name + ' ' + h.location + ' ' + (h.current_phase||'')).toLowerCase();
+      marker._searchText = (h.name + ' ' + h.address + ' ' + (h.current_phase||'')).toLowerCase();
       _hMapMarkers.push(marker);
     });
 
@@ -7279,7 +7299,7 @@
     scaffold:   [{ key:'house', label:'sfHouse' }],
     orders:     [{ key:'house', label:'sfHouse' }, { key:'material', label:'sfMaterial' }],
     deliveries: [{ key:'house', label:'sfHouse' }],
-    houses:     [{ key:'name', label:'sfName' }, { key:'location', label:'sfLocation' }],
+    houses:     [{ key:'name', label:'sfName' }, { key:'location', label:'sfAddress' }],
   };
 
   function retranslateSearchBar(mode) {
@@ -8263,7 +8283,7 @@
     // populate house dropdown
     const houseSel = document.getElementById('cHouse');
     houseSel.innerHTML = `<option value="">— No house assigned —</option>` +
-      allHouses.map(h => `<option value="${h.id}">🏠 ${h.name} — ${h.location}</option>`).join('');
+      allHouses.map(h => `<option value="${h.id}">🏠 ${h.name} — ${h.address}</option>`).join('');
 
     // populate member search list
     _memberSearchList = members;
@@ -9215,14 +9235,14 @@
       const crewsHtml = h.crews && h.crews.length
         ? h.crews.map(c => `<div style="font-size:0.78rem;color:#a78bfa;font-weight:600">👥 ${c.name}</div>`).join('')
         : '<span style="color:var(--muted)">—</span>';
-      return `<tr data-name="${(h.name||'').toLowerCase()}" data-location="${(h.location||'').toLowerCase()}" data-scaffold="${h.scaffold_status||'NONE'}" data-hascrew="${h.crews&&h.crews.length?'1':'0'}" data-hasphase="${h.current_phase?'1':'0'}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+      return `<tr data-name="${(h.name||'').toLowerCase()}" data-location="${(h.address||'').toLowerCase()}" data-scaffold="${h.scaffold_status||'NONE'}" data-hascrew="${h.crews&&h.crews.length?'1':'0'}" data-hasphase="${h.current_phase?'1':'0'}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
           <span onclick="openHouseDetail(${h.id})" style="cursor:pointer;color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">🏠 ${h.name}</span>
           <span style="font-size:0.7rem;color:var(--muted);margin-left:0.3rem">#${h.id}</span>
         </td>
         <td style="padding:0.7rem 1rem">${stageHtml}</td>
         <td style="padding:0.7rem 1rem">${crewsHtml}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.location}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.address}${h.location ? ` <a href="${h.location}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${h.start_date ? '📅 ' + h.start_date : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap;position:relative" class="admin-only">${actionsHtml}</td>
       </tr>`;
@@ -9287,7 +9307,7 @@
       // Populate destination house dropdown
       const sel = document.getElementById('destHouse');
       sel.innerHTML = `<option value="">${t('selectDestHouse')}</option>` +
-        houses.map(h => `<option value="${h.id}">${h.name} — ${h.location}</option>`).join('');
+        houses.map(h => `<option value="${h.id}">${h.name} — ${h.address}</option>`).join('');
 
       // Populate order picker with non-cancelled orders (excluding DELIVERED)
       const orderSel = document.getElementById('routeOrderPicker');
@@ -9458,7 +9478,7 @@
               <div class="stop-num" style="background:var(--green);color:#0f1117">🏁</div>
               <div class="stop-info">
                 <p class="stop-name">${dest.name}</p>
-                <p class="stop-loc">📍 ${dest.location}</p>
+                <p class="stop-loc">📍 ${dest.address}</p>
                 <p class="stop-reason" style="color:var(--muted)">Destination</p>
               </div>
             </div>
@@ -9467,7 +9487,7 @@
               <div class="stop-num" style="background:#f5a623;color:#0f1117">🏗️</div>
               <div class="stop-info">
                 <p class="stop-name">${s.name}</p>
-                <p class="stop-loc">📍 ${s.location}</p>
+                <p class="stop-loc">📍 ${s.address}</p>
                 <p class="stop-reason">${t('scaffoldStopReason')} · ~${data.distanceKm} km</p>
               </div>
             </div>
@@ -9808,7 +9828,7 @@
   let acFocusIdx    = -1;
 
   function initSearch(houses) {
-    allHouseNames = houses.map(h => ({ id: h.id, name: h.name, location: h.location }));
+    allHouseNames = houses.map(h => ({ id: h.id, name: h.name, address: h.address }));
   }
 
   function onSearch() {
@@ -9868,7 +9888,8 @@
     const lat = parseFloat(document.getElementById('mLat').value);
     const lng = parseFloat(document.getElementById('mLng').value);
     if (isNaN(lat) || isNaN(lng)) return;
-    const locEl = document.getElementById('mLocation');
+    // Reverse geocoding yields an address, so it fills mAddress — mLocation is the Maps link now.
+    const locEl = document.getElementById('mAddress');
     locEl.placeholder = '…';
     try {
       const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: { 'Accept-Language': currentLang === 'bg' ? 'bg,en' : 'en' } });
@@ -9885,7 +9906,8 @@
     _editingHouseId = house ? house.id : null;
     document.getElementById('modalTitle').textContent = house ? t('modalEditPrefix') + house.name : t('modalAddTitle');
     document.getElementById('mName').value     = house ? house.name     : '';
-    document.getElementById('mLocation').value = house ? house.location : '';
+    document.getElementById('mAddress').value  = house ? house.address  : '';
+    document.getElementById('mLocation').value = house ? (house.location || '') : '';
     document.getElementById('mLat').value       = house?.lat ?? '';
     document.getElementById('mLng').value       = house?.lng ?? '';
     document.getElementById('mStartDate').value = house?.start_date ?? '';
@@ -9905,12 +9927,13 @@
 
   async function saveHouse() {
     const name     = document.getElementById('mName').value.trim();
+    const address  = document.getElementById('mAddress').value.trim();
     const location = document.getElementById('mLocation').value.trim();
     const lat      = document.getElementById('mLat').value;
     const lng      = document.getElementById('mLng').value;
     const errEl    = document.getElementById('modalErr');
 
-    if (!name || !location) {
+    if (!name || !address) {
       errEl.textContent = t('nameLocationRequired');
       return;
     }
@@ -9927,7 +9950,7 @@
 
     const start_date    = document.getElementById('mStartDate').value || null;
     const current_phase = document.getElementById('mPhase').value.trim() || null;
-    const body = { name, location, lat: lat || null, lng: lng || null, start_date, current_phase };
+    const body = { name, address, location: location || null, lat: lat || null, lng: lng || null, start_date, current_phase };
     const url    = _editingHouseId ? `/api/houses/${_editingHouseId}` : '/api/houses';
     const method = _editingHouseId ? 'PUT' : 'POST';
 
@@ -9990,6 +10013,7 @@
     localStorage.setItem('pendingHouseForm', JSON.stringify({
       id:       _editingHouseId,
       name:     document.getElementById('mName').value,
+      address:  document.getElementById('mAddress').value,
       location: document.getElementById('mLocation').value,
       lat:      document.getElementById('mLat').value,
       lng:      document.getElementById('mLng').value,
@@ -10014,9 +10038,9 @@
         btn.textContent = t('locationFilled');
         btn.style.color = 'var(--green)';
         btn.style.borderColor = 'var(--green)';
-        // auto-fill location text via reverse geocode (same as worker modal)
+        // auto-fill the address text via reverse geocode (same as worker modal)
         const area = await reverseGeocode(lat, lng);
-        document.getElementById('mLocation').value = area || `${lat.toFixed(6)},${lng.toFixed(6)}`;
+        document.getElementById('mAddress').value = area || `${lat.toFixed(6)},${lng.toFixed(6)}`;
       },
       () => { btn.textContent = t('locationError'); },
       { enableHighAccuracy: false, timeout: 8000 }
@@ -10455,7 +10479,7 @@
       doc.setFillColor(46, 50, 80);
       doc.rect(margin, y, colW, 6, 'F');
       doc.setTextColor(122, 133, 163); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
-      doc.text(`Location: ${h.location}   #${h.id}`, margin + 3, y + 4.3);
+      doc.text(`Address: ${h.address}   #${h.id}`, margin + 3, y + 4.3);
       y += 6;
 
       // Start date + current phase row
@@ -10509,7 +10533,7 @@
 
   function renderAC(q) {
     const matches = allHouseNames.filter(h =>
-      h.name.toLowerCase().includes(q) || h.location.toLowerCase().includes(q)
+      h.name.toLowerCase().includes(q) || (h.address || '').toLowerCase().includes(q)
     ).slice(0, 6);
 
     const list = document.getElementById('acList');
@@ -10519,7 +10543,7 @@
       const hl = str => str.replace(new RegExp(`(${q})`, 'gi'), '<span class="ac-highlight">$1</span>');
       return `<div class="ac-item" data-id="${h.id}" data-name="${h.name}"
                    onmousedown="selectAC('${h.name}')">
-        🏠 ${hl(h.name)} <span style="color:var(--muted);font-size:0.78rem;margin-left:auto">📍 ${hl(h.location)}</span>
+        🏠 ${hl(h.name)} <span style="color:var(--muted);font-size:0.78rem;margin-left:auto">📍 ${hl(h.address || '')}</span>
       </div>`;
     }).join('');
     list.classList.add('open');
@@ -10965,14 +10989,14 @@
       document.getElementById('mName').value     = pending.name     || '';
       document.getElementById('mLat').value       = pin ? pin.lat.toFixed(6) : (pending.lat || '');
       document.getElementById('mLng').value       = pin ? pin.lng.toFixed(6) : (pending.lng || '');
-      // auto-fill location from pin via reverse geocode; fallback to saved location
+      // auto-fill the address from the pin via reverse geocode; fallback to the saved address.
+      // The Maps link is never derived from the pin — it comes from the client's sheet or by hand.
+      document.getElementById('mLocation').value = pending.location || '';
+      document.getElementById('mAddress').value  = pending.address  || '';
       if (pin) {
-        document.getElementById('mLocation').value = pending.location || '';
         reverseGeocode(pin.lat, pin.lng).then(area => {
-          document.getElementById('mLocation').value = area || `${pin.lat.toFixed(6)},${pin.lng.toFixed(6)}`;
+          document.getElementById('mAddress').value = area || `${pin.lat.toFixed(6)},${pin.lng.toFixed(6)}`;
         });
-      } else {
-        document.getElementById('mLocation').value = pending.location || '';
       }
       document.getElementById('mStartDate').value = pending.start_date    || '';
       document.getElementById('mPhase').value     = pending.current_phase || '';
@@ -11077,10 +11101,10 @@
           nameEl.textContent = h.name;
           card.appendChild(nameEl);
 
-          if (h.location) {
+          if (h.address) {
             const locEl = document.createElement('div');
             locEl.className = 'qr-loc';
-            locEl.textContent = '📍 ' + h.location;
+            locEl.textContent = '📍 ' + h.address;
             card.appendChild(locEl);
           }
 
