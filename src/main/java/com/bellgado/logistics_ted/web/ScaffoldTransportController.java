@@ -92,10 +92,12 @@ public class ScaffoldTransportController {
     }
 
     private static Map<String, Object> houseDto(House h) {
+        // `address` — the display text. house.location is the Maps link now (Flyway V8), and
+        // Map.of would NPE on it since it is nullable.
         return Map.of(
             "id", h.getId(),
             "name", h.getName(),
-            "location", h.getLocation()
+            "address", h.getAddress()
         );
     }
 

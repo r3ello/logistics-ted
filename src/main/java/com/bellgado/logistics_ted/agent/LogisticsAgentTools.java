@@ -98,7 +98,8 @@ public class LogisticsAgentTools {
                 Map<String, Object> row = new LinkedHashMap<>();
                 row.put("id", h.getId());
                 row.put("name", h.getName());
-                row.put("location", h.getLocation());
+                row.put("address", h.getAddress());
+                row.put("mapUrl", h.getLocation());
                 row.put("lat", h.getLat());
                 row.put("lng", h.getLng());
                 row.put("startDate", h.getStartDate() == null ? null : h.getStartDate().toString());
@@ -619,7 +620,7 @@ public class LogisticsAgentTools {
                 + closest.getLat() + "," + closest.getLng() + "/"
                 + dest.getLat() + "," + dest.getLng();
             return "Closest available scaffold: house '" + closest.getName() + "' [house " + closest.getId()
-                + "] — " + closest.getLocation() + ", ~" + distKm + " km from '" + dest.getName() + "'.\n"
+                + "] — " + closest.getAddress() + ", ~" + distKm + " km from '" + dest.getName() + "'.\n"
                 + "Google Maps: " + mapsUrl;
         } catch (NumberFormatException e) {
             return "Error: destinationHouseId must be a number (got: " + destinationHouseId + ").";

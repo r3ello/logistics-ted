@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 public record HouseUpsertRequest(
     String name,
+    String address,
     String location,
     BigDecimal lat,
     BigDecimal lng,

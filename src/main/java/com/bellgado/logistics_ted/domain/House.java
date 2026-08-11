@@ -28,7 +28,12 @@ public class House {
     @Column(nullable = false, length = 150)
     private String name;
 
+    /** The address text — the CRM's {@code Address}. This is what the UI and route stops display. */
     @Column(nullable = false, length = 255)
+    private String address;
+
+    /** A Google Maps link — the CRM's {@code Location}. Stored opaquely, never resolved to coords. */
+    @Column(length = 512)
     private String location;
 
     @Column(precision = 9, scale = 6)
