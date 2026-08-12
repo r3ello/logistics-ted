@@ -3973,12 +3973,15 @@
       const resultColor = isPass ? '#3ecf6e' : '#f76f6f';
       const resultLabel = isPass ? (en ? 'PASS' : 'ОДОБРЕНО') : (en ? 'FAIL' : 'НЕОДОБРЕНО');
       const date = s.inspected_at ? new Date(s.inspected_at).toLocaleDateString('bg-BG', {day:'2-digit',month:'short',year:'numeric'}) : '—';
-      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.55rem 0.9rem;border-bottom:1px solid var(--border)">
-        <div style="font-size:0.88rem;font-weight:600">${name}</div>
-        <div style="display:flex;align-items:center;gap:0.75rem;flex-shrink:0">
-          <span style="font-size:0.7rem;color:var(--muted)">${date}</span>
-          <span style="font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:20px;background:${isPass?'rgba(62,207,110,0.12)':'rgba(247,111,111,0.12)'};color:${resultColor};border:1px solid ${isPass?'rgba(62,207,110,0.3)':'rgba(247,111,111,0.3)'}">${resultLabel}</span>
+      return `<div style="padding:0.55rem 0.9rem;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:0.88rem;font-weight:600">${name}</div>
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-shrink:0">
+            <span style="font-size:0.7rem;color:var(--muted)">${date}</span>
+            <span style="font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:20px;background:${isPass?'rgba(62,207,110,0.12)':'rgba(247,111,111,0.12)'};color:${resultColor};border:1px solid ${isPass?'rgba(62,207,110,0.3)':'rgba(247,111,111,0.3)'}">${resultLabel}</span>
+          </div>
         </div>
+        ${s.notes ? `<div style="font-size:0.78rem;color:var(--muted);margin-top:0.25rem;font-style:italic">${s.notes}</div>` : ''}
       </div>`;
     }).join('');
     sec.innerHTML = `<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--card)">${rows}</div>`;
@@ -4035,9 +4038,6 @@
     const hasDocs     = folder.documents && folder.documents.length > 0;
     const label       = _docLabel(folder);
     const color       = folder.color || '#4f8ef7';
-    const linkBtn     = folder.linkUrl
-      ? `<a href="${folder.linkUrl}" target="_blank" onclick="event.stopPropagation()" style="color:${color};font-size:0.85rem;text-decoration:none" title="Open link">&#128279;</a>`
-      : '';
     const houseRootId = _hdRootFolderId;
     const adminBtns = currentUser?.role === 'admin'
       ? `<button title="Edit" onclick="event.stopPropagation();_houseDocEditFolder(${folder.id},${houseRootId})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.82rem;padding:1px 3px">&#9999;&#65039;</button>
@@ -4053,7 +4053,7 @@
             <div style="flex:1;min-width:0">
               <div style="font-size:0.88rem;font-weight:700;color:var(--text);word-break:break-word">${label}</div>
             </div>
-            <div style="display:flex;align-items:center;gap:3px;flex-shrink:0" onclick="event.stopPropagation()">${linkBtn}${adminBtns}</div>
+            <div style="display:flex;align-items:center;gap:3px;flex-shrink:0" onclick="event.stopPropagation()">${adminBtns}</div>
             <div data-hd-arrow="${folder.id}" style="font-size:0.75rem;color:var(--muted,#9aa3be);transition:transform .2s;margin-left:4px;flex-shrink:0">${(hasChildren||hasDocs) ? '&#9654;' : '&#9654;'}</div>
           </div>
           <div data-hd-subs="${folder.id}" style="display:none;padding:0.4rem 0;background:var(--surface)">
@@ -4061,7 +4061,6 @@
             ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, 1)).join('') : ''}
             ${_filesSection('hd', folder.id, '1.1rem')}
             <div style="padding:0.35rem 1.1rem;display:flex;gap:0.4rem">
-              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem">&#128279; ${t('docAddLink')}</button>
               <button onclick="_fileUpload('hd',${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem">&#128228; ${t('docUpload')}</button>
             </div>
           </div>
@@ -4074,7 +4073,7 @@
                onmouseover="this.style.background='rgba(128,128,128,0.07)'" onmouseout="this.style.background=''">
             <span style="font-size:0.9rem">&#128193;</span>
             <span style="flex:1;font-size:0.82rem;color:var(--text);opacity:0.85;font-weight:500">${label}</span>
-            <span onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:3px">${linkBtn}${adminBtns}</span>
+            <span onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:3px">${adminBtns}</span>
             <div data-hd-arrow="${folder.id}" style="font-size:0.65rem;color:var(--muted,#9aa3be);margin-left:2px">${(hasChildren||hasDocs) ? '&#9654;' : '&#9654;'}</div>
           </div>
           <div data-hd-subs="${folder.id}" style="display:none">
@@ -4082,7 +4081,6 @@
             ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, depth+1)).join('') : ''}
             ${_filesSection('hd', folder.id, `calc(1.1rem + ${indent} + 16px)`)}
             <div style="padding:0.2rem 1.1rem 0.2rem calc(1.1rem + ${indent} + 16px)">
-              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">&#128279; ${t('docAddLink')}</button>
               <button onclick="_fileUpload('hd',${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem;margin-left:0.3rem">&#128228; ${t('docUpload')}</button>
             </div>
           </div>
@@ -5412,9 +5410,6 @@
     const hasDocs     = folder.documents && folder.documents.length > 0;
     const label       = _docLabel(folder);
     const color       = folder.color || '#4f8ef7';
-    const linkBtn     = folder.linkUrl
-      ? `<a href="${folder.linkUrl}" target="_blank" onclick="event.stopPropagation()" style="color:${color};font-size:0.85rem;text-decoration:none" title="Open link">🔗</a>`
-      : '';
     const adminBtns = currentUser?.role === 'admin'
       ? `<button title="Edit folder" onclick="event.stopPropagation();_docEditFolder(${folder.id})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.82rem;padding:1px 3px">✏️</button>
          <button title="Delete folder" onclick="event.stopPropagation();_docDeleteFolder(${folder.id})" style="background:none;border:none;cursor:pointer;color:#e05;font-size:0.82rem;padding:1px 3px">🗑</button>`
@@ -5431,7 +5426,7 @@
               <div style="font-size:0.92rem;font-weight:700;color:var(--text)">${label}</div>
             </div>
             <div style="display:flex;align-items:center;gap:3px" onclick="event.stopPropagation()">
-              ${linkBtn}${adminBtns}
+              ${adminBtns}
             </div>
             <div id="docArrow_${folder.id}" style="font-size:0.75rem;color:var(--muted,#9aa3be);transition:transform .2s;margin-left:4px">${(hasChildren||hasDocs) ? '▶' : ''}</div>
           </div>
@@ -5440,7 +5435,6 @@
             ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, false)).join('') : ''}
             ${_filesSection('doc', folder.id, '1.1rem')}
             <div style="padding:0.35rem 1.1rem;display:flex;gap:0.4rem">
-              <button class="admin-only" onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem">🔗 ${t('docAddLink')}</button>
               <button onclick="_fileUpload('doc',${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem">📤 ${t('docUpload')}</button>
             </div>
           </div>
@@ -5459,7 +5453,7 @@
             ${folderIcon}
             <span style="flex:1;font-size:0.82rem;color:var(--text);opacity:0.85;font-weight:500">${label}</span>
             <span style="display:flex;align-items:center;gap:3px" onclick="event.stopPropagation()">
-              ${linkBtn}${adminBtns}
+              ${adminBtns}
             </span>
             <div id="docArrow_${folder.id}" style="font-size:0.65rem;color:var(--muted,#9aa3be);margin-left:2px">${(hasChildren||hasDocs) ? '▶' : ''}</div>
           </div>
@@ -5468,7 +5462,6 @@
             ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, depth)).join('') : ''}
             ${_filesSection('doc', folder.id, `calc(1.1rem + ${indent} + 16px)`)}
             <div style="padding:0.2rem 1.1rem 0.2rem calc(1.1rem + ${indent} + 16px)">
-              <button class="admin-only" onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">🔗 ${t('docAddLink')}</button>
               <button onclick="_fileUpload('doc',${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem;margin-left:0.3rem">📤 ${t('docUpload')}</button>
             </div>
           </div>
@@ -5479,16 +5472,13 @@
   function _docDocRow(doc, color, depth) {
     const title    = currentLang === 'bg' && doc.titleBg ? doc.titleBg : doc.titleEn;
     const indent   = typeof depth === 'number' ? ((depth + 1) * 16) + 'px' : '16px';
-    const linkPart = doc.linkUrl
-      ? `<a href="${doc.linkUrl}" target="_blank" style="color:${color||'#4f8ef7'};font-size:0.8rem;text-decoration:none" title="Open PDF">🔗</a>`
-      : '';
+
     return `
       <div style="display:flex;align-items:center;gap:8px;padding:0.35rem 1.1rem 0.35rem calc(1.1rem + ${indent});transition:background .15s"
            onmouseover="this.style.background='rgba(128,128,128,0.06)'" onmouseout="this.style.background=''">
         <span style="font-size:0.82rem">📄</span>
         <span style="flex:1;font-size:0.79rem;color:var(--text);opacity:0.75">${title}</span>
         <span style="display:flex;align-items:center;gap:3px">
-          ${linkPart}
           <button title="Edit" onclick="_docEditDoc(${doc.id})" style="background:none;border:none;cursor:pointer;color:var(--muted,#9aa3be);font-size:0.75rem;padding:1px 3px">✏️</button>
           <button title="Delete" onclick="_docDeleteDoc(${doc.id})" style="background:none;border:none;cursor:pointer;color:#e05;font-size:0.75rem;padding:1px 3px">🗑</button>
         </span>
@@ -5798,7 +5788,6 @@
               ${renderDropdownItems()}
             </div>
           </div>
-          <input id="_dfLink" type="url" placeholder="Link URL (optional)" value="${isEdit && folder.linkUrl ? folder.linkUrl : ''}">
         </div>
         <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem">
           <button onclick="document.getElementById('_docFolderModal').remove()" class="btn btn-ghost" style="padding:0.45rem 1.1rem">Cancel</button>
@@ -5828,12 +5817,10 @@
       const labelBg = document.getElementById('_dfLabelBg').value.trim();
       if (!labelEn) { alert('Name (EN) is required'); return; }
       const parentVal = _dfSelectedVal;
-      const linkUrl   = document.getElementById('_dfLink').value.trim();
       const body = {
         labelEn,
         labelBg: labelBg || labelEn,
         parentId: parentVal ? parseInt(parentVal) : null,
-        linkUrl:  linkUrl || null,
       };
       overlay.remove();
       if (isEdit) {
@@ -5944,7 +5931,6 @@
         <div style="display:flex;flex-direction:column;gap:0.75rem">
           <input id="_docDtitleEn" type="text" placeholder="Title (EN)" value="${doc ? doc.titleEn : ''}">
           <input id="_docDtitleBg" type="text" placeholder="Title (BG)" value="${doc ? doc.titleBg : ''}">
-          <input id="_docDlink" type="url" placeholder="Link URL (PDF link)" value="${doc && doc.linkUrl ? doc.linkUrl : ''}">
           <input id="_docDdesc" type="text" placeholder="Description (optional)" value="${doc && doc.description ? doc.description : ''}">
         </div>
         <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem">
@@ -5957,7 +5943,6 @@
       const data = {
         titleEn:     document.getElementById('_docDtitleEn').value.trim(),
         titleBg:     document.getElementById('_docDtitleBg').value.trim(),
-        linkUrl:     document.getElementById('_docDlink').value.trim(),
         description: document.getElementById('_docDdesc').value.trim(),
         docType:     'PDF',
       };

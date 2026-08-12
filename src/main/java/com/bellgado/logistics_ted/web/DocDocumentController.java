@@ -41,7 +41,6 @@ public class DocDocumentController {
         doc.setFolder(folder);
         doc.setTitleEn(titleEn);
         doc.setTitleBg(body.getOrDefault("titleBg", "").toString());
-        doc.setLinkUrl(nullOrString(body.get("linkUrl")));
         doc.setDocType(body.getOrDefault("docType", "PDF").toString());
         doc.setDescription(nullOrString(body.get("description")));
         doc.setSortOrder(body.get("sortOrder") != null ? Integer.parseInt(body.get("sortOrder").toString()) : 0);
@@ -55,7 +54,6 @@ public class DocDocumentController {
             if (body.containsKey("titleEn") && !body.get("titleEn").toString().isBlank())
                 doc.setTitleEn(body.get("titleEn").toString());
             if (body.containsKey("titleBg"))     doc.setTitleBg(body.get("titleBg").toString());
-            if (body.containsKey("linkUrl"))      doc.setLinkUrl(nullOrString(body.get("linkUrl")));
             if (body.containsKey("docType"))      doc.setDocType(body.get("docType").toString());
             if (body.containsKey("description"))  doc.setDescription(nullOrString(body.get("description")));
             return ResponseEntity.ok((Object) toDto(documents.save(doc)));
@@ -77,7 +75,6 @@ public class DocDocumentController {
         m.put("folderId",    d.getFolder().getId());
         m.put("titleEn",     d.getTitleEn());
         m.put("titleBg",     d.getTitleBg());
-        m.put("linkUrl",     d.getLinkUrl());
         m.put("docType",     d.getDocType());
         m.put("description", d.getDescription());
         m.put("sortOrder",   d.getSortOrder());

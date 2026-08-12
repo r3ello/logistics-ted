@@ -29,9 +29,6 @@ public class DocFolder {
     @Column(length = 20)
     private String color = "#4f8ef7";
 
-    @Column(name = "link_url", length = 1000)
-    private String linkUrl;
-
     @Column(name = "sort_order")
     private Integer sortOrder = 0;
 

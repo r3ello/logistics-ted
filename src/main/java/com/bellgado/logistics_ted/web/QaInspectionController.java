@@ -11,6 +11,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import com.bellgado.logistics_ted.security.AppUserDetailsService.AuthenticatedUser;
+import com.bellgado.logistics_ted.service.HouseTemplateFolderService;
+import com.bellgado.logistics_ted.repository.DocFolderRepository;
+import com.bellgado.logistics_ted.domain.DocFolder;
 
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
@@ -20,9 +23,15 @@ import java.util.ArrayList;
 public class QaInspectionController {
 
     private final JdbcTemplate jdbc;
+    private final DocFolderRepository folderRepo;
+    private final HouseTemplateFolderService folderService;
 
-    public QaInspectionController(JdbcTemplate jdbc) {
+    public QaInspectionController(JdbcTemplate jdbc,
+                                   DocFolderRepository folderRepo,
+                                   HouseTemplateFolderService folderService) {
         this.jdbc = jdbc;
+        this.folderRepo = folderRepo;
+        this.folderService = folderService;
     }
 
     /**
@@ -37,12 +46,13 @@ public class QaInspectionController {
                    st.stage_name_en,
                    qi.id AS inspection_id,
                    qi.result,
+                   qi.notes,
                    qi.inspected_at
             FROM house_stage hs
             JOIN stage_type st ON st.stage_order = hs.stage_order
             LEFT JOIN qa_inspection qi ON qi.house_id = hs.house_id AND qi.stage_order = hs.stage_order
             WHERE hs.house_id = ?
-              AND hs.status = 'DONE'
+              AND hs.status IN ('DONE', 'IN_PROGRESS')
               AND EXISTS (SELECT 1 FROM qa_checklist_item ci WHERE ci.stage_order = hs.stage_order AND ci.active = true)
             ORDER BY hs.stage_order
             """, houseId);
@@ -130,5 +140,74 @@ public class QaInspectionController {
         }
 
         return ResponseEntity.ok(Map.of("inspectionId", existingId, "result", result));
+    }
+
+    /**
+     * Finds or creates the upload folder for a QA photo:
+     * ACTIVE_SITES / house_{id} / Quality Control / {stageName}
+     * Returns the folder id so the browser can request a presigned PUT directly.
+     */
+    @PostMapping("/houses/{houseId}/stage-folder")
+    @Transactional
+    public ResponseEntity<?> stageFolder(@PathVariable Integer houseId,
+                                          @RequestBody Map<String, Object> body) {
+        String stageName   = String.valueOf(body.getOrDefault("stageName", ""));
+        String stageNameEn = String.valueOf(body.getOrDefault("stageNameEn", stageName));
+        if (stageName.isBlank())
+            return ResponseEntity.badRequest().body(Map.of("error", "stageName is required"));
+
+        // Find house root folder (under ACTIVE_SITES or COMPLETED_SITES)
+        var activeSites = folderRepo.findByFolderType("ACTIVE_SITES");
+        var completedSites = folderRepo.findByFolderType("COMPLETED_SITES");
+
+        DocFolder houseFolder = null;
+        if (activeSites.isPresent()) {
+            houseFolder = folderRepo.findByCodeAndParentId("house_" + houseId, activeSites.get().getId()).orElse(null);
+        }
+        if (houseFolder == null && completedSites.isPresent()) {
+            houseFolder = folderRepo.findByCodeAndParentId("house_" + houseId, completedSites.get().getId()).orElse(null);
+        }
+        if (houseFolder == null)
+            return ResponseEntity.status(404).body(Map.of("error", "House folder not found"));
+
+        // Find "Quality Control" subfolder
+        DocFolder qaFolder = folderRepo.findByParentId(houseFolder.getId()).stream()
+            .filter(f -> "Quality Control".equals(f.getLabelEn()) || "Контрол качество".equals(f.getLabelBg()))
+            .findFirst().orElse(null);
+        if (qaFolder == null)
+            return ResponseEntity.status(404).body(Map.of("error", "Quality Control folder not found for this house"));
+
+        // Find or create stage subfolder
+        DocFolder stageFolder = folderRepo.findByParentId(qaFolder.getId()).stream()
+            .filter(f -> stageName.equals(f.getLabelBg()) || stageNameEn.equals(f.getLabelEn()))
+            .findFirst().orElseGet(() -> {
+                DocFolder f = new DocFolder();
+                f.setCode(stageNameEn.toLowerCase().replaceAll("[^a-z0-9]+", "-"));
+                f.setLabelEn(stageNameEn);
+                f.setLabelBg(stageName);
+                f.setIcon("");
+                f.setColor("#4f8ef7");
+                f.setSortOrder(0);
+                f.setParent(qaFolder);
+                return folderRepo.save(f);
+            });
+
+        // Find or create today's date subfolder inside the stage folder
+        String today = java.time.LocalDate.now(java.time.ZoneId.of("Europe/Sofia")).toString(); // e.g. 2026-08-12
+        DocFolder dateFolder = folderRepo.findByParentId(stageFolder.getId()).stream()
+            .filter(f -> today.equals(f.getLabelEn()))
+            .findFirst().orElseGet(() -> {
+                DocFolder f = new DocFolder();
+                f.setCode(today);
+                f.setLabelEn(today);
+                f.setLabelBg(today);
+                f.setIcon("");
+                f.setColor("#4f8ef7");
+                f.setSortOrder(0);
+                f.setParent(stageFolder);
+                return folderRepo.save(f);
+            });
+
+        return ResponseEntity.ok(Map.of("folderId", dateFolder.getId()));
     }
 }

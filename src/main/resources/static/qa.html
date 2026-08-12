@@ -161,6 +161,7 @@ const i18n = {
     itemNote:'Note…', logout:'Logout',
     loading:'Loading…',
     errUnselected:'All items must be marked Pass or Fail before saving.',
+    photoLabel:'Photo (optional)', photoUploading:'Uploading photo…',
   },
   bg: {
     pending:'Очакващи проверка', inspected:'Вече проверени',
@@ -173,6 +174,7 @@ const i18n = {
     itemNote:'Бележка…', logout:'Изход',
     loading:'Зареждане…',
     errUnselected:'Всички елементи трябва да бъдат маркирани преди запазване.',
+    photoLabel:'Снимка (незадължително)', photoUploading:'Качване на снимка…',
   }
 };
 const t = k => i18n[lang][k] || i18n.en[k] || k;
@@ -302,6 +304,14 @@ function renderChecklist(existing) {
     <div style="margin-top:0.5rem">
       <span class="note-label">${t('noteLabel')}</span>
       <textarea class="overall-note" id="qaOverallNote" placeholder="${t('notePlaceholder')}">${existing?.notes || ''}</textarea>
+    </div>
+    <div style="margin-top:0.75rem">
+      <span class="note-label">${t('photoLabel')}</span>
+      <label for="qaPhoto" style="display:inline-flex;align-items:center;gap:0.45rem;margin-top:0.4rem;padding:0.45rem 1rem;background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.35);color:#4f8ef7;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;transition:background 0.15s">
+        📷 <span id="qaPhotoLabel">${t('photoLabel')}</span>
+      </label>
+      <input type="file" id="qaPhoto" accept="image/*" multiple style="display:none"
+             onchange="document.getElementById('qaPhotoLabel').textContent=this.files.length?this.files.length+' file'+(this.files.length>1?'s':'')+' selected':'${t('photoLabel')}'" />
     </div>`;
 }
 
@@ -331,6 +341,38 @@ async function qaSubmit() {
   const notes = (document.getElementById('qaOverallNote')?.value || '').trim() || null;
   showToast(t('saving'), 'info');
   try {
+    // Upload photos if any selected
+    const photoFiles = Array.from(document.getElementById('qaPhoto')?.files || []);
+    if (photoFiles.length > 0) {
+      // Get or create the date folder under Quality Control / stage
+      const stage = _stages.find(s => s.stage_order === _activeStageOrder);
+      const folderRes = await apiFetch(`/api/qa/houses/${houseId}/stage-folder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stageName: stage?.stage_name || String(_activeStageOrder), stageNameEn: stage?.stage_name_en || String(_activeStageOrder) })
+      });
+      const folderData = await folderRes.json();
+      if (!folderRes.ok) { showToast('❌ ' + (folderData.error || 'Folder error'), 'err'); return; }
+
+      for (let i = 0; i < photoFiles.length; i++) {
+        const file = photoFiles[i];
+        showToast(`${t('photoUploading')} ${i + 1}/${photoFiles.length}`, 'info');
+
+        const ticketRes = await apiFetch('/api/files/upload-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ folderId: folderData.folderId, filename: file.name, contentType: file.type, sizeBytes: file.size })
+        });
+        const ticket = await ticketRes.json();
+        if (!ticketRes.ok) { showToast('❌ ' + (ticket.error || 'Upload error'), 'err'); return; }
+
+        const putRes = await fetch(ticket.uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': ticket.contentType } });
+        if (!putRes.ok) { showToast('❌ Upload to storage failed', 'err'); return; }
+
+        await apiFetch(`/api/files/${ticket.fileId}/confirm`, { method: 'POST' });
+      }
+    }
+
     const res  = await apiFetch(`/api/qa/houses/${houseId}/stages/${_activeStageOrder}/inspect`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -22,9 +22,6 @@ public class DocDocument {
     @Column(name = "title_bg", nullable = false, length = 255)
     private String titleBg = "";
 
-    @Column(name = "link_url", length = 1000)
-    private String linkUrl;
-
     @Column(name = "doc_type", nullable = false, length = 20)
     private String docType = "PDF";
 
