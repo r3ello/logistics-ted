@@ -76,6 +76,8 @@ public class SecurityConfig {
                         "/api/houses", "/api/houses/**")
                     .hasAnyRole("ADMIN", "USER", "CREW_LEADER")
                 .requestMatchers("/api/qa/**").hasAnyRole("ADMIN", "USER", "QA_INSPECTOR")
+                .requestMatchers(HttpMethod.POST, "/api/files/upload-url").hasAnyRole("ADMIN", "USER", "QA_INSPECTOR")
+                .requestMatchers(HttpMethod.POST, "/api/files/*/confirm").hasAnyRole("ADMIN", "USER", "QA_INSPECTOR")
                 .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().permitAll()
             )

@@ -86,7 +86,6 @@ public class DocFolderController {
         f.setIcon(body.containsKey("icon") ? body.get("icon").toString() : "");
         f.setColor(body.containsKey("color") ? body.get("color").toString() : "#4f8ef7");
         f.setSortOrder(body.containsKey("sortOrder") ? Integer.parseInt(body.get("sortOrder").toString()) : 0);
-        if (body.containsKey("linkUrl")) f.setLinkUrl(nullOrString(body.get("linkUrl")));
         if (!isTopLevel) {
             folders.findById(Integer.parseInt(body.get("parentId").toString())).ifPresent(f::setParent);
         }
@@ -99,7 +98,6 @@ public class DocFolderController {
         return folders.findById(id).map(f -> {
             if (body.containsKey("labelEn") && body.get("labelEn") != null) f.setLabelEn(body.get("labelEn").toString().trim());
             if (body.containsKey("labelBg") && body.get("labelBg") != null) f.setLabelBg(body.get("labelBg").toString().trim());
-            if (body.containsKey("linkUrl")) f.setLinkUrl(nullOrString(body.get("linkUrl")));
             if (body.containsKey("icon"))    f.setIcon(body.get("icon") == null ? "" : body.get("icon").toString());
             if (body.containsKey("color"))   f.setColor(body.get("color") == null ? "#4f8ef7" : body.get("color").toString());
             if (body.containsKey("sortOrder") && body.get("sortOrder") != null)
@@ -139,7 +137,6 @@ public class DocFolderController {
         m.put("labelBg",   f.getLabelBg());
         m.put("icon",      f.getIcon());
         m.put("color",     f.getColor());
-        m.put("linkUrl",   f.getLinkUrl());
         m.put("sortOrder", f.getSortOrder());
         m.put("parentId",  f.getParent() != null ? f.getParent().getId() : null);
         return m;
@@ -151,7 +148,6 @@ public class DocFolderController {
         m.put("folderId",    d.getFolder().getId());
         m.put("titleEn",     d.getTitleEn());
         m.put("titleBg",     d.getTitleBg());
-        m.put("linkUrl",     d.getLinkUrl());
         m.put("docType",     d.getDocType());
         m.put("description", d.getDescription());
         m.put("sortOrder",   d.getSortOrder());
