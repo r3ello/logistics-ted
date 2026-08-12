@@ -19,6 +19,7 @@
 		<spring-ai.version>1.0.1</spring-ai.version>
 		<telegrambots.version>9.3.0</telegrambots.version>
 		<jjwt.version>0.12.6</jjwt.version>
+		<aws-sdk.version>2.51.4</aws-sdk.version>
 	</properties>
 
 	<dependencyManagement>
@@ -126,6 +127,41 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
+		</dependency>
+
+		<!--
+			Object storage on Contabo (S3-compatible). Only the `s3` service module — NOT the
+			`aws-sdk-java` umbrella, which pulls every AWS service client.
+
+			Both bundled HTTP transports are excluded: `netty-nio-client` (async client + 11 netty
+			jars) and `apache5-client` (httpclient5/httpcore5, ~2.2 MB). We use the sync client only,
+			over `url-connection-client` (32 KB, JDK HttpURLConnection). Measured: 46 jars / 14.7 MB
+			-> 32 jars / 8.3 MB.
+
+			Consequence: S3Client MUST be built with an explicit .httpClient(...) — with no transport
+			on the classpath the SDK fails at runtime. Presigning is unaffected (S3Presigner only
+			signs, it never opens a connection). Re-add netty-nio-client if S3AsyncClient or the
+			Transfer Manager is ever needed.
+		-->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>${aws-sdk.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>netty-nio-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>apache5-client</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>url-connection-client</artifactId>
+			<version>${aws-sdk.version}</version>
 		</dependency>
 
 		<dependency>
