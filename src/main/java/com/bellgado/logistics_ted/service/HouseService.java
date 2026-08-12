@@ -12,12 +12,15 @@ import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.InventoryRepository;
 import com.bellgado.logistics_ted.repository.WarehouseRepository;
+import com.bellgado.logistics_ted.storage.DocumentStorageService;
+import com.bellgado.logistics_ted.storage.StorageEvents;
 import com.bellgado.logistics_ted.web.dto.HouseDto;
 import com.bellgado.logistics_ted.web.dto.HouseResponse;
 import com.bellgado.logistics_ted.web.dto.HouseUpsertRequest;
 import com.bellgado.logistics_ted.web.dto.MaterialLineDto;
 import com.bellgado.logistics_ted.web.dto.MaterialTotalDto;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.context.ApplicationEventPublisher;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -43,16 +46,21 @@ public class HouseService {
     private final HouseStageRepository houseStages;
     private final DocFolderRepository docFolders;
     private final HouseTemplateFolderService houseTemplate;
+    private final DocumentStorageService documentStorage;
+    private final ApplicationEventPublisher events;
 
     public HouseService(HouseRepository houses, WarehouseRepository warehouses,
                         InventoryRepository inventories, HouseStageRepository houseStages,
-                        DocFolderRepository docFolders, HouseTemplateFolderService houseTemplate) {
+                        DocFolderRepository docFolders, HouseTemplateFolderService houseTemplate,
+                        DocumentStorageService documentStorage, ApplicationEventPublisher events) {
         this.houses = houses;
         this.warehouses = warehouses;
         this.inventories = inventories;
         this.houseStages = houseStages;
         this.docFolders = docFolders;
         this.houseTemplate = houseTemplate;
+        this.documentStorage = documentStorage;
+        this.events = events;
     }
 
     @Transactional(readOnly = true)
@@ -129,7 +137,15 @@ public class HouseService {
         }
         houseStages.saveAll(stageRows);
         DocFolder houseFolder = createHouseDocFolder(savedHouse);
-        if (houseFolder != null) houseTemplate.seedTemplate(houseFolder);
+        if (houseFolder != null) {
+            houseTemplate.seedTemplate(houseFolder);
+            // Mirror the tree into the bucket AFTER this transaction commits, on a background pool.
+            // Doing it inline costs 12 sequential PUTs per house, which a CSV import multiplies by
+            // the row count while holding the transaction open. The listener also cannot run any
+            // earlier than the commit: the template subfolders above are not visible to another
+            // connection until then.
+            events.publishEvent(new StorageEvents.FolderMirrorRequested(houseFolder.getId()));
+        }
         return toResponse(h);
     }
 
@@ -169,6 +185,13 @@ public class HouseService {
     public void delete(Integer id) {
         // FK cascades take care of warehouse + inventory rows.
         if (!houses.existsById(id)) throw new EntityNotFoundException("House not found");
+        // Compute the bucket prefix while the rows still exist, but defer the deletion itself until
+        // after this transaction commits: erasing objects inline would leave the files gone for good
+        // if anything below rolled the transaction back.
+        docFolders.findByFolderType("ACTIVE_SITES")
+            .flatMap(dept -> docFolders.findByCodeAndParentId("house_" + id, dept.getId()))
+            .ifPresent(f -> events.publishEvent(
+                new StorageEvents.PrefixDeletionRequested(documentStorage.prefixFor(f))));
         // Remove matching doc_folder — subfolders + documents cascade automatically via DB
         docFolders.deleteByCode("house_" + id);
         houses.deleteById(id);

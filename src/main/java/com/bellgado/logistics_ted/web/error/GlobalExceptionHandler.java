@@ -1,5 +1,6 @@
 package com.bellgado.logistics_ted.web.error;
 
+import com.bellgado.logistics_ted.storage.StorageException;
 import com.bellgado.logistics_ted.web.logging.RequestCorrelationFilter;
 import jakarta.validation.ConstraintViolationException;
 import java.util.LinkedHashMap;
@@ -16,6 +17,7 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 /**
  * Single place where uncaught exceptions become a consistent JSON error response, preserving the
@@ -51,6 +53,35 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> onConstraint(ConstraintViolationException ex) {
         log.warn("400 constraint: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+    }
+
+    /**
+     * Storage is off or misconfigured — the request was fine, the capability is missing. 503 tells
+     * the caller to retry later rather than to change the request.
+     */
+    @ExceptionHandler(StorageException.Unavailable.class)
+    public ResponseEntity<Map<String, Object>> onStorageUnavailable(StorageException.Unavailable ex) {
+        log.warn("503 storage unavailable: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("error", ex.getMessage()));
+    }
+
+    /**
+     * The bucket rejected or failed the operation. 502, because the failure is in an upstream
+     * dependency. The cause is logged; the response says nothing about endpoints or keys.
+     */
+    @ExceptionHandler(StorageException.class)
+    public ResponseEntity<Map<String, Object>> onStorage(StorageException ex) {
+        log.error("502 storage error (requestId={}): {}", requestId(), ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+            .body(body("File storage is temporarily unavailable.", true));
+    }
+
+    /** Multipart limit tripped before the controller ran. 413 rather than a bare 500. */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> onTooLarge(MaxUploadSizeExceededException ex) {
+        log.warn("413 upload too large: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+            .body(Map.of("error", "File is larger than the upload limit."));
     }
 
     /**

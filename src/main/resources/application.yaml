@@ -19,6 +19,7 @@ spring:
 
   # CSV import uploads (/api/import/**). Sized for whole-sheet exports; the row cap in
   # CsvReader.MAX_ROWS is the real guard, this just stops an accidental huge paste at the door.
+  # File uploads do NOT pass through here — they go browser -> bucket directly (see `storage`).
   servlet:
     multipart:
       max-file-size: 10MB
@@ -99,6 +100,33 @@ management:
 
 server:
   port: ${SERVER_PORT:3002}
+
+# Object storage for house photos, contracts and worker documents (Contabo, S3-compatible).
+# OFF by default so the app boots without credentials — DisabledObjectStorage then answers reads
+# empty and refuses writes with a 503, instead of accepting uploads and dropping the bytes.
+#
+# The keys are secrets: set them per environment and never commit them.
+#   STORAGE_ENABLED=true
+#   STORAGE_ENDPOINT=https://eu2.contabostorage.com   (region-specific, from the Contabo panel)
+#   STORAGE_BUCKET=tedhouse
+#   STORAGE_ACCESS_KEY=... / STORAGE_SECRET_KEY=...
+storage:
+  enabled: ${STORAGE_ENABLED:false}
+  endpoint: ${STORAGE_ENDPOINT:}
+  # Contabo ignores the region, but the SDK insists on a syntactically valid one.
+  region: ${STORAGE_REGION:us-east-1}
+  bucket: ${STORAGE_BUCKET:}
+  access-key: ${STORAGE_ACCESS_KEY:}
+  secret-key: ${STORAGE_SECRET_KEY:}
+  # Must stay true for Contabo: virtual-host addressing would put the bucket in the hostname.
+  path-style: ${STORAGE_PATH_STYLE:true}
+  # How long a download link stays valid once the browser asks for it.
+  presign-ttl-minutes: ${STORAGE_PRESIGN_TTL_MINUTES:15}
+  # How long an upload URL stays valid. Generous: a site video over 4G takes minutes.
+  upload-ttl-minutes: ${STORAGE_UPLOAD_TTL_MINUTES:60}
+  # 2 GB. Uploads go browser -> bucket directly, so this is NOT bounded by the multipart limit
+  # below; that one only caps the CSV import path.
+  max-file-bytes: ${STORAGE_MAX_FILE_BYTES:2147483648}
 
 app:
   # Public base URL used to generate check-in QR codes.

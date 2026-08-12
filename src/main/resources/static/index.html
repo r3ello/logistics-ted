@@ -2848,6 +2848,10 @@
       // documentation
       docTab:'Company Documentation', navDocsLabel:'Company Documentation', navDocsGroupLabel:'Documentation',
       docComingSoon:'— Coming soon —',
+      docAddLink:'Link', docUpload:'Upload', docUploading:'Uploading…', docUploadFailed:'Upload failed:',
+      docOpenFile:'Open file', docOpenFailed:'Could not open the file:',
+      docDeleteFile:'Delete file', docDeleteFailed:'Delete failed:',
+      docDeleteFileConfirm:'Delete this file permanently from storage?',
       // menu management
       pageTitle_menuconfig:'Menu Management', pageSub_menuconfig:'Toggle visibility and reorder nav items and dashboard tabs', navMenuConfig:'Menu Management', mcNavSection:'📌 Left Navigation', mcDashSection:'📊 Dashboard Tabs', mcVisible:'Visible', mcHidden:'Hidden',
       pageTitle_qachecklists:'Stage Checklists', pageSub_qachecklists:'Define quality checklist items per construction stage',
@@ -3163,6 +3167,10 @@
       // documentation
       docTab:'Фирмена документация', navDocsLabel:'Фирмена документация', navDocsGroupLabel:'Документация',
       docComingSoon:'— Очаквайте скоро —',
+      docAddLink:'Линк', docUpload:'Качване', docUploading:'Качване…', docUploadFailed:'Неуспешно качване:',
+      docOpenFile:'Отвори файла', docOpenFailed:'Файлът не можа да се отвори:',
+      docDeleteFile:'Изтрий файла', docDeleteFailed:'Неуспешно изтриване:',
+      docDeleteFileConfirm:'Да се изтрие ли файлът окончателно от хранилището?',
       // menu management
       pageTitle_menuconfig:'Управление на менюто', pageSub_menuconfig:'Управлявай видимостта и реда на елементите в навигацията и таблото', navMenuConfig:'Управление на менюто', mcNavSection:'📌 Лява навигация', mcDashSection:'📊 Табове на таблото', mcVisible:'Видим', mcHidden:'Скрит',
       pageTitle_qachecklists:'Контролни списъци', pageSub_qachecklists:'Определи елементи на контролния списък за всеки строителен етап',
@@ -4051,9 +4059,10 @@
           <div data-hd-subs="${folder.id}" style="display:none;padding:0.4rem 0;background:var(--surface)">
             ${hasChildren ? folder.children.map(c => _hdFolderCard(c, 1)).join('') : ''}
             ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, 1)).join('') : ''}
-            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.75rem 1.1rem;font-size:0.8rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
-            <div style="padding:0.35rem 1.1rem">
-              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem;width:100%;text-align:left">&#65291; Add PDF</button>
+            ${_filesSection('hd', folder.id, '1.1rem')}
+            <div style="padding:0.35rem 1.1rem;display:flex;gap:0.4rem">
+              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem">&#128279; ${t('docAddLink')}</button>
+              <button onclick="_fileUpload('hd',${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem">&#128228; ${t('docUpload')}</button>
             </div>
           </div>
         </div>`;
@@ -4071,9 +4080,10 @@
           <div data-hd-subs="${folder.id}" style="display:none">
             ${hasChildren ? folder.children.map(c => _hdFolderCard(c, depth+1)).join('') : ''}
             ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, depth+1)).join('') : ''}
-            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.5rem 1.1rem;font-size:0.78rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
+            ${_filesSection('hd', folder.id, `calc(1.1rem + ${indent} + 16px)`)}
             <div style="padding:0.2rem 1.1rem 0.2rem calc(1.1rem + ${indent} + 16px)">
-              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">&#65291; PDF</button>
+              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">&#128279; ${t('docAddLink')}</button>
+              <button onclick="_fileUpload('hd',${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem;margin-left:0.3rem">&#128228; ${t('docUpload')}</button>
             </div>
           </div>
         </div>`;
@@ -5428,9 +5438,10 @@
           <div id="docSubs_${folder.id}" style="display:none;padding:0.4rem 0;background:var(--surface)">
             ${hasChildren ? folder.children.map(c => _docFolderCard(c, 1)).join('') : ''}
             ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, false)).join('') : ''}
-            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.75rem 1.1rem;font-size:0.8rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
-            <div class="admin-only" style="padding:0.35rem 1.1rem">
-              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem;width:100%;text-align:left">＋ Add PDF</button>
+            ${_filesSection('doc', folder.id, '1.1rem')}
+            <div style="padding:0.35rem 1.1rem;display:flex;gap:0.4rem">
+              <button class="admin-only" onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem">🔗 ${t('docAddLink')}</button>
+              <button onclick="_fileUpload('doc',${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted,#9aa3be);font-size:0.78rem;cursor:pointer;padding:0.3rem 0.75rem">📤 ${t('docUpload')}</button>
             </div>
           </div>
         </div>`;
@@ -5455,9 +5466,10 @@
           <div id="docSubs_${folder.id}" style="display:none">
             ${hasChildren ? folder.children.map(c => _docFolderCard(c, depth + 1)).join('') : ''}
             ${hasDocs ? folder.documents.map(doc => _docDocRow(doc, color, depth)).join('') : ''}
-            ${(!hasChildren && !hasDocs) ? `<div style="padding:0.5rem 1.1rem 0.5rem calc(1.1rem + ${indent} + 16px);font-size:0.78rem;color:var(--muted,#9aa3be)">${t('docComingSoon')}</div>` : ''}
-            <div class="admin-only" style="padding:0.2rem 1.1rem 0.2rem calc(1.1rem + ${indent} + 16px)">
-              <button onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">＋ PDF</button>
+            ${_filesSection('doc', folder.id, `calc(1.1rem + ${indent} + 16px)`)}
+            <div style="padding:0.2rem 1.1rem 0.2rem calc(1.1rem + ${indent} + 16px)">
+              <button class="admin-only" onclick="_docAddDoc(${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem">🔗 ${t('docAddLink')}</button>
+              <button onclick="_fileUpload('doc',${folder.id})" style="background:none;border:1px dashed var(--border);border-radius:5px;color:var(--muted,#9aa3be);font-size:0.74rem;cursor:pointer;padding:0.2rem 0.6rem;margin-left:0.3rem">📤 ${t('docUpload')}</button>
             </div>
           </div>
         </div>`;
@@ -5483,6 +5495,176 @@
       </div>`;
   }
 
+  // ── Uploaded files (object storage) ──────────────────────────────────────────
+  // Files live in the Contabo bucket; the browser never receives bytes through this app. Listing
+  // is metadata from /api/files, and opening one asks for a short-lived presigned URL on demand.
+  // `ns` namespaces the DOM ids because the docs view and the house-detail panel render the same
+  // folder ids into the page at the same time.
+
+  function _filesSection(ns, folderId, padLeft) {
+    return `<div id="filesBox_${ns}_${folderId}" data-folder="${folderId}" style="padding:0 1.1rem 0 ${padLeft}"></div>`;
+  }
+
+  function _fileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function _fileIcon(name, contentType) {
+    const ct = contentType || '';
+    const n  = name || '';
+    if (ct.startsWith('image/') || /\.(jpe?g|png|gif|webp|heic|bmp)$/i.test(n)) return '🖼';
+    if (ct.startsWith('video/') || /\.(mp4|mov|avi|mkv|webm|m4v)$/i.test(n))    return '🎬';
+    if (ct.startsWith('audio/') || /\.(mp3|wav|m4a|ogg)$/i.test(n))             return '🎵';
+    if (ct === 'application/pdf' || /\.pdf$/i.test(n))                          return '📕';
+    if (/sheet|excel|csv/.test(ct) || /\.(xlsx?|csv)$/i.test(n))                return '📊';
+    if (/word|document/.test(ct)   || /\.docx?$/i.test(n))                      return '📝';
+    if (/zip|compressed/.test(ct)  || /\.(zip|rar|7z)$/i.test(n))               return '🗜';
+    return '📎';
+  }
+
+  async function _loadFiles(ns, folderId) {
+    const box = document.getElementById(`filesBox_${ns}_${folderId}`);
+    if (!box || box.dataset.loaded === '1') return;
+    box.dataset.loaded = '1';
+    try {
+      const res = await apiFetch('/api/files?folderId=' + folderId);
+      const items = await res.json();
+      if (items.error) throw new Error(items.error);
+      _renderFiles(ns, folderId, items);
+    } catch (e) {
+      box.innerHTML = `<div style="font-size:0.75rem;color:var(--yellow,#f5a623);padding:0.3rem 0">${e.message}</div>`;
+    }
+  }
+
+  function _renderFiles(ns, folderId, items) {
+    const box = document.getElementById(`filesBox_${ns}_${folderId}`);
+    if (!box) return;
+    if (!items.length) { box.innerHTML = ''; return; }
+    const isAdmin = currentUser?.role === 'admin';
+    box.innerHTML = items.map(f => `
+      <div style="display:flex;align-items:center;gap:8px;padding:0.3rem 0;transition:background .15s"
+           onmouseover="this.style.background='rgba(128,128,128,0.06)'" onmouseout="this.style.background=''">
+        <span style="font-size:0.82rem">${_fileIcon(f.filename, f.contentType)}</span>
+        <span onclick="_fileOpen('${f.id}')" title="${t('docOpenFile')}"
+              style="flex:1;font-size:0.79rem;color:var(--text);opacity:0.8;cursor:pointer;text-decoration:underline;text-underline-offset:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.filename}</span>
+        <span style="font-size:0.7rem;color:var(--muted,#9aa3be);white-space:nowrap">${_fileSize(f.sizeBytes)}</span>
+        ${isAdmin ? `<button title="${t('docDeleteFile')}" onclick="_fileDelete('${ns}',${folderId},'${f.id}')"
+              style="background:none;border:none;cursor:pointer;color:#e05;font-size:0.75rem;padding:1px 3px">🗑</button>` : ''}
+      </div>`).join('');
+  }
+
+  async function _refreshFiles(ns, folderId) {
+    const box = document.getElementById(`filesBox_${ns}_${folderId}`);
+    if (box) box.dataset.loaded = '';
+    await _loadFiles(ns, folderId);
+  }
+
+  // Uploads go straight to the bucket, never through this app — that is what makes a 300 MB site
+  // video possible. Three steps: ask for a presigned PUT, send the bytes to Contabo, confirm.
+  function _fileUpload(ns, folderId) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;          // any type: photos, video, PDF, whatever the site produces
+    input.onchange = async () => {
+      const files = Array.from(input.files || []);
+      for (const file of files) await _uploadOne(ns, folderId, file);
+    };
+    input.click();
+  }
+
+  async function _uploadOne(ns, folderId, file) {
+    const box = document.getElementById(`filesBox_${ns}_${folderId}`);
+    const rowId = 'up_' + Math.random().toString(36).slice(2);
+    if (box) box.insertAdjacentHTML('beforeend', `
+      <div id="${rowId}" style="display:flex;align-items:center;gap:8px;padding:0.3rem 0">
+        <span style="font-size:0.82rem">⏳</span>
+        <span style="flex:1;font-size:0.79rem;color:var(--muted,#9aa3be);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}</span>
+        <span style="width:90px;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+          <span id="${rowId}_bar" style="display:block;height:100%;width:0%;background:#4f8ef7;transition:width .15s"></span>
+        </span>
+        <span id="${rowId}_pct" style="font-size:0.7rem;color:var(--muted,#9aa3be);width:34px;text-align:right">0%</span>
+      </div>`);
+
+    const fail = msg => {
+      document.getElementById(rowId)?.remove();
+      alert(t('docUploadFailed') + ' ' + msg);
+    };
+
+    try {
+      // 1. Reserve the key. The server decides it — the browser never picks where it writes.
+      const res = await apiFetch('/api/files/upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          folderId,
+          filename: file.name,
+          contentType: file.type || 'application/octet-stream',
+          sizeBytes: file.size,
+        }),
+      });
+      const ticket = await res.json();
+      if (ticket.error) return fail(ticket.error);
+
+      // 2. PUT the bytes to Contabo. XHR rather than fetch(), because only XHR reports progress —
+      // without it a multi-minute video upload looks like a frozen page.
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', ticket.uploadUrl, true);
+        // Must match exactly what was signed, or the bucket rejects the request.
+        xhr.setRequestHeader('Content-Type', ticket.contentType);
+        xhr.upload.onprogress = e => {
+          if (!e.lengthComputable) return;
+          const pct = Math.round((e.loaded / e.total) * 100);
+          const bar = document.getElementById(rowId + '_bar');
+          const lbl = document.getElementById(rowId + '_pct');
+          if (bar) bar.style.width = pct + '%';
+          if (lbl) lbl.textContent = pct + '%';
+        };
+        xhr.onload  = () => (xhr.status >= 200 && xhr.status < 300)
+          ? resolve()
+          : reject(new Error(`Bucket rejected the upload (${xhr.status}).`));
+        // A CORS failure surfaces here with no status — the usual cause is a bucket without the
+        // CORS rule, which an admin sets once via POST /api/files/bucket-cors.
+        xhr.onerror = () => reject(new Error('Network or CORS error reaching the bucket.'));
+        xhr.send(file);
+      });
+
+      // 3. Confirm: the server HEADs the object and records the real size, then it becomes visible.
+      const cres = await apiFetch(`/api/files/${ticket.fileId}/confirm`, { method: 'POST' });
+      const done = await cres.json();
+      if (done.error) return fail(done.error);
+
+      await _refreshFiles(ns, folderId);
+    } catch (e) {
+      fail(e.message);
+    }
+  }
+
+  async function _fileOpen(publicId) {
+    try {
+      const res  = await apiFetch(`/api/files/${publicId}/url`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      window.open(data.url, '_blank', 'noopener');
+    } catch (e) {
+      alert(t('docOpenFailed') + ' ' + e.message);
+    }
+  }
+
+  async function _fileDelete(ns, folderId, publicId) {
+    if (!confirm(t('docDeleteFileConfirm'))) return;
+    try {
+      const res  = await apiFetch(`/api/files/${publicId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      await _refreshFiles(ns, folderId);
+    } catch (e) {
+      alert(t('docDeleteFailed') + ' ' + e.message);
+    }
+  }
+
   function _docToggle(id) {
     const subs  = document.getElementById('docSubs_'  + id);
     const arrow = document.getElementById('docArrow_' + id);
@@ -5491,6 +5673,7 @@
     subs.style.display  = open ? 'none'  : 'block';
     if (arrow) arrow.textContent = open ? '▶' : '▼';
     _docOpenId = open ? null : id;
+    if (!open) _loadFiles('doc', id);   // lazy: one request per folder, on first expand
   }
 
   function _hdToggle(id) {
@@ -5502,6 +5685,7 @@
     const open = subs.style.display !== 'none';
     subs.style.display = open ? 'none' : 'block';
     if (arrow) arrow.textContent = open ? '▶' : '▼';
+    if (!open) _loadFiles('hd', id);
   }
 
   // ── Folder create / edit ──────────────────────────────────────────────────
