@@ -1263,6 +1263,92 @@
     body.theme-light #mapCrewSelect, body.theme-light #mapChHouseSelect, body.theme-light #mapChCrewSelect { background: #fff !important; color: #1a1d27 !important; }
     body.theme-light #dashTabBar { background: #fff !important; border-color: #d4daf0 !important; }
 
+    /* ── CSV IMPORT WIZARD ── */
+    .imp-wrap { max-width: 1080px; }
+    .imp-steps { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .imp-step {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.9rem;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+      font-size: 0.78rem; font-weight: 600; color: var(--muted); white-space: nowrap;
+    }
+    .imp-step .imp-step-n {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 50%; font-size: 0.7rem;
+      background: var(--card); color: var(--muted); font-family: var(--font-mono);
+    }
+    .imp-step.done { color: var(--green); border-color: rgba(62,207,110,0.35); }
+    .imp-step.done .imp-step-n { background: rgba(62,207,110,0.18); color: var(--green); }
+    .imp-step.current { color: var(--text); border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
+    .imp-step.current .imp-step-n { background: var(--accent); color: #fff; }
+    .imp-panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.4rem 1.5rem; margin-bottom: 1.1rem; box-shadow: var(--edge);
+    }
+    .imp-panel.muted { opacity: 0.5; pointer-events: none; }
+    .imp-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .imp-panel-title { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text); }
+    .imp-panel-sub { font-size: 0.78rem; color: var(--muted); }
+    .imp-entity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.85rem; }
+    .imp-entity {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1rem 1.05rem; cursor: pointer; transition: border-color 0.15s, transform 0.15s;
+    }
+    .imp-entity:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .imp-entity.sel { border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
+    .imp-entity h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.25rem; text-transform: capitalize; }
+    .imp-entity p  { font-size: 0.74rem; color: var(--muted); line-height: 1.5; }
+    .imp-drop {
+      border: 2px dashed var(--border); border-radius: 12px; padding: 2.2rem 1rem;
+      text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      background: var(--card);
+    }
+    .imp-drop:hover, .imp-drop.over { border-color: var(--accent); background: rgba(79,142,247,0.06); }
+    .imp-drop .imp-drop-icon { font-size: 1.8rem; display: block; margin-bottom: 0.5rem; }
+    .imp-drop .imp-drop-main { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+    .imp-drop .imp-drop-sub  { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+    .imp-file-bar { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.7rem 0.9rem; }
+    .imp-file-name { font-weight: 700; font-size: 0.9rem; }
+    .imp-tag { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.15rem 0.45rem; }
+    .imp-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .imp-table th { text-align: left; padding: 0.45rem 0.7rem; color: var(--muted); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .imp-table td { padding: 0.5rem 0.7rem; border-bottom: 1px solid rgba(127,148,200,0.09); vertical-align: top; }
+    .imp-table tr:last-child td { border-bottom: none; }
+    .imp-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+    .imp-preview td { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .imp-map-target { font-weight: 700; font-size: 0.85rem; }
+    .imp-map-type { font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); }
+    .imp-req { display: inline-block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.1rem 0.35rem; border-radius: 4px; background: rgba(247,111,111,0.15); color: var(--red); margin-left: 0.35rem; }
+    .imp-key { background: rgba(79,142,247,0.15); color: var(--accent); }
+    .imp-sel { background: var(--card); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.82rem; padding: 0.4rem 0.55rem; outline: none; min-width: 180px; max-width: 100%; }
+    .imp-sel:focus { border-color: var(--accent); }
+    .imp-sel.unset { color: var(--muted); }
+    .imp-sel.miss  { border-color: var(--red); }
+    .imp-ignored { font-size: 0.75rem; color: var(--muted); line-height: 1.7; }
+    .imp-ignored code { font-family: var(--font-mono); font-size: 0.72rem; background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: 0.1rem 0.35rem; margin-right: 0.3rem; display: inline-block; }
+    .imp-note { border-left: 3px solid var(--border); padding: 0.6rem 0.9rem; font-size: 0.78rem; color: var(--muted); line-height: 1.6; background: var(--card); border-radius: 0 8px 8px 0; }
+    .imp-note.warn { border-left-color: var(--yellow); }
+    .imp-note.bad  { border-left-color: var(--red); color: var(--text); }
+    .imp-note.ok   { border-left-color: var(--green); }
+    .imp-actions { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+    .imp-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 0.6rem; margin-bottom: 1.1rem; }
+    .imp-tile { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.7rem 0.8rem; text-align: center; }
+    .imp-tile b { display: block; font-family: var(--font-mono); font-size: 1.25rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .imp-tile span { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .imp-tile.hot b { color: var(--red); }
+    .imp-tile.warm b { color: var(--yellow); }
+    .imp-tile.good b { color: var(--green); }
+    .imp-status { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 999px; }
+    .imp-status.ok      { background: rgba(62,207,110,0.15); color: var(--green); }
+    .imp-status.partial { background: rgba(245,200,66,0.15); color: var(--yellow); }
+    .imp-status.failed  { background: rgba(247,111,111,0.15); color: var(--red); }
+    .imp-code { font-family: var(--font-mono); font-size: 0.7rem; color: var(--yellow); white-space: nowrap; }
+    .imp-line { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+    body.theme-light .imp-drop:hover, body.theme-light .imp-drop.over { background: rgba(37,99,235,0.05); }
+    @media (max-width: 720px) {
+      .imp-panel { padding: 1.1rem; }
+      .imp-sel { min-width: 130px; }
+    }
+
     /* ── motion preferences ── */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -1540,6 +1626,23 @@
   </div>
 </div>
 
+<!-- CSV IMPORT — APPLY CONFIRMATION.
+     The dry run is one click; the write must not be. This is the only step of the import view
+     that touches the database. -->
+<div class="modal-backdrop" id="impConfirmModal" onclick="if(event.target===this) impCloseConfirm()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
+    <div class="modal-title">
+      <span id="impConfirmTitle">Run the import?</span>
+      <button class="modal-close" onclick="impCloseConfirm()">✕</button>
+    </div>
+    <div id="impConfirmBody" style="font-size:0.84rem;color:var(--muted);line-height:1.65"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="impCloseConfirm()" id="impConfirmCancel">Cancel</button>
+      <button class="btn btn-primary" onclick="impApply()" id="impConfirmOk">Import</button>
+    </div>
+  </div>
+</div>
+
 <!-- STAGE MODAL -->
 <div class="modal-backdrop" id="stageModal" onclick="if(event.target===this) closeStageModal()">
   <div class="modal" onclick="event.stopPropagation()">
@@ -1727,6 +1830,12 @@
       </a>
     </div>
 
+    <!-- Admin + importer only; visibility is set in applyRole() and re-checked in showView().
+         Deliberately NOT registered in menu_config: applyMenuConfig() would set display on it from
+         the stored row and undo the role gate (same reason navMenuConfig stays out). -->
+    <a class="nav-item" id="navImport" href="#import" onclick="showView('import');return false;" style="display:none;margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem">
+      <span class="nav-icon">📥</span> <span id="navImportLabel">Data Import</span>
+    </a>
     <a class="nav-item admin-only" id="navMenuConfig" href="#menuconfig" onclick="showView('menuconfig');return false;" style="margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem">
       <span class="nav-icon">🎛️</span> <span id="navMenuConfigLabel">Menu Management</span>
     </a>
@@ -2101,6 +2210,75 @@
         <div class="state-msg" style="padding:2rem"><div class="spinner"></div></div>
       </div>
       <div class="history-pager" id="auditPager"></div>
+    </div>
+  </div>
+
+  <!-- VIEW: CSV DATA IMPORT — admin + importer.
+       Pick entity → drop the file → map its columns onto the importer's → validate (dry run) →
+       import. The whole surface is built from GET /api/import/entities, so a new EntityImporter
+       shows up here with no frontend change. The file is parsed IN THE BROWSER and only the mapped
+       columns are re-emitted and uploaded: the client's CRM export carries personal data (ЕГН,
+       phone, e-mail) with no target in the app, and unmapped columns never leave the machine. -->
+  <div class="view" id="view-import">
+    <div class="imp-wrap">
+
+      <div class="imp-steps" id="impSteps"></div>
+
+      <!-- STEP 1 — entity -->
+      <section class="imp-panel" id="impPanelEntity">
+        <div class="imp-panel-head">
+          <div>
+            <div class="imp-panel-title" id="impEntityTitle">1 · What are you importing?</div>
+            <div class="imp-panel-sub" id="impEntitySub">Every entity below is offered by the API itself.</div>
+          </div>
+          <a class="btn btn-ghost" href="/import-docs.html" target="_blank" rel="noopener" id="impDocsBtn" style="text-decoration:none">📄 API</a>
+        </div>
+        <div class="imp-entity-grid" id="impEntityGrid">
+          <div class="state-msg" style="padding:1.5rem"><div class="spinner"></div></div>
+        </div>
+      </section>
+
+      <!-- STEP 2 — file -->
+      <section class="imp-panel muted" id="impPanelFile">
+        <div class="imp-panel-head">
+          <div>
+            <div class="imp-panel-title" id="impFileTitle">2 · Upload the CSV</div>
+            <div class="imp-panel-sub" id="impFileSub">Exported as CSV UTF-8. Nothing is uploaded at this step.</div>
+          </div>
+          <button class="btn btn-ghost" id="impTemplateBtn" onclick="impDownloadTemplate()">⬇ <span id="impTemplateLbl">Template</span></button>
+        </div>
+        <input type="file" id="impFileInput" accept=".csv,text/csv" style="display:none" onchange="impOnFilePicked(this.files[0])">
+        <div id="impDropSlot"></div>
+        <div id="impFileSummary" style="margin-top:1rem"></div>
+      </section>
+
+      <!-- STEP 3 — mapping -->
+      <section class="imp-panel muted" id="impPanelMap">
+        <div class="imp-panel-head">
+          <div>
+            <div class="imp-panel-title" id="impMapTitle">3 · Match the columns</div>
+            <div class="imp-panel-sub" id="impMapSub">Your headers on the right, the app's fields on the left.</div>
+          </div>
+          <div class="imp-actions">
+            <button class="btn btn-ghost" id="impAutoBtn" onclick="impAutoMap(true)">✨ <span id="impAutoLbl">Auto-match</span></button>
+            <button class="btn btn-ghost" id="impClearMapBtn" onclick="impClearMap()">✕ <span id="impClearMapLbl">Clear</span></button>
+          </div>
+        </div>
+        <div id="impMapBody"></div>
+      </section>
+
+      <!-- STEP 4 — validate / import -->
+      <section class="imp-panel muted" id="impPanelRun">
+        <div class="imp-panel-head">
+          <div>
+            <div class="imp-panel-title" id="impRunTitle">4 · Validate, then import</div>
+            <div class="imp-panel-sub" id="impRunSub">A dry run writes nothing — it reports exactly what an import would do.</div>
+          </div>
+        </div>
+        <div id="impRunBody"></div>
+        <div id="impReport" style="margin-top:1.2rem"></div>
+      </section>
+
     </div>
   </div>
 
@@ -2564,6 +2742,7 @@
       pageTitle_map:'Location Overview', pageSub_map:'Houses on map',
       pageTitle_history:'Order Route History', pageSub_history:'Past route recommendations — immutable record',
       pageTitle_auditlog:'Audit Log', pageSub_auditlog:'Who did what — append-only record', navAuditLog:'Audit Log',
+      pageTitle_import:'Data Import', pageSub_import:'Load spreadsheets into the app — validate first, then import', navImport:'Data Import',
       auditFilterUser:'User', auditFilterAction:'Action', auditFilterEntity:'Entity', auditFilterFrom:'From', auditFilterTo:'To',
       auditColWhen:'When', auditColWho:'Who', auditColAction:'Action', auditColEntity:'Entity', auditColEndpoint:'Endpoint', auditColStatus:'Status', auditColIp:'IP',
       auditNoResults:'No audit entries for this filter.', auditAnonymous:'anonymous',
@@ -2883,6 +3062,7 @@
       pageTitle_map:'Преглед на локации', pageSub_map:'Къщи на картата',
       pageTitle_history:'История на маршрута на поръчката', pageSub_history:'Минали препоръки за маршрут — неизменен запис',
       pageTitle_auditlog:'Одит дневник', pageSub_auditlog:'Кой какво е направил — неизменен запис', navAuditLog:'Одит дневник',
+      pageTitle_import:'Импорт на данни', pageSub_import:'Зареждане на таблици в приложението — първо проверка, после импорт', navImport:'Импорт на данни',
       auditFilterUser:'Потребител', auditFilterAction:'Действие', auditFilterEntity:'Обект', auditFilterFrom:'От', auditFilterTo:'До',
       auditColWhen:'Кога', auditColWho:'Кой', auditColAction:'Действие', auditColEntity:'Обект', auditColEndpoint:'Ендпойнт', auditColStatus:'Статус', auditColIp:'IP',
       auditNoResults:'Няма записи за този филтър.', auditAnonymous:'анонимен',
@@ -3238,6 +3418,9 @@
     else if (activeView === 'myorders')       renderMyOrders();
     else if (activeView === 'mycrew')         { if (_mcData) mcRender(); }
     else if (activeView === 'myworkeraccess') mwaRender();
+    else if (activeView === 'import')          impTranslate();
+    const navImpLbl = document.getElementById('navImportLabel');
+    if (navImpLbl) navImpLbl.textContent = t('navImport');
     // Re-label QA nav items
     const navQaGrpLbl = document.getElementById('navQaGroupLabel');
     if (navQaGrpLbl) navQaGrpLbl.textContent = t('navQaGroupLabel');
@@ -3568,7 +3751,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false, qa: false };
   const _navGroupConfig = {
@@ -3598,8 +3781,12 @@
   function showView(name) {
     // Crew leaders are confined to their own workspace, even via hash / back button.
     if (currentUser?.role === 'crew_leader' && !['myorders','mycrew','myworkeraccess'].includes(name)) name = 'myorders';
+    // Importers are confined to the import view — every other endpoint 403s for their token anyway.
+    if (currentUser?.role === 'importer') name = 'import';
     // Audit log is admin-only — bounce anyone else, even via hash.
     if (name === 'auditlog' && currentUser?.role !== 'admin') name = 'dashboard';
+    // The import view writes straight into live data: admin and importer only, hash included.
+    if (name === 'import' && !['admin','importer'].includes(currentUser?.role)) name = 'dashboard';
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -3634,6 +3821,7 @@
     if (name === 'myworkeraccess') mwaLoad();
     if (name === 'menuconfig')     mcfgLoad();
     if (name === 'qachecklists')   qaclInit();
+    if (name === 'import')         impInit();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -10832,6 +11020,9 @@
     if (histAllWrap) histAllWrap.style.display = user.role === 'admin' ? '' : 'none';
     const navAudit = document.getElementById('navAuditLog');
     if (navAudit) navAudit.style.display = user.role === 'admin' ? '' : 'none';
+    // Data Import mirrors the backend gate (SecurityConfig: /api/import/** = ADMIN or IMPORTER).
+    const navImport = document.getElementById('navImport');
+    if (navImport) navImport.style.display = ['admin','importer'].includes(user.role) ? '' : 'none';
     // Hide nav sections not relevant for crew leaders
     // Nav visibility by role, set explicitly every login so it's restored for admin/user after a
     // crew-leader session (inline display would otherwise stick). Crew leaders get only their workspace.
@@ -10868,6 +11059,24 @@
     try { await apiFetch('/api/logout', { method: 'POST' }); } catch (_) { /* ignore */ }
     setToken(null);
     window.location.href = '/';
+  }
+
+  /**
+   * The importer's entire workspace: the CSV import view and the API contract, nothing else.
+   * Same shape as initCrewLeader — the nav is replaced rather than hidden, so no dead link to a
+   * surface their token cannot reach is ever rendered.
+   */
+  function initImporter() {
+    applyStoredTheme();
+    const navMenu = document.querySelector('#mainNav .nav-menu');
+    if (navMenu) {
+      navMenu.innerHTML = `
+        <a class="nav-item active" id="navImport" href="#import" onclick="showView('import');return false;"><span class="nav-icon">📥</span> <span id="navImportLabel">${t('navImport')}</span></a>
+        <a class="nav-item" href="/import-docs.html" target="_blank" rel="noopener"><span class="nav-icon">📄</span> <span>API</span></a>`;
+    }
+    const brand = document.getElementById('brandName'); if (brand) brand.textContent = t('brandName');
+    const bsub  = document.getElementById('brandSub');  if (bsub)  bsub.textContent  = t('brandSub');
+    showView('import');
   }
 
   async function initCrewLeader() {
@@ -11106,11 +11315,10 @@
   function initApp() {
     if (currentUser?.role === 'crew_leader') { initCrewLeader(); return; }
     // The importer role exists to keep whoever maintains the client's spreadsheets out of the
-    // dispatcher/admin surface, so it must never land on this dashboard — every call here would
-    // 403 anyway, and the nav alone would disclose the app's structure. Their entire surface today
-    // is the import API; send them to its documentation, which reads the same stored token.
-    // When an import UI lands (DATA_IMPORT_PLAN.md phase 9) this redirect becomes that view.
-    if (currentUser?.role === 'importer') { location.replace('/import-docs.html'); return; }
+    // dispatcher/admin surface, so it must never land on the dashboard — every call there would
+    // 403 anyway, and a nav full of dead links is worse than no nav. Their whole surface is the
+    // import view, plus the API contract for whoever is scripting against it.
+    if (currentUser?.role === 'importer') { initImporter(); return; }
     applyStoredTheme();
     // Load menu config and apply visibility/ordering before showing the first view
     apiFetch('/api/menu-config').then(r => r.json()).then(data => {
@@ -13806,6 +14014,858 @@
         el.style.display = item.visible ? '' : 'none';
         dashBar.appendChild(el);
       });
+    }
+  }
+
+  // ── CSV DATA IMPORT ──────────────────────────────────────────────────────────
+  // Admin + importer. Four steps: entity → file → column mapping → validate/import.
+  //
+  // The whole surface is derived from GET /api/import/entities, so a new EntityImporter on the
+  // backend appears here with no change to this file.
+  //
+  // THE FILE IS PARSED IN THE BROWSER AND RE-EMITTED. What gets uploaded is a CSV containing only
+  // the mapped columns, renamed to the importer's canonical names. Two reasons, both load-bearing:
+  //   1. The client's CRM export uses its own headers (CRM_ID, Project_Name, Address…) and would be
+  //      rejected wholesale; renaming by hand every week is precisely the chore this view removes.
+  //   2. That same export carries personal data (ЕГН, phone, e-mail) with no target in the app.
+  //      Unmapped columns are never sent, so they cannot end up in a log, a report or a request body.
+  // The API contract is untouched — this is an ordinary multipart POST to the published endpoint.
+
+  const IMP_T = {
+    en: {
+      stepEntity:'Entity', stepFile:'File', stepMap:'Mapping', stepRun:'Import',
+      entityTitle:'1 · What are you importing?',
+      entitySub:'The list comes from the import API itself.',
+      fileTitle:'2 · Choose the CSV',
+      fileSub:'Nothing is uploaded at this step — the file is read in your browser.',
+      mapTitle:'3 · Match the columns',
+      mapSub:"The app's fields on the left, your file's headers on the right.",
+      runTitle:'4 · Validate, then import',
+      runSub:'A dry run writes nothing — it reports exactly what an import would do.',
+      template:'Template', autoMatch:'Auto-match', clear:'Clear',
+      keyOf:'Identity column', dependsOn:'Import first:', columnsWord:'columns',
+      dropMain:'Drop your CSV here, or click to choose one',
+      dropSub:'UTF-8, first row = headers, up to 50,000 rows',
+      changeFile:'Change file', rowsWord:'rows', delimiter:'Delimiter', decimal:'Decimals',
+      comma:'Comma  ,', semicolon:'Semicolon  ;', tab:'Tab', dot:'1234.56', decComma:'1234,56',
+      previewTitle:'First rows as read',
+      badEncoding:'This file is not valid UTF-8 — Cyrillic text will be mangled. Re-export it from Sheets as “Comma-separated values (.csv)”, which is always UTF-8.',
+      noRows:'The file has a header row but no data.',
+      readFailed:'Could not read the file: ',
+      colTarget:'App field', colSource:'Your column', colSample:'Example value',
+      notImported:'— not imported —',
+      ignoredTitle:'Not imported', ignoredNone:'Every column in your file is mapped.',
+      ignoredHint:'These stay in your browser and are never uploaded.',
+      reqBadge:'required', keyBadge:'key',
+      missingRequired:'Map every required field before validating:',
+      precheckDup:'duplicate value(s) in the identity column — those rows will be rejected.',
+      precheckEmpty:'row(s) with an empty required cell — those rows will be rejected.',
+      ready:'Ready to validate:',
+      mappedWord:'columns mapped', ofWord:'of',
+      validateBtn:'▶ Validate (dry run)', importBtn:'⬆ Import for real',
+      running:'Working…', validateFirst:'Import unlocks after a dry run on this exact file and mapping.',
+      staleWarn:'Something changed since the last dry run — validate again before importing.',
+      statusOk:'All good', statusPartial:'Partly OK', statusFailed:'Failed',
+      tRead:'Read', tCreated:'New', tUpdated:'Updated', tUnchanged:'Same',
+      tKeptApp:'Kept app', tConflicts:'Conflicts', tFailed:'Failed',
+      modeValidate:'Dry run — nothing was written to the database.',
+      modeApply:'Imported — these changes are live.',
+      rolledBack:'Rolled back — a row failed and you chose “roll the whole file back”, so nothing was written. Fix the rows below and run again.',
+      batchWord:'Batch', newImport:'↺ Start over',
+      errorsTitle:'Rows that could not be imported',
+      conflictsTitle:'Conflicts — changed in the app AND in your file',
+      conflictsHint:'These rows were left untouched. Decide which side is right, fix the loser, and run again.',
+      warningsTitle:'Warnings',
+      colLine:'Line', colKey:'Key', colColumn:'Field', colValue:'Value', colCode:'Code', colMessage:'What happened',
+      colBase:'Last synced', colApp:'In the app', colSheet:'In your file',
+      yourLine:'your line', downloadErrors:'⬇ Errors as CSV',
+      andMore:'…and {n} more. Download the CSV for the full list.',
+      confirmTitle:'Import for real?',
+      confirmIntro:'The dry run on this file says the import would:',
+      confirmCreate:'create {n} record(s)', confirmUpdate:'update {n} record(s)',
+      confirmUnchanged:'leave {n} untouched', confirmFailed:'fail on {n} row(s)',
+      confirmOnError:'If a row fails',
+      onErrorSkip:'Import the good rows (recommended)',
+      onErrorAbort:'Roll the whole file back',
+      confirmNeverDeletes:'An import never deletes anything.',
+      confirmPreseed:'Records are matched by their identity column only. If these already exist in the app because someone typed them in by hand, they will be created a second time — pre-seed import_ref first (examples/import/preseed-house-refs.sql).',
+      cancel:'Cancel', importNow:'Yes, import',
+      requestFailed:'The server rejected the file: ',
+      selectFileFirst:'Choose a file first.',
+    },
+    bg: {
+      stepEntity:'Обект', stepFile:'Файл', stepMap:'Съответствие', stepRun:'Импорт',
+      entityTitle:'1 · Какво импортирате?',
+      entitySub:'Списъкът идва от самото API за импорт.',
+      fileTitle:'2 · Изберете CSV файл',
+      fileSub:'На тази стъпка нищо не се качва — файлът се чете в браузъра.',
+      mapTitle:'3 · Свържете колоните',
+      mapSub:'Полетата на приложението вляво, вашите колони вдясно.',
+      runTitle:'4 · Проверка, после импорт',
+      runSub:'Пробното пускане не записва нищо — само показва какво би направил импортът.',
+      template:'Шаблон', autoMatch:'Автоматично', clear:'Изчисти',
+      keyOf:'Колона за идентификация', dependsOn:'Първо импортирайте:', columnsWord:'колони',
+      dropMain:'Пуснете CSV файла тук или кликнете, за да изберете',
+      dropSub:'UTF-8, първи ред = заглавия, до 50 000 реда',
+      changeFile:'Друг файл', rowsWord:'реда', delimiter:'Разделител', decimal:'Десетичен знак',
+      comma:'Запетая  ,', semicolon:'Точка и запетая  ;', tab:'Табулация', dot:'1234.56', decComma:'1234,56',
+      previewTitle:'Първите редове както са прочетени',
+      badEncoding:'Файлът не е валиден UTF-8 — кирилицата ще се повреди. Експортирайте отново от Sheets като „Стойности, разделени със запетая (.csv)“.',
+      noRows:'Файлът има заглавен ред, но няма данни.',
+      readFailed:'Файлът не може да бъде прочетен: ',
+      colTarget:'Поле в приложението', colSource:'Ваша колона', colSample:'Примерна стойност',
+      notImported:'— не се импортира —',
+      ignoredTitle:'Не се импортира', ignoredNone:'Всички колони от файла са свързани.',
+      ignoredHint:'Те остават в браузъра и никога не се качват.',
+      reqBadge:'задължително', keyBadge:'ключ',
+      missingRequired:'Свържете всички задължителни полета преди проверка:',
+      precheckDup:'повтарящи се стойности в колоната за идентификация — тези редове ще бъдат отхвърлени.',
+      precheckEmpty:'реда с празна задължителна клетка — тези редове ще бъдат отхвърлени.',
+      ready:'Готово за проверка:',
+      mappedWord:'свързани колони', ofWord:'от',
+      validateBtn:'▶ Проверка (пробно)', importBtn:'⬆ Импортирай наистина',
+      running:'Изпълнява се…', validateFirst:'Импортът се отключва след пробно пускане с този файл и това съответствие.',
+      staleWarn:'Нещо се промени след последната проверка — направете нова проверка.',
+      statusOk:'Всичко е наред', statusPartial:'Частично', statusFailed:'Неуспешно',
+      tRead:'Прочетени', tCreated:'Нови', tUpdated:'Обновени', tUnchanged:'Без промяна',
+      tKeptApp:'Запазено', tConflicts:'Конфликти', tFailed:'Грешки',
+      modeValidate:'Пробно пускане — нищо не е записано в базата.',
+      modeApply:'Импортирано — промените са активни.',
+      rolledBack:'Върнато назад — има сгрешен ред, а сте избрали „върни целия файл“, така че нищо не е записано. Поправете редовете по-долу и пуснете отново.',
+      batchWord:'Партида', newImport:'↺ Отначало',
+      errorsTitle:'Редове, които не бяха импортирани',
+      conflictsTitle:'Конфликти — променено и в приложението, и във файла',
+      conflictsHint:'Тези редове са оставени непроменени. Решете коя страна е вярна, поправете другата и пуснете отново.',
+      warningsTitle:'Предупреждения',
+      colLine:'Ред', colKey:'Ключ', colColumn:'Поле', colValue:'Стойност', colCode:'Код', colMessage:'Какво стана',
+      colBase:'Последна синхронизация', colApp:'В приложението', colSheet:'Във вашия файл',
+      yourLine:'ваш ред', downloadErrors:'⬇ Грешките като CSV',
+      andMore:'…и още {n}. Изтеглете CSV за пълния списък.',
+      confirmTitle:'Импорт наистина?',
+      confirmIntro:'Според пробното пускане импортът ще:',
+      confirmCreate:'създаде {n} записа', confirmUpdate:'обнови {n} записа',
+      confirmUnchanged:'остави {n} без промяна', confirmFailed:'се провали на {n} реда',
+      confirmOnError:'Ако ред е сгрешен',
+      onErrorSkip:'Импортирай верните редове (препоръчано)',
+      onErrorAbort:'Върни целия файл назад',
+      confirmNeverDeletes:'Импортът никога не изтрива нищо.',
+      confirmPreseed:'Записите се разпознават само по колоната за идентификация. Ако вече съществуват, защото са въведени на ръка, ще бъдат създадени втори път — първо заредете import_ref (examples/import/preseed-house-refs.sql).',
+      cancel:'Отказ', importNow:'Да, импортирай',
+      requestFailed:'Сървърът отхвърли файла: ',
+      selectFileFirst:'Първо изберете файл.',
+    }
+  };
+  const impT = k => (IMP_T[(typeof currentLang !== 'undefined' && currentLang) || 'en'] || IMP_T.en)[k] || k;
+  const impEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+  // Column mappings are remembered per entity: a recurring sync re-uploads the same export every
+  // week, and re-doing the matching each time is the chore this view exists to remove.
+  const IMP_MAP_KEY = 'tedhouse_import_mapping';
+
+  const _imp = {
+    entities: null,   // catalogue from /api/import/entities
+    entity: null,     // the selected catalogue entry
+    file: null,       // { name, size, text }
+    parsed: null,     // { headers: [original case], rows: [{ line, cells: [] }] }
+    delimiter: ',',
+    decimal: 'dot',
+    onError: 'skip',
+    mapping: {},      // canonical column -> original header, or absent
+    validated: null,  // report of a dry run that matches the CURRENT file+mapping, else null
+    report: null,     // last report of either mode
+    lineMap: null,    // generated CSV line -> { line: original line, key }
+    notice: null,     // { kind: 'bad'|'warn', text } — parse / download failures
+    busy: false,
+    applied: false,
+  };
+
+  async function impInit() {
+    impTranslate();                       // re-renders too, once the catalogue is in hand
+    if (_imp.entities) return;
+    try {
+      _imp.entities = await apiFetch('/api/import/entities').then(r => r.json());
+    } catch (e) {
+      document.getElementById('impEntityGrid').innerHTML =
+        `<div class="imp-note bad">${impEsc(e.message)}</div>`;
+      return;
+    }
+    impRenderAll();
+  }
+
+  function impTranslate() {
+    const set = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = impT(key); };
+    set('impEntityTitle','entityTitle'); set('impEntitySub','entitySub');
+    set('impFileTitle','fileTitle');     set('impFileSub','fileSub');
+    set('impMapTitle','mapTitle');       set('impMapSub','mapSub');
+    set('impRunTitle','runTitle');       set('impRunSub','runSub');
+    set('impTemplateLbl','template');    set('impAutoLbl','autoMatch');
+    set('impClearMapLbl','clear');       set('impConfirmTitle','confirmTitle');
+    set('impConfirmCancel','cancel');    set('impConfirmOk','importNow');
+    if (_imp.entities) impRenderAll();
+  }
+
+  function impRenderAll() {
+    impRenderSteps();
+    impRenderEntities();
+    impRenderFile();
+    impRenderMapping();
+    impRenderRun();
+    impRenderReport();
+  }
+
+  function impRenderSteps() {
+    const done = [!!_imp.entity, !!_imp.parsed, impRequiredMissing().length === 0 && !!_imp.parsed, _imp.applied];
+    const labels = ['stepEntity','stepFile','stepMap','stepRun'];
+    const current = done.indexOf(false);
+    document.getElementById('impSteps').innerHTML = labels.map((k, i) => {
+      const cls = done[i] ? 'done' : (i === current ? 'current' : '');
+      return `<div class="imp-step ${cls}"><span class="imp-step-n">${done[i] ? '✓' : i + 1}</span>${impEsc(impT(k))}</div>`;
+    }).join('');
+    // Panels unlock in order — a mapping table with no file behind it is noise, not a form.
+    const gate = (id, ok) => document.getElementById(id).classList.toggle('muted', !ok);
+    gate('impPanelFile', !!_imp.entity);
+    gate('impPanelMap', !!_imp.parsed);
+    gate('impPanelRun', !!_imp.parsed);
+  }
+
+  function impRenderEntities() {
+    const grid = document.getElementById('impEntityGrid');
+    if (!_imp.entities || !_imp.entities.length) {
+      grid.innerHTML = `<div class="imp-note">—</div>`;
+      return;
+    }
+    grid.innerHTML = _imp.entities.map(e => {
+      const cols = Object.keys(e.columns || {}).length + 1;   // + the key column
+      const deps = (e.dependsOn || []).length
+        ? `<br>${impEsc(impT('dependsOn'))} ${e.dependsOn.map(impEsc).join(', ')}` : '';
+      return `<div class="imp-entity ${_imp.entity && _imp.entity.name === e.name ? 'sel' : ''}"
+                   onclick="impSelectEntity('${impEsc(e.name)}')">
+        <h4>${impEsc(e.name)}</h4>
+        <p>${cols} ${impEsc(impT('columnsWord'))} · ${impEsc(impT('keyOf'))}: <code>${impEsc(e.keyColumn)}</code>${deps}</p>
+      </div>`;
+    }).join('');
+  }
+
+  function impSelectEntity(name) {
+    const e = (_imp.entities || []).find(x => x.name === name);
+    if (!e || (_imp.entity && _imp.entity.name === name)) return;
+    _imp.entity = e;
+    // A new entity invalidates everything downstream — the columns are different.
+    _imp.file = null; _imp.parsed = null; _imp.mapping = {}; _imp.validated = null;
+    _imp.report = null; _imp.applied = false;
+    impRenderAll();
+  }
+
+  /** Ordered target columns: identity first, then required, then the rest. */
+  function impTargets() {
+    const e = _imp.entity;
+    if (!e) return [];
+    const cols = e.columns || {};
+    const req = new Set(e.required || []);
+    const rest = Object.keys(cols).sort((a, b) => {
+      const ra = req.has(a), rb = req.has(b);
+      return ra === rb ? a.localeCompare(b) : (ra ? -1 : 1);
+    });
+    return [{ name: e.keyColumn, type: 'text', key: true, required: true }]
+      .concat(rest.map(c => ({ name: c, type: cols[c], key: false, required: req.has(c) })));
+  }
+
+  function impRequiredMissing() {
+    return impTargets().filter(t => t.required && !_imp.mapping[t.name]).map(t => t.name);
+  }
+
+  // ── file ─────────────────────────────────────────────────────────────────────
+
+  function impRenderFile() {
+    const slot = document.getElementById('impDropSlot');
+    const sum  = document.getElementById('impFileSummary');
+    const notice = _imp.notice
+      ? `<div class="imp-note ${_imp.notice.kind}">${impEsc(_imp.notice.text)}</div>` : '';
+    if (!_imp.parsed) {
+      slot.innerHTML = `
+        <div class="imp-drop" id="impDrop" onclick="document.getElementById('impFileInput').click()">
+          <span class="imp-drop-icon">📄</span>
+          <span class="imp-drop-main">${impEsc(impT('dropMain'))}</span>
+          <div class="imp-drop-sub">${impEsc(impT('dropSub'))}</div>
+        </div>`;
+      impWireDrop();
+      sum.innerHTML = notice;
+      return;
+    }
+    slot.innerHTML = '';
+    const p = _imp.parsed;
+    const opt = (v, cur, label) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${impEsc(label)}</option>`;
+    sum.innerHTML = notice + `
+      <div class="imp-file-bar">
+        <span class="imp-file-name">📄 ${impEsc(_imp.file.name)}</span>
+        <span class="imp-tag">${(_imp.file.size / 1024).toFixed(1)} KB</span>
+        <span class="imp-tag">${p.rows.length} ${impEsc(impT('rowsWord'))}</span>
+        <span class="imp-tag">${p.headers.length} ${impEsc(impT('columnsWord'))}</span>
+        <span style="flex:1"></span>
+        <label style="font-size:0.75rem;color:var(--muted)">${impEsc(impT('delimiter'))}
+          <select class="imp-sel" style="min-width:0" onchange="impSetDelimiter(this.value)">
+            ${opt(',', _imp.delimiter, impT('comma'))}${opt(';', _imp.delimiter, impT('semicolon'))}${opt('\t', _imp.delimiter, impT('tab'))}
+          </select>
+        </label>
+        <label style="font-size:0.75rem;color:var(--muted)">${impEsc(impT('decimal'))}
+          <select class="imp-sel" style="min-width:0" onchange="impSetDecimal(this.value)">
+            ${opt('dot', _imp.decimal, impT('dot'))}${opt('comma', _imp.decimal, impT('decComma'))}
+          </select>
+        </label>
+        <button class="btn btn-ghost" onclick="document.getElementById('impFileInput').click()">${impEsc(impT('changeFile'))}</button>
+      </div>
+      ${p.badEncoding ? `<div class="imp-note bad" style="margin-top:0.8rem">⚠ ${impEsc(impT('badEncoding'))}</div>` : ''}
+      ${p.rows.length ? impPreviewTable(p) : `<div class="imp-note warn" style="margin-top:0.8rem">${impEsc(impT('noRows'))}</div>`}`;
+  }
+
+  function impPreviewTable(p) {
+    const rows = p.rows.slice(0, 5);
+    return `
+      <div class="imp-panel-sub" style="margin:1rem 0 0.5rem">${impEsc(impT('previewTitle'))}</div>
+      <div class="imp-scroll"><table class="imp-table imp-preview">
+        <thead><tr>${p.headers.map(h => `<th>${impEsc(h)}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(r => `<tr>${p.headers.map((_, i) =>
+          `<td title="${impEsc(r.cells[i] || '')}">${impEsc(r.cells[i] || '')}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table></div>`;
+  }
+
+  function impWireDrop() {
+    const drop = document.getElementById('impDrop');
+    if (!drop) return;
+    ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => {
+      e.preventDefault(); drop.classList.add('over');
+    }));
+    ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => {
+      e.preventDefault(); drop.classList.remove('over');
+    }));
+    drop.addEventListener('drop', e => {
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) impOnFilePicked(f);
+    });
+  }
+
+  function impOnFilePicked(file) {
+    if (!file) return;
+    _imp.notice = null;
+    const reader = new FileReader();
+    reader.onerror = () => {
+      _imp.notice = { kind: 'bad', text: impT('readFailed') + String(reader.error) };
+      impRenderFile();
+    };
+    reader.onload = () => {
+      _imp.file = { name: file.name, size: file.size, text: String(reader.result || '') };
+      _imp.delimiter = impDetectDelimiter(_imp.file.text);
+      impReparse();
+      // Restore a saved mapping for this entity, then fill the gaps by auto-matching.
+      impLoadMapping();
+      impAutoMap(false);
+      impRenderAll();
+    };
+    reader.readAsText(file, 'utf-8');
+    document.getElementById('impFileInput').value = '';
+  }
+
+  function impSetDelimiter(d) { _imp.delimiter = d; impReparse(); impAutoMap(false); impRenderAll(); }
+  function impSetDecimal(d)   { _imp.decimal = d; _imp.validated = null; impRenderSteps(); impRenderRun(); }
+
+  function impReparse() {
+    _imp.validated = null;
+    _imp.report = null;
+    _imp.applied = false;
+    try {
+      _imp.parsed = impParse(_imp.file.text, _imp.delimiter);
+      _imp.notice = null;
+    } catch (e) {
+      _imp.parsed = null;
+      _imp.notice = { kind: 'bad', text: e.message };
+    }
+    // A header that disappeared with the new delimiter can't stay mapped.
+    if (_imp.parsed) {
+      const have = new Set(_imp.parsed.headers);
+      Object.keys(_imp.mapping).forEach(k => { if (!have.has(_imp.mapping[k])) delete _imp.mapping[k]; });
+    }
+  }
+
+  /** Same rules as the server's CsvReader: BOM stripped, blank records dropped, RFC 4180 quoting,
+   *  and the line number of a record is the physical line it starts on. */
+  function impParse(text, delimiter) {
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    const records = [];
+    let cur = [], field = '', inQuotes = false, line = 1, recordLine = 1;
+    const endField  = () => { cur.push(field); field = ''; };
+    const endRecord = () => {
+      endField();
+      if (cur.some(c => c && c.trim() !== '')) records.push({ line: recordLine, cells: cur });
+      cur = []; line++; recordLine = line;
+    };
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; } else inQuotes = false;
+        } else { if (c === '\n') line++; field += c; }
+        continue;
+      }
+      if (c === '"' && field === '') inQuotes = true;
+      else if (c === delimiter) endField();
+      else if (c === '\r') { if (text[i + 1] === '\n') i++; endRecord(); }
+      else if (c === '\n') endRecord();
+      else field += c;
+    }
+    if (field !== '' || cur.length) endRecord();
+    if (!records.length) throw new Error(impT('noRows'));
+
+    const headers = [], seen = new Set();
+    records[0].cells.forEach(h => {
+      const name = (h || '').trim();
+      if (!name) return;
+      const lower = name.toLowerCase();
+      if (seen.has(lower)) throw new Error('Duplicate column in the header: ' + name);
+      seen.add(lower);
+      headers.push(name);
+    });
+    if (!headers.length) throw new Error(impT('noRows'));
+    return {
+      headers,
+      rows: records.slice(1),
+      badEncoding: text.indexOf('�') >= 0,
+    };
+  }
+
+  function impDetectDelimiter(text) {
+    const firstLine = text.split(/\r?\n/, 1)[0] || '';
+    const count = d => (firstLine.match(new RegExp(d === '\t' ? '\t' : '\\' + d, 'g')) || []).length;
+    const scores = [[',', count(',')], [';', count(';')], ['\t', count('\t')]];
+    scores.sort((a, b) => b[1] - a[1]);
+    return scores[0][1] > 0 ? scores[0][0] : ',';
+  }
+
+  // ── mapping ──────────────────────────────────────────────────────────────────
+
+  // Aliases carry what a normalized string comparison cannot: the client's CRM vocabulary
+  // (CRM_ID is the external key, Project_Name is the house name) and the Bulgarian headers a
+  // Sheets export can arrive with.
+  const IMP_ALIASES = {
+    key:                 ['key','crmid','crm','externalkey','externalid','id','code','ключ','код'],
+    name:                ['name','projectname','project','title','обект','име','наименование','имена'],
+    address:             ['address','adress','adresa','адрес','местоположение','село','град'],
+    location:            ['location','maplink','mapslink','googlemaps','gmaps','maps','локация','карта','линк'],
+    lat:                 ['lat','latitude','ширина'],
+    lng:                 ['lng','lon','long','longitude','дължина'],
+    start_date:          ['startdate','datestart','начало','началнадата'],
+    scaffold_status:     ['scaffoldstatus','скеле','статусскеле'],
+    scaffold_start_date: ['scaffoldstartdate','скелеот'],
+    scaffold_end_date:   ['scaffoldenddate','скеледо'],
+    unit:                ['unit','uom','measure','мярка','единица'],
+    price:               ['price','cost','unitprice','цена','стойност'],
+  };
+  const impNorm = s => String(s || '').toLowerCase().replace(/[^a-z0-9а-я]/gi, '');
+
+  /**
+   * @param force when true, discards the current mapping first (the ✨ button); otherwise it only
+   *              fills fields the user has not already decided, so a restored mapping survives.
+   */
+  function impAutoMap(force) {
+    if (!_imp.parsed || !_imp.entity) return;
+    if (force) _imp.mapping = {};
+    const used = new Set(Object.values(_imp.mapping));
+    const headers = _imp.parsed.headers.map(h => ({ raw: h, norm: impNorm(h) }));
+    const take = (target, pick) => {
+      if (!pick) return false;
+      _imp.mapping[target] = pick.raw;
+      used.add(pick.raw);
+      return true;
+    };
+    const targets = impTargets().filter(t => !_imp.mapping[t.name]);
+    // Three passes over ALL targets, weakest last: an exact header match anywhere must win over a
+    // substring match on an earlier column, or Client_Name would claim `name` before Project_Name.
+    targets.forEach(t => {
+      take(t.name, headers.find(h => !used.has(h.raw) && h.norm === impNorm(t.name)));
+    });
+    targets.filter(t => !_imp.mapping[t.name]).forEach(t => {
+      const aliases = IMP_ALIASES[t.name] || [];
+      take(t.name, headers.find(h => !used.has(h.raw) && aliases.includes(h.norm)));
+    });
+    targets.filter(t => !_imp.mapping[t.name]).forEach(t => {
+      const n = impNorm(t.name);
+      take(t.name, headers.find(h => !used.has(h.raw) && n.length > 3 && h.norm.includes(n)));
+    });
+    _imp.validated = null;
+    if (force) { impSaveMapping(); impRenderAll(); }
+  }
+
+  function impClearMap() {
+    _imp.mapping = {};
+    _imp.validated = null;
+    impSaveMapping();
+    impRenderAll();
+  }
+
+  function impSetMapping(target, header) {
+    if (!header) delete _imp.mapping[target];
+    else {
+      // One source column can only feed one field — silently duplicating it would produce two
+      // canonical columns with the same content and no way to see that from the report.
+      Object.keys(_imp.mapping).forEach(k => { if (_imp.mapping[k] === header) delete _imp.mapping[k]; });
+      _imp.mapping[target] = header;
+    }
+    _imp.validated = null;
+    impSaveMapping();
+    impRenderAll();
+  }
+
+  function impSaveMapping() {
+    if (!_imp.entity) return;
+    try {
+      const all = JSON.parse(localStorage.getItem(IMP_MAP_KEY) || '{}');
+      all[_imp.entity.name] = _imp.mapping;
+      localStorage.setItem(IMP_MAP_KEY, JSON.stringify(all));
+    } catch (e) { /* private mode / quota — the mapping just won't be remembered */ }
+  }
+
+  function impLoadMapping() {
+    if (!_imp.entity || !_imp.parsed) return;
+    try {
+      const saved = (JSON.parse(localStorage.getItem(IMP_MAP_KEY) || '{}'))[_imp.entity.name];
+      if (!saved) return;
+      const have = new Set(_imp.parsed.headers);
+      const targets = new Set(impTargets().map(t => t.name));
+      Object.keys(saved).forEach(k => {
+        if (targets.has(k) && have.has(saved[k])) _imp.mapping[k] = saved[k];
+      });
+    } catch (e) { /* ignore a corrupted entry */ }
+  }
+
+  function impRenderMapping() {
+    const body = document.getElementById('impMapBody');
+    if (!_imp.parsed || !_imp.entity) { body.innerHTML = ''; return; }
+    const p = _imp.parsed;
+    const sampleOf = header => {
+      const i = p.headers.indexOf(header);
+      if (i < 0) return '';
+      const row = p.rows.find(r => (r.cells[i] || '').trim() !== '');
+      return row ? row.cells[i] : '';
+    };
+    const used = new Set(Object.values(_imp.mapping));
+
+    const rows = impTargets().map(t => {
+      const cur = _imp.mapping[t.name] || '';
+      const badge = t.key
+        ? `<span class="imp-req imp-key">${impEsc(impT('keyBadge'))}</span>`
+        : (t.required ? `<span class="imp-req">${impEsc(impT('reqBadge'))}</span>` : '');
+      const options = [`<option value="">${impEsc(impT('notImported'))}</option>`].concat(
+        p.headers.map(h => {
+          const taken = used.has(h) && h !== cur;
+          return `<option value="${impEsc(h)}" ${h === cur ? 'selected' : ''} ${taken ? 'disabled' : ''}>${impEsc(h)}</option>`;
+        })).join('');
+      const cls = 'imp-sel' + (cur ? '' : (t.required ? ' miss' : ' unset'));
+      return `<tr>
+        <td><span class="imp-map-target">${impEsc(t.name)}</span>${badge}<br><span class="imp-map-type">${impEsc(t.type)}</span></td>
+        <td><select class="${cls}" onchange="impSetMapping('${impEsc(t.name)}', this.value)">${options}</select></td>
+        <td class="imp-line" style="max-width:260px;overflow:hidden;text-overflow:ellipsis">${impEsc(sampleOf(cur))}</td>
+      </tr>`;
+    }).join('');
+
+    const ignored = p.headers.filter(h => !used.has(h));
+    body.innerHTML = `
+      <div class="imp-scroll"><table class="imp-table">
+        <thead><tr>
+          <th>${impEsc(impT('colTarget'))}</th><th>${impEsc(impT('colSource'))}</th><th>${impEsc(impT('colSample'))}</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <div style="margin-top:1rem">
+        <div class="imp-panel-sub" style="margin-bottom:0.4rem">
+          ${impEsc(impT('ignoredTitle'))} — ${impEsc(impT('ignoredHint'))}
+        </div>
+        <div class="imp-ignored">${ignored.length
+          ? ignored.map(h => `<code>${impEsc(h)}</code>`).join('')
+          : impEsc(impT('ignoredNone'))}</div>
+      </div>`;
+  }
+
+  // ── validate / import ────────────────────────────────────────────────────────
+
+  /** Client-side pre-check of the two failures the server would report row by row. */
+  function impPrecheck() {
+    const out = { dupes: 0, empties: 0 };
+    if (!_imp.parsed || !_imp.entity) return out;
+    const idx = h => _imp.parsed.headers.indexOf(h);
+    const keyIdx = idx(_imp.mapping[_imp.entity.keyColumn]);
+    const reqIdx = impTargets().filter(t => t.required && !t.key && _imp.mapping[t.name])
+      .map(t => idx(_imp.mapping[t.name]));
+    const seen = new Set();
+    _imp.parsed.rows.forEach(r => {
+      const k = keyIdx >= 0 ? (r.cells[keyIdx] || '').trim() : '';
+      if (keyIdx >= 0) {
+        if (!k) out.empties++;
+        else if (seen.has(k)) out.dupes++;
+        else seen.add(k);
+      }
+      if (k && reqIdx.some(i => !(r.cells[i] || '').trim())) out.empties++;
+    });
+    return out;
+  }
+
+  function impRenderRun() {
+    const body = document.getElementById('impRunBody');
+    if (!_imp.parsed || !_imp.entity) { body.innerHTML = ''; return; }
+    const missing = impRequiredMissing();
+    const pre = impPrecheck();
+    const mapped = Object.keys(_imp.mapping).length;
+    const notes = [];
+    if (missing.length) {
+      notes.push(`<div class="imp-note bad">${impEsc(impT('missingRequired'))} <code>${missing.map(impEsc).join('</code> <code>')}</code></div>`);
+    } else {
+      notes.push(`<div class="imp-note ok">${impEsc(impT('ready'))} <strong>${_imp.parsed.rows.length}</strong> ${impEsc(impT('rowsWord'))}, <strong>${mapped}</strong> ${impEsc(impT('mappedWord'))}.</div>`);
+    }
+    if (pre.dupes)   notes.push(`<div class="imp-note warn">${pre.dupes} ${impEsc(impT('precheckDup'))}</div>`);
+    if (pre.empties) notes.push(`<div class="imp-note warn">${pre.empties} ${impEsc(impT('precheckEmpty'))}</div>`);
+    if (_imp.applied) {
+      // `abort` rolls the file back on any failed row, so an apply that reported failures wrote
+      // nothing — saying "these changes are live" there would be a lie.
+      const rolledBack = _imp.onError === 'abort' && _imp.report && _imp.report.failed > 0;
+      notes.push(`<div class="imp-note ${rolledBack ? 'bad' : 'ok'}">${rolledBack ? '⚠ ' : '✓ '}${impEsc(impT(rolledBack ? 'rolledBack' : 'modeApply'))}</div>`);
+    } else if (!missing.length && !_imp.validated) {
+      notes.push(`<div class="imp-note">${impEsc(impT(_imp.report ? 'staleWarn' : 'validateFirst'))}</div>`);
+    }
+
+    const disabled = missing.length || _imp.busy ? 'disabled' : '';
+    body.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.1rem">${notes.join('')}</div>
+      <div class="imp-actions">
+        <button class="btn btn-ghost" ${disabled} onclick="impRun('validate')">${impEsc(impT(_imp.busy ? 'running' : 'validateBtn'))}</button>
+        <button class="btn btn-primary" ${disabled || !_imp.validated ? 'disabled' : ''} onclick="impOpenConfirm()">${impEsc(impT('importBtn'))}</button>
+        ${_imp.report ? `<button class="btn btn-ghost" onclick="impReset()">${impEsc(impT('newImport'))}</button>` : ''}
+      </div>`;
+  }
+
+  /**
+   * Re-emits the parsed file as a canonical CSV holding only the mapped columns.
+   * Also records, for every generated line, the line the row came from in the user's own file, so
+   * the report can point at something they can actually find in their spreadsheet.
+   */
+  function impBuildCsv() {
+    const p = _imp.parsed;
+    const targets = impTargets().filter(t => _imp.mapping[t.name]);
+    const idx = targets.map(t => p.headers.indexOf(_imp.mapping[t.name]));
+    const quote = v => {
+      const s = String(v == null ? '' : v);
+      return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const keyIdx = p.headers.indexOf(_imp.mapping[_imp.entity.keyColumn]);
+
+    const lines = [targets.map(t => t.name).join(',')];
+    const lineMap = {};
+    let genLine = 1;                                   // the header occupies line 1
+    p.rows.forEach(r => {
+      const record = idx.map(i => quote(i >= 0 ? (r.cells[i] || '') : '')).join(',');
+      genLine += 1;
+      lineMap[genLine] = { line: r.line, key: keyIdx >= 0 ? (r.cells[keyIdx] || '') : '' };
+      genLine += (record.match(/\n/g) || []).length;   // a quoted cell can span physical lines
+      lines.push(record);
+    });
+    _imp.lineMap = lineMap;
+    return lines.join('\n') + '\n';
+  }
+
+  async function impRun(mode) {
+    if (_imp.busy || !_imp.entity || !_imp.parsed) return;
+    if (impRequiredMissing().length) return;
+    _imp.busy = true;
+    impRenderRun();
+    document.getElementById('impReport').innerHTML =
+      `<div class="state-msg" style="padding:2rem"><div class="spinner"></div></div>`;
+    try {
+      const csv = impBuildCsv();
+      const fd = new FormData();
+      // The BOM keeps the file openable in Excel if anyone saves it; the server strips it.
+      fd.append('file', new Blob(['\uFEFF' + csv], { type: 'text/csv' }),
+                `${_imp.entity.name}-mapped.csv`);
+      const qs = new URLSearchParams({ mode, onError: _imp.onError, delimiter: 'comma', decimal: _imp.decimal });
+      const res  = await apiFetch(`/api/import/${encodeURIComponent(_imp.entity.name)}?${qs}`,
+                                  { method: 'POST', body: fd });
+      const body = await res.json();
+      if (!res.ok || body.error) {
+        throw new Error((body.error || res.statusText) + (body.code ? ` (${body.code})` : ''));
+      }
+      _imp.report = body;
+      // Only a dry run unlocks the import button, and only for the file+mapping it ran on.
+      _imp.validated = mode === 'validate' ? body : null;
+      _imp.applied   = mode === 'apply';
+    } catch (e) {
+      _imp.report = null;
+      document.getElementById('impReport').innerHTML =
+        `<div class="imp-note bad">${impEsc(impT('requestFailed'))}${impEsc(e.message)}</div>`;
+      _imp.busy = false;
+      impRenderRun();
+      return;
+    }
+    _imp.busy = false;
+    impRenderSteps();
+    impRenderRun();
+    impRenderReport();
+  }
+
+  function impOpenConfirm() {
+    const v = _imp.validated;
+    if (!v) return;
+    const li = [];
+    if (v.created)   li.push(impT('confirmCreate').replace('{n}', v.created));
+    if (v.updated)   li.push(impT('confirmUpdate').replace('{n}', v.updated));
+    if (v.unchanged) li.push(impT('confirmUnchanged').replace('{n}', v.unchanged));
+    if (v.failed)    li.push(impT('confirmFailed').replace('{n}', v.failed));
+    const radio = (val, label) => `
+      <label style="display:flex;gap:0.5rem;align-items:flex-start;margin-top:0.4rem;cursor:pointer">
+        <input type="radio" name="impOnError" value="${val}" ${_imp.onError === val ? 'checked' : ''}
+               onchange="_imp.onError=this.value" style="margin-top:0.2rem">
+        <span>${impEsc(label)}</span>
+      </label>`;
+    document.getElementById('impConfirmBody').innerHTML = `
+      <p>${impEsc(impT('confirmIntro'))}</p>
+      <ul style="margin:0.5rem 0 0 1.1rem;color:var(--text)">${li.map(x => `<li>${impEsc(x)}</li>`).join('')}</ul>
+      <div style="margin-top:1rem;font-weight:600;color:var(--text)">${impEsc(impT('confirmOnError'))}</div>
+      ${radio('skip', impT('onErrorSkip'))}${radio('abort', impT('onErrorAbort'))}
+      <div class="imp-note warn" style="margin-top:1rem">
+        ${impEsc(impT('confirmNeverDeletes'))} ${impEsc(impT('confirmPreseed'))}
+      </div>`;
+    document.getElementById('impConfirmModal').classList.add('open');
+  }
+
+  function impCloseConfirm() { document.getElementById('impConfirmModal').classList.remove('open'); }
+
+  function impApply() {
+    impCloseConfirm();
+    impRun('apply');
+  }
+
+  function impReset() {
+    _imp.file = null; _imp.parsed = null; _imp.validated = null;
+    _imp.report = null; _imp.applied = false; _imp.lineMap = null;
+    impRenderAll();
+  }
+
+  // ── report ───────────────────────────────────────────────────────────────────
+
+  /** Report lines address the generated file; the user only knows their own. Show both. */
+  function impWhere(line) {
+    const m = _imp.lineMap && _imp.lineMap[line];
+    if (!m) return `${impEsc(impT('colLine'))} ${line}`;
+    return `${impEsc(impT('yourLine'))} ${m.line}`;
+  }
+  function impKeyAt(line) {
+    const m = _imp.lineMap && _imp.lineMap[line];
+    return m ? m.key : '';
+  }
+  /** Canonical column name plus the header it came from, so the fix is in their vocabulary. */
+  function impSourceOf(column) {
+    const h = _imp.mapping[column];
+    return h && h.toLowerCase() !== String(column).toLowerCase() ? ` <span class="imp-map-type">← ${impEsc(h)}</span>` : '';
+  }
+
+  const IMP_MAX_ROWS_SHOWN = 50;
+
+  function impRenderReport() {
+    const el = document.getElementById('impReport');
+    const r = _imp.report;
+    if (!r) { el.innerHTML = ''; return; }
+
+    const tile = (key, val, cls) => `<div class="imp-tile ${val ? (cls || '') : ''}"><b>${val}</b><span>${impEsc(impT(key))}</span></div>`;
+    const statusKey = r.status === 'ok' ? 'statusOk' : r.status === 'failed' ? 'statusFailed' : 'statusPartial';
+    const modeKey = r.mode !== 'apply' ? 'modeValidate'
+                  : (_imp.onError === 'abort' && r.failed > 0 ? 'rolledBack' : 'modeApply');
+
+    const errors = (r.errors || []).slice(0, IMP_MAX_ROWS_SHOWN).map(e => `<tr>
+      <td class="imp-line">${impWhere(e.line)}</td>
+      <td class="imp-line">${impEsc(impKeyAt(e.line))}</td>
+      <td>${impEsc(e.column || '—')}${e.column ? impSourceOf(e.column) : ''}</td>
+      <td class="imp-line">${impEsc(e.value || '')}</td>
+      <td class="imp-code">${impEsc(e.code)}</td>
+      <td>${impEsc(e.message)}</td>
+    </tr>`).join('');
+
+    const conflicts = (r.conflictDetails || []).slice(0, IMP_MAX_ROWS_SHOWN).map(c => `<tr>
+      <td class="imp-line">${impWhere(c.line)}</td>
+      <td class="imp-line">${impEsc(c.key)}</td>
+      <td>${impEsc(c.column)}${impSourceOf(c.column)}</td>
+      <td class="imp-line">${impEsc(c.base || '—')}</td>
+      <td class="imp-line">${impEsc(c.app || '—')}</td>
+      <td class="imp-line">${impEsc(c.sheet || '—')}</td>
+    </tr>`).join('');
+
+    const more = n => n > IMP_MAX_ROWS_SHOWN
+      ? `<div class="imp-panel-sub" style="padding:0.6rem 0.7rem">${impEsc(impT('andMore').replace('{n}', n - IMP_MAX_ROWS_SHOWN))}</div>` : '';
+
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap;margin-bottom:0.9rem">
+        <span class="imp-status ${r.status}">${impEsc(impT(statusKey))}</span>
+        <span class="imp-panel-sub">${impEsc(impT(modeKey))}</span>
+        <span style="flex:1"></span>
+        <span class="imp-tag">${impEsc(impT('batchWord'))} ${impEsc(r.batchId || '')}</span>
+      </div>
+      <div class="imp-tiles">
+        ${tile('tRead', r.rowsRead)}${tile('tCreated', r.created, 'good')}${tile('tUpdated', r.updated, 'good')}
+        ${tile('tUnchanged', r.unchanged)}${tile('tKeptApp', r.keptApp)}
+        ${tile('tConflicts', r.conflicts, 'warm')}${tile('tFailed', r.failed, 'hot')}
+      </div>
+      ${(r.errors || []).length ? `
+        <div class="imp-panel-head" style="margin-top:1.2rem">
+          <div class="imp-panel-title">${impEsc(impT('errorsTitle'))}</div>
+          <button class="btn btn-ghost" onclick="impDownloadErrors()">${impEsc(impT('downloadErrors'))}</button>
+        </div>
+        <div class="imp-scroll"><table class="imp-table"><thead><tr>
+          <th>${impEsc(impT('colLine'))}</th><th>${impEsc(impT('colKey'))}</th><th>${impEsc(impT('colColumn'))}</th>
+          <th>${impEsc(impT('colValue'))}</th><th>${impEsc(impT('colCode'))}</th><th>${impEsc(impT('colMessage'))}</th>
+        </tr></thead><tbody>${errors}</tbody></table>${more((r.errors || []).length)}</div>` : ''}
+      ${(r.conflictDetails || []).length ? `
+        <div class="imp-panel-title" style="margin-top:1.4rem">${impEsc(impT('conflictsTitle'))}</div>
+        <div class="imp-panel-sub" style="margin:0.3rem 0 0.7rem">${impEsc(impT('conflictsHint'))}</div>
+        <div class="imp-scroll"><table class="imp-table"><thead><tr>
+          <th>${impEsc(impT('colLine'))}</th><th>${impEsc(impT('colKey'))}</th><th>${impEsc(impT('colColumn'))}</th>
+          <th>${impEsc(impT('colBase'))}</th><th>${impEsc(impT('colApp'))}</th><th>${impEsc(impT('colSheet'))}</th>
+        </tr></thead><tbody>${conflicts}</tbody></table>${more((r.conflictDetails || []).length)}</div>` : ''}
+      ${(r.warnings || []).length ? `
+        <div class="imp-panel-title" style="margin-top:1.4rem">${impEsc(impT('warningsTitle'))}</div>
+        <div style="display:flex;flex-direction:column;gap:0.4rem;margin-top:0.6rem">
+          ${r.warnings.map(w => `<div class="imp-note warn"><span class="imp-code">${impEsc(w.code)}</span>
+            ${w.column ? `<code>${impEsc(w.column)}</code> ` : ''}${impEsc(w.message)}</div>`).join('')}
+        </div>` : ''}`;
+  }
+
+  function impDownloadErrors() {
+    const r = _imp.report;
+    if (!r || !(r.errors || []).length) return;
+    const q = v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+    const rows = [['your_line', 'key', 'column', 'source_column', 'value', 'code', 'message']]
+      .concat(r.errors.map(e => {
+        const m = (_imp.lineMap && _imp.lineMap[e.line]) || {};
+        return [m.line || e.line, m.key || '', e.column || '', (e.column && _imp.mapping[e.column]) || '',
+                e.value || '', e.code, e.message];
+      }));
+    const csv = '\uFEFF' + rows.map(row => row.map(q).join(',')).join('\r\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${_imp.entity.name}-import-errors.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  /** The template endpoint needs the bearer header, so it cannot be a plain link. */
+  async function impDownloadTemplate() {
+    if (!_imp.entity) return;
+    try {
+      const res  = await apiFetch(`/api/import/templates/${encodeURIComponent(_imp.entity.name)}`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${_imp.entity.name}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) {
+      _imp.notice = { kind: 'bad', text: e.message };
+      impRenderFile();
     }
   }
 
