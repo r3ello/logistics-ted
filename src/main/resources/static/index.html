@@ -490,6 +490,23 @@
     .bar-tiles  { background: var(--red); }
     .mat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
+    /* ── WEATHER TOOLTIP ── */
+    .wx-cell { cursor:default; }
+    .wx-row:hover td { background:rgba(79,142,247,0.07); }
+    #wxTooltip {
+      display:none; position:fixed; z-index:9999; min-width:320px; max-width:440px;
+      background:var(--card); border:1px solid var(--border);
+      border-radius:12px; padding:1rem 1.2rem;
+      box-shadow:0 6px 24px rgba(0,0,0,0.4);
+      font-size:1rem; line-height:1.7; color:var(--text);
+      white-space:normal; text-align:left; pointer-events:none;
+    }
+    .wx-tip-date { font-size:0.82rem; color:var(--muted); font-weight:700; margin-bottom:0.45rem; text-transform:uppercase; }
+    .wx-tip-row { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.2rem; }
+    .wx-tip-icon { font-size:1.1rem; flex-shrink:0; }
+    .wx-tip-good { color:#3ecf6e; font-weight:700; }
+    .wx-tip-bad  { color:#f76f6f; }
+
     /* ── ORDER FORM ── */
     .order-layout { display: grid; grid-template-columns: 380px 1fr; gap: 2rem; align-items: start; }
     @media (max-width: 900px) { .order-layout { grid-template-columns: 1fr; } }
@@ -1830,6 +1847,16 @@
       </a>
     </div>
 
+    <div class="nav-item" id="navWeatherGroup" onclick="toggleNavGroup('weather')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🌤️</span><span id="navWeatherGroupLabel">Weather</span></span>
+      <span id="navWeatherChevron" style="font-size:0.7rem;color:var(--muted)">▸</span>
+    </div>
+    <div id="navWeatherChildren" style="display:none;flex-direction:column">
+      <a class="nav-item nav-sub" id="navWeatherRecommendations" href="#weatherrecommendations" onclick="showView('weatherrecommendations');return false;">
+        <span class="nav-icon">📋</span> <span id="navWeatherRecommendationsLabel">Recommendations</span>
+      </a>
+    </div>
+
     <!-- Admin + importer only; visibility is set in applyRole() and re-checked in showView().
          Deliberately NOT registered in menu_config: applyMenuConfig() would set display on it from
          the stored row and undo the role gate (same reason navMenuConfig stays out). -->
@@ -2684,6 +2711,15 @@
     </div>
   </div>
 
+  <!-- VIEW: WEATHER RECOMMENDATIONS -->
+  <div class="view" id="view-weatherrecommendations">
+    <div style="width:100%">
+      <div id="weatherRecContent">
+        <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
+      </div>
+    </div>
+  </div>
+
   <!-- VIEW: MENU CONFIG -->
   <div class="view" id="view-menuconfig">
     <div style="max-width:700px">
@@ -3034,7 +3070,9 @@
       // menu management
       pageTitle_menuconfig:'Menu Management', pageSub_menuconfig:'Toggle visibility and reorder nav items and dashboard tabs', navMenuConfig:'Menu Management', mcNavSection:'📌 Left Navigation', mcDashSection:'📊 Dashboard Tabs', mcVisible:'Visible', mcHidden:'Hidden',
       pageTitle_qachecklists:'Stage Checklists', pageSub_qachecklists:'Define quality checklist items per construction stage',
+      pageTitle_weatherrecommendations:'Weather Recommendations', pageSub_weatherrecommendations:'Construction activity recommendations based on weather forecast',
       navQaGroupLabel:'Quality Assurance', navQaChecklists:'Stage Checklists',
+      navWeatherGroupLabel:'Weather', navWeatherRecommendations:'Recommendations',
       qaclAddItem:'Add Item', qaclItemTextBg:'Text (BG)', qaclItemTextEn:'Text (EN)', qaclSave:'Save', qaclCancel:'Cancel', qaclEdit:'Edit', qaclDelete:'Delete', qaclActive:'Active', qaclInactive:'Inactive', qaclNoItems:'No checklist items yet.',
       // company folders admin
       pageTitle_companyfolders:'Company Folders Template', pageSub_companyfolders:'Global document folder structure shared across the company',
@@ -3354,7 +3392,9 @@
       // menu management
       pageTitle_menuconfig:'Управление на менюто', pageSub_menuconfig:'Управлявай видимостта и реда на елементите в навигацията и таблото', navMenuConfig:'Управление на менюто', mcNavSection:'📌 Лява навигация', mcDashSection:'📊 Табове на таблото', mcVisible:'Видим', mcHidden:'Скрит',
       pageTitle_qachecklists:'Контролни списъци', pageSub_qachecklists:'Определи елементи на контролния списък за всеки строителен етап',
+      pageTitle_weatherrecommendations:'Препоръки за времето', pageSub_weatherrecommendations:'Препоръки за строителни дейности според прогнозата за времето',
       navQaGroupLabel:'Контрол на качеството', navQaChecklists:'Контролни списъци',
+      navWeatherGroupLabel:'Времето', navWeatherRecommendations:'Препоръки',
       qaclAddItem:'Добави елемент', qaclItemTextBg:'Текст (БГ)', qaclItemTextEn:'Текст (EN)', qaclSave:'Запази', qaclCancel:'Откажи', qaclEdit:'Редактирай', qaclDelete:'Изтрий', qaclActive:'Активен', qaclInactive:'Неактивен', qaclNoItems:'Няма добавени елементи.',
       // company folders admin
       pageTitle_companyfolders:'Шаблон за фирмени папки', pageSub_companyfolders:'Обща структура на документни папки за цялата фирма',
@@ -3415,6 +3455,11 @@
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
     else if (activeView === 'workeraccess') { if (_waGroups) waRender(_waGroups); }
     else if (activeView === 'housedetail') { if (_houseDetailId) loadHouseDetail(); }
+    else if (activeView === 'weatherrecommendations') {
+      const lbl = document.getElementById('wxHouseLabel');
+      if (lbl) lbl.textContent = currentLang==='bg' ? 'Избери обект' : 'Select House';
+      if (_wxHouseId) wxFetch(_wxHouseId);
+    }
     else if (activeView === 'myorders')       renderMyOrders();
     else if (activeView === 'mycrew')         { if (_mcData) mcRender(); }
     else if (activeView === 'myworkeraccess') mwaRender();
@@ -3426,6 +3471,10 @@
     if (navQaGrpLbl) navQaGrpLbl.textContent = t('navQaGroupLabel');
     const navQaClLbl = document.getElementById('navQaChecklistsLabel');
     if (navQaClLbl) navQaClLbl.textContent = t('navQaChecklists');
+    const navWxGrpLbl = document.getElementById('navWeatherGroupLabel');
+    if (navWxGrpLbl) navWxGrpLbl.textContent = t('navWeatherGroupLabel');
+    const navWxRecLbl = document.getElementById('navWeatherRecommendationsLabel');
+    if (navWxRecLbl) navWxRecLbl.textContent = t('navWeatherRecommendations');
     if (activeView === 'qachecklists') _qaclRender();
     // Re-label Menu Management nav item and section headers
     const navMcLabel = document.getElementById('navMenuConfigLabel');
@@ -3751,9 +3800,9 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import', 'weatherrecommendations'];
 
-  const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false, qa: false };
+  const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false, qa: false, weather: false };
   const _navGroupConfig = {
     routes:         { children: 'navRoutesChildren',          chevron: 'navRoutesChevron' },
     attendance:     { children: 'navAttendanceChildren',      chevron: 'navAttendanceChevron' },
@@ -3762,6 +3811,7 @@
     orgchart:       { children: 'navOrgChartChildren',        chevron: 'navOrgChartChevron' },
     clientservices: { children: 'navClientServicesChildren',  chevron: 'navClientServicesChevron' },
     qa:             { children: 'navQaChildren',              chevron: 'navQaChevron' },
+    weather:        { children: 'navWeatherChildren',         chevron: 'navWeatherChevron' },
   };
   function setNavActive(id) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -3820,8 +3870,9 @@
     if (name === 'mycrew')         mcLoad();
     if (name === 'myworkeraccess') mwaLoad();
     if (name === 'menuconfig')     mcfgLoad();
-    if (name === 'qachecklists')   qaclInit();
-    if (name === 'import')         impInit();
+    if (name === 'qachecklists')          qaclInit();
+    if (name === 'import')                impInit();
+    if (name === 'weatherrecommendations') wxRecLoad();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -13725,6 +13776,219 @@
     } catch(e) { alert('Error deleting'); }
   }
 
+  // ── WEATHER RECOMMENDATIONS ──────────────────────────────────────────────────
+
+  // Shared floating tooltip for weather grid cells
+  (function() {
+    const el = document.createElement('div');
+    el.id = 'wxTooltip';
+    document.body.appendChild(el);
+  })();
+
+  function wxTipShow(e, idx) {
+    const tip = document.getElementById('wxTooltip');
+    if (!tip) return;
+    tip.innerHTML = (window._wxTips && window._wxTips[idx]) || '';
+    tip.style.display = 'block';
+    const rect = e.currentTarget.getBoundingClientRect();
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let left = rect.left + rect.width / 2 - tw / 2;
+    let top  = rect.top - th - 8;
+    if (left < 8) left = 8;
+    if (left + tw > window.innerWidth - 8) left = window.innerWidth - tw - 8;
+    if (top < 8) top = rect.bottom + 8;
+    tip.style.left = left + 'px';
+    tip.style.top  = top  + 'px';
+  }
+
+  function wxTipHide() {
+    const tip = document.getElementById('wxTooltip');
+    if (tip) tip.style.display = 'none';
+  }
+
+  let _wxHouseId = null;
+
+  async function wxRecLoad() {
+    const el = document.getElementById('weatherRecContent');
+    if (!el) return;
+
+    // Load houses for selector
+    const houses = (await apiFetch('/api/houses').then(r => r.json()).catch(() => []));
+    if (!houses.length) { el.innerHTML = '<div class="state-msg">No houses found.</div>'; return; }
+
+    const opts = houses.map(h => `<option value="${h.id}" ${_wxHouseId == h.id ? 'selected' : ''}>${h.name}</option>`).join('');
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.2rem;flex-wrap:wrap">
+        <label id="wxHouseLabel" style="font-size:0.8rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em">${currentLang==='bg'?'Избери обект':'Select House'}</label>
+        <select id="wxHouseSelect" onchange="wxSelectHouse(this.value)"
+          style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.45rem 0.75rem;border-radius:8px;font-size:0.9rem;cursor:pointer">
+          <option value="">— ${currentLang==='bg'?'избери':'choose'} —</option>
+          ${opts}
+        </select>
+      </div>
+      <div id="wxResult"></div>`;
+
+    if (_wxHouseId) wxFetch(_wxHouseId);
+  }
+
+  function wxSelectHouse(id) {
+    _wxHouseId = id || null;
+    if (_wxHouseId) wxFetch(_wxHouseId);
+    else document.getElementById('wxResult').innerHTML = '';
+  }
+
+  async function wxFetch(houseId) {
+    const el = document.getElementById('wxResult');
+    if (!el) return;
+    const isEn = currentLang !== 'bg';
+    el.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>${isEn ? 'Fetching forecast…' : 'Зареждане на прогноза…'}</div>`;
+    try {
+      const resp = await apiFetch('/api/weather/recommendations/' + houseId);
+      const data = await resp.json();
+      if (!resp.ok) {
+        const isNoCoords = (data.error || '').includes('no coordinates');
+        const msg = isNoCoords
+          ? (isEn
+              ? '📍 This house has no GPS coordinates set. Open the house detail page and add the location to enable weather forecasts.'
+              : '📍 Този обект няма зададени GPS координати. Отвори страницата на обекта и добави местоположението, за да активираш прогнозата.')
+          : (data.error || (isEn ? 'Unexpected error' : 'Неочаквана грешка'));
+        el.innerHTML = `<div class="state-msg" style="color:var(--muted);max-width:420px;margin:auto;line-height:1.6">${msg}</div>`;
+        return;
+      }
+      wxRender(data, el);
+    } catch(e) {
+      el.innerHTML = `<div class="state-msg" style="color:var(--red)">❌ ${e.message}</div>`;
+    }
+  }
+
+  function wxRender(data, el) {
+    const isEn = currentLang !== 'bg';
+    const days  = data.forecastDays || [];
+    const stages = data.stages || [];
+
+    const WX_ICON = { 0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️', 45:'🌫️', 48:'🌫️', 51:'🌦️', 53:'🌦️', 55:'🌧️',
+      61:'🌧️', 63:'🌧️', 65:'🌧️', 71:'❄️', 73:'❄️', 75:'❄️', 80:'🌦️', 81:'🌧️', 82:'⛈️',
+      95:'⛈️', 96:'⛈️', 99:'⛈️' };
+    const wxIcon = c => WX_ICON[c] || '🌡️';
+    const locale = isEn ? 'en-GB' : 'bg-BG';
+    const fmtD = s => { const d = new Date(s); return d.toLocaleDateString(locale,{day:'2-digit',month:'short'}); };
+    const dayOfWeek = s => new Date(s).toLocaleDateString(locale,{weekday:'short'});
+    const isToday = s => s === new Date().toISOString().slice(0,10);
+    const isWeekend = s => { const d = new Date(s).getDay(); return d===0||d===6; };
+
+    // ── Weather strip (all forecast days) ──
+    const strip = days.map(d => `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.55rem 0.6rem;text-align:center;min-width:72px;flex-shrink:0;${isToday(d.date)?'border-color:#4f8ef7;':isWeekend(d.date)?'opacity:0.7':''}">
+        <div style="font-size:0.62rem;color:var(--muted);font-weight:700;text-transform:uppercase">${dayOfWeek(d.date)}</div>
+        <div style="font-size:0.7rem;color:var(--muted)">${fmtD(d.date)}</div>
+        <div style="font-size:1.5rem;margin:0.2rem 0">${wxIcon(d.wcode)}</div>
+        <div style="font-size:0.75rem;font-weight:700">${Math.round(d.tmax)}°</div>
+        <div style="font-size:0.68rem;color:var(--muted)">${Math.round(d.tmin)}°</div>
+        ${d.precip > 0.5 ? `<div style="font-size:0.62rem;color:#60a5fa">💧${d.precip.toFixed(1)}mm</div>` : '<div style="font-size:0.62rem;color:var(--muted)">—</div>'}
+      </div>`).join('');
+
+    // ── Stage grid ──
+    const RATING_STYLE = {
+      GOOD:     { bg:'rgba(62,207,110,0.15)', color:'#3ecf6e', label:'✔' },
+      MARGINAL: { bg:'rgba(245,166,35,0.15)', color:'#f5a623', label:'~' },
+      BAD:      { bg:'rgba(247,111,111,0.15)', color:'#f76f6f', label:'✘' },
+    };
+
+    const colHeaders = days.map(d => `
+      <th style="min-width:38px;padding:0.3rem 0.2rem;text-align:center;font-size:0.58rem;color:${isToday(d.date)?'#4f8ef7':'var(--muted)'};font-weight:${isToday(d.date)?'800':'600'};border-right:1px solid var(--border);white-space:nowrap;${isWeekend(d.date)?'opacity:0.5':''}">
+        <div>${dayOfWeek(d.date)}</div><div>${fmtD(d.date)}</div>
+      </th>`).join('');
+
+    // Store tooltip HTML by index to avoid escaping issues in inline handlers
+    window._wxTips = window._wxTips || [];
+    window._wxTips.length = 0;
+
+    const fmtReasonRow = r => {
+      const a = r.actual, l = r.limit;
+      const ICONS = { rain:'🌧️', min_temp:'🌡️', max_temp:'🌡️', wind:'💨', dry_days:'☀️' };
+      const icon = ICONS[r.type] || '⚠️';
+      let text = '';
+      if (r.type === 'rain')     text = isEn ? `${a.toFixed(1)}mm rain (max ${l.toFixed(1)}mm)` : `${a.toFixed(1)}mm дъжд (макс ${l.toFixed(1)}mm)`;
+      if (r.type === 'min_temp') text = isEn ? `${Math.round(a)}°C min (need ≥${Math.round(l)}°C)` : `${Math.round(a)}°C мин (нужно ≥${Math.round(l)}°C)`;
+      if (r.type === 'max_temp') text = isEn ? `${Math.round(a)}°C max (limit ${Math.round(l)}°C)` : `${Math.round(a)}°C макс (лимит ${Math.round(l)}°C)`;
+      if (r.type === 'wind')     text = isEn ? `${Math.round(a)} kph wind (max ${Math.round(l)})` : `${Math.round(a)} км/ч вятър (макс ${Math.round(l)})`;
+      if (r.type === 'dry_days') text = isEn ? `${Math.round(a)} dry day(s) required before` : `${Math.round(a)} сух ден преди`;
+      return `<div class="wx-tip-row"><span class="wx-tip-icon">${icon}</span><span class="wx-tip-bad">${text}</span></div>`;
+    };
+
+    const stageRows = stages.map(s => {
+      const name = isEn ? (s.stageNameEn || s.stageName) : (s.stageName || s.stageNameEn);
+      const cells = s.days.map(d => {
+        const rs = RATING_STYLE[d.rating] || RATING_STYLE.BAD;
+        const tipHtml = d.reasons.length
+          ? `<div class="wx-tip-date">${dayOfWeek(d.date)}, ${fmtD(d.date)}</div>${d.reasons.map(fmtReasonRow).join('')}`
+          : `<div class="wx-tip-date">${dayOfWeek(d.date)}, ${fmtD(d.date)}</div><div class="wx-tip-row"><span class="wx-tip-icon">✅</span><span class="wx-tip-good">${isEn ? 'Good conditions' : 'Добри условия'}</span></div>`;
+        const tipIdx = window._wxTips.push(tipHtml) - 1;
+        return `<td style="padding:0.2rem;text-align:center;border-right:1px solid var(--border);${isWeekend(d.date)?'opacity:0.5':''}">
+          <div class="wx-cell" onmouseenter="wxTipShow(event,${tipIdx})" onmouseleave="wxTipHide()">
+            <div style="background:${rs.bg};color:${rs.color};border-radius:4px;font-size:0.75rem;font-weight:800;padding:0.2rem 0;cursor:default">${rs.label}</div>
+          </div>
+        </td>`;
+      }).join('');
+
+      const bwDate = s.bestWindowStart ? fmtD(s.bestWindowStart) : '—';
+      const bwDays = s.bestWindowDays  > 0 ? `${s.bestWindowDays}d` : '—';
+
+      return `<tr class="wx-row">
+        <td style="padding:0.4rem 0.75rem;white-space:nowrap;font-size:0.8rem;font-weight:600;border-right:1px solid var(--border);min-width:140px">${name}</td>
+        <td style="padding:0.3rem 0.6rem;white-space:nowrap;font-size:0.72rem;color:#3ecf6e;font-weight:700;border-right:1px solid var(--border)">${bwDate} <span style="color:var(--muted)">${bwDays}</span></td>
+        ${cells}
+      </tr>`;
+    }).join('');
+
+    // ── Best windows summary ──
+    const summary = stages.map(s => {
+      const name = isEn ? (s.stageNameEn || s.stageName) : (s.stageName || s.stageNameEn);
+      const notes = isEn ? s.notesEn : s.notesBg;
+      const bw = s.bestWindowStart
+        ? `${fmtD(s.bestWindowStart)} · ${s.bestWindowDays} ${isEn?'day':'ден'}${s.bestWindowDays>1&&isEn?'s':''}`
+        : (isEn ? 'No good window in 16 days' : 'Няма добър прозорец в 16 дни');
+      const bwColor = s.bestWindowDays >= 3 ? '#3ecf6e' : s.bestWindowDays >= 1 ? '#f5a623' : '#f76f6f';
+      return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.65rem 0.9rem">
+        <div style="font-weight:700;font-size:0.88rem;margin-bottom:0.2rem">${name}</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.35rem;font-style:italic">${notes || ''}</div>
+        <div style="font-size:0.8rem;font-weight:600;color:${bwColor}">🗓 ${bw}</div>
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div style="margin-bottom:0.5rem;font-size:0.7rem;color:var(--muted)">📍 ${data.address} · ${isEn?'16-day forecast':'16-дневна прогноза'} · Open-Meteo</div>
+
+      <!-- Weather strip -->
+      <div style="display:flex;gap:0.5rem;overflow-x:auto;margin-bottom:1.4rem;padding-bottom:0.25rem">${strip}</div>
+
+      <!-- Stage grid -->
+      <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">${isEn?'Stage Forecast Grid':'Мрежа по етапи'}</div>
+      <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);margin-bottom:1.4rem">
+        <div style="overflow-x:auto;border-radius:10px">
+          <table style="border-collapse:collapse;width:100%">
+            <thead>
+              <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
+                <th style="padding:0.4rem 0.75rem;text-align:left;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;border-right:1px solid var(--border);white-space:nowrap;min-width:140px">${isEn?'Stage':'Етап'}</th>
+                <th style="padding:0.4rem 0.6rem;text-align:left;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;border-right:1px solid var(--border);white-space:nowrap">${isEn?'Best window':'Най-добър прозорец'}</th>
+                ${colHeaders}
+              </tr>
+            </thead>
+            <tbody>${stageRows}</tbody>
+          </table>
+        </div>
+        <div style="padding:0.5rem 0.75rem;display:flex;gap:1.2rem;flex-wrap:wrap;border-top:1px solid var(--border)">
+          <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="color:#3ecf6e;font-weight:800">✔</span> ${isEn?'Good':'Добро'}</span>
+          <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="color:#f5a623;font-weight:800">~</span> ${isEn?'Marginal':'Гранично'}</span>
+          <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="color:#f76f6f;font-weight:800">✘</span> ${isEn?'Avoid':'Избягвай'}</span>
+        </div>
+      </div>
+
+      <!-- Best windows summary -->
+      <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">${isEn?'Best Windows per Stage':'Най-добри прозорци по етапи'}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.6rem">${summary}</div>`;
+  }
+
   // ── MENU CONFIG ──────────────────────────────────────────────────────────────
 
   let _mcfgData = [];
@@ -13762,6 +14026,8 @@
     nav_group_clientservices: 'navClientServicesGroup',
     nav_group_qa:             'navQaGroup',
     nav_qa_checklists:        'navQaChecklists',
+    nav_group_weather:        'navWeatherGroup',
+    nav_weather_recommendations: 'navWeatherRecommendations',
   };
   const _navChildrenMap = {
     nav_group_management:     'navManagementChildren',
@@ -13771,6 +14037,7 @@
     nav_group_orgchart:       'navOrgChartChildren',
     nav_group_clientservices: 'navClientServicesChildren',
     nav_group_qa:             'navQaChildren',
+    nav_group_weather:        'navWeatherChildren',
   };
   const _dashElMap = {
     dash_stagematrix: 'dashModeStageMatrix',

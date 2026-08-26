@@ -1,0 +1,196 @@
+package com.bellgado.logistics_ted.web;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@RestController
+@RequestMapping("/api/weather")
+public class WeatherRecommendationController {
+
+    private final JdbcTemplate jdbc;
+    private final ObjectMapper mapper;
+    private static final HttpClient HTTP = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(10)).build();
+
+    public WeatherRecommendationController(JdbcTemplate jdbc, ObjectMapper mapper) {
+        this.jdbc   = jdbc;
+        this.mapper = mapper;
+    }
+
+    @GetMapping("/recommendations/{houseId}")
+    public ResponseEntity<?> recommendations(@PathVariable Integer houseId) throws Exception {
+        // 1. Load house coordinates
+        List<Map<String, Object>> houses = jdbc.queryForList(
+            "SELECT lat, lng, name, address FROM house WHERE id = ?", houseId);
+        if (houses.isEmpty()) return ResponseEntity.notFound().build();
+        Map<String, Object> house = houses.get(0);
+        Object latObj = house.get("lat"), lngObj = house.get("lng");
+        if (latObj == null || lngObj == null)
+            return ResponseEntity.badRequest().body(Map.of("error", "House has no coordinates"));
+        double lat = ((Number) latObj).doubleValue();
+        double lng = ((Number) lngObj).doubleValue();
+
+        // 2. Load stage weather rules — skip stages already DONE for this house
+        List<Map<String, Object>> rules = jdbc.queryForList("""
+            SELECT r.stage_order, st.stage_name, st.stage_name_en,
+                   r.max_precipitation_mm, r.min_temp_c, r.max_temp_c,
+                   r.max_wind_kph, r.requires_dry_days_before, r.notes_en, r.notes_bg
+            FROM stage_weather_rule r
+            JOIN stage_type st ON st.stage_order = r.stage_order
+            WHERE NOT EXISTS (
+                SELECT 1 FROM house_stage hs
+                WHERE hs.house_id = ? AND hs.stage_order = r.stage_order AND hs.status = 'DONE'
+            )
+            ORDER BY r.stage_order
+            """, houseId);
+
+        // 3. Fetch 16-day forecast from Open-Meteo
+        String url = String.format(
+            "https://api.open-meteo.com/v1/forecast?latitude=%.6f&longitude=%.6f" +
+            "&daily=precipitation_sum,temperature_2m_max,temperature_2m_min,windspeed_10m_max,weathercode" +
+            "&forecast_days=16&timezone=Europe%%2FSofia",
+            lat, lng);
+
+        HttpRequest req = HttpRequest.newBuilder(URI.create(url))
+            .timeout(Duration.ofSeconds(15)).GET().build();
+        HttpResponse<String> resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
+        if (resp.statusCode() != 200)
+            return ResponseEntity.status(502).body(Map.of("error", "Weather API error: " + resp.statusCode()));
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> forecast = mapper.readValue(resp.body(), Map.class);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> daily = (Map<String, Object>) forecast.get("daily");
+
+        List<String>  dates  = castList(daily.get("time"));
+        List<Number>  precip = castList(daily.get("precipitation_sum"));
+        List<Number>  tmax   = castList(daily.get("temperature_2m_max"));
+        List<Number>  tmin   = castList(daily.get("temperature_2m_min"));
+        List<Number>  wind   = castList(daily.get("windspeed_10m_max"));
+        List<Number>  wcode  = castList(daily.get("weathercode"));
+
+        // 4. Build day-level weather summary
+        List<Map<String, Object>> days = new ArrayList<>();
+        for (int i = 0; i < dates.size(); i++) {
+            Map<String, Object> d = new LinkedHashMap<>();
+            d.put("date",   dates.get(i));
+            d.put("precip", precip.get(i) != null ? precip.get(i).doubleValue() : 0.0);
+            d.put("tmax",   tmax.get(i)   != null ? tmax.get(i).doubleValue()   : 20.0);
+            d.put("tmin",   tmin.get(i)   != null ? tmin.get(i).doubleValue()   : 10.0);
+            d.put("wind",   wind.get(i)   != null ? wind.get(i).doubleValue()   : 0.0);
+            d.put("wcode",  wcode.get(i)  != null ? wcode.get(i).intValue()     : 0);
+            days.add(d);
+        }
+
+        // 5. Evaluate each rule against each day
+        List<Map<String, Object>> stageResults = new ArrayList<>();
+        for (Map<String, Object> rule : rules) {
+            Double maxPrecip = toDouble(rule.get("max_precipitation_mm"));
+            Double minTemp   = toDouble(rule.get("min_temp_c"));
+            Double maxTemp   = toDouble(rule.get("max_temp_c"));
+            Double maxWind   = toDouble(rule.get("max_wind_kph"));
+            int    dryBefore = rule.get("requires_dry_days_before") != null
+                               ? ((Number) rule.get("requires_dry_days_before")).intValue() : 0;
+
+            List<Map<String, Object>> dayRatings = new ArrayList<>();
+            for (int i = 0; i < days.size(); i++) {
+                Map<String, Object> day  = days.get(i);
+                double dp  = (double) day.get("precip");
+                double dtx = (double) day.get("tmax");
+                double dtn = (double) day.get("tmin");
+                double dw  = (double) day.get("wind");
+
+                List<Map<String, Object>> reasons = new ArrayList<>();
+                if (maxPrecip != null && dp > maxPrecip)
+                    reasons.add(reason("rain",     dp,  maxPrecip));
+                if (minTemp  != null && dtn < minTemp)
+                    reasons.add(reason("min_temp", dtn, minTemp));
+                if (maxTemp  != null && dtx > maxTemp)
+                    reasons.add(reason("max_temp", dtx, maxTemp));
+                if (maxWind  != null && dw > maxWind)
+                    reasons.add(reason("wind",     dw,  maxWind));
+
+                // check dry-days-before
+                boolean dryOk = true;
+                if (dryBefore > 0) {
+                    for (int b = Math.max(0, i - dryBefore); b < i; b++) {
+                        if ((double) days.get(b).get("precip") > 2.0) { dryOk = false; break; }
+                    }
+                    if (!dryOk) reasons.add(reason("dry_days", dryBefore, null));
+                }
+
+                String rating;
+                if (reasons.isEmpty())       rating = "GOOD";
+                else if (reasons.size() == 1 && reasons.stream().noneMatch(r -> "rain".equals(r.get("type"))))
+                    rating = "MARGINAL";
+                else if (reasons.size() == 1) rating = "MARGINAL";
+                else                          rating = "BAD";
+
+                Map<String, Object> dr = new LinkedHashMap<>();
+                dr.put("date",    day.get("date"));
+                dr.put("rating",  rating);
+                dr.put("reasons", reasons);
+                dr.put("precip",  dp);
+                dr.put("tmax",    dtx);
+                dr.put("tmin",    dtn);
+                dr.put("wind",    dw);
+                dr.put("wcode",   day.get("wcode"));
+                dayRatings.add(dr);
+            }
+
+            // best window: longest consecutive GOOD streak
+            int bestLen = 0, bestStart = -1, cur = 0, curStart = 0;
+            for (int i = 0; i < dayRatings.size(); i++) {
+                if ("GOOD".equals(dayRatings.get(i).get("rating"))) {
+                    if (cur == 0) curStart = i;
+                    cur++;
+                    if (cur > bestLen) { bestLen = cur; bestStart = curStart; }
+                } else { cur = 0; }
+            }
+
+            Map<String, Object> sr = new LinkedHashMap<>();
+            sr.put("stageOrder",   rule.get("stage_order"));
+            sr.put("stageName",    rule.get("stage_name"));
+            sr.put("stageNameEn",  rule.get("stage_name_en"));
+            sr.put("notesEn",      rule.get("notes_en"));
+            sr.put("notesBg",      rule.get("notes_bg"));
+            sr.put("days",         dayRatings);
+            sr.put("bestWindowStart", bestStart >= 0 ? dayRatings.get(bestStart).get("date") : null);
+            sr.put("bestWindowDays",  bestLen);
+            stageResults.add(sr);
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("houseName", house.get("name"));
+        result.put("address",   house.get("address"));
+        result.put("lat", lat); result.put("lng", lng);
+        result.put("forecastDays", days);
+        result.put("stages", stageResults);
+        return ResponseEntity.ok(result);
+    }
+
+    private static Map<String, Object> reason(String type, double actual, Double limit) {
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("type",   type);
+        r.put("actual", actual);
+        r.put("limit",  limit);
+        return r;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> List<T> castList(Object o) {
+        return o instanceof List ? (List<T>) o : List.of();
+    }
+
+    private static Double toDouble(Object o) {
+        return o instanceof Number ? ((Number) o).doubleValue() : null;
+    }
+}
