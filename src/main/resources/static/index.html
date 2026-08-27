@@ -13846,12 +13846,29 @@
       const resp = await apiFetch('/api/weather/recommendations/' + houseId);
       const data = await resp.json();
       if (!resp.ok) {
-        const isNoCoords = (data.error || '').includes('no coordinates');
+        const err = data.error || '';
+        if (err === 'weather_unavailable') {
+          el.innerHTML = `
+            <div style="max-width:480px;margin:2rem auto;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;text-align:center">
+              <div style="font-size:2.5rem;margin-bottom:0.75rem">🌐</div>
+              <div style="font-size:1.05rem;font-weight:700;margin-bottom:0.5rem">${isEn ? 'Weather service unavailable' : 'Метеорологичната услуга не е достъпна'}</div>
+              <div style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:1.2rem">
+                ${isEn
+                  ? 'We tried reaching the forecast provider 3 times but got no response. This is usually a temporary outage — please try again in a few minutes.'
+                  : 'Опитахме да достигнем прогнозата 3 пъти, но не получихме отговор. Това обикновено е временен проблем — моля, опитай отново след няколко минути.'}
+              </div>
+              <button onclick="wxFetch(${houseId})" style="background:rgba(79,142,247,0.15);border:1px solid rgba(79,142,247,0.4);color:#4f8ef7;padding:0.5rem 1.4rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer">
+                🔄 ${isEn ? 'Try again' : 'Опитай пак'}
+              </button>
+            </div>`;
+          return;
+        }
+        const isNoCoords = err.includes('no coordinates');
         const msg = isNoCoords
           ? (isEn
               ? '📍 This house has no GPS coordinates set. Open the house detail page and add the location to enable weather forecasts.'
               : '📍 Този обект няма зададени GPS координати. Отвори страницата на обекта и добави местоположението, за да активираш прогнозата.')
-          : (data.error || (isEn ? 'Unexpected error' : 'Неочаквана грешка'));
+          : (err || (isEn ? 'Unexpected error' : 'Неочаквана грешка'));
         el.innerHTML = `<div class="state-msg" style="color:var(--muted);max-width:420px;margin:auto;line-height:1.6">${msg}</div>`;
         return;
       }

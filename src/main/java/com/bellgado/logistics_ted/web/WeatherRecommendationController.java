@@ -52,18 +52,27 @@ public class WeatherRecommendationController {
             ORDER BY r.stage_order
             """, houseId);
 
-        // 3. Fetch 16-day forecast from Open-Meteo
+        // 3. Fetch 16-day forecast from Open-Meteo — retry up to 3 times, 2s apart
         String url = String.format(
             "https://api.open-meteo.com/v1/forecast?latitude=%.6f&longitude=%.6f" +
             "&daily=precipitation_sum,temperature_2m_max,temperature_2m_min,windspeed_10m_max,weathercode" +
             "&forecast_days=16&timezone=Europe%%2FSofia",
             lat, lng);
 
-        HttpRequest req = HttpRequest.newBuilder(URI.create(url))
-            .timeout(Duration.ofSeconds(15)).GET().build();
-        HttpResponse<String> resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() != 200)
-            return ResponseEntity.status(502).body(Map.of("error", "Weather API error: " + resp.statusCode()));
+        HttpResponse<String> resp = null;
+        int attempts = 0;
+        while (attempts < 3) {
+            attempts++;
+            try {
+                HttpRequest req = HttpRequest.newBuilder(URI.create(url))
+                    .timeout(Duration.ofSeconds(15)).GET().build();
+                resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
+                if (resp.statusCode() == 200) break;
+            } catch (Exception ignored) {}
+            if (attempts < 3) Thread.sleep(2000);
+        }
+        if (resp == null || resp.statusCode() != 200)
+            return ResponseEntity.status(503).body(Map.of("error", "weather_unavailable"));
 
         @SuppressWarnings("unchecked")
         Map<String, Object> forecast = mapper.readValue(resp.body(), Map.class);
