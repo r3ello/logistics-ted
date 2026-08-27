@@ -492,14 +492,32 @@
 
     /* ── WEATHER TOOLTIP ── */
     .wx-cell { cursor:default; }
+    #wxRulesModal { display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.55); align-items:center; justify-content:center; }
+    #wxRulesModal.open { display:flex; }
+    #wxRulesModal .modal-box { background:var(--card); border:1px solid var(--border); border-radius:14px; width:90%; max-width:860px; max-height:85vh; display:flex; flex-direction:column; }
+    #wxRulesModal .modal-head { padding:1rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    #wxRulesModal .modal-body { overflow-y:auto; padding:1rem 1.25rem; }
+    #wxRulesModal table { border-collapse:collapse; width:100%; font-size:0.82rem; }
+    #wxRulesModal th { background:var(--surface); padding:0.5rem 0.65rem; text-align:left; font-size:0.68rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap; }
+    #wxRulesModal td { padding:0.45rem 0.65rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+    #wxRulesModal tr:last-child td { border-bottom:none; }
+    #wxRulesModal tr:hover td { background:rgba(79,142,247,0.06); }
+    @media print {
+      body > *:not(#wxRulesModal) { display:none !important; }
+      #wxRulesModal { display:flex !important; position:static; background:none; }
+      #wxRulesModal .modal-box { border:none; max-height:none; width:100%; }
+      #wxRulesModal .modal-head button { display:none; }
+      #wxRulesModal .modal-foot { display:none; }
+    }
     .wx-row:hover td { background:rgba(79,142,247,0.07); }
+    #wxTooltip { max-height:60vh; overflow-y:auto; }
     #wxTooltip {
       display:none; position:fixed; z-index:9999; min-width:320px; max-width:440px;
       background:var(--card); border:1px solid var(--border);
       border-radius:12px; padding:1rem 1.2rem;
       box-shadow:0 6px 24px rgba(0,0,0,0.4);
       font-size:1rem; line-height:1.7; color:var(--text);
-      white-space:normal; text-align:left; pointer-events:none;
+      white-space:normal; text-align:left; pointer-events:auto;
     }
     .wx-tip-date { font-size:0.82rem; color:var(--muted); font-weight:700; margin-bottom:0.45rem; text-transform:uppercase; }
     .wx-tip-row { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.2rem; }
@@ -1855,6 +1873,9 @@
       <a class="nav-item nav-sub" id="navWeatherRecommendations" href="#weatherrecommendations" onclick="showView('weatherrecommendations');return false;">
         <span class="nav-icon">📋</span> <span id="navWeatherRecommendationsLabel">Recommendations</span>
       </a>
+      <a class="nav-item nav-sub" id="navWeatherRules" href="#weatherrules" onclick="showView('weatherrules');return false;">
+        <span class="nav-icon">⚙️</span> <span id="navWeatherRulesLabel">Rules</span>
+      </a>
     </div>
 
     <!-- Admin + importer only; visibility is set in applyRole() and re-checked in showView().
@@ -2720,6 +2741,15 @@
     </div>
   </div>
 
+  <!-- VIEW: WEATHER RULES -->
+  <div class="view" id="view-weatherrules">
+    <div style="width:100%">
+      <div id="wxRulesEditorContent">
+        <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
+      </div>
+    </div>
+  </div>
+
   <!-- VIEW: MENU CONFIG -->
   <div class="view" id="view-menuconfig">
     <div style="max-width:700px">
@@ -3071,8 +3101,34 @@
       pageTitle_menuconfig:'Menu Management', pageSub_menuconfig:'Toggle visibility and reorder nav items and dashboard tabs', navMenuConfig:'Menu Management', mcNavSection:'📌 Left Navigation', mcDashSection:'📊 Dashboard Tabs', mcVisible:'Visible', mcHidden:'Hidden',
       pageTitle_qachecklists:'Stage Checklists', pageSub_qachecklists:'Define quality checklist items per construction stage',
       pageTitle_weatherrecommendations:'Weather Recommendations', pageSub_weatherrecommendations:'Construction activity recommendations based on weather forecast',
+      pageTitle_weatherrules:'Weather Rules', pageSub_weatherrules:'View and edit weather thresholds per construction stage',
       navQaGroupLabel:'Quality Assurance', navQaChecklists:'Stage Checklists',
-      navWeatherGroupLabel:'Weather', navWeatherRecommendations:'Recommendations',
+      navWeatherGroupLabel:'Weather', navWeatherRecommendations:'Recommendations', navWeatherRules:'Rules',
+      wrColStage:'Stage', wrColRain:'Max Rain (mm)', wrColMinTemp:'Min Temp (°C)', wrColMaxTemp:'Max Temp (°C)', wrColWind:'Max Wind (kph)', wrColDryDays:'Dry Days Before',
+      wrSaveBtn:'Save', wrSaved:'Saved', wrSaveFail:'Save failed', wrNoLimit:'—',
+      wxSelectHouse:'Select House', wxChoose:'choose', wxAllHouses:'All Houses',
+      wxFetchingAll:'Fetching all houses…', wxNoHousesCoords:'No houses with coordinates found.',
+      wxFailedLoad:'Failed to load.', wxAllHousesTitle:'All Houses — 16-day overview',
+      wxHouseCol:'House', wxLegendAllOk:'All OK', wxLegendMarginal:'Some marginal',
+      wxLegendBlocked:'At least one blocked', wxClickHouse:'Click house name to load full forecast',
+      wxStageFilterTitle:'Stage forecast', wxSelectStage:'select stage',
+      wxAllStagesOk:'All stages can proceed', wxSomeBlocked:'Some stages cannot proceed',
+      wxSomeRisky:'Some stages are risky', wxCanProceed:'Can proceed',
+      wxCannotProceed:'Cannot proceed', wxRisky:'Risky — proceed with caution',
+      wxStageAlreadyDone:'Stage already done', wxNoHouses:'No houses.',
+      wxLegendGood:'Good', wxLegendMarginalSt:'Marginal', wxLegendBlockedSt:'Blocked',
+      wxLoading:'Loading…', wxFetchingForecast:'Fetching forecast…',
+      wxWeatherUnavailable:'Weather service unavailable',
+      wxWeatherUnavailableDesc:'We tried reaching the forecast provider 3 times but got no response. This is usually a temporary outage — please try again in a few minutes.',
+      wxTryAgain:'Try again', wxNoCoords:'This house has no GPS coordinates set. Open the house detail page and add the location to enable weather forecasts.',
+      wxUnexpectedError:'Unexpected error', wxStageForecastGrid:'Stage Forecast Grid',
+      wxViewRules:'View Rules', wxExportPdf:'Export PDF', wxBestWindow:'Best window',
+      wxGood:'Good', wxMarginal:'Marginal', wxAvoid:'Avoid',
+      wxBestWindowsTitle:'Best Windows per Stage', wx16dayForecast:'16-day forecast',
+      wxDay:'day', wxDays:'days', wxNoGoodWindow:'No good window in 16 days',
+      wxGoodConditions:'Good conditions', wrLeaveBlank:'Leave a field blank to remove the limit for that parameter.',
+      wrLoadFail:'Failed to load rules', wrTitle:'Stage Weather Rules',
+      wxNoHousesFound:'No houses found.',
       qaclAddItem:'Add Item', qaclItemTextBg:'Text (BG)', qaclItemTextEn:'Text (EN)', qaclSave:'Save', qaclCancel:'Cancel', qaclEdit:'Edit', qaclDelete:'Delete', qaclActive:'Active', qaclInactive:'Inactive', qaclNoItems:'No checklist items yet.',
       // company folders admin
       pageTitle_companyfolders:'Company Folders Template', pageSub_companyfolders:'Global document folder structure shared across the company',
@@ -3393,8 +3449,34 @@
       pageTitle_menuconfig:'Управление на менюто', pageSub_menuconfig:'Управлявай видимостта и реда на елементите в навигацията и таблото', navMenuConfig:'Управление на менюто', mcNavSection:'📌 Лява навигация', mcDashSection:'📊 Табове на таблото', mcVisible:'Видим', mcHidden:'Скрит',
       pageTitle_qachecklists:'Контролни списъци', pageSub_qachecklists:'Определи елементи на контролния списък за всеки строителен етап',
       pageTitle_weatherrecommendations:'Препоръки за времето', pageSub_weatherrecommendations:'Препоръки за строителни дейности според прогнозата за времето',
+      pageTitle_weatherrules:'Правила за времето', pageSub_weatherrules:'Преглед и редакция на праговете по етап',
       navQaGroupLabel:'Контрол на качеството', navQaChecklists:'Контролни списъци',
-      navWeatherGroupLabel:'Времето', navWeatherRecommendations:'Препоръки',
+      navWeatherGroupLabel:'Времето', navWeatherRecommendations:'Препоръки', navWeatherRules:'Правила',
+      wrColStage:'Етап', wrColRain:'Макс. дъжд (мм)', wrColMinTemp:'Мин. темп. (°C)', wrColMaxTemp:'Макс. темп. (°C)', wrColWind:'Макс. вятър (кмч)', wrColDryDays:'Сухи дни преди',
+      wrSaveBtn:'Запази', wrSaved:'Запазено', wrSaveFail:'Грешка при запис', wrNoLimit:'—',
+      wxSelectHouse:'Избери обект', wxChoose:'избери', wxAllHouses:'Всички обекти',
+      wxFetchingAll:'Зареждане на обекти…', wxNoHousesCoords:'Няма обекти с координати.',
+      wxFailedLoad:'Грешка при зареждане.', wxAllHousesTitle:'Всички обекти — 16 дни',
+      wxHouseCol:'Обект', wxLegendAllOk:'Всичко ОК', wxLegendMarginal:'Гранични',
+      wxLegendBlocked:'Поне един блокиран', wxClickHouse:'Кликни обект за пълна прогноза',
+      wxStageFilterTitle:'Прогноза по етап', wxSelectStage:'избери етап',
+      wxAllStagesOk:'Всички етапи могат да се изпълнят', wxSomeBlocked:'Някои етапи не могат да се изпълнят',
+      wxSomeRisky:'Някои етапи са гранични', wxCanProceed:'Може да се изпълни',
+      wxCannotProceed:'Не може да се изпълни', wxRisky:'Рисково — с повишено внимание',
+      wxStageAlreadyDone:'Етапът е завършен', wxNoHouses:'Няма обекти.',
+      wxLegendGood:'Добре', wxLegendMarginalSt:'Гранично', wxLegendBlockedSt:'Блокирано',
+      wxLoading:'Зареждане…', wxFetchingForecast:'Зареждане на прогноза…',
+      wxWeatherUnavailable:'Метеорологичната услуга не е достъпна',
+      wxWeatherUnavailableDesc:'Опитахме да достигнем прогнозата 3 пъти, но не получихме отговор. Това обикновено е временен проблем — моля, опитай отново след няколко минути.',
+      wxTryAgain:'Опитай пак', wxNoCoords:'Този обект няма зададени GPS координати. Отвори страницата на обекта и добави местоположението, за да активираш прогнозата.',
+      wxUnexpectedError:'Неочаквана грешка', wxStageForecastGrid:'Мрежа по етапи',
+      wxViewRules:'Правила', wxExportPdf:'Експорт PDF', wxBestWindow:'Най-добър прозорец',
+      wxGood:'Добро', wxMarginal:'Гранично', wxAvoid:'Избягвай',
+      wxBestWindowsTitle:'Най-добри прозорци по етапи', wx16dayForecast:'16-дневна прогноза',
+      wxDay:'ден', wxDays:'дни', wxNoGoodWindow:'Няма добър прозорец в 16 дни',
+      wxGoodConditions:'Добри условия', wrLeaveBlank:'Оставете полето празно, за да махнете ограничението за този параметър.',
+      wrLoadFail:'Грешка при зареждане на правила', wrTitle:'Правила за времето по етапи',
+      wxNoHousesFound:'Няма намерени обекти.',
       qaclAddItem:'Добави елемент', qaclItemTextBg:'Текст (БГ)', qaclItemTextEn:'Текст (EN)', qaclSave:'Запази', qaclCancel:'Откажи', qaclEdit:'Редактирай', qaclDelete:'Изтрий', qaclActive:'Активен', qaclInactive:'Неактивен', qaclNoItems:'Няма добавени елементи.',
       // company folders admin
       pageTitle_companyfolders:'Шаблон за фирмени папки', pageSub_companyfolders:'Обща структура на документни папки за цялата фирма',
@@ -3457,8 +3539,11 @@
     else if (activeView === 'housedetail') { if (_houseDetailId) loadHouseDetail(); }
     else if (activeView === 'weatherrecommendations') {
       const lbl = document.getElementById('wxHouseLabel');
-      if (lbl) lbl.textContent = currentLang==='bg' ? 'Избери обект' : 'Select House';
-      if (_wxHouseId) wxFetch(_wxHouseId);
+      if (lbl) lbl.textContent = t('wxSelectHouse');
+      const allBtn = document.getElementById('wxAllHousesBtn');
+      if (allBtn) allBtn.innerHTML = `🏘️ ${t('wxAllHouses')}`;
+      if (_wxAllOpen) wxAllHousesLoad();
+      else if (_wxHouseId) wxFetch(_wxHouseId);
     }
     else if (activeView === 'myorders')       renderMyOrders();
     else if (activeView === 'mycrew')         { if (_mcData) mcRender(); }
@@ -3475,7 +3560,10 @@
     if (navWxGrpLbl) navWxGrpLbl.textContent = t('navWeatherGroupLabel');
     const navWxRecLbl = document.getElementById('navWeatherRecommendationsLabel');
     if (navWxRecLbl) navWxRecLbl.textContent = t('navWeatherRecommendations');
+    const navWxRulesLbl = document.getElementById('navWeatherRulesLabel');
+    if (navWxRulesLbl) navWxRulesLbl.textContent = t('navWeatherRules');
     if (activeView === 'qachecklists') _qaclRender();
+    if (activeView === 'weatherrules') wrLoad();
     // Re-label Menu Management nav item and section headers
     const navMcLabel = document.getElementById('navMenuConfigLabel');
     if (navMcLabel) navMcLabel.textContent = t('navMenuConfig');
@@ -3800,7 +3888,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import', 'weatherrecommendations'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import', 'weatherrecommendations', 'weatherrules'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false, qa: false, weather: false };
   const _navGroupConfig = {
@@ -3873,6 +3961,7 @@
     if (name === 'qachecklists')          qaclInit();
     if (name === 'import')                impInit();
     if (name === 'weatherrecommendations') wxRecLoad();
+    if (name === 'weatherrules')           wrLoad();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -13778,18 +13867,532 @@
 
   // ── WEATHER RECOMMENDATIONS ──────────────────────────────────────────────────
 
+  // Dismiss tooltip on click outside
+  document.addEventListener('click', () => wxTipHide && wxTipHide());
+
   // Shared floating tooltip for weather grid cells
   (function() {
     const el = document.createElement('div');
     el.id = 'wxTooltip';
     document.body.appendChild(el);
+
+    const modal = document.createElement('div');
+    modal.id = 'wxRulesModal';
+    modal.innerHTML = `
+      <div class="modal-box">
+        <div class="modal-head">
+          <span style="font-weight:700;font-size:0.95rem">📋 <span id="wxRulesTitle"></span></span>
+          <button onclick="wxRulesClose()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1">×</button>
+        </div>
+        <div class="modal-body" id="wxRulesBody"></div>
+        <div class="modal-foot" style="padding:0.75rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:0.6rem">
+          <button onclick="wxRulesClose()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.45rem 1.1rem;border-radius:8px;font-size:0.82rem;cursor:pointer">
+            ${document.documentElement.lang === 'bg' ? 'Затвори' : 'Close'}
+          </button>
+          <button onclick="window.print()" style="background:rgba(79,142,247,0.15);border:1px solid rgba(79,142,247,0.4);color:#4f8ef7;padding:0.45rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer">
+            📄 PDF
+          </button>
+        </div>
+      </div>`;
+    modal.addEventListener('click', e => { if (e.target === modal) wxRulesClose(); });
+    document.body.appendChild(modal);
   })();
 
-  function wxTipShow(e, idx) {
+  // ── All Houses Overview ───────────────────────────────────────────────
+  let _wxAllOpen = false;
+
+  function wxAllHousesToggle() {
+    _wxAllOpen = !_wxAllOpen;
+    const panel = document.getElementById('wxAllHousesPanel');
+    const btn   = document.getElementById('wxAllHousesBtn');
+    if (!panel) return;
+    const result = document.getElementById('wxResult');
+    if (!_wxAllOpen) {
+      panel.style.display = 'none';
+      if (result) result.style.display = '';
+      return;
+    }
+    panel.style.display = 'block';
+    if (result) result.style.display = 'none';
+    const sel = document.getElementById('wxHouseSelect');
+    if (sel) { sel.value = ''; _wxHouseId = null; }
+    wxAllHousesLoad();
+  }
+
+  async function wxAllHousesLoad() {
+    const panel = document.getElementById('wxAllHousesPanel');
+    const isEn  = currentLang !== 'bg';
+    panel.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>${t('wxFetchingAll')}</div>`;
+    try {
+      const res = await apiFetch('/api/weather/all-houses');
+      if (!res.ok) throw new Error(res.status);
+      const houses = await res.json();
+      if (!houses.length) { panel.innerHTML = `<div class="state-msg">${t('wxNoHousesCoords')}</div>`; return; }
+      wxAllHousesRender(houses);
+    } catch(e) {
+      panel.innerHTML = `<div class="state-msg" style="color:var(--danger)">${t('wxFailedLoad')}</div>`;
+    }
+  }
+
+  function wxAllHousesRender(houses) {
+    const panel = document.getElementById('wxAllHousesPanel');
+    const isEn  = currentLang !== 'bg';
+
+    // Collect all date headers from the first house
+    const days5 = houses[0]?.days || [];
+    const locale = isEn ? 'en-GB' : 'bg-BG';
+    const dayHdrs = days5.map(d => {
+      const dt = new Date(d.date);
+      return `<th style="text-align:center;padding:0.5rem 0.6rem;color:var(--muted);font-weight:600;font-size:0.78rem;min-width:70px">
+        <div>${dt.toLocaleDateString(locale,{weekday:'short'})}</div>
+        <div style="font-size:0.72rem;font-weight:400;color:var(--muted)">${dt.toLocaleDateString(locale,{day:'2-digit',month:'short'})}</div>
+      </th>`;
+    }).join('');
+
+    const WCODE_ICON = wc => {
+      if (wc === 0) return '☀️';
+      if (wc <= 3)  return '⛅';
+      if (wc <= 48) return '🌫️';
+      if (wc <= 57) return '🌦️';
+      if (wc <= 67) return '🌧️';
+      if (wc <= 77) return '❄️';
+      if (wc <= 82) return '🌦️';
+      if (wc <= 99) return '⛈️';
+      return '🌡️';
+    };
+
+    const STATUS_DOT = s => {
+      if (s === 'BAD')      return '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>';
+      if (s === 'MARGINAL') return '<span style="width:8px;height:8px;border-radius:50%;background:#eab308;display:inline-block"></span>';
+      return '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>';
+    };
+
+    const fmtReason = r => {
+      const a = typeof r.actual === 'number' ? r.actual.toFixed(1) : r.actual;
+      const l = r.limit != null ? r.limit.toFixed(1) : null;
+      if (r.type === 'rain')     return isEn ? `${a}mm rain (max ${l}mm)` : `${a}мм дъжд (макс ${l}мм)`;
+      if (r.type === 'min_temp') return isEn ? `${a}°C (min ${l}°C)` : `${a}°C (мин ${l}°C)`;
+      if (r.type === 'max_temp') return isEn ? `${a}°C (max ${l}°C)` : `${a}°C (макс ${l}°C)`;
+      if (r.type === 'wind')     return isEn ? `${a}kph wind (max ${l}kph)` : `${a}кмч вятър (макс ${l}кмч)`;
+      if (r.type === 'dry_days') return isEn ? `needs ${a} dry day(s) before` : `нужни ${a} сухи дни преди`;
+      return '';
+    };
+
+    // Build tooltip content per house×day — store in array, use index
+    window._wxAhTips = [];
+    const tipIdx = (hi, di) => {
+      const house = houses[hi];
+      const day   = house.days[di];
+      if (!day) return -1;
+      const dt = new Date(day.date).toLocaleDateString(isEn ? 'en-GB' : 'bg-BG', {weekday:'short', day:'2-digit', month:'short'});
+      let html = `<div style="font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:0.4rem">${dt}</div>`;
+      if (!day.blocked.length && !day.marginal.length) {
+        html += `<div style="color:#22c55e;font-size:0.82rem;font-weight:600;margin-bottom:0.25rem">✓ ${t('wxAllStagesOk')}</div>`;
+      } else {
+        if (day.blocked.length)
+          html += `<div style="color:#ef4444;font-size:0.82rem;font-weight:600;margin-bottom:0.35rem">✗ ${t('wxSomeBlocked')}</div>`;
+        else
+          html += `<div style="color:#eab308;font-size:0.82rem;font-weight:600;margin-bottom:0.35rem">⚠ ${t('wxSomeRisky')}</div>`;
+        [...day.blocked, ...day.marginal].forEach(s => {
+          const name = isEn ? (s.stageNameEn || s.stageName) : s.stageName;
+          const dot  = day.blocked.includes(s) ? '🔴' : '🟡';
+          const reasonText = s.reasons.map(fmtReason).join(', ');
+          html += `<div style="display:flex;gap:6px;align-items:flex-start;margin-bottom:0.3rem">
+            <span style="flex-shrink:0">${dot}</span>
+            <div><div style="font-size:0.82rem;font-weight:600">${s.stageOrder}. ${name}</div>
+            <div style="font-size:0.75rem;color:var(--muted)">${reasonText}</div></div>
+          </div>`;
+        });
+      }
+      const idx = window._wxAhTips.length;
+      window._wxAhTips.push(html);
+      return idx;
+    };
+
+    const rows = houses.map((h, hi) => {
+      const cells = h.days.map((d, di) => {
+        const icon = WCODE_ICON(d.wcode);
+        const dot  = STATUS_DOT(d.status);
+        const idx  = tipIdx(hi, di);
+        return `<td style="text-align:center;padding:0.4rem 0.5rem" onclick="wxTipShow(event,${idx},'ah')">
+          <div style="display:inline-flex;flex-direction:column;align-items:center;gap:3px;cursor:default">
+            <span style="font-size:1.1rem">${icon}</span>
+            <div style="display:flex;justify-content:center">${dot}</div>
+          </div>
+        </td>`;
+      }).join('');
+      return `<tr style="border-bottom:0.5px solid var(--border)">
+        <td style="padding:0.45rem 0.75rem;white-space:nowrap;position:sticky;left:0;z-index:1;background:var(--card)">
+          <span onclick="wxSelectHouseFromOverview(${h.houseId})" style="font-weight:600;cursor:pointer;color:var(--text)"
+            onmouseover="this.style.color='#4f8ef7'" onmouseout="this.style.color='var(--text)'">${h.houseName}</span>
+        </td>
+        ${cells}
+      </tr>`;
+    }).join('');
+
+    const scrollStyle = houses.length > 10 ? 'max-height:420px;overflow-y:auto;overflow-x:auto' : 'overflow-x:auto';
+    panel.innerHTML = `
+      <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:0.85rem">
+        <div style="padding:0.65rem 0.9rem;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-weight:700;font-size:0.9rem">${t('wxAllHousesTitle')}</span>
+          <button onclick="wxAllHousesToggle()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem">✕</button>
+        </div>
+        <div style="${scrollStyle}">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--surface,var(--card))">
+                <th style="text-align:left;padding:0.5rem 0.75rem;color:var(--muted);font-weight:600;font-size:0.78rem;position:sticky;left:0;top:0;z-index:4;background:var(--surface,var(--card))">${t('wxHouseCol')}</th>
+                ${dayHdrs.replace(/style="/g,'style="position:sticky;top:0;z-index:3;background:var(--surface,var(--card));')}
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div style="padding:0.55rem 0.9rem;background:var(--card);border-top:1px solid var(--border);display:flex;gap:1rem;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>${t('wxLegendAllOk')}</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:8px;height:8px;border-radius:50%;background:#eab308;display:inline-block"></span>${t('wxLegendMarginal')}</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>${t('wxLegendBlocked')}</span>
+          <span style="font-size:0.75rem;color:var(--muted)">${t('wxClickHouse')}</span>
+        </div>
+      </div>
+      <div id="wxStageFilterPanel" style="margin-top:1rem"></div>`;
+
+    // Load stages for the stage filter dropdown
+    apiFetch('/api/weather/rules').then(r => r.json()).then(rules => {
+      const opts = rules.map(r => `<option value="${r.stage_order}">${r.stage_order}. ${isEn ? (r.stage_name_en || r.stage_name) : r.stage_name}</option>`).join('');
+      const sfPanel = document.getElementById('wxStageFilterPanel');
+      if (!sfPanel) return;
+      sfPanel.innerHTML = `
+        <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:0.85rem">
+          <div style="padding:0.65rem 0.9rem;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
+            <span style="font-weight:700;font-size:0.9rem">${t('wxStageFilterTitle')}</span>
+            <select id="wxStageSelect" onchange="wxStageFetch(this.value)"
+              style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.3rem 0.6rem;border-radius:7px;font-size:0.83rem;cursor:pointer">
+              <option value="">— ${t('wxSelectStage')} —</option>
+              ${opts}
+            </select>
+          </div>
+          <div id="wxStageResult"></div>
+        </div>`;
+    }).catch(() => {});
+  }
+
+  async function wxStageFetch(stageOrder) {
+    const el = document.getElementById('wxStageResult');
+    if (!el) return;
+    if (!stageOrder) { el.innerHTML = ''; return; }
+    const isEn = currentLang !== 'bg';
+    el.innerHTML = `<div class="state-msg" style="padding:1rem"><div class="spinner"></div></div>`;
+    try {
+      const res = await apiFetch(`/api/weather/stage/${stageOrder}`);
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      wxStageRender(data);
+    } catch(e) {
+      el.innerHTML = `<div style="padding:1rem;color:var(--danger);font-size:0.85rem">${t('wxFailedLoad')}</div>`;
+    }
+  }
+
+  function wxStageRender(data) {
+    const el = document.getElementById('wxStageResult');
+    if (!el) return;
+    const isEn = currentLang !== 'bg';
+    const houses = data.houses || [];
+    if (!houses.length) { el.innerHTML = `<div style="padding:1rem;color:var(--muted);font-size:0.85rem">${t('wxNoHouses')}</div>`; return; }
+
+    const days = houses.find(h => !h.done && h.days && h.days.length)?.days || [];
+    const locale = isEn ? 'en-GB' : 'bg-BG';
+    const WCODE_ICON = wc => {
+      if (wc === 0) return '☀️'; if (wc <= 3) return '⛅'; if (wc <= 48) return '🌫️';
+      if (wc <= 57) return '🌦️'; if (wc <= 67) return '🌧️'; if (wc <= 77) return '❄️';
+      if (wc <= 82) return '🌦️'; if (wc <= 99) return '⛈️'; return '🌡️';
+    };
+    const DOT = s => {
+      if (s === 'BAD')      return '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>';
+      if (s === 'MARGINAL') return '<span style="width:8px;height:8px;border-radius:50%;background:#eab308;display:inline-block"></span>';
+      return '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>';
+    };
+
+    const dayHdrs = days.map(d => {
+      const dt = new Date(d.date);
+      return `<th style="text-align:center;padding:0.5rem 0.5rem;color:var(--muted);font-weight:600;font-size:0.78rem;min-width:60px">
+        <div>${dt.toLocaleDateString(locale,{weekday:'short'})}</div>
+        <div style="font-size:0.7rem;font-weight:400">${dt.toLocaleDateString(locale,{day:'2-digit',month:'short'})}</div>
+      </th>`;
+    }).join('');
+
+    // Build tooltips
+    window._wxStTips = [];
+    const fmtR = r => {
+      const a = typeof r.actual === 'number' ? r.actual.toFixed(1) : r.actual;
+      const l = r.limit != null ? r.limit.toFixed(1) : null;
+      if (r.type === 'rain')     return isEn ? `${a}mm rain (max ${l}mm)` : `${a}мм дъжд (макс ${l}мм)`;
+      if (r.type === 'min_temp') return isEn ? `${a}°C (min ${l}°C)` : `${a}°C (мин ${l}°C)`;
+      if (r.type === 'max_temp') return isEn ? `${a}°C (max ${l}°C)` : `${a}°C (макс ${l}°C)`;
+      if (r.type === 'wind')     return isEn ? `${a}kph wind (max ${l}kph)` : `${a}кмч вятър (макс ${l}кмч)`;
+      if (r.type === 'dry_days') return isEn ? `needs ${a} dry day(s) before` : `нужни ${a} сухи дни преди`;
+      return '';
+    };
+
+    const rows = houses.map(h => {
+      if (h.done) {
+        return `<tr style="border-bottom:0.5px solid var(--border)">
+          <td style="padding:0.4rem 0.75rem;white-space:nowrap;position:sticky;left:0;z-index:1;background:var(--card);font-weight:600">${h.houseName}</td>
+          <td colspan="${days.length}" style="padding:0.4rem 0.75rem">
+            <span style="font-size:0.75rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 7px">✓ ${t('wxStageAlreadyDone')}</span>
+          </td>
+        </tr>`;
+      }
+      const cells = h.days.map(d => {
+        const icon = WCODE_ICON(d.wcode || 0);
+        const dot  = DOT(d.status);
+        let tipHtml = `<div style="font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:0.35rem">${new Date(d.date).toLocaleDateString(locale,{weekday:'short',day:'2-digit',month:'short'})}</div>`;
+        const allIssues = [...(d.blocked || []), ...(d.marginal || [])];
+        const hasBlocked  = (d.blocked  || []).length > 0;
+        const hasMarginal = (d.marginal || []).length > 0;
+        if (!hasBlocked && !hasMarginal) {
+          tipHtml += `<div style="color:#22c55e;font-size:0.82rem;font-weight:600;margin-bottom:0.25rem">✓ ${t('wxCanProceed')}</div>`;
+        } else if (hasBlocked) {
+          tipHtml += `<div style="color:#ef4444;font-size:0.82rem;font-weight:600;margin-bottom:0.25rem">✗ ${t('wxCannotProceed')}</div>`;
+        } else {
+          tipHtml += `<div style="color:#eab308;font-size:0.82rem;font-weight:600;margin-bottom:0.25rem">⚠ ${t('wxRisky')}</div>`;
+        }
+        allIssues.forEach(s => {
+          const dot2 = (d.blocked || []).includes(s) ? '🔴' : '🟡';
+          tipHtml += `<div style="font-size:0.8rem;margin-top:0.15rem">${dot2} ${s.reasons.map(fmtR).join(', ')}</div>`;
+        });
+        const idx = window._wxStTips.length;
+        window._wxStTips.push(tipHtml);
+        return `<td style="text-align:center;padding:0.35rem 0.4rem" onclick="wxTipShow(event,${idx},'st')">
+          <div style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;cursor:default">
+            <span style="font-size:1rem">${icon}</span>
+            <div>${dot}</div>
+          </div>
+        </td>`;
+      }).join('');
+      return `<tr style="border-bottom:0.5px solid var(--border)">
+        <td style="padding:0.4rem 0.75rem;white-space:nowrap;position:sticky;left:0;z-index:1;background:var(--card);font-weight:600">${h.houseName}</td>
+        ${cells}
+      </tr>`;
+    }).join('');
+
+    const stScrollStyle = houses.length > 10 ? 'max-height:420px;overflow-y:auto;overflow-x:auto' : 'overflow-x:auto';
+    el.innerHTML = `
+      <div style="${stScrollStyle}">
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem">
+          <thead>
+            <tr style="background:var(--surface,var(--card))">
+              <th style="text-align:left;padding:0.5rem 0.75rem;color:var(--muted);font-weight:600;font-size:0.78rem;position:sticky;left:0;top:0;z-index:4;background:var(--surface,var(--card))">${t('wxHouseCol')}</th>
+              ${dayHdrs.replace(/style="/g,'style="position:sticky;top:0;z-index:3;background:var(--surface,var(--card));')}
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div style="padding:0.5rem 0.9rem;background:var(--card);border-top:1px solid var(--border);display:flex;gap:1rem;flex-wrap:wrap">
+        <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>${t('wxLegendGood')}</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:8px;height:8px;border-radius:50%;background:#eab308;display:inline-block"></span>${t('wxLegendMarginalSt')}</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>${t('wxLegendBlockedSt')}</span>
+      </div>`;
+  }
+
+  function wxSelectHouseFromOverview(houseId) {
+    const sel = document.getElementById('wxHouseSelect');
+    if (sel) { sel.value = houseId; wxSelectHouse(houseId); }
+  }
+
+  // ── End All Houses Overview ───────────────────────────────────────────
+
+  // ── Weather Rules Editor ─────────────────────────────────────────────
+  async function wrLoad() {
+    const el = document.getElementById('wxRulesEditorContent');
+    if (!el) return;
+    el.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>${t('wxLoading')}</div>`;
+    try {
+      const res = await apiFetch('/api/weather/rules');
+      if (!res.ok) throw new Error(res.status);
+      const rules = await res.json();
+      wrRender(rules);
+    } catch(e) {
+      el.innerHTML = `<div class="state-msg" style="color:var(--danger)">${t('wrLoadFail')}: ${e.message}</div>`;
+    }
+  }
+
+  function wrRender(rules) {
+    const el = document.getElementById('wxRulesEditorContent');
+    const isEn = currentLang !== 'bg';
+    const fmtVal = v => (v == null || v === '' ? '' : v);
+    const hdr = (k) => t(k);
+
+    let rows = rules.map((r, i) => {
+      const stageName = isEn ? (r.stage_name_en || r.stage_name) : r.stage_name;
+      return `<tr>
+        <td style="padding:0.45rem 0.7rem;font-weight:600;white-space:nowrap">${r.stage_order}. ${stageName}</td>
+        <td style="padding:0.3rem 0.5rem"><input type="number" step="0.1" min="0" max="100" class="wr-inp" data-stage="${r.stage_order}" data-field="maxPrecipMm" value="${fmtVal(r.max_precipitation_mm)}" style="width:80px"></td>
+        <td style="padding:0.3rem 0.5rem"><input type="number" step="0.5" min="-30" max="50" class="wr-inp" data-stage="${r.stage_order}" data-field="minTempC" value="${fmtVal(r.min_temp_c)}" style="width:80px"></td>
+        <td style="padding:0.3rem 0.5rem"><input type="number" step="0.5" min="-30" max="60" class="wr-inp" data-stage="${r.stage_order}" data-field="maxTempC" value="${fmtVal(r.max_temp_c)}" style="width:80px"></td>
+        <td style="padding:0.3rem 0.5rem"><input type="number" step="1" min="0" max="200" class="wr-inp" data-stage="${r.stage_order}" data-field="maxWindKph" value="${fmtVal(r.max_wind_kph)}" style="width:80px"></td>
+        <td style="padding:0.3rem 0.5rem"><input type="number" step="1" min="0" max="10" class="wr-inp" data-stage="${r.stage_order}" data-field="dryDaysBefore" value="${fmtVal(r.requires_dry_days_before)}" style="width:70px"></td>
+        <td style="padding:0.3rem 0.5rem">
+          <button onclick="wrSaveRow(${r.stage_order}, this)" style="padding:0.3rem 0.75rem;border-radius:7px;border:none;background:#4f8ef7;color:#fff;font-weight:600;cursor:pointer;font-size:0.82rem">${t('wrSaveBtn')}</button>
+          <span class="wr-status-${r.stage_order}" style="margin-left:0.4rem;font-size:0.78rem;color:var(--muted)"></span>
+        </td>
+      </tr>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div style="padding:1.5rem 1.5rem 0.5rem">
+        <h2 style="margin:0 0 0.3rem;font-size:1.25rem;font-weight:700">${t('pageTitle_weatherrules')}</h2>
+        <p style="margin:0 0 1.2rem;color:var(--muted);font-size:0.88rem">${t('pageSub_weatherrules')}</p>
+        <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
+          <table style="width:100%;border-collapse:collapse;font-size:0.87rem">
+            <thead>
+              <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
+                <th style="padding:0.55rem 0.7rem;text-align:left;white-space:nowrap">${hdr('wrColStage')}</th>
+                <th style="padding:0.55rem 0.5rem;text-align:left;white-space:nowrap">${hdr('wrColRain')}</th>
+                <th style="padding:0.55rem 0.5rem;text-align:left;white-space:nowrap">${hdr('wrColMinTemp')}</th>
+                <th style="padding:0.55rem 0.5rem;text-align:left;white-space:nowrap">${hdr('wrColMaxTemp')}</th>
+                <th style="padding:0.55rem 0.5rem;text-align:left;white-space:nowrap">${hdr('wrColWind')}</th>
+                <th style="padding:0.55rem 0.5rem;text-align:left;white-space:nowrap">${hdr('wrColDryDays')}</th>
+                <th style="padding:0.55rem 0.5rem;text-align:left"></th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <p style="margin:0.8rem 0 0;font-size:0.78rem;color:var(--muted)">${t('wrLeaveBlank')}</p>
+      </div>`;
+
+    // Style inputs
+    el.querySelectorAll('.wr-inp').forEach(inp => {
+      Object.assign(inp.style, {
+        border: '1px solid var(--border)',
+        borderRadius: '6px',
+        padding: '0.25rem 0.4rem',
+        background: 'var(--surface)',
+        color: 'var(--text)',
+        fontSize: '0.85rem'
+      });
+    });
+  }
+
+  async function wrSaveRow(stageOrder, btn) {
+    const fields = ['maxPrecipMm','minTempC','maxTempC','maxWindKph','dryDaysBefore'];
+    const body = {};
+    fields.forEach(f => {
+      const inp = document.querySelector(`.wr-inp[data-stage="${stageOrder}"][data-field="${f}"]`);
+      body[f] = inp && inp.value.trim() !== '' ? parseFloat(inp.value) : null;
+    });
+    const status = document.querySelector(`.wr-status-${stageOrder}`);
+    btn.disabled = true;
+    try {
+      const res = await apiFetch(`/api/weather/rules/${stageOrder}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error(res.status);
+      if (status) { status.textContent = t('wrSaved'); status.style.color = 'var(--success,#22c55e)'; setTimeout(()=>{ status.textContent=''; }, 2500); }
+    } catch(e) {
+      if (status) { status.textContent = t('wrSaveFail'); status.style.color = 'var(--danger,#ef4444)'; }
+    } finally {
+      btn.disabled = false;
+    }
+  }
+  // ── End Weather Rules Editor ──────────────────────────────────────────
+
+  let _wxRulesData = null;
+
+  function wxRulesOpen() {
+    if (!_wxRulesData) return;
+    const isEn = currentLang !== 'bg';
+    const modal = document.getElementById('wxRulesModal');
+    document.getElementById('wxRulesTitle').textContent = t('wrTitle');
+    const na = `<span style="color:var(--muted)">—</span>`;
+    const fmt = v => v != null ? v : null;
+    const rows = _wxRulesData.map(s => {
+      const name = isEn ? (s.stageNameEn || s.stageName) : (s.stageName || s.stageNameEn);
+      const rain  = fmt(s.maxPrecipMm)  != null ? `≤${s.maxPrecipMm}mm`  : na;
+      const tmin  = fmt(s.minTempC)     != null ? `≥${s.minTempC}°C`     : na;
+      const tmax  = fmt(s.maxTempC)     != null ? `≤${s.maxTempC}°C`     : na;
+      const wind  = fmt(s.maxWindKph)   != null ? `≤${s.maxWindKph}kph`  : na;
+      const dry   = s.dryDaysBefore > 0 ? `${s.dryDaysBefore}d`          : na;
+      const notes = isEn ? (s.notesEn || '') : (s.notesBg || '');
+      return `<tr>
+        <td style="font-weight:600;white-space:nowrap">${s.stageOrder}. ${name}</td>
+        <td style="text-align:center">${rain}</td>
+        <td style="text-align:center">${tmin}</td>
+        <td style="text-align:center">${tmax}</td>
+        <td style="text-align:center">${wind}</td>
+        <td style="text-align:center">${dry}</td>
+        <td style="color:var(--muted);font-size:0.75rem">${notes}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('wxRulesBody').innerHTML = `
+      <table>
+        <thead><tr>
+          <th>${t('wrColStage')}</th>
+          <th>🌧️ ${t('wrColRain')}</th>
+          <th>🌡️ ${t('wrColMinTemp')}</th>
+          <th>🌡️ ${t('wrColMaxTemp')}</th>
+          <th>💨 ${t('wrColWind')}</th>
+          <th>☀️ ${t('wrColDryDays')}</th>
+          <th>${currentLang === 'bg' ? 'Бележки' : 'Notes'}</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    modal.classList.add('open');
+  }
+
+  function wxRulesClose() {
+    document.getElementById('wxRulesModal').classList.remove('open');
+  }
+
+  function wxExportGrid() {
+    const gridEl = document.querySelector('#wxResult table');
+    if (!gridEl) return;
+    const isEn = currentLang !== 'bg';
+    const houseLabel = document.getElementById('wxHouseSelect')?.options[document.getElementById('wxHouseSelect').selectedIndex]?.text || '';
+    const w = window.open('', '_blank');
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+      <title>${t('pageTitle_weatherrecommendations')} — ${houseLabel}</title>
+      <style>
+        body { font-family: Arial, sans-serif; font-size: 11px; color: #111; margin: 1.5cm; }
+        h2 { font-size: 14px; margin-bottom: 4px; }
+        p  { font-size: 10px; color: #666; margin: 0 0 12px; }
+        table { border-collapse: collapse; width: 100%; }
+        th { background: #f0f0f0; padding: 5px 6px; text-align: center; font-size: 9px; text-transform: uppercase; border: 1px solid #ccc; white-space: nowrap; }
+        th:first-child, th:nth-child(2) { text-align: left; }
+        td { padding: 4px 6px; border: 1px solid #ddd; text-align: center; font-size: 10px; }
+        td:first-child { text-align: left; font-weight: 600; white-space: nowrap; }
+        td:nth-child(2) { text-align: left; white-space: nowrap; }
+        tr:nth-child(even) td { background: #f9f9f9; }
+        @media print { body { margin: 1cm; } }
+      </style></head><body>
+      <h2>🌤️ ${t('pageTitle_weatherrecommendations')} — ${houseLabel}</h2>
+      <p>${new Date().toLocaleDateString(isEn?'en-GB':'bg-BG',{day:'2-digit',month:'long',year:'numeric'})} · Open-Meteo 16-day forecast</p>
+      ${gridEl.outerHTML}
+      <script>window.onload=()=>{window.print();}<\/script>
+    </body></html>`);
+    w.document.close();
+  }
+
+  let _wxActiveTipIdx = null;
+  let _wxActiveTipNs  = null;
+
+  function wxTipShow(e, idx, ns) {
     const tip = document.getElementById('wxTooltip');
     if (!tip) return;
-    tip.innerHTML = (window._wxTips && window._wxTips[idx]) || '';
+    // toggle off if clicking the same cell
+    if (_wxActiveTipIdx === idx && _wxActiveTipNs === ns) {
+      tip.style.display = 'none';
+      _wxActiveTipIdx = null; _wxActiveTipNs = null;
+      return;
+    }
+    const tips = ns === 'ah' ? window._wxAhTips : ns === 'st' ? window._wxStTips : window._wxTips;
+    tip.innerHTML = (tips && tips[idx]) || '';
     tip.style.display = 'block';
+    _wxActiveTipIdx = idx; _wxActiveTipNs = ns;
     const rect = e.currentTarget.getBoundingClientRect();
     const tw = tip.offsetWidth, th = tip.offsetHeight;
     let left = rect.left + rect.width / 2 - tw / 2;
@@ -13799,11 +14402,13 @@
     if (top < 8) top = rect.bottom + 8;
     tip.style.left = left + 'px';
     tip.style.top  = top  + 'px';
+    e.stopPropagation();
   }
 
   function wxTipHide() {
     const tip = document.getElementById('wxTooltip');
     if (tip) tip.style.display = 'none';
+    _wxActiveTipIdx = null; _wxActiveTipNs = null;
   }
 
   let _wxHouseId = null;
@@ -13814,18 +14419,23 @@
 
     // Load houses for selector
     const houses = (await apiFetch('/api/houses').then(r => r.json()).catch(() => []));
-    if (!houses.length) { el.innerHTML = '<div class="state-msg">No houses found.</div>'; return; }
+    if (!houses.length) { el.innerHTML = `<div class="state-msg">${t('wxNoHousesFound')}</div>`; return; }
 
     const opts = houses.map(h => `<option value="${h.id}" ${_wxHouseId == h.id ? 'selected' : ''}>${h.name}</option>`).join('');
     el.innerHTML = `
       <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.2rem;flex-wrap:wrap">
-        <label id="wxHouseLabel" style="font-size:0.8rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em">${currentLang==='bg'?'Избери обект':'Select House'}</label>
+        <label id="wxHouseLabel" style="font-size:0.8rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em">${t('wxSelectHouse')}</label>
         <select id="wxHouseSelect" onchange="wxSelectHouse(this.value)"
           style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.45rem 0.75rem;border-radius:8px;font-size:0.9rem;cursor:pointer">
-          <option value="">— ${currentLang==='bg'?'избери':'choose'} —</option>
+          <option value="">— ${t('wxChoose')} —</option>
           ${opts}
         </select>
+        <button onclick="wxAllHousesToggle()" id="wxAllHousesBtn"
+          style="padding:0.4rem 0.9rem;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85rem;cursor:pointer;font-weight:600">
+          🏘️ ${t('wxAllHouses')}
+        </button>
       </div>
+      <div id="wxAllHousesPanel" style="display:none;margin-bottom:1.5rem"></div>
       <div id="wxResult"></div>`;
 
     if (_wxHouseId) wxFetch(_wxHouseId);
@@ -13833,25 +14443,47 @@
 
   function wxSelectHouse(id) {
     _wxHouseId = id || null;
-    if (_wxHouseId) wxFetch(_wxHouseId);
-    else document.getElementById('wxResult').innerHTML = '';
+    if (_wxHouseId) {
+      // close all-houses panel if open
+      if (_wxAllOpen) {
+        _wxAllOpen = false;
+        const panel = document.getElementById('wxAllHousesPanel');
+        if (panel) panel.style.display = 'none';
+        const result = document.getElementById('wxResult');
+        if (result) result.style.display = '';
+      }
+      wxFetch(_wxHouseId);
+    } else {
+      document.getElementById('wxResult').innerHTML = '';
+    }
   }
 
   async function wxFetch(houseId) {
     const el = document.getElementById('wxResult');
     if (!el) return;
     const isEn = currentLang !== 'bg';
-    el.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>${isEn ? 'Fetching forecast…' : 'Зареждане на прогноза…'}</div>`;
+    el.innerHTML = `<div class="state-msg"><div class="spinner"></div><br>${t('wxFetchingForecast')}</div>`;
     try {
       const resp = await apiFetch('/api/weather/recommendations/' + houseId);
       const data = await resp.json();
       if (!resp.ok) {
-        const isNoCoords = (data.error || '').includes('no coordinates');
+        const err = data.error || '';
+        if (err === 'weather_unavailable') {
+          el.innerHTML = `
+            <div style="max-width:480px;margin:2rem auto;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;text-align:center">
+              <div style="font-size:2.5rem;margin-bottom:0.75rem">🌐</div>
+              <div style="font-size:1.05rem;font-weight:700;margin-bottom:0.5rem">${t('wxWeatherUnavailable')}</div>
+              <div style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:1.2rem">${t('wxWeatherUnavailableDesc')}</div>
+              <button onclick="wxFetch(${houseId})" style="background:rgba(79,142,247,0.15);border:1px solid rgba(79,142,247,0.4);color:#4f8ef7;padding:0.5rem 1.4rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer">
+                🔄 ${t('wxTryAgain')}
+              </button>
+            </div>`;
+          return;
+        }
+        const isNoCoords = err.includes('no coordinates');
         const msg = isNoCoords
-          ? (isEn
-              ? '📍 This house has no GPS coordinates set. Open the house detail page and add the location to enable weather forecasts.'
-              : '📍 Този обект няма зададени GPS координати. Отвори страницата на обекта и добави местоположението, за да активираш прогнозата.')
-          : (data.error || (isEn ? 'Unexpected error' : 'Неочаквана грешка'));
+          ? `📍 ${t('wxNoCoords')}`
+          : (err || t('wxUnexpectedError'));
         el.innerHTML = `<div class="state-msg" style="color:var(--muted);max-width:420px;margin:auto;line-height:1.6">${msg}</div>`;
         return;
       }
@@ -13865,6 +14497,7 @@
     const isEn = currentLang !== 'bg';
     const days  = data.forecastDays || [];
     const stages = data.stages || [];
+    _wxRulesData = stages;
 
     const WX_ICON = { 0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️', 45:'🌫️', 48:'🌫️', 51:'🌦️', 53:'🌦️', 55:'🌧️',
       61:'🌧️', 63:'🌧️', 65:'🌧️', 71:'❄️', 73:'❄️', 75:'❄️', 80:'🌦️', 81:'🌧️', 82:'⛈️',
@@ -13922,10 +14555,10 @@
         const rs = RATING_STYLE[d.rating] || RATING_STYLE.BAD;
         const tipHtml = d.reasons.length
           ? `<div class="wx-tip-date">${dayOfWeek(d.date)}, ${fmtD(d.date)}</div>${d.reasons.map(fmtReasonRow).join('')}`
-          : `<div class="wx-tip-date">${dayOfWeek(d.date)}, ${fmtD(d.date)}</div><div class="wx-tip-row"><span class="wx-tip-icon">✅</span><span class="wx-tip-good">${isEn ? 'Good conditions' : 'Добри условия'}</span></div>`;
+          : `<div class="wx-tip-date">${dayOfWeek(d.date)}, ${fmtD(d.date)}</div><div class="wx-tip-row"><span class="wx-tip-icon">✅</span><span class="wx-tip-good">${t('wxGoodConditions')}</span></div>`;
         const tipIdx = window._wxTips.push(tipHtml) - 1;
         return `<td style="padding:0.2rem;text-align:center;border-right:1px solid var(--border);${isWeekend(d.date)?'opacity:0.5':''}">
-          <div class="wx-cell" onmouseenter="wxTipShow(event,${tipIdx})" onmouseleave="wxTipHide()">
+          <div class="wx-cell" onclick="wxTipShow(event,${tipIdx})">
             <div style="background:${rs.bg};color:${rs.color};border-radius:4px;font-size:0.75rem;font-weight:800;padding:0.2rem 0;cursor:default">${rs.label}</div>
           </div>
         </td>`;
@@ -13946,8 +14579,8 @@
       const name = isEn ? (s.stageNameEn || s.stageName) : (s.stageName || s.stageNameEn);
       const notes = isEn ? s.notesEn : s.notesBg;
       const bw = s.bestWindowStart
-        ? `${fmtD(s.bestWindowStart)} · ${s.bestWindowDays} ${isEn?'day':'ден'}${s.bestWindowDays>1&&isEn?'s':''}`
-        : (isEn ? 'No good window in 16 days' : 'Няма добър прозорец в 16 дни');
+        ? `${fmtD(s.bestWindowStart)} · ${s.bestWindowDays} ${s.bestWindowDays > 1 ? t('wxDays') : t('wxDay')}`
+        : t('wxNoGoodWindow');
       const bwColor = s.bestWindowDays >= 3 ? '#3ecf6e' : s.bestWindowDays >= 1 ? '#f5a623' : '#f76f6f';
       return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.65rem 0.9rem">
         <div style="font-weight:700;font-size:0.88rem;margin-bottom:0.2rem">${name}</div>
@@ -13957,20 +14590,28 @@
     }).join('');
 
     el.innerHTML = `
-      <div style="margin-bottom:0.5rem;font-size:0.7rem;color:var(--muted)">📍 ${data.address} · ${isEn?'16-day forecast':'16-дневна прогноза'} · Open-Meteo</div>
+      <div style="margin-bottom:0.5rem;font-size:0.7rem;color:var(--muted)">📍 ${data.address} · ${t('wx16dayForecast')} · Open-Meteo</div>
 
       <!-- Weather strip -->
       <div style="display:flex;gap:0.5rem;overflow-x:auto;margin-bottom:1.4rem;padding-bottom:0.25rem">${strip}</div>
 
       <!-- Stage grid -->
-      <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">${isEn?'Stage Forecast Grid':'Мрежа по етапи'}</div>
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem">
+        <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;flex:1">${t('wxStageForecastGrid')}</div>
+        <button onclick="wxRulesOpen()" style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.35);color:#4f8ef7;padding:0.3rem 0.85rem;border-radius:7px;font-size:0.75rem;font-weight:600;cursor:pointer">
+          📋 ${t('wxViewRules')}
+        </button>
+        <button onclick="wxExportGrid()" style="background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.35);color:#4f8ef7;padding:0.3rem 0.85rem;border-radius:7px;font-size:0.75rem;font-weight:600;cursor:pointer">
+          📄 ${t('wxExportPdf')}
+        </button>
+      </div>
       <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);margin-bottom:1.4rem">
         <div style="overflow-x:auto;border-radius:10px">
           <table style="border-collapse:collapse;width:100%">
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
-                <th style="padding:0.4rem 0.75rem;text-align:left;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;border-right:1px solid var(--border);white-space:nowrap;min-width:140px">${isEn?'Stage':'Етап'}</th>
-                <th style="padding:0.4rem 0.6rem;text-align:left;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;border-right:1px solid var(--border);white-space:nowrap">${isEn?'Best window':'Най-добър прозорец'}</th>
+                <th style="padding:0.4rem 0.75rem;text-align:left;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;border-right:1px solid var(--border);white-space:nowrap;min-width:140px">${t('wrColStage')}</th>
+                <th style="padding:0.4rem 0.6rem;text-align:left;font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;border-right:1px solid var(--border);white-space:nowrap">${t('wxBestWindow')}</th>
                 ${colHeaders}
               </tr>
             </thead>
@@ -13978,14 +14619,14 @@
           </table>
         </div>
         <div style="padding:0.5rem 0.75rem;display:flex;gap:1.2rem;flex-wrap:wrap;border-top:1px solid var(--border)">
-          <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="color:#3ecf6e;font-weight:800">✔</span> ${isEn?'Good':'Добро'}</span>
-          <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="color:#f5a623;font-weight:800">~</span> ${isEn?'Marginal':'Гранично'}</span>
-          <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="color:#f76f6f;font-weight:800">✘</span> ${isEn?'Avoid':'Избягвай'}</span>
+          <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="color:#3ecf6e;font-weight:800">✔</span> ${t('wxGood')}</span>
+          <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="color:#f5a623;font-weight:800">~</span> ${t('wxMarginal')}</span>
+          <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="color:#f76f6f;font-weight:800">✘</span> ${t('wxAvoid')}</span>
         </div>
       </div>
 
       <!-- Best windows summary -->
-      <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">${isEn?'Best Windows per Stage':'Най-добри прозорци по етапи'}</div>
+      <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">${t('wxBestWindowsTitle')}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.6rem">${summary}</div>`;
   }
 
