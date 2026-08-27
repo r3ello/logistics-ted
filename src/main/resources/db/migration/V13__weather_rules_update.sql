@@ -1,3 +1,7 @@
+-- Add Weather Rules sub-menu
+INSERT INTO menu_config (menu_key, section, label_en, label_bg, icon, visible, sort_order, is_group, parent_key)
+VALUES ('nav_weather_rules', 'nav', 'Rules', 'Правила', '⚙️', true, 2, false, 'nav_group_weather');
+
 -- Tighten weather rules based on real construction conditions
 UPDATE stage_weather_rule SET max_precipitation_mm = 5.0                                    WHERE stage_order = 2;  -- Structure: concrete mixing affected above 5mm
 UPDATE stage_weather_rule SET max_precipitation_mm = 3.0, requires_dry_days_before = 2      WHERE stage_order = 8;  -- Screed Level: needs dry ground, 2 dry days before

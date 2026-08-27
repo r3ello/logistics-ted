@@ -6,6 +6,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -171,6 +172,11 @@ public class WeatherRecommendationController {
             sr.put("stageNameEn",  rule.get("stage_name_en"));
             sr.put("notesEn",      rule.get("notes_en"));
             sr.put("notesBg",      rule.get("notes_bg"));
+            sr.put("maxPrecipMm",  rule.get("max_precipitation_mm"));
+            sr.put("minTempC",     rule.get("min_temp_c"));
+            sr.put("maxTempC",     rule.get("max_temp_c"));
+            sr.put("maxWindKph",   rule.get("max_wind_kph"));
+            sr.put("dryDaysBefore",rule.get("requires_dry_days_before"));
             sr.put("days",         dayRatings);
             sr.put("bestWindowStart", bestStart >= 0 ? dayRatings.get(bestStart).get("date") : null);
             sr.put("bestWindowDays",  bestLen);
@@ -184,6 +190,208 @@ public class WeatherRecommendationController {
         result.put("forecastDays", days);
         result.put("stages", stageResults);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/stage/{stageOrder}")
+    public ResponseEntity<?> stageAllHouses(@PathVariable int stageOrder) throws Exception {
+        // Load the one rule
+        List<Map<String, Object>> ruleRows = jdbc.queryForList("""
+            SELECT r.stage_order, st.stage_name, st.stage_name_en,
+                   r.max_precipitation_mm, r.min_temp_c, r.max_temp_c,
+                   r.max_wind_kph, r.requires_dry_days_before
+            FROM stage_weather_rule r
+            JOIN stage_type st ON st.stage_order = r.stage_order
+            WHERE r.stage_order = ?
+            """, stageOrder);
+        if (ruleRows.isEmpty()) return ResponseEntity.notFound().build();
+        Map<String, Object> rule = ruleRows.get(0);
+
+        List<Map<String, Object>> houses = jdbc.queryForList(
+            "SELECT id, name FROM house WHERE lat IS NOT NULL AND lng IS NOT NULL ORDER BY name");
+        if (houses.isEmpty()) return ResponseEntity.ok(List.of());
+
+        // Which houses have this stage DONE?
+        Set<Integer> doneHouses = new HashSet<>();
+        jdbc.queryForList(
+            "SELECT house_id FROM house_stage WHERE stage_order = ? AND status = 'DONE'", stageOrder)
+            .forEach(r -> doneHouses.add(((Number) r.get("house_id")).intValue()));
+
+        List<Map<String, Object>> singleRuleList = List.of(rule);
+        List<CompletableFuture<Map<String, Object>>> futures = new ArrayList<>();
+        for (Map<String, Object> house : houses) {
+            int houseId = ((Number) house.get("id")).intValue();
+            boolean done = doneHouses.contains(houseId);
+            futures.add(CompletableFuture.supplyAsync(() -> {
+                if (done) {
+                    Map<String, Object> r = new LinkedHashMap<>();
+                    r.put("houseId",   houseId);
+                    r.put("houseName", house.get("name"));
+                    r.put("done",      true);
+                    r.put("days",      List.of());
+                    return r;
+                }
+                try { return fetchHouseSummary(houseId, house, singleRuleList); }
+                catch (Exception e) { return null; }
+            }));
+        }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        List<Map<String, Object>> results = new ArrayList<>();
+        for (CompletableFuture<Map<String, Object>> f : futures) {
+            Map<String, Object> r = f.get();
+            if (r != null) results.add(r);
+        }
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("stageName",   rule.get("stage_name"));
+        resp.put("stageNameEn", rule.get("stage_name_en"));
+        resp.put("houses",      results);
+        return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/all-houses")
+    public ResponseEntity<?> allHouses() throws Exception {
+        // Load all houses with coordinates
+        List<Map<String, Object>> houses = jdbc.queryForList(
+            "SELECT id, name FROM house WHERE lat IS NOT NULL AND lng IS NOT NULL ORDER BY name");
+        if (houses.isEmpty()) return ResponseEntity.ok(List.of());
+
+        // Load all stage weather rules once
+        List<Map<String, Object>> allRules = jdbc.queryForList("""
+            SELECT r.stage_order, st.stage_name, st.stage_name_en,
+                   r.max_precipitation_mm, r.min_temp_c, r.max_temp_c,
+                   r.max_wind_kph, r.requires_dry_days_before
+            FROM stage_weather_rule r
+            JOIN stage_type st ON st.stage_order = r.stage_order
+            ORDER BY r.stage_order
+            """);
+
+        // Fetch forecasts in parallel
+        List<CompletableFuture<Map<String, Object>>> futures = new ArrayList<>();
+        for (Map<String, Object> house : houses) {
+            int houseId = ((Number) house.get("id")).intValue();
+            futures.add(CompletableFuture.supplyAsync(() -> {
+                try { return fetchHouseSummary(houseId, house, allRules); }
+                catch (Exception e) { return null; }
+            }));
+        }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        List<Map<String, Object>> results = new ArrayList<>();
+        for (CompletableFuture<Map<String, Object>> f : futures) {
+            Map<String, Object> r = f.get();
+            if (r != null) results.add(r);
+        }
+        return ResponseEntity.ok(results);
+    }
+
+    private Map<String, Object> fetchHouseSummary(int houseId, Map<String, Object> house,
+                                                   List<Map<String, Object>> allRules) throws Exception {
+        Map<String, Object> coords = jdbc.queryForMap("SELECT lat, lng FROM house WHERE id = ?", houseId);
+        double lat = ((Number) coords.get("lat")).doubleValue();
+        double lng = ((Number) coords.get("lng")).doubleValue();
+
+        // Rules not yet DONE for this house
+        Set<Integer> doneStages = new HashSet<>();
+        jdbc.queryForList(
+            "SELECT stage_order FROM house_stage WHERE house_id = ? AND status = 'DONE'", houseId)
+            .forEach(r -> doneStages.add(((Number) r.get("stage_order")).intValue()));
+
+        List<Map<String, Object>> rules = new ArrayList<>();
+        for (Map<String, Object> r : allRules) {
+            int so = ((Number) r.get("stage_order")).intValue();
+            if (!doneStages.contains(so)) rules.add(r);
+        }
+
+        // Fetch forecast
+        String url = String.format(
+            "https://api.open-meteo.com/v1/forecast?latitude=%.6f&longitude=%.6f" +
+            "&daily=precipitation_sum,temperature_2m_max,temperature_2m_min,windspeed_10m_max,weathercode" +
+            "&forecast_days=16&timezone=Europe%%2FSofia", lat, lng);
+
+        HttpResponse<String> resp = null;
+        for (int a = 0; a < 3; a++) {
+            try {
+                HttpRequest req = HttpRequest.newBuilder(URI.create(url))
+                    .timeout(Duration.ofSeconds(15)).GET().build();
+                resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
+                if (resp.statusCode() == 200) break;
+            } catch (Exception ignored) {}
+            if (a < 2) Thread.sleep(2000);
+        }
+        if (resp == null || resp.statusCode() != 200) return null;
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> forecast = mapper.readValue(resp.body(), Map.class);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> daily = (Map<String, Object>) forecast.get("daily");
+
+        List<String> dates  = castList(daily.get("time"));
+        List<Number> precip = castList(daily.get("precipitation_sum"));
+        List<Number> tmax   = castList(daily.get("temperature_2m_max"));
+        List<Number> tmin   = castList(daily.get("temperature_2m_min"));
+        List<Number> wind   = castList(daily.get("windspeed_10m_max"));
+        List<Number> wcode  = castList(daily.get("weathercode"));
+
+        List<Map<String, Object>> days = new ArrayList<>();
+        int limit5 = dates.size();
+        for (int i = 0; i < limit5; i++) {
+            double dp  = precip.get(i) != null ? precip.get(i).doubleValue() : 0.0;
+            double dtx = tmax.get(i)   != null ? tmax.get(i).doubleValue()   : 20.0;
+            double dtn = tmin.get(i)   != null ? tmin.get(i).doubleValue()   : 10.0;
+            double dw  = wind.get(i)   != null ? wind.get(i).doubleValue()   : 0.0;
+            int    wc  = wcode.get(i)  != null ? wcode.get(i).intValue()     : 0;
+
+            List<Map<String, Object>> blocked  = new ArrayList<>();
+            List<Map<String, Object>> marginal = new ArrayList<>();
+
+            for (Map<String, Object> rule : rules) {
+                Double maxPrecip = toDouble(rule.get("max_precipitation_mm"));
+                Double minTemp   = toDouble(rule.get("min_temp_c"));
+                Double maxTemp   = toDouble(rule.get("max_temp_c"));
+                Double maxWind   = toDouble(rule.get("max_wind_kph"));
+                int dryBefore    = rule.get("requires_dry_days_before") != null
+                                   ? ((Number) rule.get("requires_dry_days_before")).intValue() : 0;
+
+                List<Map<String, Object>> reasons = new ArrayList<>();
+                if (maxPrecip != null && dp  > maxPrecip) reasons.add(reason("rain",     dp,  maxPrecip));
+                if (minTemp  != null && dtn < minTemp)    reasons.add(reason("min_temp", dtn, minTemp));
+                if (maxTemp  != null && dtx > maxTemp)    reasons.add(reason("max_temp", dtx, maxTemp));
+                if (maxWind  != null && dw  > maxWind)    reasons.add(reason("wind",     dw,  maxWind));
+                // dry days before — simplified: check prior day only in this context
+                if (dryBefore > 0 && i > 0 && precip.get(i - 1) != null
+                        && precip.get(i - 1).doubleValue() > 2.0)
+                    reasons.add(reason("dry_days", dryBefore, null));
+
+                if (reasons.isEmpty()) continue;
+
+                Map<String, Object> entry = new LinkedHashMap<>();
+                entry.put("stageOrder",  rule.get("stage_order"));
+                entry.put("stageName",   rule.get("stage_name"));
+                entry.put("stageNameEn", rule.get("stage_name_en"));
+                entry.put("reasons",     reasons);
+
+                boolean isBad = reasons.stream().anyMatch(r -> List.of("rain","min_temp","max_temp").contains(r.get("type")));
+                if (isBad) blocked.add(entry); else marginal.add(entry);
+            }
+
+            String status = !blocked.isEmpty() ? "BAD" : !marginal.isEmpty() ? "MARGINAL" : "GOOD";
+            Map<String, Object> day = new LinkedHashMap<>();
+            day.put("date",     dates.get(i));
+            day.put("wcode",    wc);
+            day.put("precip",   dp);
+            day.put("tmax",     dtx);
+            day.put("wind",     dw);
+            day.put("status",   status);
+            day.put("blocked",  blocked);
+            day.put("marginal", marginal);
+            days.add(day);
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("houseId",   houseId);
+        result.put("houseName", house.get("name"));
+        result.put("days",      days);
+        return result;
     }
 
     private static Map<String, Object> reason(String type, double actual, Double limit) {
