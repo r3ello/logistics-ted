@@ -1623,7 +1623,7 @@
 </div>
 
 <!-- FACILITY MODAL (warehouses + suppliers) -->
-<div class="modal-backdrop" id="facilityModal" onclick="if(event.target===this) closeFacilityModal()">
+<div class="modal-backdrop" id="facilityModal">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-title">
       <span id="facModalTitle">Add</span>
@@ -1634,20 +1634,24 @@
       <input id="facName" type="text" placeholder="Name" data-i18n-placeholder="phFacName" />
     </div>
     <div class="modal-field">
-      <label id="facLocationLabel">Location</label>
+      <label id="facLocationLabel">City / Region</label>
       <input id="facLocation" type="text" placeholder="City, region…" data-i18n-placeholder="phFacLocation" />
+    </div>
+    <div class="modal-field">
+      <label id="facMapLinkLabel">Google Maps link <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <input id="facMapLink" type="url" placeholder="https://maps.app.goo.gl/…" oninput="facParseMapLink(this.value)" />
     </div>
     <div class="modal-field">
       <label id="facCoordLabel">Coordinates <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
       <div class="modal-coords">
-        <input id="facLat" type="number" step="any" placeholder="Latitude" />
-        <input id="facLng" type="number" step="any" placeholder="Longitude" />
+        <input id="facLat" type="number" step="any" placeholder="Latitude" onblur="facCoordBlur()" />
+        <input id="facLng" type="number" step="any" placeholder="Longitude" onblur="facCoordBlur()" />
       </div>
     </div>
-    <button id="facLocBtn" onclick="fillFacilityCoords()" style="
+    <button id="facPickMapBtn" onclick="pickMapForFacility()" style="
       width:100%;padding:0.55rem;background:var(--card);border:1px solid var(--border);
       border-radius:8px;color:var(--muted);font-size:0.82rem;cursor:pointer;margin-bottom:1rem">
-      📍 Use my location
+      🗺 Pick on map
     </button>
     <div class="modal-field">
       <label id="facStockLabel">Stock</label>
@@ -1657,6 +1661,22 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" id="facCancelBtn" onclick="closeFacilityModal()">Cancel</button>
       <button class="btn btn-primary" id="facSaveBtn" onclick="saveFacility()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- FACILITY INVENTORY MODAL -->
+<div class="modal-backdrop" id="facInvModal">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
+    <div class="modal-title">
+      <span id="facInvModalTitle">Inventory</span>
+      <button class="modal-close" onclick="closeFacInvModal()">✕</button>
+    </div>
+    <div id="facInvTable" style="max-height:55vh;overflow-y:auto"></div>
+    <p class="modal-err" id="facInvErr"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeFacInvModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFacInv()">Save</button>
     </div>
   </div>
 </div>
@@ -1782,6 +1802,9 @@
       <div class="nav-item nav-sub" id="navStages" onclick="showView('dashboard');setDashMode('stages');setNavActive('navStages')">
         <span class="nav-icon">🔢</span> <span id="navStagesLabel">House Stages</span>
       </div>
+      <a class="nav-item nav-sub" id="navMaterials" href="#materials" onclick="showView('materials');return false;">
+        <span class="nav-icon">🧱</span> <span id="navMaterialsLabel">Materials</span>
+      </a>
     </div>
     <div class="nav-item" id="navDocsGroup" onclick="toggleNavGroup('docs')" style="cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
       <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">📁</span><span id="navDocsGroupLabel">Documentation</span></span>
@@ -2342,12 +2365,62 @@
 
   <!-- VIEW: SUPPLIERS (external vendors — tier 3) -->
   <div class="view" id="view-suppliers">
+    <!-- header row -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem">
       <p class="section-label" style="margin:0" id="supTitle">🏭 Suppliers</p>
-      <button class="btn btn-primary" id="supAddBtn" onclick="openFacilityModal('supplier', null)">+ Add supplier</button>
+      <button class="btn btn-primary admin-only" id="supAddBtn" onclick="openFacilityModal('supplier', null)">+ Add supplier</button>
     </div>
-    <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="supSearchInput" type="text" placeholder="Search suppliers..." data-i18n-placeholder="phSearchSuppliers" autocomplete="off" oninput="filterFacilityList('supplier')" /></div>
-    <div id="suppliersList"></div>
+    <!-- selector bar -->
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.2rem;flex-wrap:wrap">
+      <label id="supSelectorLabel" style="font-size:0.8rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Supplier</label>
+      <select id="supSelector" onchange="supSelectById(this.value)"
+        style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.45rem 0.75rem;border-radius:8px;font-size:0.9rem;cursor:pointer;min-width:200px">
+        <option value="" id="supSelectorDefault">— Select a supplier —</option>
+      </select>
+      <button id="supAllBtnEl" onclick="supShowAll()"
+        style="padding:0.4rem 0.9rem;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85rem;cursor:pointer;font-weight:600">
+        🏭 All suppliers
+      </button>
+    </div>
+    <!-- detail panel (single supplier) -->
+    <div id="supDetailPanel" style="display:none"></div>
+    <!-- list panel (all suppliers) -->
+    <div id="supListPanel">
+      <div class="search-wrap" style="margin-bottom:1.25rem"><span class="search-icon">🔍</span><input id="supSearchInput" type="text" placeholder="Search suppliers..." data-i18n-placeholder="phSearchSuppliers" autocomplete="off" oninput="filterFacilityList('supplier')" /></div>
+      <div id="suppliersList"></div>
+    </div>
+  </div>
+
+  <!-- VIEW: MATERIALS -->
+  <div class="view" id="view-materials">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem">
+      <p class="section-label" style="margin:0" id="matTitle">🧱 Materials</p>
+      <button class="btn btn-primary" id="matAddBtn" onclick="matOpenForm(null)">+ Add material</button>
+    </div>
+    <div id="matTableArea"></div>
+  </div>
+
+  <!-- MODAL: MATERIAL -->
+  <div class="modal-backdrop" id="matModal" onclick="if(event.target===this) matCloseModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">
+        <span id="matModalTitle">Material</span>
+        <button class="modal-close" onclick="matCloseModal()">✕</button>
+      </div>
+      <div class="field">
+        <label id="matLblName">Name</label>
+        <input id="matFName" type="text" class="inp" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;box-sizing:border-box" />
+      </div>
+      <div class="field">
+        <label id="matLblUnit">Unit</label>
+        <input id="matFUnit" type="text" class="inp" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;box-sizing:border-box" />
+      </div>
+      <p class="modal-err" id="matModalErr"></p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="matCloseModal()" id="matCancelBtnModal">Cancel</button>
+        <button class="btn btn-primary" onclick="matSave()" id="matSaveBtnModal">Save</button>
+      </div>
+    </div>
   </div>
 
   <!-- VIEW: ELECTRIC BOXES -->
@@ -2938,6 +3011,7 @@
       pageTitle_suppliers:'Suppliers', pageSub_suppliers:'External vendors — tier-3 fallback for orders',
       whTitle:'🏬 Warehouses', supTitle:'🏭 Suppliers',
       whAdd:'+ Add warehouse', supAdd:'+ Add supplier',
+      supSelectorLabel:'Supplier', supSelectorPlaceholder:'— Select a supplier —', supAllBtn:'🏭 All suppliers', supSaveInv:'Save inventory',
       facAddWarehouse:'Add warehouse', facEditWarehouse:'Edit warehouse — ',
       facAddSupplier:'Add supplier', facEditSupplier:'Edit supplier — ',
       facNameLabel:'Name', facLocationLabel:'Location', facCoordLabel:'Coordinates', facStockLabel:'Stock',
@@ -3037,7 +3111,7 @@
       colCrew:'Crew', colHouse:'House', colHouses:'Houses', colLocation:'Location', colManager:'Manager',
       colLeader:'Leader', colMembers:'Members', colStartDate:'Start Date', colEndDate:'End Date',
       colStatus:'Status', colStage:'Stage', colScaffold:'Scaffold', colCoordinates:'Coordinates',
-      colMaterials:'Materials', colNumber:'#',
+      colInventory:'Inventory', colMaterials:'Materials', colNumber:'#',
       // scaffold map legend
       legendAvailable:'Available', legendInUse:'In Use', legendNone:'None',
       // map popup scaffold rows
@@ -3129,6 +3203,15 @@
       wxGoodConditions:'Good conditions', wrLeaveBlank:'Leave a field blank to remove the limit for that parameter.',
       wrLoadFail:'Failed to load rules', wrTitle:'Stage Weather Rules',
       wxNoHousesFound:'No houses found.',
+      // materials catalogue
+      pageTitle_materials:'Materials', pageSub_materials:'Catalogue of materials used in orders and inventory',
+      navMaterials:'Materials',
+      matAddBtn:'+ Add material', matEditBtn:'Edit', matDeleteBtn:'Delete', matSaveBtn:'Save', matCancelBtn:'Cancel',
+      matColId:'ID', matColName:'Name', matColUnit:'Unit', matColPrice:'Price', matColActions:'Actions',
+      matNoData:'No materials found.', matLoading:'Loading…',
+      matDeleteConfirm:'Delete material "{name}"?',
+      matDeleteInUse:'Cannot delete: this material is referenced by orders or inventory.',
+      matSaveFail:'Failed to save material.',
       qaclAddItem:'Add Item', qaclItemTextBg:'Text (BG)', qaclItemTextEn:'Text (EN)', qaclSave:'Save', qaclCancel:'Cancel', qaclEdit:'Edit', qaclDelete:'Delete', qaclActive:'Active', qaclInactive:'Inactive', qaclNoItems:'No checklist items yet.',
       // company folders admin
       pageTitle_companyfolders:'Company Folders Template', pageSub_companyfolders:'Global document folder structure shared across the company',
@@ -3286,6 +3369,7 @@
       pageTitle_suppliers:'Доставчици', pageSub_suppliers:'Външни доставчици — резерв от ниво 3 за поръчки',
       whTitle:'🏬 Складове', supTitle:'🏭 Доставчици',
       whAdd:'+ Добави склад', supAdd:'+ Добави доставчик',
+      supSelectorLabel:'Доставчик', supSelectorPlaceholder:'— Избери доставчик —', supAllBtn:'🏭 Всички доставчици', supSaveInv:'Запази инвентар',
       facAddWarehouse:'Добави склад', facEditWarehouse:'Редакция на склад — ',
       facAddSupplier:'Добави доставчик', facEditSupplier:'Редакция на доставчик — ',
       facNameLabel:'Име', facLocationLabel:'Локация', facCoordLabel:'Координати', facStockLabel:'Наличност',
@@ -3385,7 +3469,7 @@
       colCrew:'Екип', colHouse:'Къща', colHouses:'Къщи', colLocation:'Локация', colManager:'Мениджър',
       colLeader:'Лидер', colMembers:'Членове', colStartDate:'Начална дата', colEndDate:'Крайна дата',
       colStatus:'Статус', colStage:'Етап', colScaffold:'Скеле', colCoordinates:'Координати',
-      colMaterials:'Материали', colNumber:'#',
+      colInventory:'Инвентар', colMaterials:'Материали', colNumber:'#',
       // scaffold map legend
       legendAvailable:'Налично', legendInUse:'В употреба', legendNone:'Няма',
       // map popup scaffold rows
@@ -3477,6 +3561,15 @@
       wxGoodConditions:'Добри условия', wrLeaveBlank:'Оставете полето празно, за да махнете ограничението за този параметър.',
       wrLoadFail:'Грешка при зареждане на правила', wrTitle:'Правила за времето по етапи',
       wxNoHousesFound:'Няма намерени обекти.',
+      // materials catalogue
+      pageTitle_materials:'Материали', pageSub_materials:'Каталог на материалите, използвани в поръчки и инвентар',
+      navMaterials:'Материали',
+      matAddBtn:'+ Добави материал', matEditBtn:'Редактирай', matDeleteBtn:'Изтрий', matSaveBtn:'Запази', matCancelBtn:'Отказ',
+      matColId:'ID', matColName:'Наименование', matColUnit:'Единица', matColPrice:'Цена', matColActions:'Действия',
+      matNoData:'Няма намерени материали.', matLoading:'Зареждане…',
+      matDeleteConfirm:'Изтриване на материал "{name}"?',
+      matDeleteInUse:'Не може да се изтрие: материалът е свързан с поръчки или инвентар.',
+      matSaveFail:'Грешка при запазване на материала.',
       qaclAddItem:'Добави елемент', qaclItemTextBg:'Текст (БГ)', qaclItemTextEn:'Текст (EN)', qaclSave:'Запази', qaclCancel:'Откажи', qaclEdit:'Редактирай', qaclDelete:'Изтрий', qaclActive:'Активен', qaclInactive:'Неактивен', qaclNoItems:'Няма добавени елементи.',
       // company folders admin
       pageTitle_companyfolders:'Шаблон за фирмени папки', pageSub_companyfolders:'Обща структура на документни папки за цялата фирма',
@@ -3562,6 +3655,11 @@
     if (navWxRecLbl) navWxRecLbl.textContent = t('navWeatherRecommendations');
     const navWxRulesLbl = document.getElementById('navWeatherRulesLabel');
     if (navWxRulesLbl) navWxRulesLbl.textContent = t('navWeatherRules');
+    const navMatLbl = document.getElementById('navMaterialsLabel');
+    if (navMatLbl) navMatLbl.textContent = t('navMaterials');
+    const matTitleEl = document.getElementById('matTitle'); if (matTitleEl) matTitleEl.textContent = `🧱 ${t('pageTitle_materials')}`;
+    const matAddBtnEl = document.getElementById('matAddBtn'); if (matAddBtnEl) matAddBtnEl.textContent = t('matAddBtn');
+    if (activeView === 'materials') matLoad();
     if (activeView === 'qachecklists') _qaclRender();
     if (activeView === 'weatherrules') wrLoad();
     // Re-label Menu Management nav item and section headers
@@ -3635,6 +3733,13 @@
     facT('navWarehousesLabel','navWarehouses'); facT('navSuppliersLabel','navSuppliers');
     facT('whTitle','whTitle'); facT('supTitle','supTitle');
     facT('whAddBtn','whAdd'); facT('supAddBtn','supAdd');
+    facT('supSelectorLabel','supSelectorLabel'); facT('supAllBtnEl','supAllBtn');
+    const supSelDef = document.getElementById('supSelectorDefault'); if (supSelDef) supSelDef.textContent = t('supSelectorPlaceholder');
+    // re-render supplier selector options with translated placeholder
+    const supSel = document.getElementById('supSelector');
+    if (supSel && supSel.options.length > 0) supSel.options[0].textContent = t('supSelectorPlaceholder');
+    // re-render detail save button if visible
+    document.querySelectorAll('[data-sup-save-inv]').forEach(b => b.textContent = t('supSaveInv'));
     facT('facNameLabel','facNameLabel'); facT('facLocationLabel','facLocationLabel');
     facT('facCoordLabel','facCoordLabel'); facT('facStockLabel','facStockLabel');
     facT('facCancelBtn','facCancel'); facT('facSaveBtn','facSave');
@@ -3888,7 +3993,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import', 'weatherrecommendations', 'weatherrules'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import', 'weatherrecommendations', 'weatherrules', 'materials'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false, qa: false, weather: false };
   const _navGroupConfig = {
@@ -3962,6 +4067,7 @@
     if (name === 'import')                impInit();
     if (name === 'weatherrecommendations') wxRecLoad();
     if (name === 'weatherrules')           wrLoad();
+    if (name === 'materials')              matLoad();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -10569,38 +10675,194 @@
     }
   }
 
+  let _supSelectedId = null;
+
   async function loadSuppliers() {
     try {
       const res = await apiFetch('/api/suppliers');
       dashSuppliers = await res.json();
+      // populate selector
+      const sel = document.getElementById('supSelector');
+      if (sel) {
+        const prev = sel.value;
+        sel.innerHTML = `<option value="">${t('supSelectorPlaceholder')}</option>` +
+          dashSuppliers.map(s => `<option value="${s.id}" ${s.id == _supSelectedId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('');
+        if (!_supSelectedId) sel.value = '';
+      }
       renderFacilityList('supplier');
+      if (_supSelectedId) supRenderDetail(_supSelectedId);
     } catch (e) {
       document.getElementById('suppliersList').innerHTML =
         `<div class="state-msg" style="padding:1rem;color:var(--red)">${e.message}</div>`;
     }
   }
 
+  async function supSelectById(id) {
+    id = parseInt(id) || id;
+    _supSelectedId = id || null;
+    if (!id) { supShowAll(); return; }
+    // ensure suppliers are loaded (may be called from Materials view)
+    if (!dashSuppliers || !dashSuppliers.length) await loadSuppliers();
+    const sel = document.getElementById('supSelector');
+    if (sel) sel.value = id;
+    document.getElementById('supDetailPanel').style.display = '';
+    document.getElementById('supListPanel').style.display = 'none';
+    supRenderDetail(id);
+  }
+
+  function supShowAll() {
+    _supSelectedId = null;
+    const sel = document.getElementById('supSelector');
+    if (sel) sel.value = '';
+    document.getElementById('supDetailPanel').style.display = 'none';
+    document.getElementById('supListPanel').style.display = '';
+  }
+
+  async function supRenderDetail(id) {
+    const panel = document.getElementById('supDetailPanel');
+    if (!panel) return;
+    const sup = dashSuppliers.find(s => s.id === id);
+    if (!sup) { panel.innerHTML = `<div class="state-msg">Supplier not found.</div>`; return; }
+    _supInvFilterActive = false;
+
+    if (!materials || !materials.length) {
+      try { materials = await apiFetch('/api/materials').then(r => r.json()); } catch(e) {}
+    }
+
+    const existing = {};
+    (sup.materials || []).forEach(m => { existing[m.name] = m; });
+
+    const coordsHtml = (sup.lat != null && sup.lng != null)
+      ? `<span style="font-size:0.85rem;color:var(--muted)">🗺 ${sup.lat}, ${sup.lng}</span>`
+      : `<span style="font-size:0.85rem;color:var(--yellow)">No coordinates ⚠</span>`;
+
+    const _invCellStyle = 'padding:0.38rem 0.55rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.88rem;width:100%;box-sizing:border-box';
+    const invCells = (materials || []).flatMap(m => {
+      const cur   = existing[m.name];
+      const qty   = cur != null ? cur.quantity : '';
+      const price = (cur && cur.price != null) ? cur.price : '';
+      const icon  = MAT_META[m.name]?.icon || '📦';
+      return [
+        `<span data-inv-group="${m.id}" style="font-size:0.85rem;padding:0.35rem 0.2rem">${icon} ${mn(m.name)} <span style="color:var(--muted);font-size:0.78rem">(${mu(m.unit)})</span></span>`,
+        `<input data-inv-group="${m.id}" type="number" min="0" step="any" id="supInvQty_${m.id}" value="${qty}" placeholder="0"
+          oninput="supInvApplyFilter()" style="${_invCellStyle}" />`,
+        `<input data-inv-group="${m.id}" type="number" min="0" step="any" id="supInvPrice_${m.id}" value="${price}" placeholder="—" style="${_invCellStyle}" />`,
+      ];
+    });
+
+    const invHeader = '';
+
+    panel.innerHTML = `
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-start">
+
+        <!-- info card -->
+        <div style="flex:1;min-width:260px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem">
+            <div>
+              <div style="font-size:1.25rem;font-weight:800;color:var(--text);margin-bottom:0.3rem">${escapeHtml(sup.name)}</div>
+              ${sup.location ? `<div style="font-size:0.87rem;color:var(--muted)">📍 ${escapeHtml(sup.location)}</div>` : ''}
+              <div style="margin-top:0.4rem">${coordsHtml}</div>
+            </div>
+            <div style="display:flex;gap:0.5rem" class="admin-only">
+              <button class="card-btn card-btn-edit" title="Edit supplier" onclick="openFacilityModal('supplier',${sup.id})">✎</button>
+              <button class="card-btn card-btn-del" title="Delete supplier" onclick="deleteFacility('supplier',${sup.id})">🗑</button>
+            </div>
+          </div>
+          ${sup.lat != null ? `<a href="https://maps.google.com/?q=${sup.lat},${sup.lng}" target="_blank"
+            style="font-size:0.8rem;color:var(--accent)">Open in Google Maps ↗</a>` : ''}
+        </div>
+
+        <!-- inventory card -->
+        <div style="flex:2;min-width:320px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+            <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em">📦 Inventory</div>
+            <button id="supInvFilterBtn" onclick="supInvToggleFilter()" title="Show only in-stock materials"
+              style="display:inline-flex;align-items:center;gap:0.35rem;padding:0.25rem 0.65rem;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:0.75rem;cursor:pointer;font-weight:600;transition:all .15s">
+              ✅ In stock
+            </button>
+          </div>
+          <div style="max-height:55vh;overflow-y:auto;padding-right:2px">
+            ${invCells.length ? `<div style="display:grid;grid-template-columns:1fr 90px 105px;gap:0.3rem 0.5rem;align-items:center">
+              <span style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;padding:0.4rem 0;border-bottom:1px solid var(--border)">Material</span>
+              <span style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;padding:0.4rem 0;border-bottom:1px solid var(--border)">Qty</span>
+              <span style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;padding:0.4rem 0;border-bottom:1px solid var(--border)">Price / unit (€)</span>
+              ${invCells.join('')}
+            </div>` : `<div style="color:var(--muted);font-size:0.85rem;padding:0.5rem">${t('facNoStock')}</div>`}
+          </div>
+          <p class="modal-err" id="supInvErr" style="margin-top:0.5rem"></p>
+          <div style="display:flex;justify-content:flex-end;margin-top:1rem">
+            <button class="btn btn-primary admin-only" data-sup-save-inv onclick="supSaveInv(${sup.id})">${t('supSaveInv')}</button>
+          </div>
+        </div>
+
+      </div>`;
+  }
+
+  let _supInvFilterActive = false;
+
+  function supInvToggleFilter() {
+    _supInvFilterActive = !_supInvFilterActive;
+    const btn = document.getElementById('supInvFilterBtn');
+    if (btn) {
+      btn.textContent = _supInvFilterActive ? '👁 All' : '✅ In stock';
+      btn.style.background = _supInvFilterActive ? 'rgba(62,207,110,0.12)' : 'var(--surface)';
+      btn.style.borderColor = _supInvFilterActive ? '#3ecf6e' : 'var(--border)';
+      btn.style.color = _supInvFilterActive ? '#3ecf6e' : 'var(--muted)';
+    }
+    supInvApplyFilter();
+  }
+
+  function supInvApplyFilter() {
+    if (!materials) return;
+    materials.forEach(m => {
+      const qEl = document.getElementById(`supInvQty_${m.id}`);
+      const qty = qEl ? parseFloat(qEl.value) : NaN;
+      const hide = _supInvFilterActive && (isNaN(qty) || qty <= 0);
+      document.querySelectorAll(`[data-inv-group="${m.id}"]`).forEach(el => {
+        el.style.display = hide ? 'none' : '';
+      });
+    });
+  }
+
+  async function supSaveInv(id) {
+    const errEl = document.getElementById('supInvErr');
+    if (errEl) errEl.textContent = '';
+    const stock = {};
+    for (const m of (materials || [])) {
+      const qEl = document.getElementById(`supInvQty_${m.id}`);
+      if (!qEl || qEl.value === '') continue;
+      const pEl = document.getElementById(`supInvPrice_${m.id}`);
+      stock[m.id] = { quantity: qEl.value, unitPrice: (pEl && pEl.value !== '') ? pEl.value : null };
+    }
+    try {
+      const res  = await apiFetch(`/api/suppliers/${id}/inventory`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(stock),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      await loadSuppliers();
+    } catch(e) {
+      if (errEl) errEl.textContent = e.message;
+    }
+  }
+
   function facilityRowHtml(f, kind) {
     const mats = f.materials || [];
-    const matListHtml = mats.map(m =>
-      `<div style="font-size:0.8rem;color:var(--text);padding:0.2rem 0;white-space:nowrap">${MAT_META[m.name]?.icon || '📦'} ${mn(m.name)}: ${fmt(m.quantity)} ${mu(m.unit)}</div>`
-    ).join('') || `<div style="font-size:0.8rem;color:var(--muted)">${t('facNoStock')}</div>`;
-    const matsHtml = mats.length
-      ? `<div style="position:relative;display:inline-block">
-          <button onclick="toggleMatsFloat(this)" data-fac="${f.id}"
-            style="display:flex;align-items:center;gap:0.4rem;background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.2);border-radius:7px;padding:0.28rem 0.65rem;cursor:pointer">
-            <span style="font-size:0.8rem;color:var(--accent);font-weight:700">📦 ${mats.length} material${mats.length !== 1 ? 's' : ''}</span>
-            <span style="font-size:0.7rem;color:var(--accent)" class="mats-chevron">▾</span>
-          </button>
-          <div id="fac-mats-${f.id}" style="display:none;position:fixed;z-index:1000;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.5rem 0.75rem;box-shadow:0 8px 28px rgba(0,0,0,.4);min-width:200px;flex-direction:column;gap:0.1rem">${matListHtml}</div>
-        </div>`
-      : `<span style="color:var(--muted);font-size:0.8rem">${t('facNoStock')}</span>`;
+    const invBadge = mats.length
+      ? `<span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:var(--accent);font-weight:600">📦 ${mats.length}</span>`
+      : `<span style="font-size:0.75rem;color:var(--muted)">—</span>`;
+    const matsHtml = `<button onclick="openFacInvModal('${kind}',${f.id})" title="View / edit inventory"
+        style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.2);border-radius:7px;padding:0.28rem 0.65rem;cursor:pointer;color:var(--accent)">
+        👁 ${invBadge}
+      </button>`;
     const hasCoords = f.lat != null && f.lng != null;
     const coordsHtml = hasCoords
       ? `<span style="font-size:0.82rem;color:var(--muted)">🗺 ${f.lat}, ${f.lng}</span>`
       : `<span style="font-size:0.82rem;color:var(--yellow)">${t('facNoCoords')}</span>`;
     return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
-      <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">${escapeHtml(f.name)}</td>
+      <td style="padding:0.7rem 1rem;font-weight:700;white-space:nowrap">
+        <button onclick="supSelectById(${f.id})" style="background:none;border:none;padding:0;color:var(--accent);font-weight:700;font-size:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px">${escapeHtml(f.name)}</button>
+      </td>
       <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted);white-space:nowrap">${f.location ? '📍 ' + escapeHtml(f.location) : '<span style="color:var(--muted)">—</span>'}</td>
       <td style="padding:0.7rem 1rem;white-space:nowrap">${coordsHtml}</td>
       <td style="padding:0.7rem 1rem">${matsHtml}</td>
@@ -10665,7 +10927,7 @@
             <th data-i18n="colName" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colName')}</th>
             <th data-i18n="colLocation" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
             <th data-i18n="colCoordinates" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCoordinates')}</th>
-            <th data-i18n="colMaterials" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colMaterials')}</th>
+            <th data-i18n="colInventory" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colInventory')}</th>
             <th data-i18n="colActions" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap" class="admin-only">${t('colActions')}</th>
           </tr>
         </thead>
@@ -10708,7 +10970,7 @@
     });
   }
 
-  function openFacilityModal(kind, id) {
+  async function openFacilityModal(kind, id) {
     _facKind = kind;
     const cfg = facCfg(kind);
     const f = id != null ? cfg.list.find(x => x.id === id) : null;
@@ -10718,29 +10980,48 @@
     document.getElementById('facLocation').value = f ? f.location : '';
     document.getElementById('facLat').value      = f?.lat ?? '';
     document.getElementById('facLng').value      = f?.lng ?? '';
+    document.getElementById('facMapLink').value = f ? (f.mapLink || '') : '';
     document.getElementById('facModalErr').textContent = '';
-    document.getElementById('facLocBtn').textContent = t('facUseLocation');
+    document.getElementById('facPickMapBtn').textContent = '🗺 Pick on map';
 
-    // Build the stock editor from the global material catalog; pre-fill from this facility's
-    // lines matched by material name (the facility DTO carries no material id).
+    document.getElementById('facilityModal').classList.add('open');
+    document.getElementById('facName').focus();
+
+    // Ensure the material catalog is loaded before building the stock editor.
+    if (!materials || !materials.length) {
+      document.getElementById('facStockEditor').innerHTML =
+        `<span style="color:var(--muted);font-size:0.82rem">Loading…</span>`;
+      try {
+        materials = await apiFetch('/api/materials').then(r => r.json());
+      } catch(e) { /* leave editor empty on error */ }
+    }
+
+    // Build the stock editor — pre-fill quantities (and prices for suppliers) from existing lines.
     const existing = {};
     (f?.materials || []).forEach(m => { existing[m.name] = m; });
     const isSup = kind === 'supplier';
-    document.getElementById('facStockEditor').innerHTML = (materials || []).map(m => {
+    const colTpl = isSup ? '1fr 90px 90px' : '1fr 110px';
+    const header = isSup
+      ? `<div style="display:grid;grid-template-columns:${colTpl};gap:0.5rem;font-size:0.72rem;font-weight:600;color:var(--muted);padding-bottom:0.25rem;border-bottom:1px solid var(--border);margin-bottom:0.25rem">
+           <span>Material</span><span>Qty</span><span>Price/u (€)</span></div>`
+      : `<div style="display:grid;grid-template-columns:${colTpl};gap:0.5rem;font-size:0.72rem;font-weight:600;color:var(--muted);padding-bottom:0.25rem;border-bottom:1px solid var(--border);margin-bottom:0.25rem">
+           <span>Material</span><span>Qty</span></div>`;
+    const rows = (materials || []).map(m => {
       const cur = existing[m.name];
       const qty = cur != null ? cur.quantity : '';
       const price = (cur && cur.price != null) ? cur.price : '';
       const icon = MAT_META[m.name]?.icon || '📦';
       return `
-        <div style="display:grid;grid-template-columns:1fr ${isSup ? '80px 80px' : '110px'};gap:0.5rem;align-items:center">
+        <div style="display:grid;grid-template-columns:${colTpl};gap:0.5rem;align-items:center">
           <span style="font-size:0.84rem">${icon} ${mn(m.name)} <span style="color:var(--muted)">(${mu(m.unit)})</span></span>
-          <input type="number" min="0" step="any" id="facQty_${m.id}" value="${qty}" placeholder="0" />
-          ${isSup ? `<input type="number" min="0" step="any" id="facPrice_${m.id}" value="${price}" placeholder="€/u" />` : ''}
+          <input type="number" min="0" step="any" id="facQty_${m.id}" value="${qty}" placeholder="0"
+            style="padding:0.4rem 0.5rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.88rem;width:100%" />
+          ${isSup ? `<input type="number" min="0" step="any" id="facPrice_${m.id}" value="${price}" placeholder="—"
+            style="padding:0.4rem 0.5rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.88rem;width:100%" />` : ''}
         </div>`;
-    }).join('') || `<span style="color:var(--muted);font-size:0.82rem">${t('facNoStock')}</span>`;
-
-    document.getElementById('facilityModal').classList.add('open');
-    document.getElementById('facName').focus();
+    }).join('');
+    document.getElementById('facStockEditor').innerHTML =
+      rows ? header + rows : `<span style="color:var(--muted);font-size:0.82rem">${t('facNoStock')}</span>`;
   }
 
   function closeFacilityModal() {
@@ -10748,14 +11029,107 @@
     _editingFacId = null;
   }
 
+  // ── FACILITY INVENTORY MODAL ────────────────────────────────────────────────
+  let _facInvKind = 'supplier';
+  let _facInvId   = null;
+
+  async function openFacInvModal(kind, id) {
+    _facInvKind = kind;
+    _facInvId   = id;
+    const cfg  = facCfg(kind);
+    const fac  = cfg.list.find(x => x.id === id);
+    document.getElementById('facInvModalTitle').textContent =
+      `📦 Inventory — ${fac ? fac.name : ''}`;
+    document.getElementById('facInvErr').textContent = '';
+
+    const tbl = document.getElementById('facInvTable');
+    tbl.innerHTML = `<div style="color:var(--muted);font-size:0.85rem;padding:0.5rem">Loading…</div>`;
+    document.getElementById('facInvModal').classList.add('open');
+
+    if (!materials || !materials.length) {
+      try { materials = await apiFetch('/api/materials').then(r => r.json()); } catch(e) {}
+    }
+
+    const existing = {};
+    (fac?.materials || []).forEach(m => { existing[m.name] = m; });
+    const isSup = kind === 'supplier';
+    const colTpl = isSup ? '1fr 100px 110px' : '1fr 120px';
+
+    const header = `<div style="display:grid;grid-template-columns:${colTpl};gap:0.6rem;
+        font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+        letter-spacing:0.05em;padding:0.4rem 0.6rem;border-bottom:1px solid var(--border);
+        margin-bottom:0.25rem">
+      <span>Material</span><span>Qty</span>${isSup ? '<span>Price / unit (€)</span>' : ''}
+    </div>`;
+
+    const rows = (materials || []).map(m => {
+      const cur   = existing[m.name];
+      const qty   = cur != null ? cur.quantity : '';
+      const price = (cur && cur.price != null) ? cur.price : '';
+      const icon  = MAT_META[m.name]?.icon || '📦';
+      return `<div style="display:grid;grid-template-columns:${colTpl};gap:0.6rem;
+          align-items:center;padding:0.35rem 0.6rem;border-radius:6px"
+          onmouseover="this.style.background='rgba(79,142,247,.05)'"
+          onmouseout="this.style.background=''">
+        <span style="font-size:0.85rem">${icon} ${mn(m.name)}
+          <span style="color:var(--muted);font-size:0.78rem">(${mu(m.unit)})</span>
+        </span>
+        <input type="number" min="0" step="any" id="finvQty_${m.id}" value="${qty}" placeholder="0"
+          style="padding:0.38rem 0.55rem;background:var(--card);border:1px solid var(--border);
+          border-radius:6px;color:var(--text);font-size:0.88rem;width:100%" />
+        ${isSup ? `<input type="number" min="0" step="any" id="finvPrice_${m.id}" value="${price}" placeholder="—"
+          style="padding:0.38rem 0.55rem;background:var(--card);border:1px solid var(--border);
+          border-radius:6px;color:var(--text);font-size:0.88rem;width:100%" />` : ''}
+      </div>`;
+    }).join('');
+
+    tbl.innerHTML = rows
+      ? header + `<div style="padding:0.25rem 0">${rows}</div>`
+      : `<div style="color:var(--muted);font-size:0.85rem;padding:0.5rem">${t('facNoStock')}</div>`;
+  }
+
+  function closeFacInvModal() {
+    document.getElementById('facInvModal').classList.remove('open');
+    _facInvId = null;
+  }
+
+  async function saveFacInv() {
+    const errEl = document.getElementById('facInvErr');
+    errEl.textContent = '';
+    const isSup = _facInvKind === 'supplier';
+    const cfg   = facCfg(_facInvKind);
+    const stock = {};
+    for (const m of (materials || [])) {
+      const qEl = document.getElementById(`finvQty_${m.id}`);
+      if (!qEl || qEl.value === '') continue;
+      if (isSup) {
+        const pEl = document.getElementById(`finvPrice_${m.id}`);
+        stock[m.id] = { quantity: qEl.value, unitPrice: (pEl && pEl.value !== '') ? pEl.value : null };
+      } else {
+        stock[m.id] = qEl.value;
+      }
+    }
+    try {
+      const res  = await apiFetch(`${cfg.base}/${_facInvId}/inventory`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(stock),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      closeFacInvModal();
+      if (_facInvKind === 'supplier') loadSuppliers(); else loadWarehouses();
+    } catch(e) {
+      errEl.textContent = e.message;
+    }
+  }
+
   async function saveFacility() {
     const kind = _facKind;
     const cfg = facCfg(kind);
     const name     = document.getElementById('facName').value.trim();
     const location = document.getElementById('facLocation').value.trim();
-    const lat      = document.getElementById('facLat').value;
-    const lng      = document.getElementById('facLng').value;
-    const errEl    = document.getElementById('facModalErr');
+    const lat  = document.getElementById('facLat').value;
+    const lng  = document.getElementById('facLng').value;
+    const errEl = document.getElementById('facModalErr');
     if (!name || !location) { errEl.textContent = t('nameLocationRequired'); return; }
     errEl.textContent = '';
 
@@ -10823,6 +11197,89 @@
     );
   }
 
+  async function facParseMapLink(url) {
+    // Extract @lat,lng from full Google Maps URLs (maps.google.com or maps.app.goo.gl redirects)
+    const m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (m) {
+      const lat = parseFloat(m[1]), lng = parseFloat(m[2]);
+      document.getElementById('facLat').value = lat.toFixed(6);
+      document.getElementById('facLng').value = lng.toFixed(6);
+      const locEl = document.getElementById('facLocation');
+      if (!locEl.value) {
+        const area = await reverseGeocode(lat, lng);
+        if (area) locEl.value = area;
+      }
+    }
+  }
+
+  async function facCoordBlur() {
+    // wait a tick so both fields are committed before we read them
+    await new Promise(r => setTimeout(r, 100));
+    const lat = parseFloat(document.getElementById('facLat').value);
+    const lng = parseFloat(document.getElementById('facLng').value);
+    if (isNaN(lat) || isNaN(lng)) return;
+    const locEl = document.getElementById('facLocation');
+    if (locEl.value) return; // don't overwrite what the user typed
+    locEl.placeholder = '…';
+    const area = await reverseGeocode(lat, lng);
+    if (area) locEl.value = area;
+    locEl.placeholder = 'City, region…';
+  }
+
+  async function restoreFacilityModalState(pin, pending) {
+    if (!pending) pending = JSON.parse(localStorage.getItem('pendingFacilityForm') || '{}');
+    _facKind      = pending.kind || 'supplier';
+    _editingFacId = pending.id   || null;
+    const cfg = facCfg(_facKind);
+    document.getElementById('facModalTitle').textContent = pending.id ? (t(cfg.editKey) + pending.name) : t(cfg.addKey);
+    document.getElementById('facName').value    = pending.name    || '';
+    document.getElementById('facLocation').value = pending.location || '';
+    document.getElementById('facMapLink').value  = pending.mapLink  || '';
+    document.getElementById('facLat').value = pin ? pin.lat.toFixed(6) : (pending.lat || '');
+    document.getElementById('facLng').value = pin ? pin.lng.toFixed(6) : (pending.lng || '');
+    document.getElementById('facModalErr').textContent = '';
+    document.getElementById('facPickMapBtn').textContent = '🗺 Pick on map';
+    // rebuild stock editor (resets all fields from DB record — re-apply pending values after)
+    openFacilityModal(_facKind, _editingFacId);
+    document.getElementById('facName').value     = pending.name     || '';
+    document.getElementById('facMapLink').value  = pending.mapLink  || '';
+    if (pin) {
+      document.getElementById('facLat').value = pin.lat.toFixed(6);
+      document.getElementById('facLng').value = pin.lng.toFixed(6);
+    } else {
+      document.getElementById('facLat').value = pending.lat || '';
+      document.getElementById('facLng').value = pending.lng || '';
+    }
+    // region: use saved value, or reverse-geocode the pin if none was saved
+    if (pending.location) {
+      document.getElementById('facLocation').value = pending.location;
+    } else if (pin) {
+      document.getElementById('facLocation').placeholder = '…';
+      reverseGeocode(pin.lat, pin.lng).then(area => {
+        document.getElementById('facLocation').placeholder = 'City, region…';
+        if (area) document.getElementById('facLocation').value = area;
+      });
+    }
+    document.getElementById('facilityModal').classList.add('open');
+  }
+
+  function pickMapForFacility() {
+    localStorage.setItem('pendingFacilityForm', JSON.stringify({
+      kind:     _facKind,
+      id:       _editingFacId,
+      name:     document.getElementById('facName').value,
+      location: document.getElementById('facLocation').value,
+      mapLink:  document.getElementById('facMapLink').value,
+      lat:      document.getElementById('facLat').value,
+      lng:      document.getElementById('facLng').value,
+    }));
+    const _facReturnView = document.querySelector('.view.active')?.id?.replace('view-', '') || 'suppliers';
+    localStorage.setItem('returnToFacilityModal', '1');
+    localStorage.setItem('returnToView', _facReturnView);
+    localStorage.setItem('mapPinSource', 'facility');
+    window.location.href = '/map-picker.html';
+  }
+
   // ── MAP PICKER (localStorage round-trip) ─────────────────────────────────────
   function applyPendingMapPin() {
     const raw = localStorage.getItem('mapPin');
@@ -10841,6 +11298,11 @@
 
       if (source === 'crew') {
         restoreCrewModalState({ lat: coords.lat, lng: coords.lng });
+        return;
+      }
+
+      if (source === 'facility') {
+        restoreFacilityModalState({ lat: coords.lat, lng: coords.lng });
         return;
       }
 
@@ -11494,6 +11956,15 @@
       };
       if (reloadMap[active]) reloadMap[active]();
     });
+
+    if (localStorage.getItem('returnToFacilityModal')) {
+      localStorage.removeItem('returnToFacilityModal');
+      const pin     = JSON.parse(localStorage.getItem('mapPin') || 'null');
+      const pending = JSON.parse(localStorage.getItem('pendingFacilityForm') || '{}');
+      localStorage.removeItem('mapPin');
+      localStorage.removeItem('pendingFacilityForm');
+      restoreFacilityModalState(pin ? { lat: pin.lat, lng: pin.lng } : null, pending);
+    }
 
     if (localStorage.getItem('returnToHouseModal')) {
       localStorage.removeItem('returnToHouseModal');
@@ -14646,6 +15117,7 @@
     nav_suppliers:           'navSuppliers',
     nav_scaffold:            'navScaffold',
     nav_stages:              'navStages',
+    nav_materials:           'navMaterials',
     nav_docs:                'navDocs',
     nav_companyfolders:      'navCompanyFolders',
     nav_housefoldertemplate: 'navHouseFolderTemplates',
@@ -15086,6 +15558,130 @@
     busy: false,
     applied: false,
   };
+
+  // ── MATERIALS CATALOGUE ──────────────────────────────────────────────────
+  let _matData = [];
+  let _matEditId = null;
+  let _matSuppliers = [];
+
+  async function matLoad() {
+    const area = document.getElementById('matTableArea');
+    area.innerHTML = `<div class="state-msg">${t('matLoading')}</div>`;
+    try {
+      [_matData, _matSuppliers] = await Promise.all([
+        apiFetch('/api/materials').then(r => r.json()),
+        apiFetch('/api/suppliers').then(r => r.json()).catch(() => []),
+      ]);
+      matRender();
+    } catch(e) {
+      area.innerHTML = `<div class="state-msg" style="color:var(--danger)">${t('matSaveFail')}</div>`;
+    }
+  }
+
+  function matRender() {
+    _matEditId = null;
+    const area = document.getElementById('matTableArea');
+    if (!_matData.length) { area.innerHTML = `<div class="state-msg">${t('matNoData')}</div>`; return; }
+    const thStyle = `padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap`;
+    const tdStyle = `padding:0.7rem 1rem`;
+    const rows = _matData.map(m => {
+      // Find all suppliers that carry this material (matched by name)
+      const availability = (_matSuppliers || []).flatMap(sup => {
+        const line = (sup.materials || []).find(l => l.name === m.name);
+        if (!line || line.quantity == null) return [];
+        const priceStr = line.price != null ? ` / €${parseFloat(line.price).toFixed(2)}` : '';
+        return [`<button onclick="showView('suppliers');supSelectById(${sup.id})" style="display:inline-flex;align-items:center;gap:0.25rem;background:rgba(79,142,247,0.08);
+            border:1px solid rgba(79,142,247,0.18);border-radius:6px;padding:0.18rem 0.55rem;
+            font-size:0.76rem;white-space:nowrap;color:var(--text);cursor:pointer;
+            transition:background .15s,border-color .15s"
+            onmouseover="this.style.background='rgba(79,142,247,0.18)';this.style.borderColor='rgba(79,142,247,0.4)'"
+            onmouseout="this.style.background='rgba(79,142,247,0.08)';this.style.borderColor='rgba(79,142,247,0.18)'">
+            <span style="font-weight:600;color:var(--accent)">${_esc(sup.name)}</span>
+            <span style="color:var(--muted)">${fmt(line.quantity)} ${mu(m.unit)}${priceStr}</span>
+          </button>`];
+      });
+      const availCell = availability.length
+        ? `<div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-start">${availability.join('')}</div>`
+        : `<span style="color:var(--muted);font-size:0.8rem">—</span>`;
+      return `
+      <tr style="border-bottom:1px solid var(--border);transition:background .12s"
+          onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+        <td style="${tdStyle};color:var(--muted);font-size:0.82rem">${m.id}</td>
+        <td style="${tdStyle};font-weight:600;color:var(--text)">${_esc(m.name)}</td>
+        <td style="${tdStyle}">${availCell}</td>
+        <td style="${tdStyle};color:var(--muted);font-size:0.88rem">${_esc(m.unit)}</td>
+        <td style="${tdStyle};white-space:nowrap" class="admin-only">
+          <div style="display:flex;gap:0.4rem">
+            <button class="card-btn card-btn-edit" title="${t('matEditBtn')}" onclick="matOpenForm(${m.id})">✎</button>
+            <button class="card-btn card-btn-del" title="${t('matDeleteBtn')}" data-mat-id="${m.id}" onclick="matDeleteById(this)">🗑</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+    area.innerHTML = `
+      <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)">
+        <table style="width:100%;border-collapse:collapse;background:var(--card)">
+          <thead>
+            <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
+              <th style="${thStyle}">${t('matColId')}</th>
+              <th style="${thStyle}">${t('matColName')}</th>
+              <th style="${thStyle}">Available at</th>
+              <th style="${thStyle}">${t('matColUnit')}</th>
+              <th style="${thStyle}" class="admin-only">${t('matColActions')}</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function matOpenForm(id) {
+    _matEditId = id;
+    const m = id ? _matData.find(x => x.id === id) : null;
+    document.getElementById('matModalTitle').textContent = m ? t('matEditBtn') : t('matAddBtn');
+    document.getElementById('matLblName').textContent  = t('matColName');
+    document.getElementById('matLblUnit').textContent  = t('matColUnit');
+    document.getElementById('matSaveBtnModal').textContent   = t('matSaveBtn');
+    document.getElementById('matCancelBtnModal').textContent = t('matCancelBtn');
+    document.getElementById('matFName').value = m ? m.name : '';
+    document.getElementById('matFUnit').value = m ? m.unit : '';
+    document.getElementById('matModalErr').textContent = '';
+    document.getElementById('matModal').classList.add('open');
+    document.getElementById('matFName').focus();
+  }
+
+  function matCloseModal() {
+    document.getElementById('matModal').classList.remove('open');
+  }
+
+  async function matSave() {
+    const name  = document.getElementById('matFName').value.trim();
+    const unit  = document.getElementById('matFUnit').value.trim();
+    const errEl = document.getElementById('matModalErr');
+    if (!name || !unit) { errEl.textContent = `${t('matColName')} / ${t('matColUnit')} required`; return; }
+    const body = { name, unit };
+    try {
+      const url    = _matEditId ? `/api/materials/${_matEditId}` : '/api/materials';
+      const method = _matEditId ? 'PUT' : 'POST';
+      const res = await apiFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (!res.ok) { const j = await res.json().catch(() => ({})); errEl.textContent = j.error || t('matSaveFail'); return; }
+      matCloseModal();
+      await matLoad();
+    } catch(e) { errEl.textContent = t('matSaveFail'); }
+  }
+
+  async function matDeleteById(btn) {
+    const id = parseInt(btn.dataset.matId);
+    const m  = _matData.find(x => x.id === id);
+    if (!m || !confirm(t('matDeleteConfirm').replace('{name}', m.name))) return;
+    try {
+      const res = await apiFetch(`/api/materials/${id}`, { method: 'DELETE' });
+      if (res.status === 409 || res.status === 500) { alert(t('matDeleteInUse')); return; }
+      await matLoad();
+    } catch(e) { alert(t('matDeleteInUse')); }
+  }
+
+  // ── END MATERIALS ─────────────────────────────────────────────────────────
 
   async function impInit() {
     impTranslate();                       // re-renders too, once the catalogue is in hand
