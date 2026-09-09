@@ -13,6 +13,14 @@ produces for the CSV files sitting next to this README — not sketches.
 
 Design rationale lives in `DATA_IMPORT_PLAN.md`; this file is only *how to call it*.
 
+> **Replaying a sync into a second environment** — no original CSVs, and a row copy will not do
+> because the create path is where warehouses, stages, tokens and doc folders come from? See
+> [`MIGRATE-ENVIRONMENT.md`](MIGRATE-ENVIRONMENT.md). `export-source.sql` regenerates the CSVs,
+> external keys included, from an already-synced database, and `check-target-overlap.sql` says
+> whether the target already holds any of those records. Both are plain queries — pgAdmin against a
+> Dockerised server is the assumed setup; `*.psql` variants automate the same thing where a psql
+> shell exists.
+
 - Base URL: `http://localhost:3002` (`server.port`, override with `SERVER_PORT`)
 - **Role `importer` or `admin`** (`@PreAuthorize("hasAnyRole('ADMIN','IMPORTER')")` plus an explicit
   `SecurityConfig` matcher), JWT bearer on every call. An `importer` token reaches `/api/import/**`

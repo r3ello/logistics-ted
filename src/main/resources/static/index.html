@@ -11715,7 +11715,11 @@
           materials:'Materials', qty:'Quantity', addItem:'+ Add material', notes:'Notes (optional)',
           submit:'Send request', chooseMaterial:'— material —', remove:'✕', sent:'Request sent',
           noAssignments:'You have no assigned house/stage yet. Ask an admin to assign your crew in the stage matrix.',
-          need:'Add at least one material with a quantity.' },
+          need:'Add at least one material with a quantity.',
+          viewItems:'Show the materials in these requests', itemsWord:'items', unit:'Unit',
+          colMaterial:'Material', orderedBy:'by', noOrdersYet:'No requests for this stage yet.',
+          ostatus_DRAFT:'Draft', ostatus_CONFIRMED:'Confirmed', ostatus_DELIVERED:'Delivered',
+          ostatus_CANCELLED:'Cancelled' },
     bg: { col_house:'Обект', col_stage:'Етап', col_status:'Статус', col_request:'Материали',
           col_dates:'Начална дата', col_photo_start:'Начална снимка', col_photo_end:'Крайна снимка', col_actions:'Крайна дата', col_report:'Доклад',
           request:'Заявка', ordersWord:'заявки', existingOrders:'Съществуващи заявки', cancel:'Отказ',
@@ -11724,7 +11728,11 @@
           materials:'Материали', qty:'Количество', addItem:'+ Добави материал', notes:'Бележки (по избор)',
           submit:'Изпрати заявка', chooseMaterial:'— материал —', remove:'✕', sent:'Заявката е изпратена',
           noAssignments:'Нямате назначен обект/етап. Помолете администратор да назначи екипа ви в матрицата на етапите.',
-          need:'Добавете поне един материал с количество.' }
+          need:'Добавете поне един материал с количество.',
+          viewItems:'Покажи материалите в тези заявки', itemsWord:'позиции', unit:'Мярка',
+          colMaterial:'Материал', orderedBy:'от', noOrdersYet:'Още няма заявки за този етап.',
+          ostatus_DRAFT:'Чернова', ostatus_CONFIRMED:'Потвърдена', ostatus_DELIVERED:'Доставена',
+          ostatus_CANCELLED:'Отказана' }
   };
   const mot = k => (MO_T[(typeof currentLang !== 'undefined' && currentLang) || 'en'] || MO_T.en)[k] || k;
   const moEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
@@ -11733,7 +11741,17 @@
   const moBadge = st => `display:inline-block;padding:0.15rem 0.55rem;border-radius:999px;font-size:0.74rem;font-weight:700;color:#fff;background:${st === 'DONE' ? '#065f46' : st === 'IN_PROGRESS' ? '#b45309' : '#3a4060'}`;
   const moBtnAct = bg => `background:${bg};color:#fff;border:none;border-radius:7px;padding:0.35rem 0.85rem;font-weight:700;cursor:pointer;font-size:0.82rem;white-space:nowrap`;
 
-  let _moState = { assignments: [], materials: [], orders: [], openStage: null, form: { notes: '', items: [{ materialId: '', quantity: '' }] } };
+  // The pill that reveals a stage's existing requests. Purple-tinted while open, so the panel
+  // below is visibly attached to the pill that opened it.
+  const _moChip = on => `display:inline-flex;align-items:center;gap:.35rem;font-size:0.78rem;font-weight:600;`
+    + `cursor:pointer;border-radius:999px;padding:.2rem .6rem;`
+    + `border:1px solid ${on ? 'var(--purple,#a78bfa)' : 'var(--border,#30363d)'};`
+    + `background:${on ? 'rgba(167,139,250,.14)' : 'transparent'};`
+    + `color:${on ? 'var(--purple,#a78bfa)' : 'var(--muted,#8b949e)'}`;
+
+  // openStage = the new-request form; openDetails = the read-only breakdown. Independent on
+  // purpose: re-reading what was already ordered is exactly what you do while filling the next one.
+  let _moState = { assignments: [], materials: [], orders: [], openStage: null, openDetails: null, form: { notes: '', items: [{ materialId: '', quantity: '' }] } };
 
   async function loadMyOrders() {
     const root = document.getElementById('moRoot');
@@ -11762,6 +11780,57 @@
 
   function moOpenOrder(hsId) { _moState.openStage = hsId; _moState.form = { notes: '', items: [{ materialId: '', quantity: '' }] }; renderMyOrders(); }
   function moCloseOrder() { _moState.openStage = null; renderMyOrders(); }
+  function moToggleDetails(hsId) {
+    _moState.openDetails = _moState.openDetails === hsId ? null : hsId;
+    renderMyOrders();
+  }
+
+  // 562.0 reads as a rounding artefact rather than a quantity. Show what was actually entered.
+  const moQty = q => { const n = Number(q); return Number.isFinite(n) ? String(parseFloat(n.toFixed(3))) : String(q == null ? '' : q); };
+  function moFmtWhen(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    // createdAt is a LocalDateTime, so it carries no zone. If the browser will not parse it,
+    // show it raw rather than the string "Invalid Date".
+    if (isNaN(d.getTime())) return String(iso).slice(0, 16).replace('T', ' ');
+    const lang = (typeof currentLang !== 'undefined' && currentLang) || 'en';
+    return d.toLocaleString(lang === 'bg' ? 'bg-BG' : 'en-GB',
+      { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  // One request rendered whole: header, notes, and the material lines that make it up. Used by
+  // both the row expansion and the "existing requests" block inside the form, so the two cannot
+  // drift into showing the same order differently.
+  function moOrderCard(o) {
+    const colors = (typeof ORDER_STATUS_COLORS !== 'undefined' && ORDER_STATUS_COLORS) || {};
+    const color  = colors[o.status] || '#9aa3be';
+    const items  = o.items || [];
+    const rows = items.map(i => `
+      <tr style="border-top:1px solid var(--border,#30363d)">
+        <td style="padding:.4rem .5rem">${moEsc(i.materialName)}</td>
+        <td style="padding:.4rem .5rem;text-align:right;font-weight:700;white-space:nowrap">${moEsc(moQty(i.quantity))}</td>
+        <td style="padding:.4rem .5rem;color:var(--muted,#8b949e);white-space:nowrap">${moEsc(i.unit || '')}</td>
+      </tr>`).join('');
+    return `
+      <div style="${_moCard};margin-bottom:.6rem">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.55rem">
+          <span style="font-weight:700">#${moEsc(o.id)}</span>
+          <span style="display:inline-block;padding:.15rem .55rem;border-radius:999px;font-size:.72rem;font-weight:700;color:#fff;background:${color}">${moEsc(mot('ostatus_' + o.status))}</span>
+          <span style="font-size:.78rem;color:var(--muted,#8b949e)">${moEsc(moFmtWhen(o.createdAt))}</span>
+          ${o.createdByName ? `<span style="font-size:.78rem;color:var(--muted,#8b949e)">· ${mot('orderedBy')} ${moEsc(o.createdByName)}</span>` : ''}
+          <span style="margin-left:auto;font-size:.78rem;color:var(--muted,#8b949e)">${items.length} ${mot('itemsWord')}</span>
+        </div>
+        ${o.notes ? `<div style="font-size:.82rem;color:var(--muted,#8b949e);margin-bottom:.55rem">📝 ${moEsc(o.notes)}</div>` : ''}
+        <table style="width:100%;border-collapse:collapse;font-size:.86rem">
+          <thead><tr style="text-align:left;color:var(--muted,#8b949e);font-size:.74rem">
+            <th style="padding:.3rem .5rem;font-weight:600">${mot('colMaterial')}</th>
+            <th style="padding:.3rem .5rem;font-weight:600;text-align:right">${mot('qty')}</th>
+            <th style="padding:.3rem .5rem;font-weight:600">${mot('unit')}</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
 
   async function reloadMyOrders() {
     const [a, o] = await Promise.all([
@@ -11804,7 +11873,7 @@
     const existing = stageOrders.length ? `
       <div style="margin-bottom:0.8rem">
         <div style="font-size:0.8rem;color:var(--muted,#8b949e);font-weight:600;margin-bottom:0.3rem">${mot('existingOrders')}</div>
-        ${stageOrders.map(o => `<div style="font-size:0.82rem;margin-bottom:0.2rem">• ${moEsc(o.status)} · ${(o.items || []).map(i => `${moEsc(i.quantity)} ${moEsc(i.unit || '')} ${moEsc(i.materialName)}`).join(', ')}</div>`).join('')}
+        ${stageOrders.map(o => moOrderCard(o)).join('')}
       </div>` : '';
     return `
       <div style="padding:1rem 1.2rem;max-width:760px">
@@ -11833,9 +11902,11 @@
       const st = a.status || 'NOT_STARTED';
       const dates = a.startDate || '—';
       const endDate = a.endDate || '—';
+      const detailsOpen = s.openDetails === a.houseStageId;
+      const itemCount = stageOrders.reduce((n, o) => n + (o.items || []).length, 0);
       const orderCell = `
         <div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-start">
-          ${stageOrders.length ? `<span style="font-size:0.78rem;color:var(--muted,#8b949e)">${stageOrders.length} ${mot('ordersWord')}</span>` : ''}
+          ${stageOrders.length ? `<button onclick="moToggleDetails(${a.houseStageId})" title="${moEsc(mot('viewItems'))}" style="${_moChip(detailsOpen)}">${detailsOpen ? '▾' : '▸'} ${stageOrders.length} ${mot('ordersWord')} · ${itemCount} ${mot('itemsWord')}</button>` : ''}
           <button onclick="moOpenOrder(${a.houseStageId})" style="${_moBtnG}">＋ ${mot('request')}</button>
         </div>`;
       const mainRow = `
@@ -11850,10 +11921,17 @@
           <td style="${moTd};white-space:nowrap;font-size:0.82rem;color:var(--muted,#8b949e)">${moEsc(endDate)}</td>
           <td style="${moTd}"><label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.8rem;color:var(--muted,#8b949e);border:1px dashed var(--border,#30363d);border-radius:6px;padding:.3rem .6rem;white-space:nowrap">📄 <input type="file" accept="application/pdf" style="display:none" onchange="moReportSelected(this,${a.houseStageId})"><span>Upload</span></label></td>
         </tr>`;
+      const detailRow = detailsOpen
+        ? `<tr><td colspan="9" style="padding:0.9rem 1.2rem;background:rgba(167,139,250,.05);border-bottom:1px solid var(--border,#30363d)">`
+          + (stageOrders.length
+              ? stageOrders.map(o => moOrderCard(o)).join('')
+              : `<div style="color:var(--muted,#8b949e);font-size:0.85rem">${mot('noOrdersYet')}</div>`)
+          + `</td></tr>`
+        : '';
       const expand = s.openStage === a.houseStageId
         ? `<tr><td colspan="9" style="padding:0;background:rgba(167,139,250,.05)">${moOrderPanel(a, stageOrders)}</td></tr>`
         : '';
-      return mainRow + expand;
+      return mainRow + detailRow + expand;
     }).join('');
     body.innerHTML = `
       <div style="overflow-x:auto">
