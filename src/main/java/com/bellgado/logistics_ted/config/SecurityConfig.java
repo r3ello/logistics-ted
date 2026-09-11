@@ -78,6 +78,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/qa/**").hasAnyRole("ADMIN", "USER", "QA_INSPECTOR")
                 .requestMatchers(HttpMethod.POST, "/api/files/upload-url").hasAnyRole("ADMIN", "USER", "QA_INSPECTOR")
                 .requestMatchers(HttpMethod.POST, "/api/files/*/confirm").hasAnyRole("ADMIN", "USER", "QA_INSPECTOR")
+                // Fleet (GPS.bg tracking) is admin-only: vehicle positions are where people are.
+                // VehicleController carries @PreAuthorize too; this rejects a USER token at the filter
+                // chain. Must stay ABOVE the generic /api/** matcher.
+                .requestMatchers("/api/vehicles", "/api/vehicles/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().permitAll()
             )
