@@ -1384,6 +1384,38 @@
       .imp-sel { min-width: 130px; }
     }
 
+    /* ── fleet (GPS.bg) ── */
+    .fl-toolbar { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .fl-sync { font-size:.8rem; color:var(--muted); }
+    .fl-sync.fl-warn { color:#f5a623; }
+    .fl-sync.fl-err { color:var(--danger); }
+    .fl-map-layout { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:1rem; }
+    .fl-map { height:calc(100vh - 230px); min-height:420px; border-radius:12px; border:1px solid var(--border); overflow:hidden; }
+    .fl-map-trips { height:380px; min-height:300px; margin-bottom:1rem; }
+    .fl-list { display:flex; flex-direction:column; gap:.5rem; max-height:calc(100vh - 230px); overflow-y:auto; }
+    .fl-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:.6rem .8rem; cursor:pointer; transition:border-color .15s; }
+    .fl-card:hover { border-color:var(--accent); }
+    .fl-card-off { opacity:.55; }
+    .fl-card-top { display:flex; justify-content:space-between; gap:.5rem; font-weight:600; font-size:.88rem; }
+    .fl-card-reg { font-weight:500; font-size:.76rem; color:var(--muted); white-space:nowrap; }
+    .fl-card-sub { font-size:.76rem; color:var(--muted); margin-top:.2rem; }
+    .fl-dot { width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:.35rem; vertical-align:middle; }
+    .fl-chips { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .fl-chip { background:var(--card); border:1px solid var(--border); border-radius:99px; padding:.3rem .8rem; font-size:.8rem; }
+    .fl-inp { width:100%; padding:.6rem .85rem; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.9rem; box-sizing:border-box; font-family:inherit; }
+    .fl-inp-inline { width:auto; min-width:190px; }
+    .fl-divicon { background:none; border:none; }
+    .fl-marker { width:30px; height:30px; border-radius:50%; border:2px solid #fff; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; box-shadow:0 2px 6px rgba(0,0,0,.45); }
+    .fl-tip { font-weight:600; font-size:.74rem; }
+    .fl-trip-row { cursor:pointer; }
+    .fl-trip-row:hover { background:rgba(79,142,247,.05); }
+    @media (max-width: 900px) {
+      .fl-map-layout { grid-template-columns:1fr; }
+      .fl-map { height:55vh; min-height:320px; }
+      .fl-list { max-height:none; }
+      .fl-inp-inline { min-width:0; width:100%; }
+    }
+
     /* ── motion preferences ── */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -1898,6 +1930,25 @@
       </a>
       <a class="nav-item nav-sub" id="navWeatherRules" href="#weatherrules" onclick="showView('weatherrules');return false;">
         <span class="nav-icon">⚙️</span> <span id="navWeatherRulesLabel">Rules</span>
+      </a>
+    </div>
+
+    <!-- Fleet (GPS.bg) — admin only. Starts hidden; _flApplyRoleGate() shows it for admins and
+         re-hides it after applyMenuConfig(), which would otherwise show the stored menu_config row
+         to every role. The backend gate is SecurityConfig (/api/vehicles/** = ADMIN). -->
+    <div class="nav-item" id="navFleetGroup" onclick="toggleNavGroup('fleet')" style="display:none;cursor:pointer;justify-content:space-between;font-weight:700;letter-spacing:0.03em">
+      <span style="display:flex;align-items:center;gap:0.7rem"><span class="nav-icon">🚚</span><span id="navFleetGroupLabel">Fleet</span></span>
+      <span id="navFleetChevron" style="font-size:0.75rem;transition:transform .2s;transform:rotate(-90deg)">▼</span>
+    </div>
+    <div id="navFleetChildren" style="display:none">
+      <a class="nav-item nav-sub" id="navFleetmap" href="#fleetmap" onclick="showView('fleetmap');return false;">
+        <span class="nav-icon">📍</span> <span id="navFleetmapLabel">Live Map</span>
+      </a>
+      <a class="nav-item nav-sub" id="navFleetvehicles" href="#fleetvehicles" onclick="showView('fleetvehicles');return false;">
+        <span class="nav-icon">🚐</span> <span id="navFleetvehiclesLabel">Vehicles</span>
+      </a>
+      <a class="nav-item nav-sub" id="navFleettrips" href="#fleettrips" onclick="showView('fleettrips');return false;">
+        <span class="nav-icon">🧭</span> <span id="navFleettripsLabel">Trips</span>
       </a>
     </div>
 
@@ -2421,6 +2472,59 @@
         <button class="btn btn-primary" onclick="matSave()" id="matSaveBtnModal">Save</button>
       </div>
     </div>
+  </div>
+
+  <!-- VIEW: FLEET — LIVE MAP. Admin only. Reads our DB through /api/vehicles; only the backend poller
+       talks to GPS.bg (one call per 181 s per account), never the browser. -->
+  <div class="view" id="view-fleetmap">
+    <div class="fl-toolbar">
+      <span class="fl-sync" id="flMapSync"></span>
+      <button class="btn btn-ghost" id="flMapRefreshBtn" onclick="flMapLoad()" style="margin-left:auto">↻ Refresh</button>
+    </div>
+    <div class="fl-map-layout">
+      <div id="flMap" class="fl-map"></div>
+      <div id="flMapList" class="fl-list"></div>
+    </div>
+  </div>
+
+  <!-- VIEW: FLEET — VEHICLES -->
+  <div class="view" id="view-fleetvehicles">
+    <div class="fl-toolbar"><span class="fl-sync" id="flVehSync"></span></div>
+    <div id="flVehTable"></div>
+  </div>
+
+  <!-- MODAL: VEHICLE — our own fields only; GPS.bg's are overwritten on every poll -->
+  <div class="modal-backdrop" id="flVehModal" onclick="if(event.target===this) flVehClose()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">
+        <span id="flVehModalTitle">Vehicle</span>
+        <button class="modal-close" onclick="flVehClose()">✕</button>
+      </div>
+      <div class="field"><label id="flLblAlias" for="flFAlias">Alias</label><input id="flFAlias" type="text" maxlength="255" class="fl-inp" /></div>
+      <div class="field"><label id="flLblDriver" for="flFDriver">Assigned driver</label><select id="flFDriver" class="fl-inp"></select></div>
+      <div class="field"><label id="flLblNotes" for="flFNotes">Notes</label><textarea id="flFNotes" rows="3" maxlength="2000" class="fl-inp"></textarea></div>
+      <div style="margin:0.25rem 0 1rem">
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.88rem"><input id="flFActive" type="checkbox" /> <span id="flLblActive">Active</span></label>
+      </div>
+      <p class="modal-err" id="flVehErr"></p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="flVehClose()" id="flVehCancel">Cancel</button>
+        <button class="btn btn-primary" onclick="flVehSave()" id="flVehSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: FLEET — TRIPS -->
+  <div class="view" id="view-fleettrips">
+    <div class="fl-toolbar">
+      <select id="flTripVehicle" class="fl-inp fl-inp-inline" onchange="flTripsLoad()"></select>
+      <input id="flTripDate" type="date" class="fl-inp fl-inp-inline" onchange="flTripsLoad()" />
+      <button class="btn btn-ghost" id="flTripSyncBtn" onclick="flTripsRequestSync()">⟳ Fetch from GPS</button>
+      <span class="fl-sync" id="flTripMsg"></span>
+    </div>
+    <div id="flTripSummary" class="fl-chips"></div>
+    <div id="flTripMap" class="fl-map fl-map-trips"></div>
+    <div id="flTripTable"></div>
   </div>
 
   <!-- VIEW: ELECTRIC BOXES -->
@@ -3212,6 +3316,30 @@
       matDeleteConfirm:'Delete material "{name}"?',
       matDeleteInUse:'Cannot delete: this material is referenced by orders or inventory.',
       matSaveFail:'Failed to save material.',
+      // fleet (GPS.bg)
+      navFleetGroupLabel:'Fleet', navFleetmap:'Live Map', navFleetvehicles:'Vehicles', navFleettrips:'Trips',
+      pageTitle_fleetmap:'Fleet — Live Map', pageSub_fleetmap:'Where every vehicle is now, refreshed from GPS.bg every few minutes',
+      pageTitle_fleetvehicles:'Fleet — Vehicles', pageSub_fleetvehicles:'GPS.bg vehicles with alias, assigned driver and last signal',
+      pageTitle_fleettrips:'Fleet — Trips', pageSub_fleettrips:'Driving and stopped segments per vehicle and day',
+      flRefresh:'↻ Refresh', flLoadFail:'Failed to load vehicles.',
+      flNoVehicles:'No vehicles yet. They appear by themselves after the first successful GPS.bg sync.',
+      flSyncDisabled:'GPS polling is off in this environment — showing stored data only.',
+      flSyncNever:'No data received from GPS.bg yet.', flSyncUpdated:'Updated {ago}', flSyncError:'Last GPS error ({ago}): {msg}',
+      flJustNow:'just now', flAgoMin:'{n} min ago', flAgoH:'{n} h ago', flAgoD:'{n} d ago',
+      flStateMoving:'Moving', flStateIdle:'Engine on', flStateParked:'Parked', flStateStale:'No signal',
+      flSpeed:'Speed', flLastSignal:'Last signal', flDriver:'Driver', flOdometer:'Odometer', flBattery:'Battery', flExtPower:'Ext. power',
+      flViewTrips:'View trips →', flColName:'Vehicle', flColReg:'Reg. number', flColState:'Status', flColActions:'Actions',
+      flEdit:'Edit', flInactive:'inactive', flModalTitle:'Edit vehicle',
+      flLblAlias:'Alias (shown instead of the GPS.bg name)', flLblDriver:'Assigned driver', flNoDriver:'— none —',
+      flLblNotes:'Notes', flLblActive:'Active (trips are synced only for active vehicles)',
+      flSave:'Save', flCancel:'Cancel', flSaveFail:'Failed to save vehicle.',
+      flTripSync:'⟳ Fetch from GPS', flTripQueued:'Queued (position {n}) — it will be fetched within ~{min} min.',
+      flTripSyncFail:'Could not queue the fetch.', flSyncedAt:'Trips last fetched {ago}',
+      flTripsEmpty:'No trips stored for this day. GPS.bg history is fetched in the background (today about every hour and a half, the previous day overnight) — use “Fetch from GPS” to queue it now.',
+      flSumKm:'Distance', flSumDriving:'Driving', flSumStops:'Stops', flSumMaxSpeed:'Max speed', flSumIdle:'Idling', flSumFuel:'Fuel (est.)',
+      flFuelHint:'GPS.bg estimate: distance × 8 L/100 km, not a measurement.',
+      flColType:'Type', flColFrom:'From', flColTo:'To', flColDuration:'Duration', flColKm:'km', flKmh:'km/h', flColSpeed:'Avg / max km/h', flColIdle:'Idle',
+      flSegDriving:'Driving', flSegStopped:'Stopped', flUnitH:'h', flUnitMin:'min', flUnitS:'s',
       qaclAddItem:'Add Item', qaclItemTextBg:'Text (BG)', qaclItemTextEn:'Text (EN)', qaclSave:'Save', qaclCancel:'Cancel', qaclEdit:'Edit', qaclDelete:'Delete', qaclActive:'Active', qaclInactive:'Inactive', qaclNoItems:'No checklist items yet.',
       // company folders admin
       pageTitle_companyfolders:'Company Folders Template', pageSub_companyfolders:'Global document folder structure shared across the company',
@@ -3570,6 +3698,30 @@
       matDeleteConfirm:'Изтриване на материал "{name}"?',
       matDeleteInUse:'Не може да се изтрие: материалът е свързан с поръчки или инвентар.',
       matSaveFail:'Грешка при запазване на материала.',
+      // fleet (GPS.bg)
+      navFleetGroupLabel:'Автопарк', navFleetmap:'Карта на живо', navFleetvehicles:'Превозни средства', navFleettrips:'Пътувания',
+      pageTitle_fleetmap:'Автопарк — карта на живо', pageSub_fleetmap:'Къде е всяко превозно средство сега, обновявано от GPS.bg на няколко минути',
+      pageTitle_fleetvehicles:'Автопарк — превозни средства', pageSub_fleetvehicles:'Превозни средства от GPS.bg с псевдоним, шофьор и последен сигнал',
+      pageTitle_fleettrips:'Автопарк — пътувания', pageSub_fleettrips:'Сегменти на движение и престой по превозно средство и ден',
+      flRefresh:'↻ Обнови', flLoadFail:'Грешка при зареждане на превозните средства.',
+      flNoVehicles:'Все още няма превозни средства. Появяват се сами след първото успешно синхронизиране с GPS.bg.',
+      flSyncDisabled:'Опресняването от GPS е изключено в тази среда — показват се само записани данни.',
+      flSyncNever:'Все още няма данни от GPS.bg.', flSyncUpdated:'Обновено {ago}', flSyncError:'Последна грешка от GPS ({ago}): {msg}',
+      flJustNow:'току-що', flAgoMin:'преди {n} мин', flAgoH:'преди {n} ч', flAgoD:'преди {n} д',
+      flStateMoving:'В движение', flStateIdle:'Работещ двигател', flStateParked:'Паркиран', flStateStale:'Няма сигнал',
+      flSpeed:'Скорост', flLastSignal:'Последен сигнал', flDriver:'Шофьор', flOdometer:'Километраж', flBattery:'Батерия', flExtPower:'Външно захранване',
+      flViewTrips:'Виж пътуванията →', flColName:'Превозно средство', flColReg:'Рег. номер', flColState:'Състояние', flColActions:'Действия',
+      flEdit:'Редактирай', flInactive:'неактивно', flModalTitle:'Редакция на превозно средство',
+      flLblAlias:'Псевдоним (показва се вместо името от GPS.bg)', flLblDriver:'Назначен шофьор', flNoDriver:'— няма —',
+      flLblNotes:'Бележки', flLblActive:'Активно (пътувания се теглят само за активните)',
+      flSave:'Запази', flCancel:'Отказ', flSaveFail:'Грешка при запазване.',
+      flTripSync:'⟳ Изтегли от GPS', flTripQueued:'Добавено в опашката (позиция {n}) — ще бъде изтеглено до ~{min} мин.',
+      flTripSyncFail:'Неуспешно добавяне в опашката.', flSyncedAt:'Пътуванията са изтеглени {ago}',
+      flTripsEmpty:'Няма записани пътувания за този ден. Историята от GPS.bg се тегли във фонов режим (днешният ден приблизително на всеки час и половина, предишният — през нощта) — използвайте „Изтегли от GPS“, за да я добавите в опашката сега.',
+      flSumKm:'Разстояние', flSumDriving:'Движение', flSumStops:'Спирания', flSumMaxSpeed:'Макс. скорост', flSumIdle:'Празен ход', flSumFuel:'Гориво (оценка)',
+      flFuelHint:'Оценка на GPS.bg: разстояние × 8 л/100 км, не е измерване.',
+      flColType:'Тип', flColFrom:'От', flColTo:'До', flColDuration:'Продължителност', flColKm:'км', flKmh:'км/ч', flColSpeed:'Средна / макс. км/ч', flColIdle:'Празен ход',
+      flSegDriving:'Движение', flSegStopped:'Престой', flUnitH:'ч', flUnitMin:'мин', flUnitS:'с',
       qaclAddItem:'Добави елемент', qaclItemTextBg:'Текст (БГ)', qaclItemTextEn:'Текст (EN)', qaclSave:'Запази', qaclCancel:'Откажи', qaclEdit:'Редактирай', qaclDelete:'Изтрий', qaclActive:'Активен', qaclInactive:'Неактивен', qaclNoItems:'Няма добавени елементи.',
       // company folders admin
       pageTitle_companyfolders:'Шаблон за фирмени папки', pageSub_companyfolders:'Обща структура на документни папки за цялата фирма',
@@ -3660,6 +3812,13 @@
     const matTitleEl = document.getElementById('matTitle'); if (matTitleEl) matTitleEl.textContent = `🧱 ${t('pageTitle_materials')}`;
     const matAddBtnEl = document.getElementById('matAddBtn'); if (matAddBtnEl) matAddBtnEl.textContent = t('matAddBtn');
     if (activeView === 'materials') matLoad();
+    // Fleet (GPS.bg) nav labels + re-render of whichever fleet view is open
+    const flNavLabels = { navFleetGroupLabel:'navFleetGroupLabel', navFleetmapLabel:'navFleetmap', navFleetvehiclesLabel:'navFleetvehicles', navFleettripsLabel:'navFleettrips' };
+    Object.entries(flNavLabels).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.textContent = t(key); });
+    _flStaticLabels();
+    if (activeView === 'fleetmap')      { _flRenderSync('flMapSync'); if (_flMap) flMapRender(); }
+    if (activeView === 'fleetvehicles') { _flRenderSync('flVehSync'); flVehRender(); }
+    if (activeView === 'fleettrips')    flTripsRender();
     if (activeView === 'qachecklists') _qaclRender();
     if (activeView === 'weatherrules') wrLoad();
     // Re-label Menu Management nav item and section headers
@@ -3993,9 +4152,9 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import', 'weatherrecommendations', 'weatherrules', 'materials'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import', 'weatherrecommendations', 'weatherrules', 'materials', 'fleetmap', 'fleetvehicles', 'fleettrips'];
 
-  const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false, qa: false, weather: false };
+  const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false, qa: false, weather: false, fleet: false };
   const _navGroupConfig = {
     routes:         { children: 'navRoutesChildren',          chevron: 'navRoutesChevron' },
     attendance:     { children: 'navAttendanceChildren',      chevron: 'navAttendanceChevron' },
@@ -4005,6 +4164,7 @@
     clientservices: { children: 'navClientServicesChildren',  chevron: 'navClientServicesChevron' },
     qa:             { children: 'navQaChildren',              chevron: 'navQaChevron' },
     weather:        { children: 'navWeatherChildren',         chevron: 'navWeatherChevron' },
+    fleet:          { children: 'navFleetChildren',           chevron: 'navFleetChevron' },
   };
   function setNavActive(id) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -4030,6 +4190,8 @@
     if (name === 'auditlog' && currentUser?.role !== 'admin') name = 'dashboard';
     // The import view writes straight into live data: admin and importer only, hash included.
     if (name === 'import' && !['admin','importer'].includes(currentUser?.role)) name = 'dashboard';
+    // Fleet (GPS.bg) is admin-only — the API 403s anyone else; bounce them here too, hash included.
+    if (String(name).startsWith('fleet') && currentUser?.role !== 'admin') name = 'dashboard';
     if (!VALID_VIEWS.includes(name)) name = 'dashboard';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -4068,6 +4230,9 @@
     if (name === 'weatherrecommendations') wxRecLoad();
     if (name === 'weatherrules')           wrLoad();
     if (name === 'materials')              matLoad();
+    if (name === 'fleetmap')               flMapLoad();
+    if (name === 'fleetvehicles')          flVehLoad();
+    if (name === 'fleettrips')             flTripsInit();
     if (name === 'order' && materials && materials.length) {
       // re-render material labels in current language, preserving values
       const saved = {};
@@ -11625,6 +11790,8 @@
     // Data Import mirrors the backend gate (SecurityConfig: /api/import/** = ADMIN or IMPORTER).
     const navImport = document.getElementById('navImport');
     if (navImport) navImport.style.display = ['admin','importer'].includes(user.role) ? '' : 'none';
+    // Fleet (GPS.bg) mirrors the backend gate (SecurityConfig: /api/vehicles/** = ADMIN).
+    _flApplyRoleGate();
     // Hide nav sections not relevant for crew leaders
     // Nav visibility by role, set explicitly every login so it's restored for admin/user after a
     // crew-leader session (inline display would otherwise stick). Crew leaders get only their workspace.
@@ -15219,6 +15386,10 @@
     nav_qa_checklists:        'navQaChecklists',
     nav_group_weather:        'navWeatherGroup',
     nav_weather_recommendations: 'navWeatherRecommendations',
+    nav_group_fleet:          'navFleetGroup',
+    nav_fleet_map:            'navFleetmap',
+    nav_fleet_vehicles:       'navFleetvehicles',
+    nav_fleet_trips:          'navFleettrips',
   };
   const _navChildrenMap = {
     nav_group_management:     'navManagementChildren',
@@ -15229,6 +15400,7 @@
     nav_group_clientservices: 'navClientServicesChildren',
     nav_group_qa:             'navQaChildren',
     nav_group_weather:        'navWeatherChildren',
+    nav_group_fleet:          'navFleetChildren',
   };
   const _dashElMap = {
     dash_stagematrix: 'dashModeStageMatrix',
@@ -15472,6 +15644,442 @@
         el.style.display = item.visible ? '' : 'none';
         dashBar.appendChild(el);
       });
+    }
+    // The stored row just decided the Fleet group's display for every role; put the admin gate back.
+    _flApplyRoleGate();
+  }
+
+  // ── FLEET (GPS.bg) ───────────────────────────────────────────────────────────
+  // Admin only (SecurityConfig: /api/vehicles/** = ADMIN). Everything here reads OUR database:
+  // GPS.bg allows one call per 181 s per account, so only the backend poller (GpsPoller) talks to it
+  // and the browser never does. "Fetch from GPS" merely queues a job for that poller.
+
+  let _flVehicles = [], _flSync = null, _flWorkers = null, _flVehEditId = null;
+  let _flMap = null, _flMapMarkers = {}, _flMapFitted = false, _flMapTimer = null;
+  let _flTripMap = null, _flTripLayer = null, _flTripPreset = null, _flTripData = null, _flTripPositions = [];
+
+  const _FL_COLORS    = { moving:'#3ecf6e', idle:'#f5a623', parked:'#4f8ef7', stale:'#7a85a3' };
+  const _FL_STATE_KEY = { moving:'flStateMoving', idle:'flStateIdle', parked:'flStateParked', stale:'flStateStale' };
+
+  function _flApplyRoleGate() {
+    const admin = currentUser?.role === 'admin';
+    const grp  = document.getElementById('navFleetGroup');
+    const kids = document.getElementById('navFleetChildren');
+    if (!admin) {
+      if (grp)  grp.style.display = 'none';
+      if (kids) kids.style.display = 'none';
+      _navGroupOpen.fleet = false;
+    } else if (grp && !_mcfgData.length) {
+      grp.style.display = '';   // menu config not loaded yet; applyMenuConfig() decides once it is
+    }
+  }
+
+  function _flStaticLabels() {
+    const refresh = document.getElementById('flMapRefreshBtn'); if (refresh) refresh.textContent = t('flRefresh');
+    const sync    = document.getElementById('flTripSyncBtn');   if (sync)    sync.textContent    = t('flTripSync');
+  }
+
+  function _flLocale() { return currentLang === 'bg' ? 'bg-BG' : 'en-GB'; }
+  function _flNum(n, digits = 1) {
+    return n == null ? '—' : Number(n).toLocaleString(_flLocale(), { maximumFractionDigits: digits });
+  }
+  function _flTime(iso) {
+    return iso ? new Date(iso).toLocaleTimeString(_flLocale(), { hour:'2-digit', minute:'2-digit' }) : '—';
+  }
+  function _flDateTime(iso) {
+    return iso ? new Date(iso).toLocaleString(_flLocale(), { dateStyle:'short', timeStyle:'short' }) : '—';
+  }
+  function _flAgo(iso) {
+    if (!iso) return '—';
+    const min = Math.floor((Date.now() - Date.parse(iso)) / 60000);
+    if (min < 1)  return t('flJustNow');
+    if (min < 60) return t('flAgoMin').replace('{n}', min);
+    const h = Math.floor(min / 60);
+    if (h < 48)   return t('flAgoH').replace('{n}', h);
+    return t('flAgoD').replace('{n}', Math.floor(h / 24));
+  }
+  function _flDur(sec) {
+    sec = Math.max(0, Math.round(sec || 0));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
+    if (h) return `${h} ${t('flUnitH')} ${m} ${t('flUnitMin')}`;
+    if (m) return `${m} ${t('flUnitMin')}`;
+    return `${sec} ${t('flUnitS')}`;
+  }
+  function _flName(v)   { return v.name || v.gpsCode; }
+  function _flDriver(v) { return v.driverWorkerName || v.providerDriver || '—'; }
+
+  // GPS.bg's IsOnline is not trustworthy (a unit silent for two days still says true), so a vehicle
+  // without a fix for an hour is "no signal" whatever the flag says.
+  function _flState(v) {
+    const ageMin = v.lastTs ? (Date.now() - Date.parse(v.lastTs)) / 60000 : Infinity;
+    if (ageMin > 60) return 'stale';
+    if (v.ignition && (v.speedKmh || 0) > 3) return 'moving';
+    if (v.ignition) return 'idle';
+    return 'parked';
+  }
+
+  async function _flFetch() {
+    const [veh, sync] = await Promise.all([
+      apiFetch('/api/vehicles').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+      apiFetch('/api/vehicles/sync-status').then(r => r.ok ? r.json() : null).catch(() => null),
+    ]);
+    _flVehicles = Array.isArray(veh) ? veh : [];
+    _flSync = sync;
+  }
+
+  function _flRenderSync(elId) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.className = 'fl-sync';
+    const s = _flSync;
+    if (!s) { el.textContent = ''; return; }
+    const errIsLatest = s.lastError && (!s.lastStatusAt || Date.parse(s.lastErrorAt) >= Date.parse(s.lastStatusAt));
+    if (!s.enabled)          { el.classList.add('fl-warn'); el.textContent = t('flSyncDisabled'); }
+    else if (errIsLatest)    { el.classList.add('fl-err');  el.textContent = t('flSyncError').replace('{ago}', _flAgo(s.lastErrorAt)).replace('{msg}', s.lastError); }
+    else if (s.lastStatusAt) { el.textContent = t('flSyncUpdated').replace('{ago}', _flAgo(s.lastStatusAt)); }
+    else                     { el.textContent = t('flSyncNever'); }
+  }
+
+  function _flTiles(map) {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 18 }).addTo(map);
+  }
+
+  // ── live map
+  async function flMapLoad() {
+    _flStaticLabels();
+    try { await _flFetch(); }
+    catch (e) { document.getElementById('flMapList').innerHTML = `<div class="state-msg" style="color:var(--danger)">${t('flLoadFail')}</div>`; return; }
+    _flRenderSync('flMapSync');
+    flMapRender();
+    // Re-reading our own API every minute is cheap; GPS.bg data itself lands every few minutes.
+    if (!_flMapTimer) _flMapTimer = setInterval(() => {
+      if (!document.getElementById('view-fleetmap')?.classList.contains('active')) { clearInterval(_flMapTimer); _flMapTimer = null; return; }
+      flMapLoad();
+    }, 60000);
+  }
+
+  function _flIcon(v) {
+    const st = _flState(v);
+    const glyph = st === 'moving' && v.heading != null
+      ? `<span style="display:inline-block;transform:rotate(${Number(v.heading)}deg)">▲</span>` : '●';
+    return L.divIcon({ className: 'fl-divicon', html: `<div class="fl-marker" style="background:${_FL_COLORS[st]}">${glyph}</div>`,
+                       iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -14] });
+  }
+
+  function _flPopup(v) {
+    const st = _flState(v);
+    const speed = st === 'moving' ? ` · ${_flNum(v.speedKmh)} ${t('flKmh')}` : '';
+    return `<div style="min-width:210px;font-size:.82rem;line-height:1.55">
+      <div style="font-weight:700;font-size:.92rem">${escapeHtml(_flName(v))}</div>
+      <div style="color:#7a85a3">${escapeHtml(v.regNumber || '')}</div>
+      <div><span class="fl-dot" style="background:${_FL_COLORS[st]}"></span>${t(_FL_STATE_KEY[st])}${speed}</div>
+      <div>${t('flLastSignal')}: ${_flAgo(v.lastTs)} <span style="color:#7a85a3">(${_flDateTime(v.lastTs)})</span></div>
+      <div>${t('flDriver')}: ${escapeHtml(_flDriver(v))}</div>
+      <div>${t('flOdometer')}: ${_flNum(v.odometerKm, 0)} ${t('flColKm')}</div>
+      <div>${t('flExtPower')}: ${_flNum(v.extPowerV, 2)} V · ${t('flBattery')}: ${_flNum(v.batteryV, 2)} V</div>
+      <a href="#" onclick="flOpenTrips(${Number(v.id)});return false" style="display:inline-block;margin-top:.35rem">${t('flViewTrips')}</a>
+    </div>`;
+  }
+
+  function flMapRender() {
+    if (!document.getElementById('flMap')) return;
+    if (!_flMap) { _flMap = L.map('flMap').setView([42.7, 23.32], 9); _flTiles(_flMap); }
+    setTimeout(() => _flMap && _flMap.invalidateSize(), 60);   // the container was hidden until the view opened
+    const seen = new Set(), pts = [];
+    _flVehicles.filter(v => v.lastLat != null && v.lastLng != null).forEach(v => {
+      const ll = [v.lastLat, v.lastLng];
+      seen.add(String(v.id));
+      pts.push(ll);
+      let m = _flMapMarkers[v.id];
+      if (!m) {
+        m = L.marker(ll, { icon: _flIcon(v) }).addTo(_flMap);
+        m.bindTooltip(escapeHtml(_flName(v)), { permanent: true, direction: 'right', offset: [14, 0], className: 'fl-tip' });
+        m.bindPopup(_flPopup(v));
+        _flMapMarkers[v.id] = m;
+      } else {
+        m.setLatLng(ll);
+        m.setIcon(_flIcon(v));
+        m.setTooltipContent(escapeHtml(_flName(v)));
+        m.setPopupContent(_flPopup(v));   // updates an open popup in place
+      }
+    });
+    Object.keys(_flMapMarkers).forEach(id => { if (!seen.has(id)) { _flMapMarkers[id].remove(); delete _flMapMarkers[id]; } });
+    if (!_flMapFitted && pts.length) { _flMap.fitBounds(pts, { padding: [40, 40], maxZoom: 13 }); _flMapFitted = true; }
+    _flRenderMapList();
+  }
+
+  function _flRenderMapList() {
+    const box = document.getElementById('flMapList');
+    if (!_flVehicles.length) { box.innerHTML = `<div class="state-msg">${t('flNoVehicles')}</div>`; return; }
+    const rank = { moving: 0, idle: 1, parked: 2, stale: 3 };
+    const list = [..._flVehicles].sort((a, b) => rank[_flState(a)] - rank[_flState(b)] || _flName(a).localeCompare(_flName(b)));
+    box.innerHTML = list.map(v => {
+      const st = _flState(v);
+      const speed = st === 'moving' ? ` · ${_flNum(v.speedKmh)} ${t('flKmh')}` : '';
+      return `<div class="fl-card${v.active ? '' : ' fl-card-off'}" onclick="flFocus(${Number(v.id)})">
+        <div class="fl-card-top"><span>${escapeHtml(_flName(v))}</span><span class="fl-card-reg">${escapeHtml(v.regNumber || '')}</span></div>
+        <div class="fl-card-sub"><span class="fl-dot" style="background:${_FL_COLORS[st]}"></span>${t(_FL_STATE_KEY[st])}${speed} · ${_flAgo(v.lastTs)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function flFocus(id) {
+    const m = _flMapMarkers[id];
+    if (!m || !_flMap) return;
+    _flMap.setView(m.getLatLng(), Math.max(_flMap.getZoom(), 14));
+    m.openPopup();
+  }
+
+  // ── vehicles
+  async function flVehLoad() {
+    const area = document.getElementById('flVehTable');
+    area.innerHTML = `<div class="state-msg">${t('matLoading')}</div>`;
+    try { await _flFetch(); }
+    catch (e) { area.innerHTML = `<div class="state-msg" style="color:var(--danger)">${t('flLoadFail')}</div>`; return; }
+    _flRenderSync('flVehSync');
+    flVehRender();
+  }
+
+  function flVehRender() {
+    const area = document.getElementById('flVehTable');
+    if (!area) return;
+    if (!_flVehicles.length) { area.innerHTML = `<div class="state-msg">${t('flNoVehicles')}</div>`; return; }
+    const th = `padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap`;
+    const td = `padding:0.7rem 1rem`;
+    const rows = _flVehicles.map(v => {
+      const st = _flState(v);
+      const provider = v.alias && v.providerName ? `<div style="font-size:.76rem;color:var(--muted);font-weight:400">${escapeHtml(v.providerName)}</div>` : '';
+      const inactive = v.active ? '' : ` <span style="font-size:.72rem;color:var(--muted);font-weight:400">(${t('flInactive')})</span>`;
+      return `<tr style="border-bottom:1px solid var(--border);${v.active ? '' : 'opacity:.55'}">
+        <td style="${td};font-weight:600">${escapeHtml(_flName(v))}${inactive}${provider}</td>
+        <td style="${td};white-space:nowrap">${escapeHtml(v.regNumber || '—')}</td>
+        <td style="${td};white-space:nowrap"><span class="fl-dot" style="background:${_FL_COLORS[st]}"></span>${t(_FL_STATE_KEY[st])}</td>
+        <td style="${td};white-space:nowrap" title="${escapeHtml(_flDateTime(v.lastTs))}">${_flAgo(v.lastTs)}</td>
+        <td style="${td};white-space:nowrap">${st === 'moving' ? `${_flNum(v.speedKmh)} ${t('flKmh')}` : '—'}</td>
+        <td style="${td};white-space:nowrap">${_flNum(v.odometerKm, 0)} ${t('flColKm')}</td>
+        <td style="${td}">${escapeHtml(_flDriver(v))}</td>
+        <td style="${td};white-space:nowrap"><div style="display:flex;gap:.4rem">
+          <button class="card-btn card-btn-edit" title="${t('flEdit')}" onclick="flVehOpen(${Number(v.id)})">✎</button>
+          <button class="card-btn" title="${t('flViewTrips')}" onclick="flOpenTrips(${Number(v.id)})">🧭</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+    area.innerHTML = `<div style="overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:12px">
+      <table style="width:100%;border-collapse:collapse;font-size:.88rem">
+        <thead><tr style="border-bottom:1px solid var(--border)">
+          <th style="${th}">${t('flColName')}</th><th style="${th}">${t('flColReg')}</th><th style="${th}">${t('flColState')}</th>
+          <th style="${th}">${t('flLastSignal')}</th><th style="${th}">${t('flSpeed')}</th><th style="${th}">${t('flOdometer')}</th>
+          <th style="${th}">${t('flDriver')}</th><th style="${th}">${t('flColActions')}</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  async function flVehOpen(id) {
+    const v = _flVehicles.find(x => x.id === id);
+    if (!v) return;
+    _flVehEditId = id;
+    document.getElementById('flVehModalTitle').textContent = `${t('flModalTitle')} — ${_flName(v)}`;
+    document.getElementById('flLblAlias').textContent  = t('flLblAlias');
+    document.getElementById('flLblDriver').textContent = t('flLblDriver');
+    document.getElementById('flLblNotes').textContent  = t('flLblNotes');
+    document.getElementById('flLblActive').textContent = t('flLblActive');
+    document.getElementById('flVehCancel').textContent  = t('flCancel');
+    document.getElementById('flVehSaveBtn').textContent = t('flSave');
+    const alias = document.getElementById('flFAlias');
+    alias.value = v.alias || '';
+    alias.placeholder = v.providerName || '';
+    document.getElementById('flFNotes').value = v.notes || '';
+    document.getElementById('flFActive').checked = !!v.active;
+    document.getElementById('flVehErr').textContent = '';
+    const sel = document.getElementById('flFDriver');
+    sel.innerHTML = `<option value="">${t('flNoDriver')}</option>`;
+    document.getElementById('flVehModal').classList.add('open');
+    if (!_flWorkers) {
+      try { _flWorkers = await apiFetch('/api/workers').then(r => r.ok ? r.json() : []); } catch (e) { _flWorkers = []; }
+    }
+    sel.innerHTML = `<option value="">${t('flNoDriver')}</option>` + [...(_flWorkers || [])]
+      .sort((a, b) => String(a.name).localeCompare(String(b.name)))
+      .map(w => `<option value="${Number(w.id)}">${escapeHtml(w.name)}</option>`).join('');
+    sel.value = v.driverWorkerId != null ? String(v.driverWorkerId) : '';
+  }
+
+  function flVehClose() {
+    document.getElementById('flVehModal').classList.remove('open');
+    _flVehEditId = null;
+  }
+
+  async function flVehSave() {
+    const id = _flVehEditId;
+    if (!id) return;
+    const errEl = document.getElementById('flVehErr');
+    const body = {
+      alias:  document.getElementById('flFAlias').value.trim(),
+      notes:  document.getElementById('flFNotes').value.trim(),
+      active: document.getElementById('flFActive').checked,
+      driverWorkerId: document.getElementById('flFDriver').value || null,
+    };
+    try {
+      const res = await apiFetch(`/api/vehicles/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { errEl.textContent = data.error || t('flSaveFail'); return; }
+      const i = _flVehicles.findIndex(x => x.id === id);
+      if (i >= 0) _flVehicles[i] = { ...data, telemetry: null };
+      flVehClose();
+      flVehRender();
+    } catch (e) { errEl.textContent = t('flSaveFail'); }
+  }
+
+  // ── trips
+  function flOpenTrips(id) {
+    _flTripPreset = id;
+    showView('fleettrips');
+  }
+
+  async function flTripsInit() {
+    _flStaticLabels();
+    const sel = document.getElementById('flTripVehicle');
+    const dateEl = document.getElementById('flTripDate');
+    const table = document.getElementById('flTripTable');
+    if (!_flVehicles.length) {
+      try { await _flFetch(); }
+      catch (e) { table.innerHTML = `<div class="state-msg" style="color:var(--danger)">${t('flLoadFail')}</div>`; return; }
+    }
+    if (!_flVehicles.length) { table.innerHTML = `<div class="state-msg">${t('flNoVehicles')}</div>`; return; }
+    const keep = _flTripPreset != null ? String(_flTripPreset) : sel.value;
+    _flTripPreset = null;
+    sel.innerHTML = _flVehicles.map(v =>
+      `<option value="${Number(v.id)}">${escapeHtml(_flName(v))}${v.regNumber ? ' · ' + escapeHtml(v.regNumber) : ''}</option>`).join('');
+    if (keep && _flVehicles.some(v => String(v.id) === keep)) sel.value = keep;
+    const today = new Date().toLocaleDateString('sv-SE');   // yyyy-mm-dd in the browser's zone
+    if (!dateEl.value) dateEl.value = today;
+    dateEl.max = today;
+    flTripsLoad();
+  }
+
+  async function flTripsLoad() {
+    const id = document.getElementById('flTripVehicle').value;
+    const date = document.getElementById('flTripDate').value;
+    const table = document.getElementById('flTripTable');
+    document.getElementById('flTripMsg').textContent = '';
+    if (!id || !date) return;
+    table.innerHTML = `<div class="state-msg">${t('matLoading')}</div>`;
+    try {
+      const q = `date=${encodeURIComponent(date)}`;
+      const [trips, pos] = await Promise.all([
+        apiFetch(`/api/vehicles/${id}/trips?${q}`).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+        apiFetch(`/api/vehicles/${id}/positions?${q}`).then(r => r.ok ? r.json() : []),
+      ]);
+      _flTripData = trips;
+      _flTripPositions = Array.isArray(pos) ? pos : [];
+    } catch (e) {
+      table.innerHTML = `<div class="state-msg" style="color:var(--danger)">${t('flLoadFail')}</div>`;
+      return;
+    }
+    flTripsRender();
+  }
+
+  function flTripsRender() {
+    const d = _flTripData;
+    _flStaticLabels();
+    if (!d) return;
+    const msg = document.getElementById('flTripMsg');
+    msg.className = 'fl-sync';
+    msg.textContent = d.routesSyncedAt ? t('flSyncedAt').replace('{ago}', _flAgo(d.routesSyncedAt)) : '';
+    const s = d.summary;
+    const chip = (label, value, title = '') => `<span class="fl-chip"${title ? ` title="${title}"` : ''}><span style="color:var(--muted)">${label}:</span> <strong>${value}</strong></span>`;
+    document.getElementById('flTripSummary').innerHTML = d.segments.length ? [
+      chip(t('flSumKm'), `${_flNum(s.distanceKm)} ${t('flColKm')}`),
+      chip(t('flSumDriving'), _flDur(s.drivingSeconds)),
+      chip(t('flSumStops'), s.stops),
+      chip(t('flSumMaxSpeed'), s.maxSpeedKmh != null ? `${_flNum(s.maxSpeedKmh)} ${t('flKmh')}` : '—'),
+      chip(t('flSumIdle'), _flDur(s.idleSeconds)),
+      chip(t('flSumFuel'), `~${_flNum(s.fuelEstL)} L`, t('flFuelHint')),
+    ].join('') : '';
+    _flTripsDrawMap();
+
+    const table = document.getElementById('flTripTable');
+    if (!d.segments.length) { table.innerHTML = `<div class="state-msg">${t('flTripsEmpty')}</div>`; return; }
+    const th = `padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap`;
+    const td = `padding:0.6rem 1rem;white-space:nowrap`;
+    // Zero-length / sub-minute stops are GPS.bg noise between drives; the map and totals skip them too.
+    const rows = d.segments.map((sg, i) => (!sg.moving && (sg.durationS || 0) < 60) ? '' : `
+      <tr class="fl-trip-row" style="border-bottom:1px solid var(--border)" onclick="flTripFocus(${i})">
+        <td style="${td}">${sg.moving ? '🚗 ' + t('flSegDriving') : '🅿️ ' + t('flSegStopped')}</td>
+        <td style="${td}">${_flTime(sg.start)}</td>
+        <td style="${td}">${_flTime(sg.end)}</td>
+        <td style="${td}">${_flDur(sg.durationS)}</td>
+        <td style="${td}">${sg.moving ? _flNum(sg.distanceKm, 2) : '—'}</td>
+        <td style="${td}">${sg.moving ? `${_flNum(sg.avgSpeedKmh)} / ${_flNum(sg.maxSpeedKmh)}` : '—'}</td>
+        <td style="${td}">${sg.moving && sg.idleS ? _flDur(sg.idleS) : '—'}</td>
+      </tr>`).join('');
+    table.innerHTML = `<div style="overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:12px">
+      <table style="width:100%;border-collapse:collapse;font-size:.86rem">
+        <thead><tr style="border-bottom:1px solid var(--border)">
+          <th style="${th}">${t('flColType')}</th><th style="${th}">${t('flColFrom')}</th><th style="${th}">${t('flColTo')}</th>
+          <th style="${th}">${t('flColDuration')}</th><th style="${th}">${t('flColKm')}</th><th style="${th}">${t('flColSpeed')}</th>
+          <th style="${th}">${t('flColIdle')}</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  // GPS.bg gives only start/end per segment; the breadcrumb (one point per poll) is the real line.
+  // A drive the breadcrumb does not cover (e.g. history fetched for a day before polling began) is
+  // drawn as a dashed straight line from start to end.
+  function _flTripsDrawMap() {
+    if (!document.getElementById('flTripMap')) return;
+    if (!_flTripMap) {
+      _flTripMap = L.map('flTripMap').setView([42.7, 23.32], 9);
+      _flTiles(_flTripMap);
+      _flTripLayer = L.layerGroup().addTo(_flTripMap);
+    }
+    setTimeout(() => _flTripMap && _flTripMap.invalidateSize(), 60);
+    _flTripLayer.clearLayers();
+    const bounds = _flTripPositions.map(p => [p.lat, p.lng]);
+    if (bounds.length >= 2) L.polyline(bounds, { color: '#4f8ef7', weight: 3, opacity: 0.85 }).addTo(_flTripLayer);
+    const crumbTimes = _flTripPositions.map(p => Date.parse(p.ts));
+    (_flTripData?.segments || []).forEach(sg => {
+      if (sg.startLat == null || sg.startLng == null) return;
+      if (sg.moving) {
+        if (sg.endLat == null || sg.endLng == null) return;
+        const from = Date.parse(sg.start), to = Date.parse(sg.end);
+        const covered = crumbTimes.filter(ts => ts >= from && ts <= to).length >= 2;
+        if (!covered) L.polyline([[sg.startLat, sg.startLng], [sg.endLat, sg.endLng]], { color: '#3ecf6e', weight: 3, opacity: 0.8, dashArray: '6 6' }).addTo(_flTripLayer);
+        bounds.push([sg.startLat, sg.startLng], [sg.endLat, sg.endLng]);
+      } else if ((sg.durationS || 0) >= 180) {
+        L.circleMarker([sg.startLat, sg.startLng], { radius: 7, color: '#f5a623', weight: 2, fillColor: '#f5a623', fillOpacity: 0.5 })
+          .bindPopup(`🅿️ ${_flTime(sg.start)}–${_flTime(sg.end)} (${_flDur(sg.durationS)})`)
+          .addTo(_flTripLayer);
+        bounds.push([sg.startLat, sg.startLng]);
+      }
+    });
+    if (bounds.length) _flTripMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+  }
+
+  function flTripFocus(i) {
+    const sg = _flTripData?.segments?.[i];
+    if (!sg || !_flTripMap || sg.startLat == null) return;
+    const b = [[sg.startLat, sg.startLng]];
+    if (sg.endLat != null) b.push([sg.endLat, sg.endLng]);
+    _flTripMap.fitBounds(b, { padding: [60, 60], maxZoom: 16 });
+    document.getElementById('flTripMap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function flTripsRequestSync() {
+    const id = document.getElementById('flTripVehicle').value;
+    const date = document.getElementById('flTripDate').value;
+    const msg = document.getElementById('flTripMsg');
+    msg.className = 'fl-sync';
+    if (!id || !date) return;
+    try {
+      const res = await apiFetch(`/api/vehicles/${id}/trips/sync?date=${encodeURIComponent(date)}`, { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { msg.classList.add('fl-err'); msg.textContent = data.error || t('flTripSyncFail'); return; }
+      msg.textContent = t('flTripQueued').replace('{n}', data.position).replace('{min}', Math.max(1, Math.ceil((data.etaSeconds || 0) / 60)));
+    } catch (e) {
+      msg.classList.add('fl-err');
+      msg.textContent = t('flTripSyncFail');
     }
   }
 

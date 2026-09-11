@@ -128,6 +128,27 @@ storage:
   # below; that one only caps the CSV import path.
   max-file-bytes: ${STORAGE_MAX_FILE_BYTES:2147483648}
 
+# Fleet tracking from GPS.bg (GPSHunter SOAP). OFF by default.
+#
+# GPS.bg answers ONE call per 181 s per account and every rejected attempt restarts that timer, so
+# exactly ONE environment may poll: two instances on the same account lock each other out. Turn it on
+# where the fleet map should be live and nowhere else (local dev included).
+#   GPS_ENABLED=true
+#   GPS_USER=... / GPS_PASSWORD=...     secrets: never commit them, never log them
+# The UI only ever reads Postgres; the poller is the only thing that talks to GPS.bg.
+gps:
+  enabled: ${GPS_ENABLED:false}
+  endpoint: ${GPS_ENDPOINT:https://bg.gpsbg.eu/_services.soap/GPSHunter.php}
+  user: ${GPS_USER:}
+  password: ${GPS_PASSWORD:}
+  # Seconds between calls. Anything under 190 is raised to 190 (GPS.bg's floor is 181).
+  slot-seconds: ${GPS_SLOT_SECONDS:200}
+  # By day, 1 slot in N fetches one vehicle's trips instead of live status.
+  route-slot-every: ${GPS_ROUTE_SLOT_EVERY:4}
+  # GPS.bg timestamps carry no zone: they are Bulgarian local time.
+  provider-zone: ${GPS_PROVIDER_ZONE:Europe/Sofia}
+  request-timeout-seconds: 60
+
 app:
   # Public base URL used to generate check-in QR codes.
   # Override in production: APP_BASE_URL=https://yourdomain.com
