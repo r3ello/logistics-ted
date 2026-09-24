@@ -22,6 +22,7 @@ public record HouseDto(
     @JsonProperty("scaffold_start_date") String scaffoldStartDate,
     @JsonProperty("scaffold_end_date") String scaffoldEndDate,
     @JsonProperty("checkin_token") String checkinToken,
+    @JsonProperty("google_doc_url") String googleDocUrl,
     List<CrewRefDto> crews
 ) {
 
@@ -54,6 +55,7 @@ public record HouseDto(
                 source.getScaffoldStartDate() == null ? null : source.getScaffoldStartDate().toString(),
                 source.getScaffoldEndDate()   == null ? null : source.getScaffoldEndDate().toString(),
                 source.getCheckinToken(),
+                source.getGoogleDocUrl(),
                 crews
             );
         }

@@ -60,4 +60,7 @@ public class House {
 
     @Column(name = "checkin_token", length = 64, unique = true)
     private String checkinToken;
+
+    @Column(name = "google_doc_url", length = 512)
+    private String googleDocUrl;
 }

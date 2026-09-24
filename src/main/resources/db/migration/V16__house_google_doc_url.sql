@@ -1,0 +1,1 @@
+ALTER TABLE house ADD COLUMN IF NOT EXISTS google_doc_url VARCHAR(512);

@@ -1632,6 +1632,10 @@
       </div>
       <input type="hidden" id="mPhase" value="" />
     </div>
+    <div class="field">
+      <label>Google Doc link <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <input id="mGoogleDocUrl" type="url" placeholder="https://docs.google.com/…" />
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:-0.25rem">
       <button id="mLocBtn" onclick="fillModalCoords()" style="
         padding:0.55rem;background:var(--card);border:1px solid var(--border);
@@ -2664,10 +2668,11 @@
   <!-- ── ATTENDANCE VIEW ─────────────────────────────────────────────────── -->
   <div class="view" id="view-attendance">
 
-    <!-- Tab bar: By Crew / By Worker -->
+    <!-- Tab bar: By Crew / By Worker / By House -->
     <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:1rem">
       <button class="btn btn-ghost att-tab active" id="attTabCrew"   onclick="attSwitchTab('crew')"   data-i18n="attTabByCrew">👥 By Crew</button>
       <button class="btn btn-ghost att-tab"        id="attTabWorker" onclick="attSwitchTab('worker')" data-i18n="attTabByWorker">👤 By Worker</button>
+      <button class="btn btn-ghost att-tab"        id="attTabHouse"  onclick="attSwitchTab('house')"  data-i18n="attTabByHouse">🏠 By House</button>
     </div>
 
     <!-- BY CREW panel -->
@@ -2682,8 +2687,12 @@
           </div>
         </div>
         <div class="field" style="margin:0">
-          <label data-i18n="attFieldDate">Date</label>
-          <input type="date" id="attCrewDate" onchange="attLoadCrew()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
+          <label data-i18n="attFieldFrom">From</label>
+          <input type="date" id="attCrewFrom" onchange="attLoadCrew()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label data-i18n="attFieldTo">To</label>
+          <input type="date" id="attCrewTo" onchange="attLoadCrew()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
@@ -2716,6 +2725,32 @@
         <button id="attWorkerExportBtn" class="btn btn-ghost" style="font-size:.82rem;padding:.4rem .9rem;display:none" onclick="attExportWorkerPdf()">📄 Export PDF</button>
       </div>
       <div id="attWorkerResults"></div>
+    </div>
+
+    <!-- BY HOUSE panel -->
+    <div id="attPanelHouse" style="display:none">
+      <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;margin-bottom:1rem">
+        <div class="field" style="flex:2;min-width:200px;margin:0">
+          <label data-i18n="attFieldHouse">House</label>
+          <div class="ss-wrap" style="position:relative">
+            <input class="ss-inp" id="ss-house-inp" type="text" placeholder="— select house —" data-i18n-placeholder="attSelectHouse" autocomplete="off" readonly>
+            <div class="ss-drop" id="ss-house-drop"></div>
+            <input type="hidden" id="attHouseSelect" value="">
+          </div>
+        </div>
+        <div class="field" style="margin:0">
+          <label data-i18n="attFieldFrom">From</label>
+          <input type="date" id="attHouseFrom" onchange="attLoadHouse()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label data-i18n="attFieldTo">To</label>
+          <input type="date" id="attHouseTo" onchange="attLoadHouse()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;padding:.55rem .9rem;outline:none"/>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
+        <button id="attHouseExportBtn" class="btn btn-ghost" style="font-size:.82rem;padding:.4rem .9rem;display:none" onclick="attExportHousePdf()">📄 Export PDF</button>
+      </div>
+      <div id="attHouseResults"></div>
     </div>
 
   </div><!-- /view-attendance -->
@@ -3181,7 +3216,7 @@
       navOrgChartGroup:'Org Chart', navCrews:'Crews', navCrewManager:'Crew Manager', navClientServicesGroup:'Client Services',
       navStageMatrix:'Project Stages', pageTitle_stagematrix:'Project Stages', pageSub_stagematrix:'All houses × all construction stages',
       pageTitle_housedetail:'House Detail', pageSub_housedetail:'Stages, crews and timeline',
-      hdBack:'← Back', hdLabelHouse:'House', hdLabelLocation:'Location', hdLabelStartDate:'Start Date', hdLabelActiveStage:'Active Stage',
+      hdBack:'← Back', hdLabelHouse:'House', hdLabelLocation:'Location', hdLabelStartDate:'Start Date', hdLabelActiveStage:'Active Stage', hdLabelGoogleDoc:'Google Doc', hdOpenDocument:'Open document',
       hdGanttTitle:'Construction Timeline', hdCrewsTitle:'Assigned Crews', hdNoWorkers:'No workers',
       pageTitle_workerjourney:'Worker History', pageSub_workerjourney:'Stage history across all houses',
       pageTitle_crewhistory:'Crew History', pageSub_crewhistory:'Stage history across all houses',
@@ -3237,14 +3272,16 @@
       // scaffold start location label on scaffold view
       scaffoldStartLbl:'📍 Driver starting location',
       // attendance view
-      attTabByCrew:'👥 By Crew', attTabByWorker:'👤 By Worker',
-      attFieldCrew:'Crew', attFieldWorker:'Worker', attFieldDate:'Date', attFieldFrom:'From', attFieldTo:'To',
-      attSelectCrew:'— select crew —', attSelectWorker:'— select worker —',
+      attTabByCrew:'👥 By Crew', attTabByWorker:'👤 By Worker', attTabByHouse:'🏠 By House',
+      attFieldCrew:'Crew', attFieldWorker:'Worker', attFieldHouse:'House', attFieldDate:'Date', attFieldFrom:'From', attFieldTo:'To',
+      attSelectCrew:'— select crew —', attSelectWorker:'— select worker —', attSelectHouse:'— select house —',
       attHeaderWorker:'Worker', attHeaderHouse:'House', attHeaderIn:'In', attHeaderOut:'Out',
-      attHeaderDuration:'Duration', attHeaderStatus:'Status',
+      attHeaderDuration:'Duration', attHeaderStatus:'Status', attHeaderTotalHours:'Total Hours',
       attBadgeDone:'Done', attBadgeWorking:'Working',
       attNoSessionsCrew:'No sessions recorded for this date.',
       attNoSessionsWorker:'No sessions in this date range.',
+      attNoSessionsHouse:'No sessions recorded for this house in the selected period.',
+      attSummaryTitle:'Summary — Total Hours by Worker',
       // stage matrix
       matrixHeaderHouse:'House',
       stageStatusInProgress:'In Progress', stageStatusDone:'Done',
@@ -3563,7 +3600,7 @@
       navOrgChartGroup:'Орг. схема', navCrews:'Екипи', navCrewManager:'Мениджър на екипи', navClientServicesGroup:'Клиентски услуги',
       navStageMatrix:'Етапи на проект', pageTitle_stagematrix:'Етапи на проект', pageSub_stagematrix:'Всички обекти × всички строителни етапи',
       pageTitle_housedetail:'Детайли на обект', pageSub_housedetail:'Етапи, екипи и времева линия',
-      hdBack:'← Назад', hdLabelHouse:'Обект', hdLabelLocation:'Локация', hdLabelStartDate:'Начална дата', hdLabelActiveStage:'Активен етап',
+      hdBack:'← Назад', hdLabelHouse:'Обект', hdLabelLocation:'Локация', hdLabelStartDate:'Начална дата', hdLabelActiveStage:'Активен етап', hdLabelGoogleDoc:'Google Doc', hdOpenDocument:'Отвори документ',
       hdGanttTitle:'График на строителството', hdCrewsTitle:'Назначени екипи', hdNoWorkers:'Няма работници',
       pageTitle_workerjourney:'История на работник', pageSub_workerjourney:'История на етапите по обекти',
       pageTitle_crewhistory:'История на екип', pageSub_crewhistory:'История на етапите по обекти',
@@ -3619,14 +3656,16 @@
       // scaffold start location label on scaffold view
       scaffoldStartLbl:'📍 Начална локация на шофьора',
       // attendance view
-      attTabByCrew:'👥 По екип', attTabByWorker:'👤 По работник',
-      attFieldCrew:'Екип', attFieldWorker:'Работник', attFieldDate:'Дата', attFieldFrom:'От', attFieldTo:'До',
-      attSelectCrew:'— изберете екип —', attSelectWorker:'— изберете работник —',
+      attTabByCrew:'👥 По екип', attTabByWorker:'👤 По работник', attTabByHouse:'🏠 По обект',
+      attFieldCrew:'Екип', attFieldWorker:'Работник', attFieldHouse:'Обект', attFieldDate:'Дата', attFieldFrom:'От', attFieldTo:'До',
+      attSelectCrew:'— изберете екип —', attSelectWorker:'— изберете работник —', attSelectHouse:'— изберете обект —',
       attHeaderWorker:'Работник', attHeaderHouse:'Обект', attHeaderIn:'Влизане', attHeaderOut:'Излизане',
-      attHeaderDuration:'Продължителност', attHeaderStatus:'Статус',
+      attHeaderDuration:'Продължителност', attHeaderStatus:'Статус', attHeaderTotalHours:'Общо часове',
       attBadgeDone:'Завършен', attBadgeWorking:'На работа',
       attNoSessionsCrew:'Няма записани сесии за тази дата.',
       attNoSessionsWorker:'Няма сесии в този период.',
+      attNoSessionsHouse:'Няма записани сесии за този обект в избрания период.',
+      attSummaryTitle:'Обобщение — Общо часове по работник',
       // stage matrix
       matrixHeaderHouse:'Обект',
       stageStatusInProgress:'В процес', stageStatusDone:'Завършен',
@@ -4394,7 +4433,10 @@
 
       el.innerHTML = `
         <div style="padding:0.75rem 1rem">
-          <button onclick="showView('${_houseDetailPrevView}')" style="background:rgba(79,142,247,.12);border:none;color:#4f8ef7;padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-weight:600;margin-bottom:1rem">${t('hdBack')}</button>
+          <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem">
+            <button onclick="showView('${_houseDetailPrevView}')" style="background:rgba(79,142,247,.12);border:none;color:#4f8ef7;padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-weight:600">${t('hdBack')}</button>
+            ${currentUser?.role === 'admin' ? `<button onclick="openHouseModal(${h.id})" style="background:rgba(79,142,247,.15);border:none;color:#4f8ef7;padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-weight:600">✎ Edit</button>` : ''}
+          </div>
 
           <!-- Info cards -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.6rem;margin-bottom:1.2rem">
@@ -4414,6 +4456,10 @@
               <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelActiveStage')}</div>
               <div style="font-weight:600;font-size:0.9rem;color:var(--purple)">${h.current_phase || '—'}</div>
             </div>
+            ${h.google_doc_url ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelGoogleDoc')}</div>
+              <div style="font-weight:600;font-size:0.9rem"><a href="${h.google_doc_url}" target="_blank" rel="noopener" style="color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">📄 ${t('hdOpenDocument')}</a></div>
+            </div>` : ''}
           </div>
 
           <!-- Classic Gantt -->
@@ -10010,7 +10056,7 @@
         </td>
         <td style="padding:0.7rem 1rem">${stageHtml}</td>
         <td style="padding:0.7rem 1rem">${crewsHtml}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.address}${h.location ? ` <a href="${h.location}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.address}${h.location ? ` <a href="${h.location}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}${h.google_doc_url ? ` <a href="${h.google_doc_url}" target="_blank" rel="noopener" title="Google Doc" style="text-decoration:none">📄</a>` : ''}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${h.start_date ? '📅 ' + h.start_date : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap;position:relative" class="admin-only">${actionsHtml}</td>
       </tr>`;
@@ -10669,8 +10715,14 @@
     locEl.placeholder = t('phCityRegion');
   }
 
-  function openHouseModal(houseId) {
-    const house = houseId != null ? dashHouses.find(h => h.id === houseId) : null;
+  async function openHouseModal(houseId) {
+    let house = houseId != null ? (dashHouses.find(h => h.id === houseId) || null) : null;
+    if (houseId != null && !house) {
+      try {
+        const all = await apiFetch('/api/houses').then(r => r.json());
+        house = all.find(h => h.id === houseId) || null;
+      } catch(e) {}
+    }
     _editingHouseId = house ? house.id : null;
     document.getElementById('modalTitle').textContent = house ? t('modalEditPrefix') + house.name : t('modalAddTitle');
     document.getElementById('mName').value     = house ? house.name     : '';
@@ -10678,8 +10730,9 @@
     document.getElementById('mLocation').value = house ? (house.location || '') : '';
     document.getElementById('mLat').value       = house?.lat ?? '';
     document.getElementById('mLng').value       = house?.lng ?? '';
-    document.getElementById('mStartDate').value = house?.start_date ?? '';
-    document.getElementById('mPhase').value     = house?.current_phase ?? '';
+    document.getElementById('mStartDate').value    = house?.start_date ?? '';
+    document.getElementById('mPhase').value        = house?.current_phase ?? '';
+    document.getElementById('mGoogleDocUrl').value = house?.google_doc_url ?? '';
     document.getElementById('modalErr').textContent = '';
     document.getElementById('mLocBtn').textContent   = '📍 Use my current location';
     document.getElementById('mLocBtn').style.color   = '';
@@ -10718,7 +10771,8 @@
 
     const start_date    = document.getElementById('mStartDate').value || null;
     const current_phase = document.getElementById('mPhase').value.trim() || null;
-    const body = { name, address, location: location || null, lat: lat || null, lng: lng || null, start_date, current_phase };
+    const google_doc_url = document.getElementById('mGoogleDocUrl').value.trim() || null;
+    const body = { name, address, location: location || null, lat: lat || null, lng: lng || null, start_date, current_phase, google_doc_url };
     const url    = _editingHouseId ? `/api/houses/${_editingHouseId}` : '/api/houses';
     const method = _editingHouseId ? 'PUT' : 'POST';
 
@@ -10730,6 +10784,7 @@
       if (data.error) throw new Error(data.error);
       closeHouseModal();
       loadDashboard();
+      if (_houseDetailId) loadHouseDetail();
     } catch (e) {
       errEl.textContent = e.message;
     }
@@ -12773,7 +12828,8 @@
 
     // Set default dates
     const today = new Date().toISOString().slice(0,10);
-    document.getElementById('attCrewDate').value  = today;
+    document.getElementById('attCrewFrom').value  = today;
+    document.getElementById('attCrewTo').value    = today;
     document.getElementById('attWorkerFrom').value = today;
     document.getElementById('attWorkerTo').value   = today;
 
@@ -12795,48 +12851,75 @@
         _attWorkers.map(w => ({ value: w.id, label: w.name })),
         attLoadWorker);
     } catch(e) { console.error('attInit workers', e); }
+
+    // Load houses
+    try {
+      const r = await apiFetch('/api/houses');
+      const hs = await r.json();
+      hs.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      ssSetup('ss-house-inp', 'ss-house-drop', 'attHouseSelect',
+        hs.map(h => ({ value: h.id, label: h.name })),
+        attLoadHouse);
+    } catch(e) { console.error('attInit houses', e); }
+
+    document.getElementById('attHouseFrom').value = today;
+    document.getElementById('attHouseTo').value   = today;
   }
 
   function attSwitchTab(tab) {
     document.getElementById('attPanelCrew').style.display   = tab === 'crew'   ? '' : 'none';
     document.getElementById('attPanelWorker').style.display = tab === 'worker' ? '' : 'none';
+    document.getElementById('attPanelHouse').style.display  = tab === 'house'  ? '' : 'none';
     document.getElementById('attTabCrew').classList.toggle('active',   tab === 'crew');
     document.getElementById('attTabWorker').classList.toggle('active', tab === 'worker');
+    document.getElementById('attTabHouse').classList.toggle('active',  tab === 'house');
   }
 
-  let _attCrewLastData   = null; // {crewName, date, list}
+  let _attCrewLastData   = null; // {crewName, from, to, list}
   let _attWorkerLastData = null; // {workerName, from, to, list}
+  let _attHouseLastData  = null; // {houseName, from, to, list}
 
   async function attLoadCrew() {
     const crewId = document.getElementById('attCrewSelect').value;
-    const date   = document.getElementById('attCrewDate').value;
+    const from   = document.getElementById('attCrewFrom').value;
+    const to     = document.getElementById('attCrewTo').value;
     const box    = document.getElementById('attCrewResults');
-    if (!crewId || !date) { box.innerHTML = ''; _attCrewLastData = null; document.getElementById('attCrewExportBtn').style.display = 'none'; return; }
+    if (!crewId || !from || !to) { box.innerHTML = ''; _attCrewLastData = null; document.getElementById('attCrewExportBtn').style.display = 'none'; return; }
 
     box.innerHTML = '<p class="att-empty">Loading…</p>';
     try {
-      const r    = await apiFetch(`/api/attendance/crew/${crewId}?date=${date}`);
+      const r    = await apiFetch(`/api/attendance/crew/${crewId}?from=${from}&to=${to}`);
       const list = await r.json();
       if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error loading data'}</p>`; _attCrewLastData = null; return; }
       if (list.length === 0) { box.innerHTML = `<p class="att-empty">${t('attNoSessionsCrew')}</p>`; _attCrewLastData = null; document.getElementById('attCrewExportBtn').style.display = 'none'; return; }
       const crewName = document.getElementById('ss-crew-inp').value || crewId;
-      _attCrewLastData = { crewName, date, list };
+      _attCrewLastData = { crewName, from, to, list };
       document.getElementById('attCrewExportBtn').style.display = '';
-      box.innerHTML = `
-        <table class="att-table">
-          <thead><tr><th>${t('attHeaderWorker')}</th><th>${t('attHeaderHouse')}</th><th>${t('attHeaderIn')}</th><th>${t('attHeaderOut')}</th><th>${t('attHeaderDuration')}</th><th>${t('attHeaderStatus')}</th></tr></thead>
-          <tbody>
-            ${list.map(s => `
-              <tr>
-                <td>${s.workerName}</td>
-                <td style="color:#a78bfa;font-size:0.82rem">${s.houseName || '—'}</td>
-                <td>${attFmtTime(s.checkedInAt)}</td>
-                <td>${s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—'}</td>
-                <td>${s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'}</td>
-                <td>${s.checkedOutAt ? `<span class="att-badge-out">${t('attBadgeDone')}</span>` : `<span class="att-badge-in">${t('attBadgeWorking')}</span>`}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>`;
+      // Group by date
+      const byDate = {};
+      list.forEach(s => {
+        const d = s.checkedInAt.slice(0,10);
+        if (!byDate[d]) byDate[d] = [];
+        byDate[d].push(s);
+      });
+      box.innerHTML = Object.keys(byDate).sort().reverse().map(d => `
+        <div style="margin-bottom:1.25rem">
+          <p style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.5rem">${d}</p>
+          <table class="att-table">
+            <thead><tr><th>${t('attHeaderWorker')}</th><th>${t('attHeaderHouse')}</th><th>${t('attHeaderIn')}</th><th>${t('attHeaderOut')}</th><th>${t('attHeaderDuration')}</th><th>${t('attHeaderStatus')}</th></tr></thead>
+            <tbody>
+              ${byDate[d].map(s => `
+                <tr>
+                  <td>${s.workerName}</td>
+                  <td style="color:#a78bfa;font-size:0.82rem">${s.houseName || '—'}</td>
+                  <td>${attFmtTime(s.checkedInAt)}</td>
+                  <td>${s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—'}</td>
+                  <td>${s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'}</td>
+                  <td>${s.checkedOutAt ? `<span class="att-badge-out">${t('attBadgeDone')}</span>` : `<span class="att-badge-in">${t('attBadgeWorking')}</span>`}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`).join('');
     } catch(e) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${e.message}</p>`; }
   }
 
@@ -12880,6 +12963,95 @@
             </tbody>
           </table>
         </div>`).join('');
+    } catch(e) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${e.message}</p>`; }
+  }
+
+  async function attLoadHouse() {
+    const houseId   = document.getElementById('attHouseSelect').value;
+    const from      = document.getElementById('attHouseFrom').value;
+    const to        = document.getElementById('attHouseTo').value;
+    const box       = document.getElementById('attHouseResults');
+    if (!houseId || !from || !to) { box.innerHTML = ''; _attHouseLastData = null; return; }
+
+    box.innerHTML = '<p class="att-empty">Loading…</p>';
+    try {
+      const r    = await apiFetch(`/api/attendance/house/${houseId}?from=${from}&to=${to}`);
+      const list = await r.json();
+      if (!Array.isArray(list)) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${list.error || 'Error'}</p>`; _attHouseLastData = null; return; }
+      if (!list.length) { box.innerHTML = `<p class="att-empty">${t('attNoSessionsHouse')}</p>`; _attHouseLastData = null; document.getElementById('attHouseExportBtn').style.display = 'none'; return; }
+
+      const houseName = document.getElementById('ss-house-inp').value || houseId;
+      _attHouseLastData = { houseName, from, to, list };
+      document.getElementById('attHouseExportBtn').style.display = '';
+
+      // Group by crew, then by worker
+      const crewMap = {}; // crewKey -> { crewName, workers: { workerId -> {workerName, sessions[]} } }
+      list.forEach(s => {
+        const crewKey  = s.crewId != null ? String(s.crewId) : '__none__';
+        const crewName = s.crewName || t('attNoCrew') || 'No crew';
+        if (!crewMap[crewKey]) crewMap[crewKey] = { crewName, workers: {} };
+        const wKey = String(s.workerId);
+        if (!crewMap[crewKey].workers[wKey]) crewMap[crewKey].workers[wKey] = { workerName: s.workerName, sessions: [] };
+        crewMap[crewKey].workers[wKey].sessions.push(s);
+      });
+
+      // Summary: total minutes per worker
+      const summary = {}; // workerId -> { workerName, crewName, totalMins }
+      list.forEach(s => {
+        if (s.durationMinutes != null) {
+          const k = String(s.workerId);
+          if (!summary[k]) summary[k] = { workerName: s.workerName, crewName: s.crewName || '—', totalMins: 0 };
+          summary[k].totalMins += s.durationMinutes;
+        }
+      });
+
+      // Render crew sections
+      const crewHtml = Object.entries(crewMap).sort(([,a],[,b]) => a.crewName.localeCompare(b.crewName)).map(([, crew]) => `
+        <div style="margin-bottom:2rem">
+          <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:0.6rem;padding:0.35rem 0.6rem;background:rgba(79,142,247,.08);border-radius:6px;border-left:3px solid var(--accent)">
+            👥 ${crew.crewName}
+          </div>
+          ${Object.entries(crew.workers).map(([, w]) => `
+            <div style="margin-bottom:1rem;padding-left:0.75rem">
+              <p style="font-size:0.8rem;font-weight:700;color:var(--text);margin-bottom:0.4rem">👤 ${w.workerName}</p>
+              <table class="att-table">
+                <thead><tr><th>${t('attHeaderIn')}</th><th>${t('attHeaderOut')}</th><th>${t('attHeaderDuration')}</th><th>${t('attHeaderStatus')}</th></tr></thead>
+                <tbody>
+                  ${w.sessions.map(s => `<tr>
+                    <td>${attFmtTime(s.checkedInAt)}</td>
+                    <td>${s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—'}</td>
+                    <td>${s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'}</td>
+                    <td>${s.checkedOutAt ? `<span class="att-badge-out">${t('attBadgeDone')}</span>` : `<span class="att-badge-in">${t('attBadgeWorking')}</span>`}</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>`).join('')}
+        </div>`).join('');
+
+      // Render summary table grouped by crew
+      const summaryByCrew = {};
+      Object.values(summary).forEach(w => {
+        const k = w.crewName;
+        if (!summaryByCrew[k]) summaryByCrew[k] = [];
+        summaryByCrew[k].push(w);
+      });
+      const summaryHtml = `
+        <div style="margin-top:2rem;border-top:2px solid var(--border);padding-top:1.25rem">
+          <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:0.75rem">📊 ${t('attSummaryTitle')}</p>
+          ${Object.entries(summaryByCrew).sort(([a],[b]) => a.localeCompare(b)).map(([crew, workers]) => `
+            <div style="margin-bottom:1.25rem">
+              <p style="font-size:0.75rem;font-weight:700;color:var(--accent);margin-bottom:0.4rem">👥 ${crew}</p>
+              <table class="att-table">
+                <thead><tr><th>${t('attHeaderWorker')}</th><th>${t('attHeaderTotalHours')}</th></tr></thead>
+                <tbody>
+                  ${workers.sort((a,b) => a.workerName.localeCompare(b.workerName)).map(w => `
+                    <tr><td>${w.workerName}</td><td style="font-weight:700;color:var(--green)">${attFmtDur(w.totalMins)}</td></tr>`).join('')}
+                </tbody>
+              </table>
+            </div>`).join('')}
+        </div>`;
+
+      box.innerHTML = crewHtml + summaryHtml;
     } catch(e) { box.innerHTML = `<p class="att-empty" style="color:var(--red)">${e.message}</p>`; }
   }
 
@@ -12966,6 +13138,72 @@
       </div>
       <hr>
       ${tables}`);
+  }
+
+  function attExportHousePdf() {
+    if (!_attHouseLastData) return;
+    const { houseName, from, to, list } = _attHouseLastData;
+
+    // Group by crew → worker
+    const crewMap = {};
+    list.forEach(s => {
+      const ck = s.crewId != null ? String(s.crewId) : '__none__';
+      const cn = s.crewName || 'No crew';
+      if (!crewMap[ck]) crewMap[ck] = { crewName: cn, workers: {} };
+      const wk = String(s.workerId);
+      if (!crewMap[ck].workers[wk]) crewMap[ck].workers[wk] = { workerName: s.workerName, sessions: [], totalMins: 0 };
+      crewMap[ck].workers[wk].sessions.push(s);
+      crewMap[ck].workers[wk].totalMins += s.durationMinutes || 0;
+    });
+
+    const crewSections = Object.entries(crewMap).sort(([,a],[,b]) => a.crewName.localeCompare(b.crewName)).map(([, crew]) => {
+      const workerRows = Object.entries(crew.workers).sort(([,a],[,b]) => a.workerName.localeCompare(b.workerName)).map(([, w]) => {
+        const sessionRows = w.sessions.map(s => `<tr>
+          <td>${s.checkedInAt.slice(0,10)}</td>
+          <td>${attFmtTime(s.checkedInAt)}</td>
+          <td>${s.checkedOutAt ? attFmtTime(s.checkedOutAt) : '—'}</td>
+          <td>${s.durationMinutes != null ? attFmtDur(s.durationMinutes) : '—'}</td>
+          <td>${s.checkedOutAt ? 'Завършен' : 'Работи'}</td>
+        </tr>`).join('');
+        return `
+          <tr class="worker-header"><td colspan="5"><b>👤 ${w.workerName}</b></td></tr>
+          ${sessionRows}
+          <tr class="subtotal-row"><td colspan="3" style="text-align:right">Общо ${w.workerName}:</td><td colspan="2"><b>${attFmtDur(w.totalMins)}</b></td></tr>`;
+      }).join('');
+      const crewTotal = Object.values(crew.workers).reduce((s, w) => s + w.totalMins, 0);
+      return `
+        <h3 style="margin:1.5rem 0 0.5rem;color:#333">👥 ${crew.crewName}</h3>
+        <table>
+          <thead><tr><th>Дата</th><th>Влизане</th><th>Излизане</th><th>Продължителност</th><th>Статус</th></tr></thead>
+          <tbody>${workerRows}</tbody>
+          <tfoot><tr class="total-row"><td colspan="3">Общо екип ${crew.crewName}</td><td colspan="2">${attFmtDur(crewTotal)}</td></tr></tfoot>
+        </table>`;
+    }).join('');
+
+    // Summary table
+    const grandTotal = list.reduce((s, r) => s + (r.durationMinutes || 0), 0);
+    const summaryRows = Object.entries(crewMap).sort(([,a],[,b]) => a.crewName.localeCompare(b.crewName)).map(([, crew]) =>
+      Object.entries(crew.workers).sort(([,a],[,b]) => a.workerName.localeCompare(b.workerName)).map(([, w]) =>
+        `<tr><td>${crew.crewName}</td><td>${w.workerName}</td><td><b>${attFmtDur(w.totalMins)}</b></td></tr>`
+      ).join('')
+    ).join('');
+
+    attPrintHtml(`
+      <h2>TEDHOUSE — Отчет присъствие по обект</h2>
+      <div class="meta">
+        Обект: <b>${houseName}</b><br>
+        Период: <b>${from}${from !== to ? ' → ' + to : ''}</b><br>
+        Общо часове: <b>${attFmtDur(grandTotal)}</b><br>
+        Генериран: ${new Date().toLocaleString()}
+      </div>
+      <hr>
+      ${crewSections}
+      <h3 style="margin:2rem 0 0.5rem;color:#333;page-break-before:auto">📊 Обобщение — Общо часове по работник</h3>
+      <table>
+        <thead><tr><th>Екип</th><th>Работник</th><th>Общо часове</th></tr></thead>
+        <tbody>${summaryRows}</tbody>
+        <tfoot><tr class="total-row"><td colspan="2">Общо</td><td>${attFmtDur(grandTotal)}</td></tr></tfoot>
+      </table>`);
   }
 
   function attFmtTime(iso) {
