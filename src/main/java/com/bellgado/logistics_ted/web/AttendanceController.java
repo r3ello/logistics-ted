@@ -253,9 +253,13 @@ public class AttendanceController {
     @GetMapping("/api/attendance/crew/{crewId}")
     @Transactional(readOnly = true)
     public ResponseEntity<?> getCrewAttendance(@PathVariable Integer crewId,
-                                                @RequestParam String date) {
-        LocalDate d = LocalDate.parse(date);
-        List<WorkSession> list = sessions.findByCrewAndDate(crewId, d);
+                                                @RequestParam(required = false) String date,
+                                                @RequestParam(required = false) String from,
+                                                @RequestParam(required = false) String to) {
+        LocalDate f = from != null ? LocalDate.parse(from) : (date != null ? LocalDate.parse(date) : null);
+        LocalDate t = to   != null ? LocalDate.parse(to)   : f;
+        if (f == null) return ResponseEntity.badRequest().body(Map.of("error", "from date required"));
+        List<WorkSession> list = sessions.findByCrewAndRange(crewId, f, t);
         return ResponseEntity.ok(list.stream().map(this::toDto).toList());
     }
 
@@ -267,6 +271,26 @@ public class AttendanceController {
                                                   @RequestParam String to) {
         List<WorkSession> list = sessions.findByWorkerAndRange(workerId, LocalDate.parse(from), LocalDate.parse(to));
         return ResponseEntity.ok(list.stream().map(this::toDto).toList());
+    }
+
+    /** All sessions for a house between two dates, enriched with crew info. */
+    @GetMapping("/api/attendance/house/{houseId}")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getHouseAttendance(@PathVariable Integer houseId,
+                                                 @RequestParam String from,
+                                                 @RequestParam String to) {
+        List<WorkSession> list = sessions.findByHouseAndRange(houseId, LocalDate.parse(from), LocalDate.parse(to));
+        return ResponseEntity.ok(list.stream().map(s -> {
+            Map<String, Object> m = toDto(s);
+            if (s.getWorker().getCrew() != null) {
+                m.put("crewId",   s.getWorker().getCrew().getId());
+                m.put("crewName", s.getWorker().getCrew().getName());
+            } else {
+                m.put("crewId",   null);
+                m.put("crewName", null);
+            }
+            return m;
+        }).toList());
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
