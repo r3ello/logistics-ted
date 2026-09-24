@@ -1632,6 +1632,10 @@
       </div>
       <input type="hidden" id="mPhase" value="" />
     </div>
+    <div class="field">
+      <label>Google Doc link <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <input id="mGoogleDocUrl" type="url" placeholder="https://docs.google.com/…" />
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:-0.25rem">
       <button id="mLocBtn" onclick="fillModalCoords()" style="
         padding:0.55rem;background:var(--card);border:1px solid var(--border);
@@ -3212,7 +3216,7 @@
       navOrgChartGroup:'Org Chart', navCrews:'Crews', navCrewManager:'Crew Manager', navClientServicesGroup:'Client Services',
       navStageMatrix:'Project Stages', pageTitle_stagematrix:'Project Stages', pageSub_stagematrix:'All houses × all construction stages',
       pageTitle_housedetail:'House Detail', pageSub_housedetail:'Stages, crews and timeline',
-      hdBack:'← Back', hdLabelHouse:'House', hdLabelLocation:'Location', hdLabelStartDate:'Start Date', hdLabelActiveStage:'Active Stage',
+      hdBack:'← Back', hdLabelHouse:'House', hdLabelLocation:'Location', hdLabelStartDate:'Start Date', hdLabelActiveStage:'Active Stage', hdLabelGoogleDoc:'Google Doc', hdOpenDocument:'Open document',
       hdGanttTitle:'Construction Timeline', hdCrewsTitle:'Assigned Crews', hdNoWorkers:'No workers',
       pageTitle_workerjourney:'Worker History', pageSub_workerjourney:'Stage history across all houses',
       pageTitle_crewhistory:'Crew History', pageSub_crewhistory:'Stage history across all houses',
@@ -3596,7 +3600,7 @@
       navOrgChartGroup:'Орг. схема', navCrews:'Екипи', navCrewManager:'Мениджър на екипи', navClientServicesGroup:'Клиентски услуги',
       navStageMatrix:'Етапи на проект', pageTitle_stagematrix:'Етапи на проект', pageSub_stagematrix:'Всички обекти × всички строителни етапи',
       pageTitle_housedetail:'Детайли на обект', pageSub_housedetail:'Етапи, екипи и времева линия',
-      hdBack:'← Назад', hdLabelHouse:'Обект', hdLabelLocation:'Локация', hdLabelStartDate:'Начална дата', hdLabelActiveStage:'Активен етап',
+      hdBack:'← Назад', hdLabelHouse:'Обект', hdLabelLocation:'Локация', hdLabelStartDate:'Начална дата', hdLabelActiveStage:'Активен етап', hdLabelGoogleDoc:'Google Doc', hdOpenDocument:'Отвори документ',
       hdGanttTitle:'График на строителството', hdCrewsTitle:'Назначени екипи', hdNoWorkers:'Няма работници',
       pageTitle_workerjourney:'История на работник', pageSub_workerjourney:'История на етапите по обекти',
       pageTitle_crewhistory:'История на екип', pageSub_crewhistory:'История на етапите по обекти',
@@ -4429,7 +4433,10 @@
 
       el.innerHTML = `
         <div style="padding:0.75rem 1rem">
-          <button onclick="showView('${_houseDetailPrevView}')" style="background:rgba(79,142,247,.12);border:none;color:#4f8ef7;padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-weight:600;margin-bottom:1rem">${t('hdBack')}</button>
+          <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem">
+            <button onclick="showView('${_houseDetailPrevView}')" style="background:rgba(79,142,247,.12);border:none;color:#4f8ef7;padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-weight:600">${t('hdBack')}</button>
+            ${currentUser?.role === 'admin' ? `<button onclick="openHouseModal(${h.id})" style="background:rgba(79,142,247,.15);border:none;color:#4f8ef7;padding:0.4rem 0.9rem;border-radius:8px;cursor:pointer;font-weight:600">✎ Edit</button>` : ''}
+          </div>
 
           <!-- Info cards -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.6rem;margin-bottom:1.2rem">
@@ -4449,6 +4456,10 @@
               <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelActiveStage')}</div>
               <div style="font-weight:600;font-size:0.9rem;color:var(--purple)">${h.current_phase || '—'}</div>
             </div>
+            ${h.google_doc_url ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelGoogleDoc')}</div>
+              <div style="font-weight:600;font-size:0.9rem"><a href="${h.google_doc_url}" target="_blank" rel="noopener" style="color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">📄 ${t('hdOpenDocument')}</a></div>
+            </div>` : ''}
           </div>
 
           <!-- Classic Gantt -->
@@ -10045,7 +10056,7 @@
         </td>
         <td style="padding:0.7rem 1rem">${stageHtml}</td>
         <td style="padding:0.7rem 1rem">${crewsHtml}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.address}${h.location ? ` <a href="${h.location}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.address}${h.location ? ` <a href="${h.location}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}${h.google_doc_url ? ` <a href="${h.google_doc_url}" target="_blank" rel="noopener" title="Google Doc" style="text-decoration:none">📄</a>` : ''}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${h.start_date ? '📅 ' + h.start_date : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap;position:relative" class="admin-only">${actionsHtml}</td>
       </tr>`;
@@ -10704,8 +10715,14 @@
     locEl.placeholder = t('phCityRegion');
   }
 
-  function openHouseModal(houseId) {
-    const house = houseId != null ? dashHouses.find(h => h.id === houseId) : null;
+  async function openHouseModal(houseId) {
+    let house = houseId != null ? (dashHouses.find(h => h.id === houseId) || null) : null;
+    if (houseId != null && !house) {
+      try {
+        const all = await apiFetch('/api/houses').then(r => r.json());
+        house = all.find(h => h.id === houseId) || null;
+      } catch(e) {}
+    }
     _editingHouseId = house ? house.id : null;
     document.getElementById('modalTitle').textContent = house ? t('modalEditPrefix') + house.name : t('modalAddTitle');
     document.getElementById('mName').value     = house ? house.name     : '';
@@ -10713,8 +10730,9 @@
     document.getElementById('mLocation').value = house ? (house.location || '') : '';
     document.getElementById('mLat').value       = house?.lat ?? '';
     document.getElementById('mLng').value       = house?.lng ?? '';
-    document.getElementById('mStartDate').value = house?.start_date ?? '';
-    document.getElementById('mPhase').value     = house?.current_phase ?? '';
+    document.getElementById('mStartDate').value    = house?.start_date ?? '';
+    document.getElementById('mPhase').value        = house?.current_phase ?? '';
+    document.getElementById('mGoogleDocUrl').value = house?.google_doc_url ?? '';
     document.getElementById('modalErr').textContent = '';
     document.getElementById('mLocBtn').textContent   = '📍 Use my current location';
     document.getElementById('mLocBtn').style.color   = '';
@@ -10753,7 +10771,8 @@
 
     const start_date    = document.getElementById('mStartDate').value || null;
     const current_phase = document.getElementById('mPhase').value.trim() || null;
-    const body = { name, address, location: location || null, lat: lat || null, lng: lng || null, start_date, current_phase };
+    const google_doc_url = document.getElementById('mGoogleDocUrl').value.trim() || null;
+    const body = { name, address, location: location || null, lat: lat || null, lng: lng || null, start_date, current_phase, google_doc_url };
     const url    = _editingHouseId ? `/api/houses/${_editingHouseId}` : '/api/houses';
     const method = _editingHouseId ? 'PUT' : 'POST';
 
@@ -10765,6 +10784,7 @@
       if (data.error) throw new Error(data.error);
       closeHouseModal();
       loadDashboard();
+      if (_houseDetailId) loadHouseDetail();
     } catch (e) {
       errEl.textContent = e.message;
     }

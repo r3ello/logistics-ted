@@ -14,5 +14,6 @@ public record HouseUpsertRequest(
     @JsonProperty("current_phase") String currentPhase,
     ScaffoldStatus scaffoldStatus,
     @JsonProperty("scaffoldStartDate") String scaffoldStartDate,
-    @JsonProperty("scaffoldEndDate")   String scaffoldEndDate
+    @JsonProperty("scaffoldEndDate")   String scaffoldEndDate,
+    @JsonProperty("google_doc_url")    String googleDocUrl
 ) {}

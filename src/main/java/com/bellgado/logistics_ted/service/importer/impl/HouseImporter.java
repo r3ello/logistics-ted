@@ -150,7 +150,8 @@ public class HouseImporter implements EntityImporter {
             null,                                       // current_phase — derived, never imported
             scaffoldStatus(values.get("scaffold_status")),
             values.get("scaffold_start_date"),
-            values.get("scaffold_end_date"));
+            values.get("scaffold_end_date"),
+            null);
         return Long.valueOf(houseService.create(req).id());
     }
 

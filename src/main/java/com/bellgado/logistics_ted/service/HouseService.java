@@ -221,6 +221,7 @@ public class HouseService {
         // allow clearing dates
         if ("".equals(req.scaffoldStartDate())) h.setScaffoldStartDate(null);
         if ("".equals(req.scaffoldEndDate()))   h.setScaffoldEndDate(null);
+        if (req.googleDocUrl() != null) h.setGoogleDocUrl(req.googleDocUrl().isBlank() ? null : req.googleDocUrl().trim());
     }
 
     private static LocalDate parseDate(String s) {
