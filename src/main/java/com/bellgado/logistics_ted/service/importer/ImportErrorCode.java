@@ -33,5 +33,10 @@ public enum ImportErrorCode {
     KEY_REUSED,
 
     // ── warnings ──────────────────────────────────────────────────────────────
-    UNKNOWN_COLUMN
+    UNKNOWN_COLUMN,
+    /**
+     * A new key matched a record created in the app with the same external id; the row updated
+     * that record instead of creating a duplicate.
+     */
+    ADOPTED_EXISTING
 }

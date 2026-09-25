@@ -60,6 +60,24 @@ public interface EntityImporter {
     /** Creates the entity from canonical values and returns its new id. */
     Long create(Map<String, String> values);
 
+    /**
+     * Creates the entity for a given external key. Entities that store the key on themselves (a
+     * house's {@code external_id}) override this; the default ignores the key.
+     */
+    default Long create(String externalKey, Map<String, String> values) {
+        return create(values);
+    }
+
+    /**
+     * The id of an existing entity that already carries this external key although no
+     * {@code import_ref} maps it — e.g. a house created by hand with its CRM id typed in. The sync
+     * then adopts it instead of creating a duplicate. {@code null} when there is none, or when the
+     * entity has no external-id field of its own (the default).
+     */
+    default Long findByExternalKey(String externalKey) {
+        return null;
+    }
+
     /** Applies just the given columns to an existing entity. */
     void update(Long entityId, Map<String, String> values);
 }

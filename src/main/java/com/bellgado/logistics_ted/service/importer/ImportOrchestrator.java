@@ -133,11 +133,26 @@ public class ImportOrchestrator {
 
         Map<String, String> sheet = imp.readRow(row);
         ImportRef ref = refsByKey.get(key);
+        Map<String, String> app = ref == null ? null : imp.project(ref.getEntityId());
+
+        // No live mapping, but the app may already hold this key: a record created by hand with its
+        // external id typed in. Adopt it rather than create a duplicate. "No live mapping" includes a
+        // dangling one — the mapped record was deleted and a new one was then typed in by hand.
+        if (app == null) {
+            Long adopted = imp.findByExternalKey(key);
+            if (adopted != null) {
+                ref = keys.adopt(imp.entityType(), key, adopted, ref, apply);
+                refsByKey.put(key, ref);
+                app = imp.project(adopted);
+                warnings.add(new ImportReport.Warning(row.line(), ImportErrorCode.ADOPTED_EXISTING, imp.keyColumn(),
+                    "Key '" + key + "' matched an existing " + imp.entityType() + " (id " + adopted
+                        + ") created in the app with the same external id; it was updated, not duplicated."));
+            }
+        }
 
         // A null projection means the id no longer resolves: the row was deleted through the UI and
         // the mapping is dangling. Re-create rather than fail — "never delete" also means the import
         // will not tidy up after itself, so a failed key could never recover.
-        Map<String, String> app = ref == null ? null : imp.project(ref.getEntityId());
         boolean exists = app != null;
         if (ref != null && !exists) {
             warnings.add(new ImportReport.Warning(row.line(), ImportErrorCode.UNRESOLVED_REF, imp.keyColumn(),
@@ -152,7 +167,7 @@ public class ImportOrchestrator {
             case CREATED -> {
                 c.created++;
                 if (apply) {
-                    Long id = imp.create(sheet);
+                    Long id = imp.create(key, sheet);
                     Map<String, String> post = imp.project(id);
                     if (ref == null) keys.record(imp.entityType(), key, id, batch.getId(), post, sheet);
                     else keys.repoint(ref, id, batch.getId(), post, sheet);

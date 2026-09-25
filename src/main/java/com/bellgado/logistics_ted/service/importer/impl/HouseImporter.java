@@ -49,6 +49,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class HouseImporter implements EntityImporter {
 
+    /** {@code import_ref.entity_type} for houses — also used by {@code HouseService} to re-key it. */
+    public static final String ENTITY_TYPE = "house";
+
     /** Mirrors {@code house.name varchar(150)} / {@code address varchar(255)} / {@code location varchar(512)}. */
     private static final int NAME_MAX = 150;
     private static final int ADDRESS_MAX = 255;
@@ -77,7 +80,7 @@ public class HouseImporter implements EntityImporter {
     }
 
     @Override public String name()       { return "houses"; }
-    @Override public String entityType() { return "house"; }
+    @Override public String entityType() { return ENTITY_TYPE; }
 
     @Override public Map<String, ColumnType> columns() { return COLUMNS; }
 
@@ -140,6 +143,12 @@ public class HouseImporter implements EntityImporter {
 
     @Override
     public Long create(Map<String, String> values) {
+        return create(null, values);
+    }
+
+    /** The key is stored as the house's {@code external_id}, so the client sees their id in the app. */
+    @Override
+    public Long create(String externalKey, Map<String, String> values) {
         HouseUpsertRequest req = new HouseUpsertRequest(
             values.get("name"),
             values.get("address"),
@@ -151,8 +160,15 @@ public class HouseImporter implements EntityImporter {
             scaffoldStatus(values.get("scaffold_status")),
             values.get("scaffold_start_date"),
             values.get("scaffold_end_date"),
-            null);
+            null,                                       // google_doc_url — not imported
+            externalKey);
         return Long.valueOf(houseService.create(req).id());
+    }
+
+    /** A house created by hand with this CRM id typed in, which the sync then adopts. */
+    @Override
+    public Long findByExternalKey(String externalKey) {
+        return houses.findByExternalId(externalKey).map(h -> Long.valueOf(h.getId())).orElse(null);
     }
 
     @Override

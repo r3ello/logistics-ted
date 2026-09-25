@@ -21,6 +21,12 @@ info:
     mapping `key → internal id` is stored on our side. The same key in a later run updates the same
     record; a new key creates a new record.
 
+    For **houses** the key is also stored on the house itself and shown in the application as its
+    **External ID**, where it can be searched and filtered. It works in both directions: a house
+    created by hand in the application with its External ID filled in is **adopted** by the first
+    import row carrying that key — updated, not duplicated (reported with an `ADOPTED_EXISTING`
+    warning). Editing a house's External ID in the application re-keys it for the import as well.
+
     > **The `key` column is the contract.** Changing a row's key detaches it from its record and
     > creates a duplicate. Reusing a key for a different real-world entity re-points it at the wrong
     > record. Freeze and protect that column in the source sheet.
@@ -773,7 +779,9 @@ components:
         `KEY_REUSED` a key whose identity fields changed wholesale — reserved, not yet emitted
 
         **Warning** (reported in `warnings`, nothing is rejected):
-        `UNKNOWN_COLUMN` a column this importer does not manage; it was ignored
+        `UNKNOWN_COLUMN` a column this importer does not manage; it was ignored ·
+        `ADOPTED_EXISTING` a new key matched a record created in the application with the same
+        External ID; that record was updated instead of creating a duplicate
       enum:
         - ENCODING
         - MALFORMED_CSV
@@ -793,6 +801,7 @@ components:
         - CONSTRAINT_VIOLATION
         - KEY_REUSED
         - UNKNOWN_COLUMN
+        - ADOPTED_EXISTING
 
     ErrorResponse:
       type: object

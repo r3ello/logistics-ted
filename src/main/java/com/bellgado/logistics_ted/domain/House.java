@@ -63,4 +63,12 @@ public class House {
 
     @Column(name = "google_doc_url", length = 512)
     private String googleDocUrl;
+
+    /**
+     * The client's own id for this house (CRM id). Unique when set. Also the CSV sync's key: an
+     * import row with this key updates this house. Kept in step with {@code import_ref} by
+     * {@code HouseService} and {@code HouseImporter} — see Flyway V17.
+     */
+    @Column(name = "external_id", length = 120)
+    private String externalId;
 }
