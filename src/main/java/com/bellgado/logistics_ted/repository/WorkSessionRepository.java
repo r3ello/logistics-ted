@@ -99,4 +99,27 @@ public interface WorkSessionRepository extends JpaRepository<WorkSession, Intege
     List<WorkSession> findByWorkerAndRange(@Param("workerId") Integer workerId,
                                            @Param("from")     LocalDate from,
                                            @Param("to")       LocalDate to);
+
+    /** Every session between two dates, worker + crew + house eagerly loaded (attendance reports). */
+    @Query("""
+        SELECT s FROM WorkSession s
+        JOIN FETCH s.worker w
+        LEFT JOIN FETCH w.crew c
+        JOIN FETCH s.house h
+        WHERE s.sessionDate BETWEEN :from AND :to
+        ORDER BY s.checkedInAt
+        """)
+    List<WorkSession> findAllInRange(@Param("from") LocalDate from,
+                                     @Param("to")   LocalDate to);
+
+    /** Every session never checked out, on any date — includes forgotten check-outs from past days. */
+    @Query("""
+        SELECT s FROM WorkSession s
+        JOIN FETCH s.worker w
+        LEFT JOIN FETCH w.crew c
+        JOIN FETCH s.house h
+        WHERE s.checkedOutAt IS NULL
+        ORDER BY s.checkedInAt
+        """)
+    List<WorkSession> findAllOpen();
 }
