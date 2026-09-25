@@ -262,12 +262,82 @@ class ImportOrchestratorTest {
         assertThat(refs.get("W-1").getEntityId()).isEqualTo(3L);
     }
 
+    // ── adopting records created by hand with the external id typed in ────────
+
+    /** A record created in the app, carrying the external id but mapped by no import_ref. */
+    private Long handMade(String externalId, String name, String price) {
+        Long id = importer.ids.incrementAndGet();
+        importer.store.put(id, new LinkedHashMap<>(Map.of("name", name, "price", price)));
+        importer.externalIds.put(id, externalId);
+        return id;
+    }
+
+    @Test
+    void aHandMadeRecordWithTheSameExternalIdIsAdoptedNotDuplicated() {
+        Long id = handMade("W-1", "Плочки", "12");
+
+        ImportReport r = apply(TWO_ROWS);
+
+        assertThat(r.created()).isEqualTo(1);                           // only W-2
+        assertThat(r.updated()).isEqualTo(1);                           // W-1: the sheet wins, no baseline
+        assertThat(importer.store).hasSize(2);
+        assertThat(importer.store.get(id)).containsEntry("price", "10");
+        assertThat(refs.get("W-1").getEntityId()).isEqualTo(id);
+        assertThat(r.warnings()).anySatisfy(w ->
+            assertThat(w.code()).isEqualTo(ImportErrorCode.ADOPTED_EXISTING));
+    }
+
+    @Test
+    void anAdoptedRecordSettlesToUnchangedOnTheNextRun() {
+        handMade("W-1", "Плочки", "12");
+        apply(TWO_ROWS);
+
+        ImportReport second = apply(TWO_ROWS);
+
+        assertThat(second.unchanged()).isEqualTo(2);
+        assertThat(second.warnings()).isEmpty();
+    }
+
+    @Test
+    void validateReportsTheAdoptionButWritesNothing() {
+        Long id = handMade("W-1", "Плочки", "12");
+
+        ImportReport r = run(TWO_ROWS, ImportOrchestrator.MODE_VALIDATE);
+
+        assertThat(r.updated()).isEqualTo(1);
+        assertThat(r.created()).isEqualTo(1);
+        assertThat(refs).isEmpty();
+        assertThat(importer.store.get(id)).containsEntry("price", "12");
+    }
+
+    @Test
+    void aDanglingMappingIsRepointedAtAHandMadeRecordInsteadOfRecreating() {
+        apply(TWO_ROWS);
+        importer.store.remove(1L);                      // deleted through the app…
+        Long id = handMade("W-1", "Плочки", "10");      // …and typed in again by hand
+
+        ImportReport r = apply(TWO_ROWS);
+
+        assertThat(r.created()).isZero();
+        assertThat(refs.get("W-1").getEntityId()).isEqualTo(id);
+        assertThat(importer.store).hasSize(2);
+    }
+
+    @Test
+    void createdRecordsCarryTheirKey() {
+        apply(TWO_ROWS);
+
+        assertThat(importer.externalIds).containsValues("W-1", "W-2");
+    }
+
     // ── an entity store standing in for the real ones ─────────────────────────
 
     /** Deliberately a fake rather than a mock: the assertions are about the resulting data. */
     private static final class FakeImporter implements EntityImporter {
 
         final Map<Long, Map<String, String>> store = new LinkedHashMap<>();
+        /** The entity's own external-id field, like {@code house.external_id}. */
+        final Map<Long, String> externalIds = new HashMap<>();
         final AtomicLong ids = new AtomicLong();
         int writes;
 
@@ -302,6 +372,18 @@ class ImportOrchestratorTest {
             Long id = ids.incrementAndGet();
             store.put(id, new LinkedHashMap<>(values));
             return id;
+        }
+
+        @Override public Long create(String externalKey, Map<String, String> values) {
+            Long id = create(values);
+            externalIds.put(id, externalKey);
+            return id;
+        }
+
+        @Override public Long findByExternalKey(String externalKey) {
+            return externalIds.entrySet().stream()
+                .filter(e -> e.getValue().equals(externalKey) && store.containsKey(e.getKey()))
+                .map(Map.Entry::getKey).findFirst().orElse(null);
         }
 
         @Override public void update(Long entityId, Map<String, String> values) {

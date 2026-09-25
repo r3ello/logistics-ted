@@ -52,6 +52,8 @@ class HouseImporterTest {
             return h;
         });
         when(repo.findById(any())).thenAnswer(inv -> Optional.ofNullable(stored.get(inv.getArgument(0))));
+        when(repo.findByExternalId(any())).thenAnswer(inv -> stored.values().stream()
+            .filter(h -> inv.getArgument(0).equals(h.getExternalId())).findFirst());
 
         // The service mock mimics only what the importer consumes: create() persisting the house
         // fields and returning the new id. The real side effects are exactly why it must be called.
@@ -69,6 +71,7 @@ class HouseImporterTest {
             if (req.scaffoldStatus() != null) h.setScaffoldStatus(req.scaffoldStatus());
             h.setScaffoldStartDate(req.scaffoldStartDate() == null ? null : LocalDate.parse(req.scaffoldStartDate()));
             h.setScaffoldEndDate(req.scaffoldEndDate() == null ? null : LocalDate.parse(req.scaffoldEndDate()));
+            h.setExternalId(req.externalId());
             stored.put(h.getId(), h);
             return new HouseResponse(h.getId(), h.getName(), h.getAddress(), h.getLocation(),
                 h.getLat(), h.getLng(), req.startDate(), null);
@@ -85,6 +88,25 @@ class HouseImporterTest {
         "key,name,address,location,lat,lng,start_date,scaffold_status,scaffold_start_date,scaffold_end_date";
 
     private static final String MAPS_LINK = "https://maps.app.goo.gl/nRDmHHrUMxXvW9FXA?g_st=iv";
+
+    @Test
+    void createStoresTheKeyAsTheHouseExternalId() {
+        Long id = importer.create("CRM-2026-00010", Map.of("name", "Рударци Йордан", "address", "Рударци"));
+
+        assertThat(stored.get(id.intValue()).getExternalId()).isEqualTo("CRM-2026-00010");
+    }
+
+    @Test
+    void findsAHandMadeHouseByItsExternalId() {
+        House h = new House();
+        h.setId(ids.incrementAndGet());
+        h.setName("Ръчно въведена");
+        h.setExternalId("CRM-2026-00099");
+        stored.put(h.getId(), h);
+
+        assertThat(importer.findByExternalKey("CRM-2026-00099")).isEqualTo(Long.valueOf(h.getId()));
+        assertThat(importer.findByExternalKey("CRM-2026-00100")).isNull();
+    }
 
     @Test
     void readsAndCanonicalisesARow() {

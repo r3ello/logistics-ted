@@ -7,12 +7,15 @@ import com.bellgado.logistics_ted.domain.Material;
 import com.bellgado.logistics_ted.domain.ScaffoldStatus;
 import com.bellgado.logistics_ted.domain.Warehouse;
 import com.bellgado.logistics_ted.domain.DocFolder;
+import com.bellgado.logistics_ted.domain.ImportRef;
 import com.bellgado.logistics_ted.repository.DocFolderRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
+import com.bellgado.logistics_ted.repository.ImportRefRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.InventoryRepository;
 import com.bellgado.logistics_ted.repository.WarehouseRepository;
 import com.bellgado.logistics_ted.storage.DocumentStorageService;
+import com.bellgado.logistics_ted.service.importer.impl.HouseImporter;
 import com.bellgado.logistics_ted.storage.StorageEvents;
 import com.bellgado.logistics_ted.web.dto.HouseDto;
 import com.bellgado.logistics_ted.web.dto.HouseResponse;
@@ -32,6 +35,7 @@ import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,11 +52,16 @@ public class HouseService {
     private final HouseTemplateFolderService houseTemplate;
     private final DocumentStorageService documentStorage;
     private final ApplicationEventPublisher events;
+    private final ImportRefRepository importRefs;
+
+    /** Mirrors {@code house.external_id varchar(120)} / {@code import_ref.external_key}. */
+    private static final int EXTERNAL_ID_MAX = 120;
 
     public HouseService(HouseRepository houses, WarehouseRepository warehouses,
                         InventoryRepository inventories, HouseStageRepository houseStages,
                         DocFolderRepository docFolders, HouseTemplateFolderService houseTemplate,
-                        DocumentStorageService documentStorage, ApplicationEventPublisher events) {
+                        DocumentStorageService documentStorage, ApplicationEventPublisher events,
+                        ImportRefRepository importRefs) {
         this.houses = houses;
         this.warehouses = warehouses;
         this.inventories = inventories;
@@ -61,6 +70,7 @@ public class HouseService {
         this.houseTemplate = houseTemplate;
         this.documentStorage = documentStorage;
         this.events = events;
+        this.importRefs = importRefs;
     }
 
     @Transactional(readOnly = true)
@@ -115,6 +125,9 @@ public class HouseService {
         validateNameLocation(req);
         House h = new House();
         applyFields(h, req);
+        String externalId = normalizeExternalId(req.externalId());
+        requireExternalIdFree(externalId, null);
+        h.setExternalId(externalId);
         h = houses.save(h);
         // Auto-assign a unique check-in QR token
         h.setCheckinToken(generateCheckinToken(h.getId()));
@@ -166,6 +179,16 @@ public class HouseService {
         validateNameLocation(req);
         House h = houses.findById(id).orElseThrow(() -> new EntityNotFoundException("House not found"));
         applyFields(h, req);
+        // null = untouched (partial updates keep the id); "" clears it.
+        if (req.externalId() != null) {
+            String previous = h.getExternalId();
+            String next = normalizeExternalId(req.externalId());
+            if (!Objects.equals(previous, next)) {
+                requireExternalIdFree(next, h.getId());
+                h.setExternalId(next);
+                rekeyImportRefs(h.getId(), next);
+            }
+        }
         HouseResponse res = toResponse(houses.save(h));
         syncHouseDocFolderName(h);
         return res;
@@ -204,6 +227,66 @@ public class HouseService {
             || req.address() == null || req.address().isBlank()) {
             throw new IllegalArgumentException("Name and address are required.");
         }
+    }
+
+    private static String normalizeExternalId(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+        String v = raw.trim();
+        if (v.length() > EXTERNAL_ID_MAX) {
+            throw new IllegalArgumentException("External ID must be at most " + EXTERNAL_ID_MAX + " characters.");
+        }
+        return v;
+    }
+
+    /** Readable 400 instead of the unique index's 500. The index stays the real guarantee. */
+    private void requireExternalIdFree(String externalId, Integer selfId) {
+        if (externalId == null) return;
+        houses.findByExternalId(externalId)
+            .filter(other -> !other.getId().equals(selfId))
+            .ifPresent(other -> {
+                throw new IllegalArgumentException("External ID '" + externalId
+                    + "' is already used by house #" + other.getId() + " (" + other.getName() + ").");
+            });
+    }
+
+    /**
+     * Keeps the CSV sync pointing at this house after its external id is edited, so the next import
+     * with the new key updates it instead of creating a duplicate.
+     *
+     * <p>Invariant after this call: the house has at most one mapping, keyed by its external id.
+     * Clearing the id unlinks the house from the sync (its mapping and open conflicts go); a later
+     * row with the old key then creates a new house — the user has said this house is not that key.
+     */
+    private void rekeyImportRefs(Integer houseId, String newKey) {
+        String type = HouseImporter.ENTITY_TYPE;
+        List<ImportRef> own = importRefs.findByEntityTypeAndEntityId(type, houseId.longValue());
+        if (newKey == null) {
+            importRefs.deleteAll(own);
+            return;
+        }
+        // A mapping for the new key that points elsewhere can only be dangling (its house was
+        // deleted — a live one would carry the id and have failed requireExternalIdFree). Drop it
+        // and flush, because Hibernate runs deletes after updates and the re-key below would
+        // otherwise hit uq_import_ref.
+        importRefs.findByEntityTypeAndExternalKey(type, newKey)
+            .filter(r -> !r.getEntityId().equals(houseId.longValue()))
+            .ifPresent(r -> {
+                if (houses.existsById(r.getEntityId().intValue())) {
+                    throw new IllegalArgumentException("External ID '" + newKey
+                        + "' is mapped by the import to house #" + r.getEntityId() + ".");
+                }
+                importRefs.delete(r);
+                importRefs.flush();
+            });
+        if (own.isEmpty()) return;
+        ImportRef keep = own.get(0);
+        if (own.size() > 1) {
+            importRefs.deleteAll(own.subList(1, own.size()));
+            importRefs.flush();
+        }
+        // Baselines stay: they describe the house's values, which have not changed.
+        keep.setExternalKey(newKey);
+        importRefs.save(keep);
     }
 
     private static void applyFields(House h, HouseUpsertRequest req) {

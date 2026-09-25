@@ -1611,6 +1611,10 @@
       <input id="mName" type="text" placeholder="House name" />
     </div>
     <div class="modal-field">
+      <label id="mExternalIdLabel">External ID <span id="mExternalIdOptional" style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <input id="mExternalId" type="text" maxlength="120" placeholder="CRM-2026-00010" autocomplete="off" />
+    </div>
+    <div class="modal-field">
       <label id="mAddressLabel">Address</label>
       <input id="mAddress" type="text" placeholder="City, region…" />
     </div>
@@ -3216,7 +3220,7 @@
       navOrgChartGroup:'Org Chart', navCrews:'Crews', navCrewManager:'Crew Manager', navClientServicesGroup:'Client Services',
       navStageMatrix:'Project Stages', pageTitle_stagematrix:'Project Stages', pageSub_stagematrix:'All houses × all construction stages',
       pageTitle_housedetail:'House Detail', pageSub_housedetail:'Stages, crews and timeline',
-      hdBack:'← Back', hdLabelHouse:'House', hdLabelLocation:'Location', hdLabelStartDate:'Start Date', hdLabelActiveStage:'Active Stage', hdLabelGoogleDoc:'Google Doc', hdOpenDocument:'Open document',
+      hdBack:'← Back', hdLabelHouse:'House', hdLabelLocation:'Location', hdLabelStartDate:'Start Date', hdLabelActiveStage:'Active Stage', hdLabelGoogleDoc:'Google Doc', hdOpenDocument:'Open document', hdLabelExternalId:'External ID',
       hdGanttTitle:'Construction Timeline', hdCrewsTitle:'Assigned Crews', hdNoWorkers:'No workers',
       pageTitle_workerjourney:'Worker History', pageSub_workerjourney:'Stage history across all houses',
       pageTitle_crewhistory:'Crew History', pageSub_crewhistory:'Stage history across all houses',
@@ -3247,7 +3251,7 @@
       scaffoldStatusNone:'None', scaffoldStatusAvailable:'Available', scaffoldStatusInUse:'In Use',
       // shared management table column headers
       colActions:'Actions', colName:'Name', colWorker:'Worker', colRole:'Role', colTrade:'Trade', colCrews:'Crews',
-      colCrew:'Crew', colHouse:'House', colHouses:'Houses', colLocation:'Location', colManager:'Manager',
+      colCrew:'Crew', colHouse:'House', colExternalId:'External ID', colHouses:'Houses', colLocation:'Location', colManager:'Manager',
       colLeader:'Leader', colMembers:'Members', colStartDate:'Start Date', colEndDate:'End Date',
       colStatus:'Status', colStage:'Stage', colScaffold:'Scaffold', colCoordinates:'Coordinates',
       colInventory:'Inventory', colMaterials:'Materials', colNumber:'#',
@@ -3289,7 +3293,7 @@
       stageFoundationRequired:'Foundation required',
       matrixLoading:'Loading…',
       // search field labels
-      sfName:'Name', sfCrew:'Crew', sfHouse:'House', sfStage:'Stage', sfMaterial:'Material', sfLocation:'Location', sfAddress:'Address',
+      sfName:'Name', sfExternalId:'External ID', sfCrew:'Crew', sfHouse:'House', sfStage:'Stage', sfMaterial:'Material', sfLocation:'Location', sfAddress:'Address',
       // chip group labels
       chipGrpRole:'Role', chipGrpCrew:'Crew', chipGrpHouse:'House', chipGrpMembers:'Members',
       chipGrpPassword:'Password', chipGrpStatus:'Status', chipGrpPhase:'Phase',
@@ -3600,7 +3604,7 @@
       navOrgChartGroup:'Орг. схема', navCrews:'Екипи', navCrewManager:'Мениджър на екипи', navClientServicesGroup:'Клиентски услуги',
       navStageMatrix:'Етапи на проект', pageTitle_stagematrix:'Етапи на проект', pageSub_stagematrix:'Всички обекти × всички строителни етапи',
       pageTitle_housedetail:'Детайли на обект', pageSub_housedetail:'Етапи, екипи и времева линия',
-      hdBack:'← Назад', hdLabelHouse:'Обект', hdLabelLocation:'Локация', hdLabelStartDate:'Начална дата', hdLabelActiveStage:'Активен етап', hdLabelGoogleDoc:'Google Doc', hdOpenDocument:'Отвори документ',
+      hdBack:'← Назад', hdLabelHouse:'Обект', hdLabelLocation:'Локация', hdLabelStartDate:'Начална дата', hdLabelActiveStage:'Активен етап', hdLabelGoogleDoc:'Google Doc', hdOpenDocument:'Отвори документ', hdLabelExternalId:'Външен ID',
       hdGanttTitle:'График на строителството', hdCrewsTitle:'Назначени екипи', hdNoWorkers:'Няма работници',
       pageTitle_workerjourney:'История на работник', pageSub_workerjourney:'История на етапите по обекти',
       pageTitle_crewhistory:'История на екип', pageSub_crewhistory:'История на етапите по обекти',
@@ -3631,7 +3635,7 @@
       scaffoldStatusNone:'Няма', scaffoldStatusAvailable:'Налично', scaffoldStatusInUse:'В употреба',
       // shared management table column headers
       colActions:'Действия', colName:'Име', colWorker:'Работник', colRole:'Роля', colTrade:'Специалност', colCrews:'Екипи',
-      colCrew:'Екип', colHouse:'Къща', colHouses:'Къщи', colLocation:'Локация', colManager:'Мениджър',
+      colCrew:'Екип', colHouse:'Къща', colExternalId:'Външен ID', colHouses:'Къщи', colLocation:'Локация', colManager:'Мениджър',
       colLeader:'Лидер', colMembers:'Членове', colStartDate:'Начална дата', colEndDate:'Крайна дата',
       colStatus:'Статус', colStage:'Етап', colScaffold:'Скеле', colCoordinates:'Координати',
       colInventory:'Инвентар', colMaterials:'Материали', colNumber:'#',
@@ -3673,7 +3677,7 @@
       stageFoundationRequired:'Необходим фундамент',
       matrixLoading:'Зареждане…',
       // search field labels
-      sfName:'Наименование', sfCrew:'Екип', sfHouse:'Обект', sfStage:'Етап', sfMaterial:'Материал', sfLocation:'Локация', sfAddress:'Адрес',
+      sfName:'Наименование', sfExternalId:'Външен ID', sfCrew:'Екип', sfHouse:'Обект', sfStage:'Етап', sfMaterial:'Материал', sfLocation:'Локация', sfAddress:'Адрес',
       // chip group labels
       chipGrpRole:'Роля', chipGrpCrew:'Екип', chipGrpHouse:'Обект', chipGrpMembers:'Членове',
       chipGrpPassword:'Парола', chipGrpStatus:'Статус', chipGrpPhase:'Фаза',
@@ -4130,6 +4134,8 @@
     fts('mCoordOptional','fieldOptional');
     const mStartDateLabel = document.getElementById('mStartDateLabel'); if (mStartDateLabel?.firstChild) mStartDateLabel.firstChild.textContent = t('fieldStartDate') + ' ';
     fts('mStartOptional','fieldOptional');
+    const mExternalIdLabel = document.getElementById('mExternalIdLabel'); if (mExternalIdLabel?.firstChild) mExternalIdLabel.firstChild.textContent = t('colExternalId') + ' ';
+    fts('mExternalIdOptional','fieldOptional');
     const mPhaseLabel = document.getElementById('mPhaseLabel'); if (mPhaseLabel?.firstChild) mPhaseLabel.firstChild.textContent = t('fieldPhase') + ' ';
     fts('mPhaseOptional','fieldOptional');
     ftp('mName','phHouseName'); ftp('mAddress','phCityRegion'); ftp('mLocation','phMapLink');
@@ -4456,6 +4462,10 @@
               <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelActiveStage')}</div>
               <div style="font-weight:600;font-size:0.9rem;color:var(--purple)">${h.current_phase || '—'}</div>
             </div>
+            ${h.external_id ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelExternalId')}</div>
+              <div style="font-weight:600;font-size:0.9rem;font-family:ui-monospace,monospace">${escapeHtml(h.external_id)}</div>
+            </div>` : ''}
             ${h.google_doc_url ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
               <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelGoogleDoc')}</div>
               <div style="font-weight:600;font-size:0.9rem"><a href="${h.google_doc_url}" target="_blank" rel="noopener" style="color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">📄 ${t('hdOpenDocument')}</a></div>
@@ -8113,7 +8123,7 @@
     scaffold:   [{ key:'house', label:'sfHouse' }],
     orders:     [{ key:'house', label:'sfHouse' }, { key:'material', label:'sfMaterial' }],
     deliveries: [{ key:'house', label:'sfHouse' }],
-    houses:     [{ key:'name', label:'sfName' }, { key:'location', label:'sfAddress' }],
+    houses:     [{ key:'name', label:'sfName' }, { key:'extid', label:'sfExternalId' }, { key:'location', label:'sfAddress' }],
   };
 
   function retranslateSearchBar(mode) {
@@ -10049,11 +10059,12 @@
       const crewsHtml = h.crews && h.crews.length
         ? h.crews.map(c => `<div style="font-size:0.78rem;color:#a78bfa;font-weight:600">👥 ${c.name}</div>`).join('')
         : '<span style="color:var(--muted)">—</span>';
-      return `<tr data-name="${(h.name||'').toLowerCase()}" data-location="${(h.address||'').toLowerCase()}" data-scaffold="${h.scaffold_status||'NONE'}" data-hascrew="${h.crews&&h.crews.length?'1':'0'}" data-hasphase="${h.current_phase?'1':'0'}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+      return `<tr data-name="${(h.name||'').toLowerCase()}" data-extid="${escapeHtml((h.external_id||'').toLowerCase())}" data-location="${(h.address||'').toLowerCase()}" data-scaffold="${h.scaffold_status||'NONE'}" data-hascrew="${h.crews&&h.crews.length?'1':'0'}" data-hasphase="${h.current_phase?'1':'0'}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
           <span onclick="openHouseDetail(${h.id})" style="cursor:pointer;color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">🏠 ${h.name}</span>
           <span style="font-size:0.7rem;color:var(--muted);margin-left:0.3rem">#${h.id}</span>
         </td>
+        <td style="padding:0.7rem 1rem;font-size:0.82rem;font-family:ui-monospace,monospace;color:var(--text);white-space:nowrap">${h.external_id ? escapeHtml(h.external_id) : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem">${stageHtml}</td>
         <td style="padding:0.7rem 1rem">${crewsHtml}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.address}${h.location ? ` <a href="${h.location}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}${h.google_doc_url ? ` <a href="${h.google_doc_url}" target="_blank" rel="noopener" title="Google Doc" style="text-decoration:none">📄</a>` : ''}</td>
@@ -10068,6 +10079,7 @@
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
                 <th data-i18n="colHouse" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
+                <th data-i18n="colExternalId" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colExternalId')}</th>
                 <th data-i18n="colStage" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
                 <th data-i18n="colCrews" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrews')}</th>
                 <th data-i18n="colLocation" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
@@ -10642,7 +10654,7 @@
   let acFocusIdx    = -1;
 
   function initSearch(houses) {
-    allHouseNames = houses.map(h => ({ id: h.id, name: h.name, address: h.address }));
+    allHouseNames = houses.map(h => ({ id: h.id, name: h.name, address: h.address, externalId: h.external_id || '' }));
   }
 
   function onSearch() {
@@ -10733,6 +10745,7 @@
     document.getElementById('mStartDate').value    = house?.start_date ?? '';
     document.getElementById('mPhase').value        = house?.current_phase ?? '';
     document.getElementById('mGoogleDocUrl').value = house?.google_doc_url ?? '';
+    document.getElementById('mExternalId').value   = house?.external_id ?? '';
     document.getElementById('modalErr').textContent = '';
     document.getElementById('mLocBtn').textContent   = '📍 Use my current location';
     document.getElementById('mLocBtn').style.color   = '';
@@ -10772,7 +10785,9 @@
     const start_date    = document.getElementById('mStartDate').value || null;
     const current_phase = document.getElementById('mPhase').value.trim() || null;
     const google_doc_url = document.getElementById('mGoogleDocUrl').value.trim() || null;
-    const body = { name, address, location: location || null, lat: lat || null, lng: lng || null, start_date, current_phase, google_doc_url };
+    // Sent as "" when blank: the backend reads null as untouched and "" as clear.
+    const external_id = document.getElementById('mExternalId').value.trim();
+    const body = { name, address, location: location || null, lat: lat || null, lng: lng || null, start_date, current_phase, google_doc_url, external_id };
     const url    = _editingHouseId ? `/api/houses/${_editingHouseId}` : '/api/houses';
     const method = _editingHouseId ? 'PUT' : 'POST';
 
@@ -11713,6 +11728,7 @@
   function renderAC(q) {
     const matches = allHouseNames.filter(h =>
       h.name.toLowerCase().includes(q) || (h.address || '').toLowerCase().includes(q)
+      || h.externalId.toLowerCase().includes(q)
     ).slice(0, 6);
 
     const list = document.getElementById('acList');
@@ -11722,7 +11738,7 @@
       const hl = str => str.replace(new RegExp(`(${q})`, 'gi'), '<span class="ac-highlight">$1</span>');
       return `<div class="ac-item" data-id="${h.id}" data-name="${h.name}"
                    onmousedown="selectAC('${h.name}')">
-        🏠 ${hl(h.name)} <span style="color:var(--muted);font-size:0.78rem;margin-left:auto">📍 ${hl(h.address || '')}</span>
+        🏠 ${hl(h.name)}${h.externalId ? ` <span style="color:var(--muted);font-size:0.72rem;font-family:ui-monospace,monospace">${hl(escapeHtml(h.externalId))}</span>` : ''} <span style="color:var(--muted);font-size:0.78rem;margin-left:auto">📍 ${hl(h.address || '')}</span>
       </div>`;
     }).join('');
     list.classList.add('open');

@@ -53,6 +53,35 @@ public class ExternalKeyResolver {
     }
 
     /**
+     * Links a key to an entity the app already holds under that external id — typically a house
+     * created by hand with its CRM id typed in. The mapping is written <b>without a baseline</b>, the
+     * same state {@code preseed-house-refs.sql} produces: the merge takes its no-baseline path, the
+     * sheet is authoritative for this one run, and the run establishes both baselines.
+     *
+     * <p>{@code dangling} is an existing mapping whose record was deleted; it is re-pointed rather
+     * than duplicated, since {@code (entity_type, external_key)} is unique. Its baselines described
+     * the deleted record and are dropped.
+     *
+     * <p>With {@code persist=false} ({@code mode=validate}) nothing is saved and {@code dangling} is
+     * left untouched: a detached copy is returned, so the dry run reports the row exactly as the real
+     * run will — {@code updated}/{@code unchanged}, never {@code created} — while writing nothing.
+     */
+    public ImportRef adopt(String entityType, String externalKey, Long entityId, ImportRef dangling,
+                           boolean persist) {
+        ImportRef ref = persist && dangling != null ? dangling : new ImportRef();
+        if (ref != dangling) {
+            ref.setEntityType(entityType);
+            ref.setExternalKey(externalKey);
+            ref.setCreatedAt(Instant.now());
+        }
+        ref.setEntityId(entityId);
+        ref.setSyncedSnapshot(null);
+        ref.setSourceSnapshot(null);
+        ref.setSourceHash(null);
+        return persist ? refs.save(ref) : ref;
+    }
+
+    /**
      * Re-points a mapping whose entity was deleted through the UI. The alternative — failing the row
      * — would mean a key could never recover, since "never delete" also means the import will not
      * clean up after itself.
