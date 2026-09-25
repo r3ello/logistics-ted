@@ -25,6 +25,9 @@ import com.bellgado.logistics_ted.repository.SupplierInventoryRepository;
 import com.bellgado.logistics_ted.repository.SupplierRepository;
 import com.bellgado.logistics_ted.repository.WarehouseRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
+import com.bellgado.logistics_ted.service.AttendanceQueryService;
+import com.bellgado.logistics_ted.service.AttendanceQueryService.SessionView;
+import com.bellgado.logistics_ted.service.AttendanceQueryService.WorkerRef;
 import com.bellgado.logistics_ted.service.AuditLogService;
 import com.bellgado.logistics_ted.service.OrderHistoryService;
 import com.bellgado.logistics_ted.service.OrderHistoryService.RecordResult;
@@ -44,6 +47,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -82,6 +87,7 @@ public class LogisticsAgentTools {
     private final ObjectMapper objectMapper;
     private final OrderHistoryService orderHistory;
     private final AuditLogService audit;
+    private final AttendanceQueryService attendance;
 
     // ========================================================================
     // LOOKUP TOOLS
@@ -631,6 +637,148 @@ public class LogisticsAgentTools {
     }
 
     // ========================================================================
+    // ATTENDANCE (QR check-in log) — read-only
+    // ========================================================================
+    // Sessions are created/closed only by the public check-in page; these tools never write.
+    // Minute counting lives in AttendanceQueryService: a session still open today counts until
+    // now, one left open on a past day counts 0 and is flagged.
+
+    @Tool(description = "Attendance for one day from the QR check-in log: which workers checked in, " +
+            "at which house, check-in / check-out times, hours worked and who is still on site. " +
+            "Answers 'who started work today?', 'who is at house 12 right now?', 'who worked " +
+            "yesterday?'. Optional filters by house and/or crew.")
+    @Transactional(readOnly = true)
+    public String getDailyAttendance(
+            @ToolParam(description = "Day as YYYY-MM-DD, 'today' or 'yesterday'. Empty string for today.")
+            String date,
+            @ToolParam(description = "House numeric id to filter by, or empty string for all houses")
+            String houseId,
+            @ToolParam(description = "Crew numeric id to filter by, or empty string for all crews")
+            String crewId) {
+        try {
+            LocalDate today = attendance.today();
+            LocalDate day = parseDay(date, today, today);
+            List<SessionView> list = attendance.sessionsBetween(day, day, null,
+                    parseOptionalId(houseId, "houseId"), parseOptionalId(crewId, "crewId"));
+            return AttendanceReportFormatter.daily(day, day.equals(today), list, attendance.zone().getId());
+        } catch (IllegalArgumentException e) {
+            return "Error: " + e.getMessage();
+        } catch (Exception e) {
+            log.warn("getDailyAttendance failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    @Tool(description = "Hours worked by ONE worker over a date range, from the QR check-in log: " +
+            "total, per-day breakdown with houses and times, per-house totals, and any missing " +
+            "check-outs. Answers 'how many hours did Ivan work this week?'. Resolve the worker's " +
+            "name to an id with listWorkers first.")
+    @Transactional(readOnly = true)
+    public String getWorkerHours(
+            @ToolParam(description = "Worker numeric id (from listWorkers)") String workerId,
+            @ToolParam(description = "First day YYYY-MM-DD, 'today' or 'yesterday'. Empty string for 6 days before the end date (a 7-day window).")
+            String fromDate,
+            @ToolParam(description = "Last day YYYY-MM-DD, 'today' or 'yesterday'. Empty string for today.")
+            String toDate) {
+        try {
+            Integer wid = parseOptionalId(workerId, "workerId");
+            if (wid == null) {
+                return "Error: workerId is required — look it up with listWorkers.";
+            }
+            Optional<Worker> w = workers.findById(wid);
+            if (w.isEmpty()) {
+                return "Error: worker not found: " + wid;
+            }
+            LocalDate today = attendance.today();
+            LocalDate to = parseDay(toDate, today, today);
+            LocalDate from = parseDay(fromDate, today, to.minusDays(6));
+            Worker worker = w.get();
+            WorkerRef ref = new WorkerRef(worker.getId(), worker.getName(),
+                    worker.getRole() != null ? worker.getRole().name() : null,
+                    worker.getCrew() != null ? worker.getCrew().getId() : null,
+                    worker.getCrew() != null ? worker.getCrew().getName() : null);
+            List<SessionView> list = attendance.sessionsBetween(from, to, wid, null, null);
+            return AttendanceReportFormatter.workerHours(ref, from, to, list);
+        } catch (IllegalArgumentException e) {
+            return "Error: " + e.getMessage();
+        } catch (Exception e) {
+            log.warn("getWorkerHours failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    @Tool(description = "Total hours worked over a date range, from the QR check-in log, grouped by " +
+            "worker, crew or house and ranked from most to fewest hours. Answers 'hours per worker " +
+            "this month', 'how many hours did each crew work last week?', 'man-hours on house 12'. " +
+            "Optional filters by house and/or crew.")
+    @Transactional(readOnly = true)
+    public String getHoursSummary(
+            @ToolParam(description = "First day YYYY-MM-DD, 'today' or 'yesterday'. Empty string for 6 days before the end date (a 7-day window).")
+            String fromDate,
+            @ToolParam(description = "Last day YYYY-MM-DD, 'today' or 'yesterday'. Empty string for today.")
+            String toDate,
+            @ToolParam(description = "'worker' (default), 'crew' or 'house'")
+            String groupBy,
+            @ToolParam(description = "House numeric id to filter by, or empty string for all houses")
+            String houseId,
+            @ToolParam(description = "Crew numeric id to filter by, or empty string for all crews")
+            String crewId) {
+        try {
+            LocalDate today = attendance.today();
+            LocalDate to = parseDay(toDate, today, today);
+            LocalDate from = parseDay(fromDate, today, to.minusDays(6));
+            AttendanceReportFormatter.GroupBy by = parseGroupBy(groupBy);
+            Integer hid = parseOptionalId(houseId, "houseId");
+            Integer cid = parseOptionalId(crewId, "crewId");
+            List<String> filters = new ArrayList<>();
+            if (hid != null) filters.add("house " + hid);
+            if (cid != null) filters.add("crew " + cid);
+            List<SessionView> list = attendance.sessionsBetween(from, to, null, hid, cid);
+            return AttendanceReportFormatter.summary(from, to, by, String.join(", ", filters), list);
+        } catch (IllegalArgumentException e) {
+            return "Error: " + e.getMessage();
+        } catch (Exception e) {
+            log.warn("getHoursSummary failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    @Tool(description = "Crew workers who did NOT check in on a given day (no QR check-in at any " +
+            "house), grouped by crew. Workers without a crew are not expected on site and are never " +
+            "listed. Answers 'who didn't come to work today?', 'who from crew 3 is missing?'.")
+    @Transactional(readOnly = true)
+    public String getAbsentWorkers(
+            @ToolParam(description = "Day as YYYY-MM-DD, 'today' or 'yesterday'. Empty string for today.")
+            String date,
+            @ToolParam(description = "Crew numeric id to limit to one crew, or empty string for all crews")
+            String crewId) {
+        try {
+            LocalDate today = attendance.today();
+            LocalDate day = parseDay(date, today, today);
+            List<WorkerRef> absent = attendance.absentWorkers(day, parseOptionalId(crewId, "crewId"));
+            return AttendanceReportFormatter.absent(day, day.equals(today), absent);
+        } catch (IllegalArgumentException e) {
+            return "Error: " + e.getMessage();
+        } catch (Exception e) {
+            log.warn("getAbsentWorkers failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    @Tool(description = "Check-in sessions that have no check-out yet: workers still on site today, " +
+            "and sessions left open on past days (forgotten check-outs, which count as 0 hours " +
+            "until corrected). Answers 'who is still working?', 'who forgot to check out?'.")
+    @Transactional(readOnly = true)
+    public String getOpenSessions() {
+        try {
+            return AttendanceReportFormatter.open(attendance.openSessions());
+        } catch (Exception e) {
+            log.warn("getOpenSessions failed: {}", e.getMessage(), e);
+            return "Error: " + safeMessage(e);
+        }
+    }
+
+    // ========================================================================
     // HELPERS
     // ========================================================================
 
@@ -950,6 +1098,41 @@ public class LogisticsAgentTools {
             return String.format(Locale.ROOT, "%.0f", qty);
         }
         return String.format(Locale.ROOT, "%.2f", qty);
+    }
+
+    /** Parses an LLM-supplied day: empty → {@code dflt}; 'today' / 'yesterday'; else YYYY-MM-DD. */
+    static LocalDate parseDay(String raw, LocalDate today, LocalDate dflt) {
+        String v = raw == null ? "" : raw.trim().toLowerCase(Locale.ROOT);
+        if (v.isEmpty()) return dflt;
+        if (v.equals("today")) return today;
+        if (v.equals("yesterday")) return today.minusDays(1);
+        try {
+            return LocalDate.parse(v);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("date must be YYYY-MM-DD, 'today' or 'yesterday' (got: " + raw + ").");
+        }
+    }
+
+    /** Parses an optional numeric id: empty → null. */
+    static Integer parseOptionalId(String raw, String name) {
+        String v = raw == null ? "" : raw.trim();
+        if (v.isEmpty()) return null;
+        try {
+            return Integer.parseInt(v);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(name + " must be a number (got: " + raw + ").");
+        }
+    }
+
+    static AttendanceReportFormatter.GroupBy parseGroupBy(String raw) {
+        String v = raw == null ? "" : raw.trim().toLowerCase(Locale.ROOT);
+        return switch (v) {
+            case "", "worker", "workers" -> AttendanceReportFormatter.GroupBy.WORKER;
+            case "crew", "crews" -> AttendanceReportFormatter.GroupBy.CREW;
+            case "house", "houses" -> AttendanceReportFormatter.GroupBy.HOUSE;
+            default -> throw new IllegalArgumentException(
+                    "groupBy must be 'worker', 'crew' or 'house' (got: " + raw + ").");
+        };
     }
 
     private static String safeMessage(Exception e) {
