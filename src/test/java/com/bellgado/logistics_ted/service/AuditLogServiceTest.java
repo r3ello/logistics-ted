@@ -75,6 +75,18 @@ class AuditLogServiceTest {
     }
 
     @Test
+    void externalIntegrationRolesAreAppUsersNotWorkers() {
+        // importer / exporter accounts are app_user rows — their id must not land in worker_id.
+        for (String role : List.of("importer", "exporter")) {
+            seedPrincipal(5, role, role);
+            Actor a = AuditLogService.currentActor();
+            assertThat(a.actorType()).as(role).isEqualTo("app_user");
+            assertThat(a.appUserId()).as(role).isEqualTo(5);
+            assertThat(a.workerId()).as(role).isNull();
+        }
+    }
+
+    @Test
     void crewLeaderPrincipalMapsToWorkerActor() {
         // For crew leaders the principal userId is a worker.id, NOT an app_user id.
         seedPrincipal(42, "ivan", "crew_leader");

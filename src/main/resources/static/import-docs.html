@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Tedhouse — CSV Data Import API</title>
+<title>Tedhouse — CSV Data Import &amp; Export API</title>
 <!--
-  Viewer for the CSV import API contract.
+  Viewer for the CSV import/export API contract.
 
   This shell is public because a bearer-token API cannot gate a page the browser navigates to (no
   Authorization header is sent on navigation). It contains no contract information: the specification
@@ -98,8 +98,8 @@
 
 <div id="gate">
   <div class="card">
-    <h1>CSV Data Import API</h1>
-    <p class="sub">This documentation is restricted. Sign in with your <strong>importer</strong> account to view the contract.</p>
+    <h1>CSV Data Import &amp; Export API</h1>
+    <p class="sub">This documentation is restricted. Sign in with your <strong>importer</strong> or <strong>exporter</strong> account to view the contract.</p>
     <form id="loginForm" autocomplete="on">
       <label for="u">Username</label>
       <input id="u" name="username" type="text" autocomplete="username" required autofocus>
@@ -152,7 +152,7 @@
       .then(function (res) {
         if (res.status === 401) throw new Error('expired');
         if (res.status === 403) {
-          throw new Error('This account does not have the importer or administrator role, so it cannot view the import API documentation.');
+          throw new Error('This account does not have the importer, exporter or administrator role, so it cannot view the API documentation.');
         }
         if (!res.ok) throw new Error('Could not load the specification (HTTP ' + res.status + ').');
         return res.json();

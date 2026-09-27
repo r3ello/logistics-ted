@@ -53,6 +53,10 @@ public class AuditLogService {
         return actorOf(u);
     }
 
+    /** Roles whose principals are {@code app_user} rows (the {@code chk_app_user_role} set). */
+    private static final java.util.Set<String> APP_USER_ROLES =
+        java.util.Set.of("admin", "user", "qa_inspector", "importer", "exporter");
+
     /**
      * Maps a principal to an actor. Roles {@code admin}/{@code user} live in {@code app_user};
      * every other role label (crew_leader, crew_manager, worker) is Worker-backed, where
@@ -60,7 +64,7 @@ public class AuditLogService {
      */
     public static Actor actorOf(AuthenticatedUser u) {
         String role = u.getRoleLabel();
-        boolean appUser = "admin".equalsIgnoreCase(role) || "user".equalsIgnoreCase(role) || "qa_inspector".equalsIgnoreCase(role);
+        boolean appUser = role != null && APP_USER_ROLES.contains(role.toLowerCase());
         return appUser
             ? new Actor("app_user", u.getUserId(), null, null, u.getUsername(), role)
             : new Actor("worker", null, u.getUserId(), null, u.getUsername(), role);
@@ -113,6 +117,22 @@ public class AuditLogService {
         if (details != null && !details.isEmpty()) {
             row.setDetailsJson(details);
         }
+        repo.save(row);
+    }
+
+    /**
+     * A CSV export. Reads are not captured by {@code AuditLogInterceptor} (it only sees mutating
+     * methods), but an export is bulk personal data leaving the system, so it is recorded
+     * explicitly: which dataset, which filters, which columns and how many rows. Never the rows.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void recordExport(Actor actor, String path, String dataset, Map<String, Object> details,
+                             String clientIp, String requestId) {
+        AuditLog row = base(actor, SOURCE_API);
+        row.setAction("export");
+        row.setEntityType(dataset);
+        row.setDetailsJson(details);
+        fillHttp(row, "GET", path, 200, clientIp, requestId);
         repo.save(row);
     }
 

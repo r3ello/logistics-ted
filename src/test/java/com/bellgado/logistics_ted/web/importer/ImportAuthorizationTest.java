@@ -2,7 +2,6 @@ package com.bellgado.logistics_ted.web.importer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -26,21 +25,34 @@ class ImportAuthorizationTest {
 
     private static final String EXPECTED = "hasAnyRole('ADMIN','IMPORTER')";
 
+    /**
+     * The contract document covers the export too, so the read-only {@code exporter} role may read
+     * it — but only it: {@link ImportController} itself stays admin + importer.
+     */
+    private static final String EXPECTED_DOCS = "hasAnyRole('ADMIN','IMPORTER','EXPORTER')";
+
     @Test
     void importEndpointsAreOpenToAdminsAndImportersOnly() {
-        for (Class<?> controller : List.of(ImportController.class, ImportDocsController.class)) {
-            PreAuthorize annotation = controller.getAnnotation(PreAuthorize.class);
+        assertDeclares(ImportController.class, EXPECTED);
+    }
 
-            assertThat(annotation)
-                .withFailMessage("%s has no @PreAuthorize. Every import controller must declare one — "
-                    + "the SecurityConfig matcher alone would let any ADMIN or USER token through.",
-                    controller.getSimpleName())
-                .isNotNull();
+    @Test
+    void theContractIsReadableByBothExternalRoles() {
+        assertDeclares(ImportDocsController.class, EXPECTED_DOCS);
+    }
 
-            assertThat(annotation.value().replace(" ", "").replace("\"", "'"))
-                .withFailMessage("%s declares @PreAuthorize(\"%s\"); expected \"%s\".",
-                    controller.getSimpleName(), annotation.value(), EXPECTED)
-                .isEqualTo(EXPECTED);
-        }
+    private static void assertDeclares(Class<?> controller, String expected) {
+        PreAuthorize annotation = controller.getAnnotation(PreAuthorize.class);
+
+        assertThat(annotation)
+            .withFailMessage("%s has no @PreAuthorize. Every import controller must declare one — "
+                + "the SecurityConfig matcher alone would let any ADMIN or USER token through.",
+                controller.getSimpleName())
+            .isNotNull();
+
+        assertThat(annotation.value().replace(" ", "").replace("\"", "'"))
+            .withFailMessage("%s declares @PreAuthorize(\"%s\"); expected \"%s\".",
+                controller.getSimpleName(), annotation.value(), expected)
+            .isEqualTo(expected);
     }
 }

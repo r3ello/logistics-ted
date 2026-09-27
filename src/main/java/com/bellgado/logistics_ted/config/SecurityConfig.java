@@ -68,7 +68,14 @@ public class SecurityConfig {
                 // the only place an IMPORTER token is accepted — every other /api/** path falls
                 // through to the ADMIN/USER rule below and is rejected by the filter chain, not
                 // merely hidden in the UI. Must stay ABOVE the generic /api/** matcher.
+                // The integration contract (import + export) is readable by both external roles.
+                // Must stay ABOVE the /api/import/** rule, which would otherwise reject EXPORTER.
+                .requestMatchers(HttpMethod.GET, "/api/import/openapi.yaml", "/api/import/openapi.json")
+                    .hasAnyRole("ADMIN", "IMPORTER", "EXPORTER")
                 .requestMatchers("/api/import/**").hasAnyRole("ADMIN", "IMPORTER")
+                // The read-only counterpart: CSV exports for the EXPORTER role (V18). Same reasoning
+                // as the import rule — the only place an EXPORTER token is accepted.
+                .requestMatchers("/api/export/**").hasAnyRole("ADMIN", "EXPORTER")
                 .requestMatchers("/api/my/**").hasRole("CREW_LEADER")
                 .requestMatchers(HttpMethod.GET, "/api/me").authenticated()
                 .requestMatchers(HttpMethod.GET,
