@@ -46,7 +46,7 @@ public class AttendanceQueryService {
     public record SessionView(int sessionId,
                               int workerId, String workerName,
                               Integer crewId, String crewName,
-                              int houseId, String houseName,
+                              int houseId, String houseName, String houseExternalId,
                               LocalDate date,
                               ZonedDateTime checkedInAt,
                               ZonedDateTime checkedOutAt,
@@ -149,7 +149,7 @@ public class AttendanceQueryService {
         Worker w = s.getWorker();
         return new SessionView(s.getId(),
                 w.getId(), w.getName(), crewIdOf(w), crewNameOf(w),
-                s.getHouse().getId(), s.getHouse().getName(),
+                s.getHouse().getId(), s.getHouse().getName(), s.getHouse().getExternalId(),
                 s.getSessionDate(), in, out, state, minutes);
     }
 

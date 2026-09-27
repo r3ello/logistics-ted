@@ -2,9 +2,14 @@ package com.bellgado.logistics_ted.web.importer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bellgado.logistics_ted.service.exporter.EntityExporter;
+import com.bellgado.logistics_ted.service.exporter.ExportColumnType;
+import com.bellgado.logistics_ted.service.exporter.ExportFilter;
 import com.bellgado.logistics_ted.service.importer.ImportErrorCode;
+import com.bellgado.logistics_ted.web.exporter.ExportController;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
 import java.nio.charset.StandardCharsets;
@@ -16,7 +21,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,13 +79,13 @@ class ImportOpenApiSpecTest {
     void documentsNothingOutsideTheImportSurface() {
         Set<String> offenders = new TreeSet<>();
         for (String path : paths().keySet()) {
-            if (!path.startsWith("/api/import") && !path.equals(AUTH_PATH)) {
+            if (!path.startsWith("/api/import") && !path.startsWith("/api/export") && !path.equals(AUTH_PATH)) {
                 offenders.add(path);
             }
         }
         assertThat(offenders)
             .withFailMessage("""
-                The import API document describes %s, which is outside /api/import.
+                The import API document describes %s, which is outside /api/import and /api/export.
 
                 This document is published to an external client. Nothing internal to the dashboard \
                 may appear in it. Either remove the path, or — if it genuinely belongs to the import \
@@ -148,7 +156,59 @@ class ImportOpenApiSpecTest {
         }
     }
 
+    @Test
+    void listsEveryExportColumnAndFilterType() {
+        Set<String> columnTypes = new TreeSet<>();
+        for (ExportColumnType t : ExportColumnType.values()) columnTypes.add(t.name().toLowerCase());
+        assertThat(new TreeSet<>(enumValuesOf("ExportColumnType")))
+            .withFailMessage("Documented ExportColumnType does not match the enum %s.", columnTypes)
+            .isEqualTo(columnTypes);
+
+        Set<String> filterTypes = new TreeSet<>();
+        for (ExportFilter.Type t : ExportFilter.Type.values()) filterTypes.add(t.name().toLowerCase());
+        assertThat(new TreeSet<>(enumValuesOf("ExportFilterType")))
+            .withFailMessage("Documented ExportFilterType does not match the enum %s.", filterTypes)
+            .isEqualTo(filterTypes);
+    }
+
+    @Test
+    void listsEveryExportDataset() throws Exception {
+        Set<String> actual = exporterNames();
+        assertThat(actual).as("exporters discovered by classpath scan").isNotEmpty();
+        @SuppressWarnings("unchecked")
+        Map<String, Object> param = (Map<String, Object>) ((Map<String, Object>)
+            ((Map<String, Object>) spec.get("components")).get("parameters")).get("ExportEntity");
+        @SuppressWarnings("unchecked")
+        List<String> documented = (List<String>) ((Map<String, Object>) param.get("schema")).get("enum");
+        assertThat(new TreeSet<>(documented))
+            .withFailMessage("""
+                The ExportEntity parameter documents %s but the registered exporters are %s.
+
+                Add the new dataset to the enum in %s.""", new TreeSet<>(documented), actual, SPEC)
+            .isEqualTo(actual);
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Every {@code @Component} {@link EntityExporter}'s name, found by scanning the classpath (no
+     * Spring context, no database): each is instantiated with null collaborators, which is enough
+     * because {@code name()} never touches them.
+     */
+    private static Set<String> exporterNames() throws Exception {
+        var scanner = new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(new AssignableTypeFilter(EntityExporter.class));
+        Set<String> out = new TreeSet<>();
+        for (var bd : scanner.findCandidateComponents("com.bellgado.logistics_ted")) {
+            Class<?> type = Class.forName(bd.getBeanClassName());
+            // Only registered beans: test doubles implementing the interface are not datasets.
+            if (!type.isAnnotationPresent(Component.class)) continue;
+            Constructor<?> ctor = type.getConstructors()[0];
+            Object[] args = new Object[ctor.getParameterCount()];
+            out.add(((EntityExporter<?>) ctor.newInstance(args)).name());
+        }
+        return out;
+    }
 
     @SuppressWarnings("unchecked")
     private static Map<String, Object> paths() {
@@ -178,7 +238,8 @@ class ImportOpenApiSpecTest {
     /** Every path the import controllers actually map, assembled from their annotations. */
     private static Set<String> mappedPaths() {
         Set<String> out = new TreeSet<>();
-        for (Class<?> controller : List.of(ImportController.class, ImportDocsController.class)) {
+        for (Class<?> controller : List.of(ImportController.class, ImportDocsController.class,
+                                           ExportController.class)) {
             String base = controller.getAnnotation(RequestMapping.class).value()[0];
             for (Method m : controller.getDeclaredMethods()) {
                 GetMapping get = m.getAnnotation(GetMapping.class);

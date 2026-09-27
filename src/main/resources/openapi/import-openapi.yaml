@@ -1,13 +1,15 @@
 openapi: 3.0.3
 
 info:
-  title: Tedhouse — CSV Data Import API
+  title: Tedhouse — CSV Data Import & Export API
   version: "1.0.0"
   description: |
     Recurring synchronisation of operational data from spreadsheets into the Tedhouse logistics
-    database. Files are uploaded as CSV; each run reports, per row, exactly what it did.
+    database. Files are uploaded as CSV; each run reports, per row, exactly what it did. In the other
+    direction, selected datasets (starting with worker attendance) can be **exported** as CSV — see
+    *Export* below.
 
-    This document covers **only** the data-import surface. The rest of the application's API is
+    This document covers **only** the data-import and data-export surface. The rest of the application's API is
     internal and not part of any integration contract.
 
     ---
@@ -87,6 +89,41 @@ info:
 
     ---
 
+    ## Export
+
+    Read-only CSV downloads, the mirror image of the import. `GET /api/export/entities` lists every
+    dataset with its **filters** and its **columns**; `GET /api/export/{entity}` returns the file.
+
+    - **Choose your columns** with `columns=a,b,c`: only those, in that order. Omit it to get the
+      dataset's default columns (the catalogue marks them `default: true`). An unknown column is a
+      `400` listing the valid ones.
+    - **Filters are declared per dataset** and type-checked. An unknown query parameter is a `400`
+      rather than being ignored, so a misspelt filter can never silently widen an export.
+    - **Same dialect as the import**: `delimiter` (`comma` | `semicolon` | `tab`) and `decimal`
+      (`dot` | `comma`; comma requires a non-comma delimiter). UTF-8 with a byte-order mark, RFC 4180
+      quoting, CRLF line endings.
+    - **Timestamps** are `timestamps=iso` (default, `2026-09-24T07:30:00+03:00`) or `local`
+      (`2026-09-24 07:30:00`, Europe/Sofia — what spreadsheets parse as a date-time).
+    - **Formula-injection guard**: a text cell beginning with `=`, `+`, `-`, `@`, tab or CR is
+      prefixed with `'`. Numeric, date and timestamp cells are never altered.
+    - Every export is recorded in the application's audit log (dataset, filters, columns, row count).
+
+    ### Attendance
+
+    Both datasets read the QR check-in log and share one counting rule: a closed session counts
+    check-in → check-out; a session still open **today** counts check-in → now (`IN_PROGRESS`); a
+    session left open on a **past** day counts **0** and is flagged `MISSING_CHECKOUT`, because its
+    real end time is unknown. `from`/`to` are required and span at most 366 days. Device identifiers
+    and GPS coordinates are never exported.
+
+    - `attendance-sessions` — one row per check-in.
+    - `attendance-daily` — one row per worker per work day with at least one check-in; its
+      `counted_minutes` sum to exactly the sessions' for the same filters.
+
+    Houses are identified by `house_external_id`, the same key the house import uses.
+
+    ---
+
     ## Authentication
 
     Every endpoint requires a JWT bearer token. Obtain one from `POST /api/login` and send it as
@@ -97,6 +134,9 @@ info:
     nothing else: every other endpoint of the application rejects it with `403`. This is deliberate —
     the data import needs no access to the dispatcher and administration surface, so it is not
     granted any. Administrators can also call these endpoints.
+
+    For exports you will be issued an account with the **`exporter`** role instead: it reaches the
+    `/api/export` endpoints and this document, and nothing else — not even the import.
 
   contact:
     name: Tedhouse
@@ -121,6 +161,8 @@ tags:
     description: Obtaining a token. Not part of the import surface, but required to use it.
   - name: Import
     description: Uploading and dry-running CSV files.
+  - name: Export
+    description: Downloading datasets as CSV, with the columns you choose.
   - name: Documentation
     description: This document, machine-readable.
 
@@ -132,7 +174,8 @@ paths:
       summary: Obtain a JWT bearer token
       description: |
         Returns a token to be sent as `Authorization: Bearer <token>` on every other call. The
-        account must have the `importer` role (or `admin`) to use the import endpoints.
+        account must have the `importer` role (or `admin`) to use the import endpoints, and the
+        `exporter` role (or `admin`) to use the export endpoints.
       operationId: login
       security: []
       requestBody:
@@ -491,6 +534,107 @@ paths:
                 error: Internal server error
                 requestId: 3f9c1a7e-88d2-4b06-9e51-7a2c4d0b6e13
 
+  /api/export/entities:
+    get:
+      tags: [Export]
+      summary: List the exportable datasets, their filters and columns
+      description: |
+        Derived from the server's exporter registry, so it cannot describe a dataset that does not
+        exist or omit one that does. Build your `columns=` list from it.
+      operationId: listExportEntities
+      responses:
+        '200':
+          description: The catalogue, alphabetically.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ExportEntityDescriptor' }
+              example:
+                - name: attendance-daily
+                  description: "Timesheet: one row per worker per work day with at least one check-in, hours summed."
+                  filters:
+                    - { name: from, type: date, required: true, description: "First work day, inclusive (YYYY-MM-DD)." }
+                    - { name: to, type: date, required: true, description: "Last work day, inclusive. At most 366 days after `from`." }
+                    - { name: crewId, type: integer, required: false, description: "Only workers currently in this crew." }
+                  columns:
+                    - { name: date, type: date, default: true, description: "Work day (Europe/Sofia)." }
+                    - { name: worker_name, type: text, default: true, description: "Worker's name." }
+                    - { name: counted_hours, type: decimal, default: true, description: "counted_minutes / 60, two decimals." }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/export/{entity}:
+    get:
+      tags: [Export]
+      summary: Download one dataset as CSV
+      description: |
+        Besides the parameters below, pass the dataset's own **filters** (from the catalogue) as
+        query parameters — `from`, `to`, `crewId`, `workerId`, `houseId` for attendance. Any
+        parameter that is neither a declared filter nor one of the format parameters is rejected
+        with `400`.
+      operationId: exportEntity
+      parameters:
+        - $ref: '#/components/parameters/ExportEntity'
+        - name: columns
+          in: query
+          required: false
+          description: Comma-separated column names, in output order. Omitted = the dataset's default columns.
+          schema: { type: string }
+          example: date,worker_name,crew_name,counted_hours
+        - name: delimiter
+          in: query
+          required: false
+          schema: { type: string, enum: [comma, semicolon, tab], default: comma }
+        - name: decimal
+          in: query
+          required: false
+          description: Decimal separator. `comma` requires `delimiter=semicolon` or `tab`.
+          schema: { type: string, enum: [dot, comma], default: dot }
+        - name: timestamps
+          in: query
+          required: false
+          schema: { type: string, enum: [iso, local], default: iso }
+        - name: from
+          in: query
+          required: false
+          description: Attendance datasets — first work day (required there).
+          schema: { type: string, format: date }
+          example: "2026-09-01"
+        - name: to
+          in: query
+          required: false
+          description: Attendance datasets — last work day (required there).
+          schema: { type: string, format: date }
+          example: "2026-09-30"
+      responses:
+        '200':
+          description: The CSV file (UTF-8 with a byte-order mark).
+          headers:
+            Content-Disposition:
+              description: '`attachment; filename="<entity>_<from>_<to>.csv"`.'
+              schema: { type: string }
+            X-Export-Rows:
+              description: Number of data rows in the file.
+              schema: { type: integer }
+          content:
+            text/csv:
+              schema: { type: string }
+              example: "date,worker_name,crew_name,counted_hours\r\n2026-09-24,Иван Петров,Crew A,8.58\r\n"
+        '400':
+          description: Missing/invalid filter, unknown parameter or column, or an invalid dialect.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              example: { error: "Unknown column(s) [hours]. Available: [date, worker_id, ...]." }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: No dataset under that name.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
   /api/import/openapi.yaml:
     get:
       tags: [Documentation]
@@ -529,7 +673,7 @@ components:
       bearerFormat: JWT
       description: |
         A token from `POST /api/login`, sent as `Authorization: Bearer <token>`. The account must
-        have the `importer` role (or `admin`).
+        have the `importer` role for the import, the `exporter` role for the export, or `admin`.
 
   parameters:
     Entity:
@@ -554,6 +698,16 @@ components:
         type: string
         example: materials
 
+    ExportEntity:
+      name: entity
+      in: path
+      required: true
+      description: The dataset name, as returned by `GET /api/export/entities`.
+      schema:
+        type: string
+        enum: [attendance-daily, attendance-sessions]
+        example: attendance-daily
+
   responses:
     Unauthorized:
       description: No token, or an expired/invalid one.
@@ -562,7 +716,7 @@ components:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
           example: { error: Unauthorized }
     Forbidden:
-      description: Authenticated, but the account has neither the `importer` nor the `admin` role.
+      description: Authenticated, but the account's role does not grant this endpoint (`importer` for the import, `exporter` for the export, or `admin`).
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -596,9 +750,10 @@ components:
         role:
           type: string
           description: |
-            Must be `importer` or `admin` to use the import endpoints. An `importer` account is
-            scoped to this API and is rejected everywhere else in the application.
-          enum: [importer, admin]
+            Must be `importer` or `admin` to use the import endpoints, `exporter` or `admin` for the
+            export endpoints. Both external roles are scoped to their API and rejected everywhere
+            else in the application.
+          enum: [importer, exporter, admin]
           example: importer
 
     EntityDescriptor:
@@ -638,6 +793,51 @@ components:
             that its dependency has not created yet fails with `UNRESOLVED_REF`.
           items: { type: string }
           example: []
+
+    ExportEntityDescriptor:
+      type: object
+      description: One exportable dataset, as described by the server's exporter registry.
+      properties:
+        name:
+          type: string
+          description: The `{entity}` path segment.
+          example: attendance-sessions
+        description:
+          type: string
+          description: What one row is.
+        filters:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string, example: from }
+              type: { $ref: '#/components/schemas/ExportFilterType' }
+              required: { type: boolean }
+              description: { type: string }
+        columns:
+          type: array
+          description: Every selectable column, in the default order.
+          items:
+            type: object
+            properties:
+              name: { type: string, example: counted_hours }
+              type: { $ref: '#/components/schemas/ExportColumnType' }
+              default:
+                type: boolean
+                description: Included when the request passes no `columns`.
+              description: { type: string }
+
+    ExportFilterType:
+      type: string
+      description: '`date` is ISO `YYYY-MM-DD`.'
+      enum: [date, integer]
+
+    ExportColumnType:
+      type: string
+      description: |
+        How the cell is written. `decimal` honours `decimal=`; `timestamp` honours `timestamps=`;
+        `pipe_set` is several values joined with `|`; `text` and `pipe_set` get the formula guard.
+      enum: [text, integer, decimal, date, timestamp, boolean, enum, pipe_set]
 
     ImportReport:
       type: object

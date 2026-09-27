@@ -218,6 +218,25 @@
     .att-badge-out { display:inline-block; padding:.2rem .55rem; border-radius:5px; font-size:.75rem; font-weight:700; background:rgba(79,142,247,.15); color:#4f8ef7; }
     .att-badge-abs { display:inline-block; padding:.2rem .55rem; border-radius:5px; font-size:.75rem; font-weight:700; background:rgba(255,255,255,.06); color:var(--muted); }
     .att-empty { text-align:center; padding:3rem 1rem; color:var(--muted); font-size:.9rem; }
+
+    /* ── CSV EXPORT (generic, catalogue-driven — see csvExpRender) ── */
+    .csvexp-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:.75rem; }
+    .csvexp-grid select, .csvexp-grid input, .csvexp-ds select {
+      width:100%; padding:.55rem .75rem; background:var(--card); border:1px solid var(--border);
+      border-radius:8px; color:var(--text); font-size:.88rem; outline:none; }
+    .csvexp-sec { margin-top:1rem; }
+    .csvexp-sec > .csvexp-h { font-size:.75rem; font-weight:700; color:var(--muted); text-transform:uppercase;
+      letter-spacing:.04em; margin-bottom:.45rem; display:flex; align-items:center; gap:.5rem; }
+    .csvexp-h .csvexp-links { margin-left:auto; font-weight:500; text-transform:none; letter-spacing:0; }
+    .csvexp-h .csvexp-links a { color:var(--accent); cursor:pointer; margin-left:.6rem; font-size:.78rem; }
+    .csvexp-cols { display:grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap:.3rem .9rem;
+      max-height:260px; overflow:auto; padding:.5rem .6rem; border:1px solid var(--border); border-radius:8px; }
+    .csvexp-cols label { display:flex; gap:.45rem; align-items:flex-start; font-size:.84rem; cursor:pointer; line-height:1.3; }
+    .csvexp-cols label code { font-size:.8rem; }
+    .csvexp-desc { font-size:.78rem; color:var(--muted); margin-top:.3rem; line-height:1.45; }
+    .csvexp-msg { font-size:.82rem; margin-top:.75rem; min-height:1.2em; }
+    .csvexp-msg.err { color:var(--red); }
+    .csvexp-msg.ok  { color:var(--green, #3fb950); }
     .btn-green { background: var(--green); color: #0f1117; }
     .btn-green:hover { opacity: 0.85; }
 
@@ -1738,6 +1757,17 @@
   </div>
 </div>
 
+<!-- CSV EXPORT MODAL — body rendered by csvExpRender() from GET /api/export/entities -->
+<div class="modal-backdrop" id="csvExportModal" onclick="if(event.target===this) csvExpClose()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:720px;max-height:92vh;overflow:auto">
+    <div class="modal-title">
+      <span id="csvExpModalTitle">Export CSV</span>
+      <button class="modal-close" onclick="csvExpClose()">✕</button>
+    </div>
+    <div id="csvExpModalBody"></div>
+  </div>
+</div>
+
 <!-- STAGE MODAL -->
 <div class="modal-backdrop" id="stageModal" onclick="if(event.target===this) closeStageModal()">
   <div class="modal" onclick="event.stopPropagation()">
@@ -2677,6 +2707,8 @@
       <button class="btn btn-ghost att-tab active" id="attTabCrew"   onclick="attSwitchTab('crew')"   data-i18n="attTabByCrew">👥 By Crew</button>
       <button class="btn btn-ghost att-tab"        id="attTabWorker" onclick="attSwitchTab('worker')" data-i18n="attTabByWorker">👤 By Worker</button>
       <button class="btn btn-ghost att-tab"        id="attTabHouse"  onclick="attSwitchTab('house')"  data-i18n="attTabByHouse">🏠 By House</button>
+      <!-- Admin-only (applyRole): the /api/export surface is ADMIN + EXPORTER, a USER token would 403. -->
+      <button class="btn btn-ghost" id="attCsvBtn" style="margin-left:auto;display:none" onclick="attOpenCsvExport()" data-i18n="csvExpButton">⬇ Export CSV</button>
     </div>
 
     <!-- BY CREW panel -->
@@ -2949,6 +2981,14 @@
   </div>
 
   <!-- VIEW: WEATHER RECOMMENDATIONS -->
+  <!-- VIEW: CSV EXPORT — the exporter role's whole workspace (admins reach the same form as a
+       modal from the attendance view). Rendered by csvExpRender() from the export catalogue. -->
+  <div class="view" id="view-export">
+    <div style="max-width:820px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem">
+      <div id="csvExpPageBody"></div>
+    </div>
+  </div>
+
   <div class="view" id="view-weatherrecommendations">
     <div style="width:100%">
       <div id="weatherRecContent">
@@ -3025,6 +3065,19 @@
       pageTitle_history:'Order Route History', pageSub_history:'Past route recommendations — immutable record',
       pageTitle_auditlog:'Audit Log', pageSub_auditlog:'Who did what — append-only record', navAuditLog:'Audit Log',
       pageTitle_import:'Data Import', pageSub_import:'Load spreadsheets into the app — validate first, then import', navImport:'Data Import',
+      pageTitle_export:'Data Export', pageSub_export:'Download data as CSV with the columns you choose', navExport:'Data Export',
+      csvExpButton:'⬇ Export CSV', csvExpTitle:'Export CSV', csvExpDataset:'Dataset', csvExpFilters:'Filters',
+      csvExpColumns:'Columns', csvExpAll:'All', csvExpDefaults:'Defaults', csvExpNone:'None', csvExpFormat:'File format',
+      csvExpDelimiter:'Delimiter', csvExpDecimal:'Decimal separator', csvExpTimestamps:'Date-times',
+      csvExpDelimComma:'Comma  ,', csvExpDelimSemicolon:'Semicolon  ;', csvExpDelimTab:'Tab',
+      csvExpDecDot:'Dot  8.50', csvExpDecComma:'Comma  8,50',
+      csvExpTsLocal:'Spreadsheet (2026-09-24 07:30:00)', csvExpTsIso:'ISO with offset',
+      csvExpDownload:'⬇ Download CSV', csvExpDownloading:'Preparing…', csvExpDone:'Downloaded {n} rows.',
+      csvExpPickColumn:'Pick at least one column.', csvExpLoadFailed:'Could not load the export catalogue.',
+      csvExpOptional:'optional', csvExpBgHint:'Bulgarian Excel expects “;” and decimal comma.',
+      csvExpDs_attendance_sessions:'Attendance — one row per check-in',
+      csvExpDs_attendance_daily:'Attendance — hours per worker per day',
+      csvExpF_from:'From', csvExpF_to:'To', csvExpF_crewId:'Crew ID', csvExpF_workerId:'Worker ID', csvExpF_houseId:'House ID',
       auditFilterUser:'User', auditFilterAction:'Action', auditFilterEntity:'Entity', auditFilterFrom:'From', auditFilterTo:'To',
       auditColWhen:'When', auditColWho:'Who', auditColAction:'Action', auditColEntity:'Entity', auditColEndpoint:'Endpoint', auditColStatus:'Status', auditColIp:'IP',
       auditNoResults:'No audit entries for this filter.', auditAnonymous:'anonymous',
@@ -3409,6 +3462,19 @@
       pageTitle_history:'История на маршрута на поръчката', pageSub_history:'Минали препоръки за маршрут — неизменен запис',
       pageTitle_auditlog:'Одит дневник', pageSub_auditlog:'Кой какво е направил — неизменен запис', navAuditLog:'Одит дневник',
       pageTitle_import:'Импорт на данни', pageSub_import:'Зареждане на таблици в приложението — първо проверка, после импорт', navImport:'Импорт на данни',
+      pageTitle_export:'Експорт на данни', pageSub_export:'Изтегляне на данни като CSV с избрани колони', navExport:'Експорт на данни',
+      csvExpButton:'⬇ Експорт CSV', csvExpTitle:'Експорт CSV', csvExpDataset:'Набор от данни', csvExpFilters:'Филтри',
+      csvExpColumns:'Колони', csvExpAll:'Всички', csvExpDefaults:'По подразбиране', csvExpNone:'Нито една', csvExpFormat:'Формат на файла',
+      csvExpDelimiter:'Разделител', csvExpDecimal:'Десетичен знак', csvExpTimestamps:'Дата и час',
+      csvExpDelimComma:'Запетая  ,', csvExpDelimSemicolon:'Точка и запетая  ;', csvExpDelimTab:'Табулация',
+      csvExpDecDot:'Точка  8.50', csvExpDecComma:'Запетая  8,50',
+      csvExpTsLocal:'За таблици (2026-09-24 07:30:00)', csvExpTsIso:'ISO с часова зона',
+      csvExpDownload:'⬇ Изтегли CSV', csvExpDownloading:'Подготовка…', csvExpDone:'Изтеглени {n} реда.',
+      csvExpPickColumn:'Изберете поне една колона.', csvExpLoadFailed:'Каталогът за експорт не можа да се зареди.',
+      csvExpOptional:'по избор', csvExpBgHint:'Българският Excel очаква „;“ и десетична запетая.',
+      csvExpDs_attendance_sessions:'Присъствие — ред за всяко влизане',
+      csvExpDs_attendance_daily:'Присъствие — часове на работник за ден',
+      csvExpF_from:'От', csvExpF_to:'До', csvExpF_crewId:'ID на екип', csvExpF_workerId:'ID на работник', csvExpF_houseId:'ID на обект',
       auditFilterUser:'Потребител', auditFilterAction:'Действие', auditFilterEntity:'Обект', auditFilterFrom:'От', auditFilterTo:'До',
       auditColWhen:'Кога', auditColWho:'Кой', auditColAction:'Действие', auditColEntity:'Обект', auditColEndpoint:'Ендпойнт', auditColStatus:'Статус', auditColIp:'IP',
       auditNoResults:'Няма записи за този филтър.', auditAnonymous:'анонимен',
@@ -4197,7 +4263,7 @@
     setTimeout(() => { if (_hMap) _hMap.invalidateSize(); }, 260);
   }
 
-  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import', 'weatherrecommendations', 'weatherrules', 'materials', 'fleetmap', 'fleetvehicles', 'fleettrips'];
+  const VALID_VIEWS = ['dashboard', 'order', 'scaffold', 'map', 'warehouses', 'suppliers', 'crews', 'history', 'auditlog', 'electric', 'attendance', 'qrcodes', 'stagematrix', 'workeraccess', 'housedetail', 'myorders', 'workerjourney', 'crewhistory', 'companyfolders', 'housefoldertemplate', 'mycrew', 'myworkeraccess', 'menuconfig', 'qachecklists', 'import', 'export', 'weatherrecommendations', 'weatherrules', 'materials', 'fleetmap', 'fleetvehicles', 'fleettrips'];
 
   const _navGroupOpen = { routes: false, attendance: false, management: false, orgchart: false, clientservices: false, qa: false, weather: false, fleet: false };
   const _navGroupConfig = {
@@ -4231,6 +4297,9 @@
     if (currentUser?.role === 'crew_leader' && !['myorders','mycrew','myworkeraccess'].includes(name)) name = 'myorders';
     // Importers are confined to the import view — every other endpoint 403s for their token anyway.
     if (currentUser?.role === 'importer') name = 'import';
+    // Exporters likewise, to the export view (SecurityConfig: /api/export/** = ADMIN or EXPORTER).
+    if (currentUser?.role === 'exporter') name = 'export';
+    if (name === 'export' && !['admin','exporter'].includes(currentUser?.role)) name = 'dashboard';
     // Audit log is admin-only — bounce anyone else, even via hash.
     if (name === 'auditlog' && currentUser?.role !== 'admin') name = 'dashboard';
     // The import view writes straight into live data: admin and importer only, hash included.
@@ -4272,6 +4341,7 @@
     if (name === 'menuconfig')     mcfgLoad();
     if (name === 'qachecklists')          qaclInit();
     if (name === 'import')                impInit();
+    if (name === 'export')                csvExpPageInit();
     if (name === 'weatherrecommendations') wxRecLoad();
     if (name === 'weatherrules')           wrLoad();
     if (name === 'materials')              matLoad();
@@ -11861,6 +11931,9 @@
     // Data Import mirrors the backend gate (SecurityConfig: /api/import/** = ADMIN or IMPORTER).
     const navImport = document.getElementById('navImport');
     if (navImport) navImport.style.display = ['admin','importer'].includes(user.role) ? '' : 'none';
+    // CSV export mirrors the backend gate (SecurityConfig: /api/export/** = ADMIN or EXPORTER).
+    const attCsvBtn = document.getElementById('attCsvBtn');
+    if (attCsvBtn) attCsvBtn.style.display = user.role === 'admin' ? '' : 'none';
     // Fleet (GPS.bg) mirrors the backend gate (SecurityConfig: /api/vehicles/** = ADMIN).
     _flApplyRoleGate();
     // Hide nav sections not relevant for crew leaders
@@ -11917,6 +11990,20 @@
     const brand = document.getElementById('brandName'); if (brand) brand.textContent = t('brandName');
     const bsub  = document.getElementById('brandSub');  if (bsub)  bsub.textContent  = t('brandSub');
     showView('import');
+  }
+
+  /** The exporter's entire workspace: the export form and the API contract, nothing else. */
+  function initExporter() {
+    applyStoredTheme();
+    const navMenu = document.querySelector('#mainNav .nav-menu');
+    if (navMenu) {
+      navMenu.innerHTML = `
+        <a class="nav-item active" id="navExport" href="#export" onclick="showView('export');return false;"><span class="nav-icon">📤</span> <span>${t('navExport')}</span></a>
+        <a class="nav-item" href="/import-docs.html" target="_blank" rel="noopener"><span class="nav-icon">📄</span> <span>API</span></a>`;
+    }
+    const brand = document.getElementById('brandName'); if (brand) brand.textContent = t('brandName');
+    const bsub  = document.getElementById('brandSub');  if (bsub)  bsub.textContent  = t('brandSub');
+    showView('export');
   }
 
   async function initCrewLeader() {
@@ -12237,6 +12324,8 @@
     // 403 anyway, and a nav full of dead links is worse than no nav. Their whole surface is the
     // import view, plus the API contract for whoever is scripting against it.
     if (currentUser?.role === 'importer') { initImporter(); return; }
+    // Same separation for the read-only counterpart: an exporter's surface is the export form.
+    if (currentUser?.role === 'exporter') { initExporter(); return; }
     applyStoredTheme();
     // Load menu config and apply visibility/ordering before showing the first view
     apiFetch('/api/menu-config').then(r => r.json()).then(data => {
@@ -12889,6 +12978,195 @@
     document.getElementById('attTabCrew').classList.toggle('active',   tab === 'crew');
     document.getElementById('attTabWorker').classList.toggle('active', tab === 'worker');
     document.getElementById('attTabHouse').classList.toggle('active',  tab === 'house');
+  }
+
+  // ── CSV EXPORT (generic) ────────────────────────────────────────────────────
+  // Everything below is driven by GET /api/export/entities: datasets, their filters and their
+  // columns come from the server's exporter registry, so a new backend dataset appears here with
+  // no frontend change. Labels fall back to the raw names when there is no csvExpDs_* / csvExpF_*
+  // i18n key. The same renderer serves the admin modal (from the attendance view) and the
+  // exporter role's page.
+  let _csvExpCatalogue = null;
+
+  async function csvExpCatalogue() {
+    if (_csvExpCatalogue) return _csvExpCatalogue;
+    const r = await apiFetch('/api/export/entities');
+    if (!r.ok) throw new Error(t('csvExpLoadFailed'));
+    _csvExpCatalogue = await r.json();
+    return _csvExpCatalogue;
+  }
+
+  const _csvExpEsc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const _csvExpLabel = (prefix, name) => { const k = prefix + String(name).replace(/-/g, '_'); const v = t(k); return v === k ? name : v; };
+
+  function _csvExpPrefs() {
+    let p = null;
+    try { p = JSON.parse(localStorage.getItem('csvExpPrefs') || 'null'); } catch (_) { p = null; }
+    // Bulgarian Excel splits on ';' and reads decimal commas — default to that in BG.
+    return p || (currentLang === 'bg'
+      ? { delimiter: 'semicolon', decimal: 'comma', timestamps: 'local' }
+      : { delimiter: 'comma', decimal: 'dot', timestamps: 'local' });
+  }
+
+  /**
+   * Renders the export form into `box`.
+   * opts: { dataset, values: {filterName: value}, hints: {filterName: 'Crew A'} }
+   */
+  async function csvExpRender(box, opts = {}) {
+    box.innerHTML = '<div class="spinner"></div>';
+    let cat;
+    try { cat = await csvExpCatalogue(); }
+    catch (e) { box.innerHTML = `<div class="csvexp-msg err">${_csvExpEsc(e.message)}</div>`; return; }
+    if (!cat.length) { box.innerHTML = '<div class="csvexp-msg">—</div>'; return; }
+
+    const ds = cat.find(d => d.name === opts.dataset) || cat[0];
+    const values = opts.values || {};
+    const hints  = opts.hints  || {};
+    const prefs  = _csvExpPrefs();
+    const id = box.id;   // namespaces element ids so modal + page can coexist
+
+    const filters = ds.filters.map(f => {
+      const v = values[f.name] ?? '';
+      const label = _csvExpLabel('csvExpF_', f.name) + (f.required ? '' : ` <span style="font-weight:400">(${t('csvExpOptional')})</span>`);
+      const hint = hints[f.name] ? `<div class="csvexp-desc">${_csvExpEsc(hints[f.name])}</div>` : '';
+      const input = f.type === 'date'
+        ? `<input type="date" data-filter="${_csvExpEsc(f.name)}" value="${_csvExpEsc(v)}" ${f.required ? 'required' : ''}>`
+        : `<input type="number" min="1" step="1" data-filter="${_csvExpEsc(f.name)}" value="${_csvExpEsc(v)}">`;
+      return `<div class="modal-field" style="margin:0" title="${_csvExpEsc(f.description)}"><label>${label}</label>${input}${hint}</div>`;
+    }).join('');
+
+    const cols = ds.columns.map(c => `
+      <label title="${_csvExpEsc(c.description)}">
+        <input type="checkbox" data-col="${_csvExpEsc(c.name)}" ${c.default ? 'checked' : ''}>
+        <span><code>${_csvExpEsc(c.name)}</code><br><span class="csvexp-desc" style="margin:0">${_csvExpEsc(c.description)}</span></span>
+      </label>`).join('');
+
+    const opt = (val, key, cur) => `<option value="${val}" ${cur === val ? 'selected' : ''}>${t(key)}</option>`;
+
+    box.innerHTML = `
+      <div class="csvexp-ds modal-field" style="margin:0">
+        <label>${t('csvExpDataset')}</label>
+        <select id="${id}-ds">${cat.map(d => `<option value="${_csvExpEsc(d.name)}" ${d.name === ds.name ? 'selected' : ''}>${_csvExpEsc(_csvExpLabel('csvExpDs_', d.name))}</option>`).join('')}</select>
+        <div class="csvexp-desc">${_csvExpEsc(ds.description)}</div>
+      </div>
+      <div class="csvexp-sec"><div class="csvexp-h">${t('csvExpFilters')}</div>
+        <div class="csvexp-grid" id="${id}-filters">${filters}</div></div>
+      <div class="csvexp-sec"><div class="csvexp-h">${t('csvExpColumns')}
+          <span class="csvexp-links"><a data-sel="all">${t('csvExpAll')}</a><a data-sel="def">${t('csvExpDefaults')}</a><a data-sel="none">${t('csvExpNone')}</a></span></div>
+        <div class="csvexp-cols" id="${id}-cols">${cols}</div></div>
+      <div class="csvexp-sec"><div class="csvexp-h">${t('csvExpFormat')}</div>
+        <div class="csvexp-grid">
+          <div class="modal-field" style="margin:0"><label>${t('csvExpDelimiter')}</label>
+            <select id="${id}-delim">${opt('comma','csvExpDelimComma',prefs.delimiter)}${opt('semicolon','csvExpDelimSemicolon',prefs.delimiter)}${opt('tab','csvExpDelimTab',prefs.delimiter)}</select></div>
+          <div class="modal-field" style="margin:0"><label>${t('csvExpDecimal')}</label>
+            <select id="${id}-dec">${opt('dot','csvExpDecDot',prefs.decimal)}${opt('comma','csvExpDecComma',prefs.decimal)}</select></div>
+          <div class="modal-field" style="margin:0"><label>${t('csvExpTimestamps')}</label>
+            <select id="${id}-ts">${opt('local','csvExpTsLocal',prefs.timestamps)}${opt('iso','csvExpTsIso',prefs.timestamps)}</select></div>
+        </div>
+        <div class="csvexp-desc">${t('csvExpBgHint')}</div></div>
+      <div class="csvexp-msg" id="${id}-msg"></div>
+      <div class="modal-actions"><button class="btn btn-primary" id="${id}-go">${t('csvExpDownload')}</button></div>`;
+
+    // Switching dataset keeps the filter values the two datasets share (from/to/ids).
+    box.querySelector(`#${id}-ds`).onchange = e => {
+      const keep = {};
+      box.querySelectorAll('[data-filter]').forEach(i => { if (i.value) keep[i.dataset.filter] = i.value; });
+      csvExpRender(box, { dataset: e.target.value, values: keep, hints });
+    };
+    box.querySelectorAll('[data-sel]').forEach(a => a.onclick = () => {
+      const mode = a.dataset.sel;
+      box.querySelectorAll('[data-col]').forEach(cb => {
+        const c = ds.columns.find(x => x.name === cb.dataset.col);
+        cb.checked = mode === 'all' || (mode === 'def' && c && c.default);
+      });
+    });
+    // A decimal comma needs a non-comma delimiter (the server rejects the combination).
+    const delim = box.querySelector(`#${id}-delim`), dec = box.querySelector(`#${id}-dec`);
+    dec.onchange = () => { if (dec.value === 'comma' && delim.value === 'comma') delim.value = 'semicolon'; };
+    delim.onchange = () => { if (dec.value === 'comma' && delim.value === 'comma') dec.value = 'dot'; };
+    box.querySelector(`#${id}-go`).onclick = () => csvExpDownload(box, ds);
+  }
+
+  async function csvExpDownload(box, ds) {
+    const id = box.id;
+    const msg = box.querySelector(`#${id}-msg`);
+    const btn = box.querySelector(`#${id}-go`);
+    msg.className = 'csvexp-msg'; msg.textContent = '';
+
+    const columns = [...box.querySelectorAll('[data-col]')].filter(cb => cb.checked).map(cb => cb.dataset.col);
+    if (!columns.length) { msg.className = 'csvexp-msg err'; msg.textContent = t('csvExpPickColumn'); return; }
+
+    const qs = new URLSearchParams();
+    for (const i of box.querySelectorAll('[data-filter]')) {
+      if (i.required && !i.value) { msg.className = 'csvexp-msg err'; msg.textContent = `${_csvExpLabel('csvExpF_', i.dataset.filter)}?`; i.focus(); return; }
+      if (i.value) qs.set(i.dataset.filter, i.value);
+    }
+    const prefs = {
+      delimiter:  box.querySelector(`#${id}-delim`).value,
+      decimal:    box.querySelector(`#${id}-dec`).value,
+      timestamps: box.querySelector(`#${id}-ts`).value,
+    };
+    try { localStorage.setItem('csvExpPrefs', JSON.stringify(prefs)); } catch (_) {}
+    qs.set('columns', columns.join(','));
+    Object.entries(prefs).forEach(([k, v]) => qs.set(k, v));
+
+    btn.disabled = true; const label = btn.textContent; btn.textContent = t('csvExpDownloading');
+    try {
+      const r = await apiFetch(`/api/export/${encodeURIComponent(ds.name)}?${qs}`);
+      if (!r.ok) {
+        let err = `HTTP ${r.status}`;
+        try { err = (await r.json()).error || err; } catch (_) {}
+        throw new Error(err);
+      }
+      const blob = await r.blob();
+      const cd = r.headers.get('Content-Disposition') || '';
+      const m = cd.match(/filename="?([^";]+)"?/);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = m ? m[1] : `${ds.name}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+      msg.className = 'csvexp-msg ok';
+      msg.textContent = t('csvExpDone').replace('{n}', r.headers.get('X-Export-Rows') ?? '?');
+    } catch (e) {
+      msg.className = 'csvexp-msg err'; msg.textContent = e.message;
+    } finally {
+      btn.disabled = false; btn.textContent = label;
+    }
+  }
+
+  function csvExpOpen(opts) {
+    document.getElementById('csvExpModalTitle').textContent = t('csvExpTitle');
+    document.getElementById('csvExportModal').classList.add('open');
+    csvExpRender(document.getElementById('csvExpModalBody'), opts);
+  }
+
+  function csvExpClose() {
+    document.getElementById('csvExportModal').classList.remove('open');
+  }
+
+  function csvExpPageInit() {
+    const today = new Date().toISOString().slice(0, 10);
+    const first = today.slice(0, 8) + '01';
+    csvExpRender(document.getElementById('csvExpPageBody'), { values: { from: first, to: today } });
+  }
+
+  /** Opens the export pre-filled with the active attendance tab's dates and selection. */
+  function attOpenCsvExport() {
+    const tab = document.getElementById('attTabWorker').classList.contains('active') ? 'worker'
+              : document.getElementById('attTabHouse').classList.contains('active')  ? 'house' : 'crew';
+    const cap = tab.charAt(0).toUpperCase() + tab.slice(1);
+    const sel = document.getElementById(`att${cap}Select`).value;
+    const values = {
+      from: document.getElementById(`att${cap}From`).value,
+      to:   document.getElementById(`att${cap}To`).value,
+    };
+    const hints = {};
+    if (sel) {
+      values[`${tab}Id`] = sel;
+      hints[`${tab}Id`] = document.getElementById(`ss-${tab}-inp`).value || '';
+    }
+    csvExpOpen({ dataset: 'attendance-daily', values, hints });
   }
 
   let _attCrewLastData   = null; // {crewName, from, to, list}

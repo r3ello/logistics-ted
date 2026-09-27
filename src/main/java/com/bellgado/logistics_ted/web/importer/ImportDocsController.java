@@ -17,7 +17,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 /**
- * Serves the OpenAPI contract for the CSV import API to the external client integrating with it.
+ * Serves the OpenAPI contract for the CSV import/export API to the external client integrating with it.
  *
  * <p><b>Why the specification is hand-written and not generated.</b> A generator (springdoc and
  * friends) scans every controller in the application, so the complete API — including the internal
@@ -34,12 +34,14 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
  *
  * <p><b>Why it lives here and not in {@code static/}.</b> Anything under {@code static/} is served by
  * the resource handler and falls through to {@code anyRequest().permitAll()} — the document would be
- * public. Mapping it under {@code /api/import} instead puts it behind the same authorization as the
- * endpoints it describes: {@code admin} or {@code importer}, and nothing else.
+ * public. Mapping it under {@code /api/import} instead puts it behind authentication: {@code admin},
+ * {@code importer} or {@code exporter} (the document covers both the import and the CSV export), and
+ * nothing else. {@code SecurityConfig} carries a matching GET rule above the {@code /api/import/**}
+ * one so an exporter token reaches these two paths and no other import path.
  */
 @RestController
 @RequestMapping("/api/import")
-@PreAuthorize("hasAnyRole('ADMIN','IMPORTER')")
+@PreAuthorize("hasAnyRole('ADMIN','IMPORTER','EXPORTER')")
 public class ImportDocsController {
 
     private static final String SPEC = "openapi/import-openapi.yaml";
