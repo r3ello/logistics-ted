@@ -8,6 +8,7 @@ import static com.bellgado.logistics_ted.service.exporter.ExportColumnType.PIPE_
 import static com.bellgado.logistics_ted.service.exporter.ExportColumnType.TEXT;
 import static com.bellgado.logistics_ted.service.exporter.ExportColumnType.TIMESTAMP;
 
+import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.service.AttendanceQueryService;
 import com.bellgado.logistics_ted.service.AttendanceQueryService.SessionView;
 import com.bellgado.logistics_ted.service.AttendanceQueryService.State;
@@ -77,9 +78,11 @@ public class AttendanceDailyExporter implements EntityExporter<AttendanceDailyEx
             DailyRow::inProgress));
 
     private final AttendanceQueryService attendance;
+    private final HouseRepository houses;
 
-    public AttendanceDailyExporter(AttendanceQueryService attendance) {
+    public AttendanceDailyExporter(AttendanceQueryService attendance, HouseRepository houses) {
         this.attendance = attendance;
+        this.houses = houses;
     }
 
     @Override
@@ -104,7 +107,7 @@ public class AttendanceDailyExporter implements EntityExporter<AttendanceDailyEx
 
     @Override
     public List<DailyRow> fetch(ExportQuery q) {
-        return aggregate(AttendanceSessionExporter.sessions(attendance, q));
+        return aggregate(AttendanceSessionExporter.sessions(attendance, houses, q));
     }
 
     @Override

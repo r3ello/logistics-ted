@@ -38,6 +38,7 @@ public final class ExportQuery {
             out.put(f.name(), switch (f.type()) {
                 case DATE -> parseDate(f.name(), v.trim());
                 case INTEGER -> parseInteger(f.name(), v.trim());
+                case TEXT -> v.trim();
             });
         }
         return new ExportQuery(out);
@@ -49,6 +50,10 @@ public final class ExportQuery {
 
     public Integer integer(String name) {
         return (Integer) values.get(name);
+    }
+
+    public String text(String name) {
+        return (String) values.get(name);
     }
 
     /** The parsed filters, for the audit trail. */

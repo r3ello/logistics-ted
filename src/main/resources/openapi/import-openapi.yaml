@@ -113,8 +113,9 @@ info:
     Both datasets read the QR check-in log and share one counting rule: a closed session counts
     check-in → check-out; a session still open **today** counts check-in → now (`IN_PROGRESS`); a
     session left open on a **past** day counts **0** and is flagged `MISSING_CHECKOUT`, because its
-    real end time is unknown. `from`/`to` are required and span at most 366 days. Device identifiers
-    and GPS coordinates are never exported.
+    real end time is unknown. `from`/`to` are required and span at most 366 days; `houseExternalId`
+    narrows to one house by its External ID. Device identifiers and GPS coordinates are never
+    exported.
 
     - `attendance-sessions` — one row per check-in.
     - `attendance-daily` — one row per worker per work day with at least one check-in; its
@@ -556,7 +557,7 @@ paths:
                   filters:
                     - { name: from, type: date, required: true, description: "First work day, inclusive (YYYY-MM-DD)." }
                     - { name: to, type: date, required: true, description: "Last work day, inclusive. At most 366 days after `from`." }
-                    - { name: crewId, type: integer, required: false, description: "Only workers currently in this crew." }
+                    - { name: houseExternalId, type: text, required: false, description: "Only check-ins at the house with this External ID (the key used by the house import)." }
                   columns:
                     - { name: date, type: date, default: true, description: "Work day (Europe/Sofia)." }
                     - { name: worker_name, type: text, default: true, description: "Worker's name." }
@@ -570,7 +571,7 @@ paths:
       summary: Download one dataset as CSV
       description: |
         Besides the parameters below, pass the dataset's own **filters** (from the catalogue) as
-        query parameters — `from`, `to`, `crewId`, `workerId`, `houseId` for attendance. Any
+        query parameters — `from`, `to` and `houseExternalId` for attendance. Any
         parameter that is neither a declared filter nor one of the format parameters is rejected
         with `400`.
       operationId: exportEntity
@@ -607,6 +608,14 @@ paths:
           description: Attendance datasets — last work day (required there).
           schema: { type: string, format: date }
           example: "2026-09-30"
+        - name: houseExternalId
+          in: query
+          required: false
+          description: |
+            Attendance datasets — only check-ins at the house with this External ID, the same key
+            the house import uses. An External ID no house carries is a `400`, not an empty file.
+          schema: { type: string }
+          example: CRM-1042
       responses:
         '200':
           description: The CSV file (UTF-8 with a byte-order mark).
@@ -829,8 +838,8 @@ components:
 
     ExportFilterType:
       type: string
-      description: '`date` is ISO `YYYY-MM-DD`.'
-      enum: [date, integer]
+      description: '`date` is ISO `YYYY-MM-DD`; `text` is trimmed and matched exactly.'
+      enum: [date, integer, text]
 
     ExportColumnType:
       type: string

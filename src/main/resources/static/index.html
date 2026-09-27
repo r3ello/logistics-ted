@@ -3077,7 +3077,9 @@
       csvExpOptional:'optional', csvExpBgHint:'Bulgarian Excel expects “;” and decimal comma.',
       csvExpDs_attendance_sessions:'Attendance — one row per check-in',
       csvExpDs_attendance_daily:'Attendance — hours per worker per day',
-      csvExpF_from:'From', csvExpF_to:'To', csvExpF_crewId:'Crew ID', csvExpF_workerId:'Worker ID', csvExpF_houseId:'House ID',
+      csvExpF_from:'From', csvExpF_to:'To', csvExpF_houseExternalId:'House External ID',
+      csvExpNoExtId:'This house has no External ID, so the export cannot be limited to it.',
+      csvExpScopeCrew:'Crew and worker are not export filters — the file covers everyone; filter it in the spreadsheet.',
       auditFilterUser:'User', auditFilterAction:'Action', auditFilterEntity:'Entity', auditFilterFrom:'From', auditFilterTo:'To',
       auditColWhen:'When', auditColWho:'Who', auditColAction:'Action', auditColEntity:'Entity', auditColEndpoint:'Endpoint', auditColStatus:'Status', auditColIp:'IP',
       auditNoResults:'No audit entries for this filter.', auditAnonymous:'anonymous',
@@ -3474,7 +3476,9 @@
       csvExpOptional:'по избор', csvExpBgHint:'Българският Excel очаква „;“ и десетична запетая.',
       csvExpDs_attendance_sessions:'Присъствие — ред за всяко влизане',
       csvExpDs_attendance_daily:'Присъствие — часове на работник за ден',
-      csvExpF_from:'От', csvExpF_to:'До', csvExpF_crewId:'ID на екип', csvExpF_workerId:'ID на работник', csvExpF_houseId:'ID на обект',
+      csvExpF_from:'От', csvExpF_to:'До', csvExpF_houseExternalId:'Външен ID на обекта',
+      csvExpNoExtId:'Този обект няма външен ID, затова експортът не може да се ограничи до него.',
+      csvExpScopeCrew:'Екипът и работникът не са филтри за експорт — файлът обхваща всички; филтрирайте в таблицата.',
       auditFilterUser:'Потребител', auditFilterAction:'Действие', auditFilterEntity:'Обект', auditFilterFrom:'От', auditFilterTo:'До',
       auditColWhen:'Кога', auditColWho:'Кой', auditColAction:'Действие', auditColEntity:'Обект', auditColEndpoint:'Ендпойнт', auditColStatus:'Статус', auditColIp:'IP',
       auditNoResults:'Няма записи за този филтър.', auditAnonymous:'анонимен',
@@ -12962,6 +12966,7 @@
       const r = await apiFetch('/api/houses');
       const hs = await r.json();
       hs.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      _attHouses = hs;
       ssSetup('ss-house-inp', 'ss-house-drop', 'attHouseSelect',
         hs.map(h => ({ value: h.id, label: h.name })),
         attLoadHouse);
@@ -12987,6 +12992,7 @@
   // i18n key. The same renderer serves the admin modal (from the attendance view) and the
   // exporter role's page.
   let _csvExpCatalogue = null;
+  let _attHouses = null;   // attendance house list (with external_id), for the export pre-fill
 
   async function csvExpCatalogue() {
     if (_csvExpCatalogue) return _csvExpCatalogue;
@@ -13029,9 +13035,8 @@
       const v = values[f.name] ?? '';
       const label = _csvExpLabel('csvExpF_', f.name) + (f.required ? '' : ` <span style="font-weight:400">(${t('csvExpOptional')})</span>`);
       const hint = hints[f.name] ? `<div class="csvexp-desc">${_csvExpEsc(hints[f.name])}</div>` : '';
-      const input = f.type === 'date'
-        ? `<input type="date" data-filter="${_csvExpEsc(f.name)}" value="${_csvExpEsc(v)}" ${f.required ? 'required' : ''}>`
-        : `<input type="number" min="1" step="1" data-filter="${_csvExpEsc(f.name)}" value="${_csvExpEsc(v)}">`;
+      const type = f.type === 'date' ? 'date' : f.type === 'integer' ? 'number' : 'text';
+      const input = `<input type="${type}" ${type === 'number' ? 'min="1" step="1"' : ''} data-filter="${_csvExpEsc(f.name)}" value="${_csvExpEsc(v)}" ${f.required ? 'required' : ''}>`;
       return `<div class="modal-field" style="margin:0" title="${_csvExpEsc(f.description)}"><label>${label}</label>${input}${hint}</div>`;
     }).join('');
 
@@ -13161,10 +13166,15 @@
       from: document.getElementById(`att${cap}From`).value,
       to:   document.getElementById(`att${cap}To`).value,
     };
+    // Only the house can be carried over, and only by its External ID — internal crew/worker/house
+    // ids are not export filters (an external client could never know them).
     const hints = {};
-    if (sel) {
-      values[`${tab}Id`] = sel;
-      hints[`${tab}Id`] = document.getElementById(`ss-${tab}-inp`).value || '';
+    if (tab === 'house' && sel) {
+      const h = (_attHouses || []).find(x => String(x.id) === String(sel));
+      if (h && h.external_id) values.houseExternalId = h.external_id;
+      else hints.houseExternalId = t('csvExpNoExtId');
+    } else if (sel) {
+      hints.from = t('csvExpScopeCrew');
     }
     csvExpOpen({ dataset: 'attendance-daily', values, hints });
   }

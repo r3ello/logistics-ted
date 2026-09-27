@@ -7,6 +7,7 @@ import static com.bellgado.logistics_ted.service.exporter.ExportColumnType.INTEG
 import static com.bellgado.logistics_ted.service.exporter.ExportColumnType.TEXT;
 import static com.bellgado.logistics_ted.service.exporter.ExportColumnType.TIMESTAMP;
 
+import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.service.AttendanceQueryService;
 import com.bellgado.logistics_ted.service.AttendanceQueryService.SessionView;
 import com.bellgado.logistics_ted.service.exporter.EntityExporter;
@@ -31,12 +32,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class AttendanceSessionExporter implements EntityExporter<SessionView> {
 
+    /**
+     * Filters are what an external client can actually name: dates, and a house by its External ID
+     * (the import key). Internal crew/worker/house ids are deliberately not filters — a client has
+     * no way to know them; narrow those in the spreadsheet instead.
+     */
     static final List<ExportFilter> FILTERS = List.of(
         ExportFilter.requiredDate("from", "First work day, inclusive (YYYY-MM-DD)."),
         ExportFilter.requiredDate("to", "Last work day, inclusive. At most 366 days after `from`."),
-        ExportFilter.optionalInteger("crewId", "Only workers currently in this crew."),
-        ExportFilter.optionalInteger("workerId", "Only this worker."),
-        ExportFilter.optionalInteger("houseId", "Only check-ins at this house."));
+        ExportFilter.optionalText("houseExternalId",
+            "Only check-ins at the house with this External ID (the key used by the house import)."));
 
     private static final List<ExportColumn<SessionView>> COLUMNS = List.of(
         ExportColumn.of("session_id", INTEGER, "Internal id of the check-in.", SessionView::sessionId),
@@ -60,9 +65,11 @@ public class AttendanceSessionExporter implements EntityExporter<SessionView> {
             s -> AttendanceDailyExporter.hours(s.countedMinutes())));
 
     private final AttendanceQueryService attendance;
+    private final HouseRepository houses;
 
-    public AttendanceSessionExporter(AttendanceQueryService attendance) {
+    public AttendanceSessionExporter(AttendanceQueryService attendance, HouseRepository houses) {
         this.attendance = attendance;
+        this.houses = houses;
     }
 
     @Override
@@ -87,7 +94,7 @@ public class AttendanceSessionExporter implements EntityExporter<SessionView> {
 
     @Override
     public List<SessionView> fetch(ExportQuery q) {
-        return sessions(attendance, q);
+        return sessions(attendance, houses, q);
     }
 
     @Override
@@ -96,10 +103,19 @@ public class AttendanceSessionExporter implements EntityExporter<SessionView> {
     }
 
     /** Shared with the daily exporter, which aggregates the very same sessions. */
-    static List<SessionView> sessions(AttendanceQueryService attendance, ExportQuery q) {
+    static List<SessionView> sessions(AttendanceQueryService attendance, HouseRepository houses,
+                                      ExportQuery q) {
+        Integer houseId = null;
+        String externalId = q.text("houseExternalId");
+        if (externalId != null) {
+            // An unknown key is a 400, not an empty file: an empty file is indistinguishable from
+            // "nobody worked there", which is exactly the wrong conclusion for a typo.
+            houseId = houses.findByExternalId(externalId)
+                .map(h -> h.getId())
+                .orElseThrow(() -> new ExportException("No house has External ID '" + externalId + "'."));
+        }
         try {
-            return attendance.sessionsBetween(q.date("from"), q.date("to"),
-                q.integer("workerId"), q.integer("houseId"), q.integer("crewId"));
+            return attendance.sessionsBetween(q.date("from"), q.date("to"), null, houseId, null);
         } catch (IllegalArgumentException e) {
             // Range backwards or too wide — the service's message is already user-facing.
             throw new ExportException(e.getMessage());

@@ -1,10 +1,21 @@
 package com.bellgado.logistics_ted.service.exporter.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
+import com.bellgado.logistics_ted.domain.House;
+import com.bellgado.logistics_ted.repository.HouseRepository;
+import com.bellgado.logistics_ted.service.AttendanceQueryService;
 import com.bellgado.logistics_ted.service.AttendanceQueryService.SessionView;
 import com.bellgado.logistics_ted.service.AttendanceQueryService.State;
 import com.bellgado.logistics_ted.service.exporter.ExportColumn;
+import com.bellgado.logistics_ted.service.exporter.ExportException;
+import com.bellgado.logistics_ted.service.exporter.ExportFilter;
+import com.bellgado.logistics_ted.service.exporter.ExportQuery;
 import com.bellgado.logistics_ted.service.exporter.impl.AttendanceDailyExporter.DailyRow;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,6 +23,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
@@ -80,10 +93,58 @@ class AttendanceExportersTest {
         assertThat(AttendanceDailyExporter.hours(0)).isEqualByComparingTo("0.00");
     }
 
+    // ── filters ────────────────────────────────────────────────────────────────
+
+    private static ExportQuery query(Map<String, String> raw) {
+        return ExportQuery.parse(AttendanceSessionExporter.FILTERS, raw);
+    }
+
+    @Test
+    void houseExternalIdIsResolvedToTheHouse() {
+        AttendanceQueryService attendance = mock(AttendanceQueryService.class);
+        HouseRepository houses = mock(HouseRepository.class);
+        House h = new House();
+        h.setId(12);
+        when(houses.findByExternalId("CRM-77")).thenReturn(Optional.of(h));
+
+        new AttendanceSessionExporter(attendance, houses)
+            .fetch(query(Map.of("from", "2026-09-01", "to", "2026-09-30", "houseExternalId", " CRM-77 ")));
+
+        verify(attendance).sessionsBetween(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30), null, 12, null);
+    }
+
+    @Test
+    void anUnknownHouseExternalIdIsAnErrorNotAnEmptyFile() {
+        AttendanceQueryService attendance = mock(AttendanceQueryService.class);
+        HouseRepository houses = mock(HouseRepository.class);
+        when(houses.findByExternalId("nope")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> new AttendanceDailyExporter(attendance, houses)
+                .fetch(query(Map.of("from", "2026-09-01", "to", "2026-09-30", "houseExternalId", "nope"))))
+            .isInstanceOf(ExportException.class)
+            .hasMessageContaining("nope");
+        verifyNoInteractions(attendance);
+    }
+
+    @Test
+    void withoutAHouseFilterEveryHouseIsIncluded() {
+        AttendanceQueryService attendance = mock(AttendanceQueryService.class);
+        HouseRepository houses = mock(HouseRepository.class);
+        new AttendanceSessionExporter(attendance, houses).fetch(query(Map.of("from", "2026-09-01", "to", "2026-09-01")));
+        verify(attendance).sessionsBetween(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 1), null, null, null);
+        verifyNoInteractions(houses);
+    }
+
+    @Test
+    void internalIdsAreNotFilters() {
+        assertThat(AttendanceSessionExporter.FILTERS).extracting(ExportFilter::name)
+            .containsExactly("from", "to", "houseExternalId");
+    }
+
     @Test
     void neverExposesDeviceOrCoordinates() {
-        var session = new AttendanceSessionExporter(null);
-        var daily = new AttendanceDailyExporter(null);
+        var session = new AttendanceSessionExporter(null, null);
+        var daily = new AttendanceDailyExporter(null, null);
         List<String> names = Stream.concat(
                 session.columns().stream().map(ExportColumn::name),
                 daily.columns().stream().map(ExportColumn::name))
@@ -93,8 +154,8 @@ class AttendanceExportersTest {
 
     @Test
     void columnNamesAreUniquePerDataset() {
-        for (var cols : List.of(new AttendanceSessionExporter(null).columns(),
-                                new AttendanceDailyExporter(null).columns())) {
+        for (var cols : List.of(new AttendanceSessionExporter(null, null).columns(),
+                                new AttendanceDailyExporter(null, null).columns())) {
             List<String> names = cols.stream().map(c -> c.name()).toList();
             assertThat(names).doesNotHaveDuplicates();
         }
