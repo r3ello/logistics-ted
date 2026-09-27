@@ -1996,6 +1996,12 @@
     <a class="nav-item" id="navImport" href="#import" onclick="showView('import');return false;" style="display:none;margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem">
       <span class="nav-icon">📥</span> <span id="navImportLabel">Data Import</span>
     </a>
+    <!-- Admin only in this nav (the exporter role gets its own nav from initExporter()); visibility
+         is set in applyRole() and re-checked in showView(). Kept out of menu_config for the same
+         reason as navImport: applyMenuConfig() would undo the role gate. -->
+    <a class="nav-item" id="navExport" href="#export" onclick="showView('export');return false;" style="display:none">
+      <span class="nav-icon">📤</span> <span id="navExportLabel">Data Export</span>
+    </a>
     <a class="nav-item admin-only" id="navMenuConfig" href="#menuconfig" onclick="showView('menuconfig');return false;" style="margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem">
       <span class="nav-icon">🎛️</span> <span id="navMenuConfigLabel">Menu Management</span>
     </a>
@@ -3893,6 +3899,7 @@
     else if (activeView === 'history')     loadHistory();
     else if (activeView === 'auditlog')    loadAuditLog(_alState.page);
     else if (activeView === 'attendance')  { attLoadCrew(); attLoadWorker(); }
+    else if (activeView === 'export')      csvExpPageInit();
     else if (activeView === 'workeraccess') { if (_waGroups) waRender(_waGroups); }
     else if (activeView === 'housedetail') { if (_houseDetailId) loadHouseDetail(); }
     else if (activeView === 'weatherrecommendations') {
@@ -3909,6 +3916,8 @@
     else if (activeView === 'import')          impTranslate();
     const navImpLbl = document.getElementById('navImportLabel');
     if (navImpLbl) navImpLbl.textContent = t('navImport');
+    const navExpLbl = document.getElementById('navExportLabel');
+    if (navExpLbl) navExpLbl.textContent = t('navExport');
     // Re-label QA nav items
     const navQaGrpLbl = document.getElementById('navQaGroupLabel');
     if (navQaGrpLbl) navQaGrpLbl.textContent = t('navQaGroupLabel');
@@ -11936,6 +11945,8 @@
     const navImport = document.getElementById('navImport');
     if (navImport) navImport.style.display = ['admin','importer'].includes(user.role) ? '' : 'none';
     // CSV export mirrors the backend gate (SecurityConfig: /api/export/** = ADMIN or EXPORTER).
+    const navExport = document.getElementById('navExport');
+    if (navExport) navExport.style.display = user.role === 'admin' ? '' : 'none';
     const attCsvBtn = document.getElementById('attCsvBtn');
     if (attCsvBtn) attCsvBtn.style.display = user.role === 'admin' ? '' : 'none';
     // Fleet (GPS.bg) mirrors the backend gate (SecurityConfig: /api/vehicles/** = ADMIN).
@@ -12002,7 +12013,7 @@
     const navMenu = document.querySelector('#mainNav .nav-menu');
     if (navMenu) {
       navMenu.innerHTML = `
-        <a class="nav-item active" id="navExport" href="#export" onclick="showView('export');return false;"><span class="nav-icon">📤</span> <span>${t('navExport')}</span></a>
+        <a class="nav-item active" id="navExport" href="#export" onclick="showView('export');return false;"><span class="nav-icon">📤</span> <span id="navExportLabel">${t('navExport')}</span></a>
         <a class="nav-item" href="/import-docs.html" target="_blank" rel="noopener"><span class="nav-icon">📄</span> <span>API</span></a>`;
     }
     const brand = document.getElementById('brandName'); if (brand) brand.textContent = t('brandName');
