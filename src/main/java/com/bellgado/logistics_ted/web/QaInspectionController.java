@@ -54,7 +54,7 @@ public class QaInspectionController {
             WHERE hs.house_id = ?
               AND hs.status IN ('DONE', 'IN_PROGRESS')
               AND EXISTS (SELECT 1 FROM qa_checklist_item ci WHERE ci.stage_order = hs.stage_order AND ci.active = true)
-            ORDER BY hs.stage_order
+            ORDER BY st.sort_order, hs.stage_order
             """, houseId);
         return ResponseEntity.ok(rows);
     }

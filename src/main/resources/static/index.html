@@ -3210,6 +3210,7 @@
       stagesPromptAdd:'New stage name:', stagesPromptRename:'Rename stage:',
       stagesDeleteConfirm:'Delete stage "{name}"? This removes it from all houses.',
       stagesErrAdd:'Failed to add stage', stagesErrRename:'Failed to rename stage', stagesErrDelete:'Failed to delete stage',
+      stagesDragHint:'Drag ⠿ to change the order.', stagesDragSearchOff:'Clear the search to change the order.', stagesErrReorder:'Failed to save the new order',
       navWarehouses:'Warehouses', navSuppliers:'Suppliers',
       pageTitle_warehouses:'Warehouses', pageSub_warehouses:'Company depots — tier-2 source for orders',
       pageTitle_suppliers:'Suppliers', pageSub_suppliers:'External vendors — tier-3 fallback for orders',
@@ -3608,6 +3609,7 @@
       stagesColStage:'Наименование на етап', stagesAddBtn:'＋ Добави етап', stagesNoResults:'Няма намерени етапи.',
       stagesPromptAdd:'Наименование на нов етап:', stagesPromptRename:'Преименувай етап:',
       stagesDeleteConfirm:'Изтриване на етап "{name}"? Това го премахва от всички обекти.',
+      stagesDragHint:'Плъзнете ⠿, за да промените реда.', stagesDragSearchOff:'Изчистете търсенето, за да промените реда.', stagesErrReorder:'Неуспешно запазване на новия ред',
       stagesErrAdd:'Грешка при добавяне на етап', stagesErrRename:'Грешка при преименуване', stagesErrDelete:'Грешка при изтриване на етап',
       navWarehouses:'Складове', navSuppliers:'Доставчици',
       pageTitle_warehouses:'Складове', pageSub_warehouses:'Фирмени складове — източник от ниво 2 за поръчки',
@@ -6724,11 +6726,15 @@
     const filtered = q ? list.filter(s => s.stageName.toLowerCase().includes(q)) : list;
 
     const isEn = currentLang === 'en';
+    // Reordering needs the full list on screen: dropping inside a filtered subset is ambiguous.
+    const canDrag = currentUser?.role === 'admin' && !q;
     const rows = filtered.map(s => {
       const displayName = isEn && s.stageNameEn ? s.stageNameEn : s.stageName;
+      const pos = list.indexOf(s) + 1;
       return `
-      <tr id="stageTypeRow_${s.stageOrder}" style="border-bottom:1px solid #2e3250">
-        <td style="padding:0.55rem 0.75rem;color:#9aa3be;font-size:0.78rem;font-weight:700;width:40px">${s.stageOrder}</td>
+      <tr id="stageTypeRow_${s.stageOrder}" data-stage="${s.stageOrder}" ${canDrag ? 'draggable="true"' : ''} style="border-bottom:1px solid #2e3250">
+        <td class="admin-only" style="padding:0.55rem 0 0.55rem 0.75rem;width:18px;color:#5a6280;font-size:1rem;${canDrag ? 'cursor:grab' : 'opacity:.3'}" title="${canDrag ? t('stagesDragHint') : t('stagesDragSearchOff')}">⠿</td>
+        <td style="padding:0.55rem 0.75rem;color:#9aa3be;font-size:0.78rem;font-weight:700;width:40px">${pos}</td>
         <td style="padding:0.55rem 0.75rem;font-size:0.9rem;font-weight:600" id="stageTypeName_${s.stageOrder}">${displayName}</td>
         <td style="padding:0.55rem 0.75rem;text-align:right;white-space:nowrap" class="admin-only">
           <button onclick="editStageType(${s.stageOrder},'${s.stageName.replace(/'/g,"\\'")}','${(s.stageNameEn||'').replace(/'/g,"\\'")}')" style="background:none;border:none;color:#4f8ef7;cursor:pointer;font-size:1rem;padding:0.2rem 0.4rem">✎</button>
@@ -6738,18 +6744,71 @@
 
     grid.innerHTML = `
       <div style="max-width:600px">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:1rem" class="admin-only">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem" class="admin-only">
+          <span style="color:#9aa3be;font-size:0.8rem">${canDrag ? t('stagesDragHint') : t('stagesDragSearchOff')}</span>
           <button class="btn btn-primary" onclick="addStageType()">${t('stagesAddBtn')}</button>
         </div>
         <table style="width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;border:1px solid #2e3250">
           <thead><tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+            <th class="admin-only"></th>
             <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase;width:40px">#</th>
             <th data-i18n="stagesColStage" style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase">${t('stagesColStage')}</th>
             <th class="admin-only"></th>
           </tr></thead>
-          <tbody>${rows || `<tr><td colspan="3" style="padding:1rem;color:#9aa3be;text-align:center">${t('stagesNoResults')}</td></tr>`}</tbody>
+          <tbody id="stageTypeBody">${rows || `<tr><td colspan="4" style="padding:1rem;color:#9aa3be;text-align:center">${t('stagesNoResults')}</td></tr>`}</tbody>
         </table>
       </div>`;
+    if (canDrag) initStageTypeDrag(document.getElementById('stageTypeBody'));
+  }
+
+  // Drag-and-drop reorder of stage types. Moves the row in the DOM, then saves the full order
+  // (PUT /api/stage-types/reorder); on failure the list is reloaded from the server.
+  function initStageTypeDrag(tbody) {
+    let dragged = null;
+    const clearMarks = () => tbody.querySelectorAll('tr[data-stage]').forEach(r => { r.style.borderTop = ''; r.style.borderBottom = '1px solid #2e3250'; });
+    // Drop above the target row if the pointer is in its upper half, below it otherwise —
+    // so the last position is reachable.
+    const dropsAfter = (tr, e) => { const b = tr.getBoundingClientRect(); return e.clientY > b.top + b.height / 2; };
+
+    tbody.addEventListener('dragstart', e => {
+      dragged = e.target.closest('tr[data-stage]');
+      if (!dragged) { e.preventDefault(); return; }
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', dragged.dataset.stage);
+      requestAnimationFrame(() => { if (dragged) dragged.style.opacity = '0.4'; });
+    });
+    tbody.addEventListener('dragend', () => {
+      if (dragged) dragged.style.opacity = '';
+      dragged = null;
+      clearMarks();
+    });
+    tbody.addEventListener('dragover', e => {
+      if (!dragged) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      clearMarks();
+      const tr = e.target.closest('tr[data-stage]');
+      if (!tr || tr === dragged) return;
+      if (dropsAfter(tr, e)) tr.style.borderBottom = '2px solid var(--accent)';
+      else                   tr.style.borderTop    = '2px solid var(--accent)';
+    });
+    tbody.addEventListener('drop', async e => {
+      e.preventDefault();
+      clearMarks();
+      const tr = e.target.closest('tr[data-stage]');
+      if (!dragged || !tr || tr === dragged) return;
+      const before = [...tbody.querySelectorAll('tr[data-stage]')].map(r => +r.dataset.stage);
+      tr.parentNode.insertBefore(dragged, dropsAfter(tr, e) ? tr.nextSibling : tr);
+      const order = [...tbody.querySelectorAll('tr[data-stage]')].map(r => +r.dataset.stage);
+      if (order.join() === before.join()) return;
+      try {
+        const r = await apiFetch('/api/stage-types/reorder', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ stageOrders: order }) });
+        if (!r.ok) throw new Error(r.status);
+      } catch(err) {
+        alert(t('stagesErrReorder'));
+      }
+      renderStagesDash();
+    });
   }
 
   let _stageModalOrder = null;

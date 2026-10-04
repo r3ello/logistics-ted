@@ -50,7 +50,7 @@ public class WeatherRecommendationController {
                 SELECT 1 FROM house_stage hs
                 WHERE hs.house_id = ? AND hs.stage_order = r.stage_order AND hs.status = 'DONE'
             )
-            ORDER BY r.stage_order
+            ORDER BY st.sort_order, r.stage_order
             """, houseId);
 
         // 3. Fetch 16-day forecast from Open-Meteo — retry up to 3 times, 2s apart
@@ -262,7 +262,7 @@ public class WeatherRecommendationController {
                    r.max_wind_kph, r.requires_dry_days_before
             FROM stage_weather_rule r
             JOIN stage_type st ON st.stage_order = r.stage_order
-            ORDER BY r.stage_order
+            ORDER BY st.sort_order, r.stage_order
             """);
 
         // Fetch forecasts in parallel

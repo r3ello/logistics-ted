@@ -38,7 +38,7 @@ public final class AuditActionResolver {
         Map.entry("import", "import"));
 
     /** Trailing path segments that name the operation rather than a subresource. */
-    private static final Set<String> VERB_SEGMENTS = Set.of("start", "finish", "view", "choose");
+    private static final Set<String> VERB_SEGMENTS = Set.of("start", "finish", "view", "choose", "reorder");
 
     public ResolvedAction resolve(String method, String path) {
         String defaultAction = defaultAction(method);

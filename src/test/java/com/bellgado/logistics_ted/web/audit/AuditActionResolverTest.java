@@ -99,6 +99,12 @@ class AuditActionResolverTest {
     }
 
     @Test
+    void stageTypeReorderIsAVerb() {
+        assertResolved("PUT", "/api/stage-types/reorder", "reorder", "stage_type", null);
+        assertResolved("PUT", "/api/stage-types/7",       "update",  "stage_type", "7");
+    }
+
+    @Test
     void checkinTokenIsNeverCaptured() {
         ResolvedAction in = resolver.resolve("POST", "/api/public/checkin/" + UUID + "/session");
         assertThat(in).isEqualTo(new ResolvedAction("check_in", "work_session", null));

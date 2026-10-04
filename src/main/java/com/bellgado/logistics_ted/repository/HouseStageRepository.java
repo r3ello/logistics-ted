@@ -7,15 +7,17 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface HouseStageRepository extends JpaRepository<HouseStage, Integer> {
-    List<HouseStage> findByHouseIdOrderByStageOrder(Integer houseId);
+    /** A house's stages in display order (stage_type.sort_order). */
+    @Query("SELECT s FROM HouseStage s LEFT JOIN StageType st ON st.stageOrder = s.stageOrder WHERE s.house.id = :houseId ORDER BY st.sortOrder, s.stageOrder")
+    List<HouseStage> findByHouseIdInDisplayOrder(Integer houseId);
 
     java.util.Optional<HouseStage> findByHouseIdAndStageOrder(Integer houseId, Integer stageOrder);
 
     /** Every (house) stage cell assigned to a crew — what its leader may raise a material order for. */
-    @Query("SELECT s FROM HouseStage s JOIN FETCH s.house WHERE s.crewId = :crewId ORDER BY s.house.name, s.stageOrder")
+    @Query("SELECT s FROM HouseStage s JOIN FETCH s.house LEFT JOIN StageType st ON st.stageOrder = s.stageOrder WHERE s.crewId = :crewId ORDER BY s.house.name, st.sortOrder, s.stageOrder")
     List<HouseStage> findByCrewIdWithHouse(Integer crewId);
 
-    @Query(value = "SELECT stage_order, stage_name, stage_name_en FROM stage_type ORDER BY CASE WHEN stage_name_en = 'Completion' THEN 1 ELSE 0 END, stage_order", nativeQuery = true)
+    @Query(value = "SELECT stage_order, stage_name, stage_name_en FROM stage_type ORDER BY sort_order, stage_order", nativeQuery = true)
     List<Object[]> findDistinctStageTypes();
 
     List<HouseStage> findByStageOrder(Integer stageOrder);
@@ -35,6 +37,9 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query(value = "SELECT MAX(stage_order) FROM stage_type", nativeQuery = true)
     Integer maxStageOrder();
 
+    @Query(value = "SELECT MAX(sort_order) FROM stage_type", nativeQuery = true)
+    Integer maxSortOrder();
+
     @Modifying
     @Query("UPDATE HouseStage s SET s.workerName = :leaderName WHERE s.crewId = :crewId")
     void syncLeaderNameForCrew(Integer crewId, String leaderName);
@@ -42,14 +47,14 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query("SELECT COUNT(s) FROM HouseStage s WHERE s.crewId = :crewId AND s.id <> :excludeId")
     long countOtherAssignments(Integer crewId, Integer excludeId);
 
-    @Query(value = "SELECT stage_name FROM house_stage WHERE house_id = :houseId AND status = 'IN_PROGRESS' ORDER BY stage_order", nativeQuery = true)
+    @Query(value = "SELECT hs.stage_name FROM house_stage hs LEFT JOIN stage_type st ON st.stage_order = hs.stage_order WHERE hs.house_id = :houseId AND hs.status = 'IN_PROGRESS' ORDER BY st.sort_order, hs.stage_order", nativeQuery = true)
     List<String> findAllInProgressStageNames(Integer houseId);
 
     @Query(value = "SELECT DISTINCT h.id, h.name FROM house_stage hs JOIN house h ON h.id = hs.house_id WHERE hs.crew_id = :crewId AND hs.status IN ('ASSIGNED', 'IN_PROGRESS') ORDER BY h.name", nativeQuery = true)
     List<Object[]> findAssignedHousesForCrew(Integer crewId);
 
-    /** Lowest ASSIGNED stage for a crew on a specific house — candidate for auto-promote on check-in. */
-    @Query("SELECT s FROM HouseStage s JOIN FETCH s.house WHERE s.house.id = :houseId AND s.crewId = :crewId AND s.status = 'ASSIGNED' ORDER BY s.stageOrder ASC")
+    /** First ASSIGNED stage (display order) for a crew on a specific house — candidate for auto-promote on check-in. */
+    @Query("SELECT s FROM HouseStage s JOIN FETCH s.house LEFT JOIN StageType st ON st.stageOrder = s.stageOrder WHERE s.house.id = :houseId AND s.crewId = :crewId AND s.status = 'ASSIGNED' ORDER BY st.sortOrder, s.stageOrder")
     List<HouseStage> findAssignedStagesForCrewOnHouse(Integer houseId, Integer crewId);
 
     @Query(value = """

@@ -21,7 +21,7 @@ public class WeatherRulesController {
                    r.max_wind_kph, r.requires_dry_days_before, r.notes_en, r.notes_bg
             FROM stage_weather_rule r
             JOIN stage_type st ON st.stage_order = r.stage_order
-            ORDER BY r.stage_order
+            ORDER BY st.sort_order, r.stage_order
             """);
         return ResponseEntity.ok(rules);
     }

@@ -10,21 +10,23 @@ public interface HouseStageCrewLogRepository extends JpaRepository<HouseStageCre
 
     @Query(value = """
         SELECT l.* FROM house_stage_crew_log l
+        LEFT JOIN stage_type st ON st.stage_order = l.stage_order
         WHERE l.crew_id = (
             SELECT w.crew_id FROM worker w WHERE w.id = :workerId AND w.crew_id IS NOT NULL LIMIT 1
         )
-        ORDER BY l.house_id, l.stage_order, l.logged_at ASC
+        ORDER BY l.house_id, st.sort_order, l.stage_order, l.logged_at ASC
         """, nativeQuery = true)
     List<HouseStageCrewLog> findByWorkerId(@Param("workerId") Integer workerId);
 
     @Query(value = """
         SELECT l.* FROM house_stage_crew_log l
+        LEFT JOIN stage_type st ON st.stage_order = l.stage_order
         WHERE l.crew_id = (
             SELECT w.crew_id FROM worker w WHERE w.id = :workerId AND w.crew_id IS NOT NULL LIMIT 1
         )
         AND (:fromDate IS NULL OR COALESCE(l.start_date, l.logged_at::date) >= CAST(:fromDate AS date))
         AND (:toDate   IS NULL OR COALESCE(l.end_date,   l.logged_at::date) <= CAST(:toDate   AS date))
-        ORDER BY l.house_id, l.stage_order, l.logged_at ASC
+        ORDER BY l.house_id, st.sort_order, l.stage_order, l.logged_at ASC
         """, nativeQuery = true)
     List<HouseStageCrewLog> findByWorkerIdAndDateRange(
         @Param("workerId") Integer workerId,
@@ -33,17 +35,19 @@ public interface HouseStageCrewLogRepository extends JpaRepository<HouseStageCre
 
     @Query(value = """
         SELECT l.* FROM house_stage_crew_log l
+        LEFT JOIN stage_type st ON st.stage_order = l.stage_order
         WHERE l.crew_id = :crewId
-        ORDER BY l.house_id, l.stage_order, l.logged_at ASC
+        ORDER BY l.house_id, st.sort_order, l.stage_order, l.logged_at ASC
         """, nativeQuery = true)
     List<HouseStageCrewLog> findByCrewId(@Param("crewId") Integer crewId);
 
     @Query(value = """
         SELECT l.* FROM house_stage_crew_log l
+        LEFT JOIN stage_type st ON st.stage_order = l.stage_order
         WHERE l.crew_id = :crewId
         AND (:fromDate IS NULL OR COALESCE(l.start_date, l.logged_at::date) >= CAST(:fromDate AS date))
         AND (:toDate   IS NULL OR COALESCE(l.end_date,   l.logged_at::date) <= CAST(:toDate   AS date))
-        ORDER BY l.house_id, l.stage_order, l.logged_at ASC
+        ORDER BY l.house_id, st.sort_order, l.stage_order, l.logged_at ASC
         """, nativeQuery = true)
     List<HouseStageCrewLog> findByCrewIdAndDateRange(
         @Param("crewId") Integer crewId,
@@ -56,11 +60,12 @@ public interface HouseStageCrewLogRepository extends JpaRepository<HouseStageCre
                MAX(l.stage_name)    AS stage_name,
                MAX(l.stage_name_en) AS stage_name_en
         FROM house_stage_crew_log l
+        LEFT JOIN stage_type st ON st.stage_order = l.stage_order
         WHERE l.status = 'DONE'
           AND l.start_date IS NOT NULL
           AND l.end_date   IS NOT NULL
         GROUP BY l.stage_order
-        ORDER BY l.stage_order
+        ORDER BY MIN(st.sort_order), l.stage_order
         """, nativeQuery = true)
     List<Object[]> avgDaysPerStage();
 

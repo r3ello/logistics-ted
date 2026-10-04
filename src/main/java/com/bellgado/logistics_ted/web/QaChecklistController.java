@@ -26,7 +26,7 @@ public class QaChecklistController {
                    qi.item_text_bg, qi.item_text_en, qi.sort_order, qi.active
             FROM qa_checklist_item qi
             JOIN stage_type st ON st.stage_order = qi.stage_order
-            ORDER BY qi.stage_order, qi.sort_order, qi.id
+            ORDER BY st.sort_order, qi.stage_order, qi.sort_order, qi.id
             """);
         return ResponseEntity.ok(rows);
     }

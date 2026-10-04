@@ -13,12 +13,14 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +59,7 @@ public class HouseStageController {
 
     @GetMapping("/stage-types")
     public List<Map<String, Object>> listStageTypes() {
-        var raw = jdbc.queryForList("SELECT stage_order, stage_name, stage_name_en, main_stage_bg, main_stage_en, has_crew FROM stage_type ORDER BY CASE WHEN stage_name_en = 'Completion' THEN 1 ELSE 0 END, stage_order");
+        var raw = jdbc.queryForList("SELECT stage_order, stage_name, stage_name_en, main_stage_bg, main_stage_en, has_crew, sort_order FROM stage_type ORDER BY sort_order, stage_order");
         return raw.stream().map(row -> {
                 Map<String, Object> m = new LinkedHashMap<>();
                 m.put("stageOrder",   row.get("stage_order"));
@@ -66,6 +68,7 @@ public class HouseStageController {
                 m.put("mainStageBg",  row.get("main_stage_bg"));
                 m.put("mainStageEn",  row.get("main_stage_en"));
                 m.put("hasCrew",      row.get("has_crew"));
+                m.put("sortOrder",    row.get("sort_order"));
                 return m;
             }).toList();
     }
@@ -87,6 +90,8 @@ public class HouseStageController {
         String name = body.get("stageName").toString().trim();
         Integer maxOrder = stages.maxStageOrder();
         int newOrder = (maxOrder == null ? 0 : maxOrder) + 1;
+        Integer maxSort = stages.maxSortOrder();
+        int newSort = (maxSort == null ? 0 : maxSort) + 1;
         List<House> allHouses = houses.findAll();
         List<HouseStage> toSave = new ArrayList<>();
         String nameEn = body.get("stageNameEn") != null ? body.get("stageNameEn").toString().trim() : name;
@@ -101,10 +106,35 @@ public class HouseStageController {
             toSave.add(s);
         }
         jdbc.update(
-            "INSERT INTO stage_type (stage_order, stage_name, stage_name_en, has_crew) VALUES (?, ?, ?, false)",
-            newOrder, name, nameEn);
+            "INSERT INTO stage_type (stage_order, stage_name, stage_name_en, has_crew, sort_order) VALUES (?, ?, ?, false, ?)",
+            newOrder, name, nameEn, newSort);
         stages.saveAll(toSave);
         return ResponseEntity.ok(Map.of("stageOrder", newOrder, "stageName", name));
+    }
+
+    /**
+     * Sets the display order of the stage types. Body: {@code {"stageOrders":[2,1,3,...]}} — every
+     * existing stage id exactly once, in the new order. Only {@code sort_order} changes; the ids
+     * (and everything that references them) stay as they are.
+     */
+    @PutMapping("/stage-types/reorder")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public ResponseEntity<?> reorderStageTypes(@RequestBody Map<String, Object> body) {
+        if (!(body.get("stageOrders") instanceof List<?> raw))
+            return ResponseEntity.badRequest().body(Map.of("error", "stageOrders required"));
+        List<Integer> ids = new ArrayList<>();
+        for (Object o : raw) {
+            if (!(o instanceof Number n)) return ResponseEntity.badRequest().body(Map.of("error", "stageOrders must be integers"));
+            ids.add(n.intValue());
+        }
+        List<Integer> existing = jdbc.queryForList("SELECT stage_order FROM stage_type", Integer.class);
+        if (ids.size() != existing.size() || !new HashSet<>(ids).equals(new HashSet<>(existing)))
+            return ResponseEntity.badRequest().body(Map.of("error", "stageOrders must list every stage exactly once"));
+        List<Object[]> args = new ArrayList<>();
+        for (int i = 0; i < ids.size(); i++) args.add(new Object[]{ i + 1, ids.get(i) });
+        jdbc.batchUpdate("UPDATE stage_type SET sort_order = ? WHERE stage_order = ?", args);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     @DeleteMapping("/stage-types/{order}")
@@ -203,7 +233,7 @@ public class HouseStageController {
     @GetMapping("/houses/{houseId}/stages")
     @Transactional(readOnly = true)
     public List<Map<String, Object>> listForHouse(@PathVariable Integer houseId) {
-        return stages.findByHouseIdOrderByStageOrder(houseId).stream().map(this::toDto).toList();
+        return stages.findByHouseIdInDisplayOrder(houseId).stream().map(this::toDto).toList();
     }
 
     // ── Worker journey: all house-stage history for a worker's crew ─────────────
@@ -278,7 +308,7 @@ public class HouseStageController {
     @Transactional(readOnly = true)
     public ResponseEntity<?> houseTimeline(@PathVariable Integer houseId) {
         return houses.findById(houseId).map(h -> {
-            List<Map<String, Object>> stageList = stages.findByHouseIdOrderByStageOrder(houseId).stream().map(s -> {
+            List<Map<String, Object>> stageList = stages.findByHouseIdInDisplayOrder(houseId).stream().map(s -> {
                 Map<String, Object> m = new LinkedHashMap<>();
                 m.put("stageOrder",  s.getStageOrder());
                 m.put("stageName",   s.getStageName());
