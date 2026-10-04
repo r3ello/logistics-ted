@@ -42,6 +42,13 @@ public final class CsvRow {
         DateTimeFormatter.ofPattern("yyyy/MM/dd")
     };
 
+    /** This row with its column names translated; positions are unchanged. */
+    CsvRow renamed(Map<String, String> oldToNew) {
+        Map<String, Integer> next = new java.util.LinkedHashMap<>();
+        index.forEach((name, pos) -> next.put(oldToNew.getOrDefault(name, name), pos));
+        return new CsvRow(next, values, line, format);
+    }
+
     /** 1-based line in the source file, for the error report. */
     public int line() {
         return line;

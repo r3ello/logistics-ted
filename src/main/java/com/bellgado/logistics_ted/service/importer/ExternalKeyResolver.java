@@ -104,7 +104,13 @@ public class ExternalKeyResolver {
      */
     public ImportRef rebase(ImportRef ref, Map<String, String> appSnapshot,
                             Map<String, String> sheetSnapshot, Long batchId) {
-        applyBaseline(ref, appSnapshot, sheetSnapshot, batchId);
+        // A file may manage only some columns (a key,name,lat,lng coordinate fix; a stage cell
+        // reading "Не"). Columns it did not carry keep their previous sheet baseline: dropping them
+        // would make the next full file look like a sheet edit of every one of them, turning
+        // legitimate app edits into conflicts.
+        Map<String, String> merged = new LinkedHashMap<>(sheetBaselineOf(ref));
+        merged.putAll(sheetSnapshot);
+        applyBaseline(ref, appSnapshot, merged, batchId);
         return refs.save(ref);
     }
 

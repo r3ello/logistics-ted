@@ -61,6 +61,7 @@ public class ImportOrchestrator {
                             String filename, String username) {
 
         boolean apply = MODE_APPLY.equals(mode);
+        table = table.renameHeaders(imp.headerResolver());
         ImportBatch batch = recorder.start(imp.entityType(), apply ? MODE_APPLY : MODE_VALIDATE,
                                            filename, username);
 

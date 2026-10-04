@@ -4,6 +4,7 @@ import com.bellgado.logistics_ted.web.importer.csv.CsvRow;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 /**
  * Everything the sync needs to know about one entity. Adding a new importable entity means writing
@@ -33,6 +34,17 @@ public interface EntityImporter {
     /** Importers whose files must be applied first, by {@link #name()}. */
     default List<String> dependsOn() {
         return List.of();
+    }
+
+    /**
+     * Translates the file's header names (lower-cased, trimmed) into this importer's column names,
+     * before anything else looks at the file — so a client can upload its own sheet verbatim
+     * ({@code Project_ID} → {@code key}). A name the resolver leaves alone is matched as-is, and an
+     * unknown one still ends up as an {@code UNKNOWN_COLUMN} warning. Called once per file, so an
+     * importer whose columns come from the database can load them once here.
+     */
+    default UnaryOperator<String> headerResolver() {
+        return UnaryOperator.identity();
     }
 
     /** The column carrying the sheet-owned external key. */

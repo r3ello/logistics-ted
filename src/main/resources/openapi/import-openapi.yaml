@@ -248,6 +248,12 @@ paths:
                              google_chat_id: text, google_album_id: text, google_album_url: text,
                              calculator_sheet_id: text, master_sheet_id: text }
                   dependsOn: []
+                - name: house-stages
+                  entityType: house_stages
+                  keyColumn: key
+                  required: []
+                  columns: { конструкция: text, ламперия: text, ел: text, вик: text }
+                  dependsOn: [houses]
                 - name: materials
                   entityType: material
                   keyColumn: key
@@ -693,8 +699,25 @@ components:
       required: true
       description: |
         The importer name, plural and lower-case, as returned by `GET /api/import/entities`.
-        Currently `materials` and `houses` are available; the remaining entities are being
-        rolled out.
+        Currently `materials`, `houses` and `house-stages` are available; the remaining entities
+        are being rolled out.
+
+        The master sheet can be uploaded verbatim to both `houses` and `house-stages`: each importer
+        translates the sheet's own headers (`Project_ID` → `key`, `Project_Name` → `name`,
+        `Project_Link` → `drive_folder_url`, `Calculator_SS_Id` → `calculator_sheet_id`,
+        `Prj_Master_SS_Id` → `master_sheet_id`) and reports the other importer's columns as
+        `UNKNOWN_COLUMN` warnings.
+
+        For `house-stages`: one row per house, keyed by the house's external id (import `houses`
+        first — an unknown key fails with `UNRESOLVED_REF`). Every other column is a construction
+        stage, matched by its name (a leading number such as `7_` is ignored; the English stage
+        name is accepted too). A cell reads as `<worker> <status>`: `Завършен`, `изпълнил`,
+        `Монтирана`, `Взети размери` → done; `в Процес` → in progress; a name alone → assigned;
+        an empty cell → not started; `Не` → the stage is left untouched; any other text is stored
+        as the stage's note without changing its status. Dates are never set from the sheet.
+        While the file has no foundation (`Фундамент`) column, the foundation is marked done as soon
+        as any later stage is in progress or done.
+        Progress recorded in the application is kept until the sheet itself changes that cell.
 
         For `houses`: only `name` is required (the project name, e.g. `Project_Name`). `address` is
         the optional address text; `location` is optional and holds the Google Maps link for the

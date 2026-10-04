@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import org.springframework.stereotype.Component;
 
 /**
@@ -107,6 +108,23 @@ public class HouseImporter implements EntityImporter {
     @Override public Map<String, ColumnType> columns() { return COLUMNS; }
 
     @Override public Set<String> requiredColumns() { return Set.of("name"); }
+
+    /**
+     * The ACTIVE_MASTER sheet's own headers, so the client's export can be uploaded as-is. Its
+     * other columns either already match ({@code location}, {@code client_name}, {@code google_*})
+     * or belong to {@code house-stages} and come back as UNKNOWN_COLUMN warnings.
+     */
+    private static final Map<String, String> MASTER_SHEET_HEADERS = Map.of(
+        "project_id",       "key",
+        "project_name",     "name",
+        "project_link",     "drive_folder_url",
+        "calculator_ss_id", "calculator_sheet_id",
+        "prj_master_ss_id", "master_sheet_id");
+
+    @Override
+    public UnaryOperator<String> headerResolver() {
+        return h -> MASTER_SHEET_HEADERS.getOrDefault(h, h);
+    }
 
     @Override
     public Map<String, String> readRow(CsvRow row) {
