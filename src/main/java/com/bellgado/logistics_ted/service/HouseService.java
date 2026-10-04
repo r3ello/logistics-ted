@@ -122,7 +122,7 @@ public class HouseService {
     }
 
     public HouseResponse create(HouseUpsertRequest req) {
-        validateNameLocation(req);
+        validateName(req);
         House h = new House();
         applyFields(h, req);
         String externalId = normalizeExternalId(req.externalId());
@@ -176,7 +176,7 @@ public class HouseService {
     }
 
     public HouseResponse update(Integer id, HouseUpsertRequest req) {
-        validateNameLocation(req);
+        validateName(req);
         House h = houses.findById(id).orElseThrow(() -> new EntityNotFoundException("House not found"));
         applyFields(h, req);
         // null = untouched (partial updates keep the id); "" clears it.
@@ -220,12 +220,10 @@ public class HouseService {
         houses.deleteById(id);
     }
 
-    private static void validateNameLocation(HouseUpsertRequest req) {
-        // `address` is the required one, not `location`: location is now the optional Maps link.
-        if (req == null
-            || req.name() == null || req.name().isBlank()
-            || req.address() == null || req.address().isBlank()) {
-            throw new IllegalArgumentException("Name and address are required.");
+    private static void validateName(HouseUpsertRequest req) {
+        // Only the name: address is optional since V20 (the ACTIVE_MASTER sheet has none).
+        if (req == null || req.name() == null || req.name().isBlank()) {
+            throw new IllegalArgumentException("Name is required.");
         }
     }
 
@@ -291,7 +289,7 @@ public class HouseService {
 
     private static void applyFields(House h, HouseUpsertRequest req) {
         if (req.name()     != null) h.setName(req.name().trim());
-        if (req.address()  != null) h.setAddress(req.address().trim());
+        if (req.address()  != null) h.setAddress(blankToNull(req.address()));
         if (req.location() != null) h.setLocation(req.location().isBlank() ? null : req.location().trim());
         if (req.lat()      != null) h.setLat(req.lat());
         if (req.lng()      != null) h.setLng(req.lng());
@@ -305,6 +303,17 @@ public class HouseService {
         if ("".equals(req.scaffoldStartDate())) h.setScaffoldStartDate(null);
         if ("".equals(req.scaffoldEndDate()))   h.setScaffoldEndDate(null);
         if (req.googleDocUrl() != null) h.setGoogleDocUrl(req.googleDocUrl().isBlank() ? null : req.googleDocUrl().trim());
+        if (req.clientName()        != null) h.setClientName(blankToNull(req.clientName()));
+        if (req.driveFolderUrl()    != null) h.setDriveFolderUrl(blankToNull(req.driveFolderUrl()));
+        if (req.googleChatId()      != null) h.setGoogleChatId(blankToNull(req.googleChatId()));
+        if (req.googleAlbumId()     != null) h.setGoogleAlbumId(blankToNull(req.googleAlbumId()));
+        if (req.googleAlbumUrl()    != null) h.setGoogleAlbumUrl(blankToNull(req.googleAlbumUrl()));
+        if (req.calculatorSheetId() != null) h.setCalculatorSheetId(blankToNull(req.calculatorSheetId()));
+        if (req.masterSheetId()     != null) h.setMasterSheetId(blankToNull(req.masterSheetId()));
+    }
+
+    private static String blankToNull(String s) {
+        return s == null || s.isBlank() ? null : s.trim();
     }
 
     private static LocalDate parseDate(String s) {

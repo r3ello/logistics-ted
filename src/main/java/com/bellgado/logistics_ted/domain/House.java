@@ -28,8 +28,11 @@ public class House {
     @Column(nullable = false, length = 150)
     private String name;
 
-    /** The address text — the CRM's {@code Address}. This is what the UI and route stops display. */
-    @Column(nullable = false, length = 255)
+    /**
+     * The address text — the CRM's {@code Address}. Optional since V20: the ACTIVE_MASTER sheet has
+     * no address column, so readers must fall back (to the name) when it is null.
+     */
+    @Column(length = 255)
     private String address;
 
     /** A Google Maps link — the CRM's {@code Location}. Stored opaquely, never resolved to coords. */
@@ -71,4 +74,37 @@ public class House {
      */
     @Column(name = "external_id", length = 120)
     private String externalId;
+
+    // ── ACTIVE_MASTER project columns (Flyway V20) ──────────────────────────────────────────────
+
+    /** The end client's name ({@code Client_Name}). Personal data — never log it. */
+    @Column(name = "client_name", length = 255)
+    private String clientName;
+
+    /** The project's Google Drive folder ({@code Project_Link}). */
+    @Column(name = "drive_folder_url", length = 512)
+    private String driveFolderUrl;
+
+    /** Google Chat space ({@code Google_Chat_ID}, "spaces/…"). */
+    @Column(name = "google_chat_id", length = 120)
+    private String googleChatId;
+
+    @Column(name = "google_album_id", length = 255)
+    private String googleAlbumId;
+
+    @Column(name = "google_album_url", length = 512)
+    private String googleAlbumUrl;
+
+    /** Google Sheets id of the project calculator ({@code Calculator_SS_Id}) — an id, not a URL. */
+    @Column(name = "calculator_sheet_id", length = 120)
+    private String calculatorSheetId;
+
+    /** Google Sheets id of the project master ({@code Prj_Master_SS_Id}) — an id, not a URL. */
+    @Column(name = "master_sheet_id", length = 120)
+    private String masterSheetId;
+
+    /** What to show where an address is expected: the address, or the name when there is none (V20). */
+    public String addressOrName() {
+        return address != null && !address.isBlank() ? address : name;
+    }
 }

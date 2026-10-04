@@ -138,9 +138,36 @@ class HouseImporterTest {
         assertThatThrownBy(() -> importer.readRow(row("key,name,address", "H-001,,Рударци")))
             .isInstanceOf(CsvValueException.class)
             .satisfies(e -> assertThat(((CsvValueException) e).getCode()).isEqualTo(ImportErrorCode.EMPTY_REQUIRED));
-        assertThatThrownBy(() -> importer.readRow(row("key,name,address", "H-001,Къща,")))
-            .isInstanceOf(CsvValueException.class)
-            .satisfies(e -> assertThat(((CsvValueException) e).getCode()).isEqualTo(ImportErrorCode.EMPTY_REQUIRED));
+    }
+
+    @Test
+    void addressIsOptionalSinceTheMasterSheetHasNone() {
+        assertThat(importer.requiredColumns()).containsExactly("name");
+        Map<String, String> v = importer.readRow(row("key,name,address", "H-001,Къща,"));
+        assertThat(v).containsEntry("name", "Къща");
+        assertThat(v.get("address")).isNull();
+    }
+
+    @Test
+    void masterSheetProjectColumnsAreRead() {
+        Map<String, String> v = importer.readRow(row(
+            "key,name,client_name,drive_folder_url,google_chat_id,google_album_id,google_album_url,calculator_sheet_id,master_sheet_id",
+            "TH-2025-012,Широки дол Теодор,Иван Иванов,https://drive.google.com/drive/folders/1dk,spaces/AAQAK9ibi8I,"
+                + "APYZlOk,https://photos.google.com/lr/album/APYZlOk,1mUJBmBDza,"));
+        assertThat(v).containsEntry("client_name", "Иван Иванов")
+            .containsEntry("drive_folder_url", "https://drive.google.com/drive/folders/1dk")
+            .containsEntry("google_chat_id", "spaces/AAQAK9ibi8I")
+            .containsEntry("google_album_id", "APYZlOk")
+            .containsEntry("google_album_url", "https://photos.google.com/lr/album/APYZlOk")
+            .containsEntry("calculator_sheet_id", "1mUJBmBDza");
+        assertThat(v.get("master_sheet_id")).isNull();       // empty cell in a present column = null value
+    }
+
+    @Test
+    void masterSheetColumnsRespectTheirLength() {
+        String tooLong = "x".repeat(121);
+        assertThatThrownBy(() -> importer.readRow(row("key,name,google_chat_id", "H-001,Къща," + tooLong)))
+            .isInstanceOf(CsvValueException.class);
     }
 
     @Test

@@ -16,5 +16,13 @@ public record HouseUpsertRequest(
     @JsonProperty("scaffoldStartDate") String scaffoldStartDate,
     @JsonProperty("scaffoldEndDate")   String scaffoldEndDate,
     @JsonProperty("google_doc_url")    String googleDocUrl,
-    @JsonProperty("external_id")       String externalId
+    @JsonProperty("external_id")       String externalId,
+    // ACTIVE_MASTER project columns (V20). null = untouched, "" = clear.
+    @JsonProperty("client_name")         String clientName,
+    @JsonProperty("drive_folder_url")    String driveFolderUrl,
+    @JsonProperty("google_chat_id")      String googleChatId,
+    @JsonProperty("google_album_id")     String googleAlbumId,
+    @JsonProperty("google_album_url")    String googleAlbumUrl,
+    @JsonProperty("calculator_sheet_id") String calculatorSheetId,
+    @JsonProperty("master_sheet_id")     String masterSheetId
 ) {}

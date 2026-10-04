@@ -30,7 +30,7 @@ public class WeatherRecommendationController {
     public ResponseEntity<?> recommendations(@PathVariable Integer houseId) throws Exception {
         // 1. Load house coordinates
         List<Map<String, Object>> houses = jdbc.queryForList(
-            "SELECT lat, lng, name, address FROM house WHERE id = ?", houseId);
+            "SELECT lat, lng, name, COALESCE(NULLIF(address, ''), name) AS address FROM house WHERE id = ?", houseId);
         if (houses.isEmpty()) return ResponseEntity.notFound().build();
         Map<String, Object> house = houses.get(0);
         Object latObj = house.get("lat"), lngObj = house.get("lng");

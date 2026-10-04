@@ -24,6 +24,13 @@ public record HouseDto(
     @JsonProperty("checkin_token") String checkinToken,
     @JsonProperty("google_doc_url") String googleDocUrl,
     @JsonProperty("external_id") String externalId,
+    @JsonProperty("client_name") String clientName,
+    @JsonProperty("drive_folder_url") String driveFolderUrl,
+    @JsonProperty("google_chat_id") String googleChatId,
+    @JsonProperty("google_album_id") String googleAlbumId,
+    @JsonProperty("google_album_url") String googleAlbumUrl,
+    @JsonProperty("calculator_sheet_id") String calculatorSheetId,
+    @JsonProperty("master_sheet_id") String masterSheetId,
     List<CrewRefDto> crews
 ) {
 
@@ -58,6 +65,13 @@ public record HouseDto(
                 source.getCheckinToken(),
                 source.getGoogleDocUrl(),
                 source.getExternalId(),
+                source.getClientName(),
+                source.getDriveFolderUrl(),
+                source.getGoogleChatId(),
+                source.getGoogleAlbumId(),
+                source.getGoogleAlbumUrl(),
+                source.getCalculatorSheetId(),
+                source.getMasterSheetId(),
                 crews
             );
         }

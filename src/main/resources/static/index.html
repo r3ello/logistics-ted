@@ -1634,7 +1634,7 @@
       <input id="mExternalId" type="text" maxlength="120" placeholder="CRM-2026-00010" autocomplete="off" />
     </div>
     <div class="modal-field">
-      <label id="mAddressLabel">Address</label>
+      <label id="mAddressLabel">Address <span id="mAddressOptional" style="font-weight:400;color:var(--muted)">(optional)</span></label>
       <input id="mAddress" type="text" placeholder="City, region…" />
     </div>
     <div class="modal-field">
@@ -1658,6 +1658,35 @@
     <div class="field">
       <label>Google Doc link <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
       <input id="mGoogleDocUrl" type="url" placeholder="https://docs.google.com/…" />
+    </div>
+    <div id="mMasterSection" style="margin:1rem 0 0.5rem;padding-top:0.75rem;border-top:1px solid var(--border);font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Project data (client master sheet)</div>
+    <div class="modal-field">
+      <label id="mClientNameLabel" data-i18n-first="fieldClientName">Client name <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+      <input id="mClientName" type="text" maxlength="255" placeholder="" autocomplete="off" />
+    </div>
+    <div class="modal-field">
+      <label id="mDriveFolderUrlLabel" data-i18n-first="fieldDriveFolder">Google Drive folder <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+      <input id="mDriveFolderUrl" type="url" maxlength="512" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off" />
+    </div>
+    <div class="modal-field">
+      <label id="mAlbumUrlLabel" data-i18n-first="fieldAlbumUrl">Google Photos album URL <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+      <input id="mAlbumUrl" type="url" maxlength="512" placeholder="https://photos.google.com/lr/album/…" autocomplete="off" />
+    </div>
+    <div class="modal-field">
+      <label id="mAlbumIdLabel" data-i18n-first="fieldAlbumId">Google Photos album ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+      <input id="mAlbumId" type="text" maxlength="255" placeholder="" autocomplete="off" />
+    </div>
+    <div class="modal-field">
+      <label id="mChatIdLabel" data-i18n-first="fieldChatId">Google Chat space ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+      <input id="mChatId" type="text" maxlength="120" placeholder="spaces/AAQA…" autocomplete="off" />
+    </div>
+    <div class="modal-field">
+      <label id="mCalcSheetIdLabel" data-i18n-first="fieldCalcSheet">Calculator sheet ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+      <input id="mCalcSheetId" type="text" maxlength="120" placeholder="" autocomplete="off" />
+    </div>
+    <div class="modal-field">
+      <label id="mMasterSheetIdLabel" data-i18n-first="fieldMasterSheet">Project master sheet ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+      <input id="mMasterSheetId" type="text" maxlength="120" placeholder="" autocomplete="off" />
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:-0.25rem">
       <button id="mLocBtn" onclick="fillModalCoords()" style="
@@ -3166,6 +3195,9 @@
       modalAddTitle:'Add house', modalEditPrefix:'Edit — ',
       modalUpdateStockPrefix:'📦 Update Stock — ',
       fieldName:'Name', fieldLocation:'Location', fieldAddress:'Address', fieldMapLink:'Google Maps link',
+      nameRequired:'Name is required.', mMasterSection:'Project data (client master sheet)',
+      fieldClientName:'Client name', fieldDriveFolder:'Google Drive folder', fieldAlbumUrl:'Google Photos album URL', fieldAlbumId:'Google Photos album ID',
+      fieldChatId:'Google Chat space ID', fieldCalcSheet:'Calculator sheet ID', fieldMasterSheet:'Project master sheet ID',
       openInMaps:'Open in Maps', fieldCoordinates:'Coordinates',
       fieldOptional:'(optional)', fieldStartDate:'Start date', fieldPhase:'Current phase',
       phaseNone:'— none —',
@@ -3283,6 +3315,7 @@
       navStageMatrix:'Project Stages', pageTitle_stagematrix:'Project Stages', pageSub_stagematrix:'All houses × all construction stages',
       pageTitle_housedetail:'House Detail', pageSub_housedetail:'Stages, crews and timeline',
       hdBack:'← Back', hdLabelHouse:'House', hdLabelLocation:'Location', hdLabelStartDate:'Start Date', hdLabelActiveStage:'Active Stage', hdLabelGoogleDoc:'Google Doc', hdOpenDocument:'Open document', hdLabelExternalId:'External ID',
+      hdLabelClient:'Client', hdLabelLinks:'Project links', linkDrive:'Drive folder', linkPhotos:'Photos', linkChat:'Chat', linkCalc:'Calculator', linkMaster:'Master sheet',
       hdGanttTitle:'Construction Timeline', hdCrewsTitle:'Assigned Crews', hdNoWorkers:'No workers',
       pageTitle_workerjourney:'Worker History', pageSub_workerjourney:'Stage history across all houses',
       pageTitle_crewhistory:'Crew History', pageSub_crewhistory:'Stage history across all houses',
@@ -3566,6 +3599,9 @@
       modalAddTitle:'Добави къща', modalEditPrefix:'Редактирай — ',
       modalUpdateStockPrefix:'📦 Обнови склад — ',
       fieldName:'Име', fieldLocation:'Локация', fieldAddress:'Адрес', fieldMapLink:'Google Maps линк',
+      nameRequired:'Името е задължително.', mMasterSection:'Данни на проекта (мастър таблица на клиента)',
+      fieldClientName:'Клиент', fieldDriveFolder:'Папка в Google Drive', fieldAlbumUrl:'Албум в Google Photos (URL)', fieldAlbumId:'ID на албум в Google Photos',
+      fieldChatId:'ID на пространство в Google Chat', fieldCalcSheet:'ID на таблица „Калкулатор“', fieldMasterSheet:'ID на мастър таблица на проекта',
       openInMaps:'Отвори в Maps', fieldCoordinates:'Координати',
       fieldOptional:'(незадължително)', fieldStartDate:'Начална дата', fieldPhase:'Текуща фаза',
       phaseNone:'— без —',
@@ -3683,6 +3719,7 @@
       navStageMatrix:'Етапи на проект', pageTitle_stagematrix:'Етапи на проект', pageSub_stagematrix:'Всички обекти × всички строителни етапи',
       pageTitle_housedetail:'Детайли на обект', pageSub_housedetail:'Етапи, екипи и времева линия',
       hdBack:'← Назад', hdLabelHouse:'Обект', hdLabelLocation:'Локация', hdLabelStartDate:'Начална дата', hdLabelActiveStage:'Активен етап', hdLabelGoogleDoc:'Google Doc', hdOpenDocument:'Отвори документ', hdLabelExternalId:'Външен ID',
+      hdLabelClient:'Клиент', hdLabelLinks:'Връзки към проекта', linkDrive:'Папка в Drive', linkPhotos:'Снимки', linkChat:'Чат', linkCalc:'Калкулатор', linkMaster:'Мастър таблица',
       hdGanttTitle:'График на строителството', hdCrewsTitle:'Назначени екипи', hdNoWorkers:'Няма работници',
       pageTitle_workerjourney:'История на работник', pageSub_workerjourney:'История на етапите по обекти',
       pageTitle_crewhistory:'История на екип', pageSub_crewhistory:'История на етапите по обекти',
@@ -4208,7 +4245,13 @@
     ftp('loginUser','phUsername'); ftp('loginPass','phPassword');
 
     // house modal labels & placeholders
-    fts('mNameLabel','fieldName'); fts('mAddressLabel','fieldAddress');
+    fts('mNameLabel','fieldName');
+    const mAddressLabel = document.getElementById('mAddressLabel'); if (mAddressLabel?.firstChild) mAddressLabel.firstChild.textContent = t('fieldAddress') + ' ';
+    fts('mAddressOptional','fieldOptional');
+    // Master-sheet fields: the label's first text node is the name, the span says (optional).
+    document.querySelectorAll('#houseModal [data-i18n-first]').forEach(l => { if (l.firstChild) l.firstChild.textContent = t(l.dataset.i18nFirst) + ' '; });
+    document.querySelectorAll('#houseModal .m-opt').forEach(el => el.textContent = t('fieldOptional'));
+    fts('mMasterSection','mMasterSection');
     const mLocationLabel = document.getElementById('mLocationLabel'); if (mLocationLabel?.firstChild) mLocationLabel.firstChild.textContent = t('fieldMapLink') + ' ';
     fts('mLocationOptional','fieldOptional');
     const mCoordLabel = document.getElementById('mCoordLabel'); if (mCoordLabel?.firstChild) mCoordLabel.firstChild.textContent = t('fieldCoordinates') + ' ';
@@ -4555,6 +4598,11 @@
               <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelGoogleDoc')}</div>
               <div style="font-weight:600;font-size:0.9rem"><a href="${h.google_doc_url}" target="_blank" rel="noopener" style="color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">📄 ${t('hdOpenDocument')}</a></div>
             </div>` : ''}
+            ${h.client_name ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelClient')}</div>
+              <div style="font-weight:600;font-size:0.9rem">👤 ${escapeHtml(h.client_name)}</div>
+            </div>` : ''}
+            ${houseProjectLinksCard(h)}
           </div>
 
           <!-- Classic Gantt -->
@@ -4948,7 +4996,7 @@
       const popupHeader = `
         <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
           <div style="font-size:0.97rem;font-weight:700">${h.name}</div>
-          <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${h.address}</div>
+          <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${h.address || '—'}</div>
         </div>`;
 
       const popupContent = _mapMode === 'scaffold' ? `
@@ -5026,7 +5074,7 @@
         .bindTooltip(tooltipText, { permanent: true, direction: 'top', offset: [0, -10],
           className: tooltipClass });
       const ssSearchLabel = { AVAILABLE: 'available', IN_USE: 'in use inuse', NONE: 'none' }[h.scaffold_status] || '';
-      marker._searchText = (h.name + ' ' + h.address + ' ' + (h.current_phase||'') + ' ' + ssSearchLabel).toLowerCase();
+      marker._searchText = (h.name + ' ' + (h.address || '') + ' ' + (h.current_phase||'') + ' ' + ssSearchLabel).toLowerCase();
       _hMapMarkers.push(marker);
     });
 
@@ -5605,7 +5653,7 @@
     const hSel = document.getElementById('mapChHouseSelect');
     const cSel = document.getElementById('mapChCrewSelect');
     hSel.innerHTML = '<option value="">🏠 Select a house…</option>' +
-      houses.map(h => `<option value="${h.id}">🏠 ${h.name} — ${h.address}</option>`).join('');
+      houses.map(h => `<option value="${h.id}">🏠 ${h.name}${h.address ? ' — ' + h.address : ''}</option>`).join('');
     cSel.innerHTML = '<option value="">👥 Select a crew…</option>' +
       crews.map(c => `<option value="${c.id}">👥 ${c.name}</option>`).join('');
 
@@ -5682,7 +5730,7 @@
           <div style="font-family:'Segoe UI',sans-serif;width:200px;background:#21253a;color:#e2e8f0;border-radius:10px;overflow:hidden;margin:-13px -19px">
             <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
               <div style="font-size:0.97rem;font-weight:700">🏠 ${house.name}</div>
-              <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${house.address}</div>
+              <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${house.address || '—'}</div>
             </div>
           </div>`;
         const m = L.marker([house.lat, house.lng], { icon: hIcon })
@@ -5828,7 +5876,7 @@
     return `<div style="font-family:'Segoe UI',sans-serif;width:260px;background:#21253a;color:#e2e8f0;border-radius:10px;overflow:hidden;margin:-13px -19px">
       <div style="background:#1a1d27;padding:0.75rem 1rem;border-bottom:1px solid #2e3250">
         <div style="font-size:0.97rem;font-weight:700">${h.name}</div>
-        <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${h.address}</div>
+        <div style="font-size:0.75rem;color:#9aa3be;margin-top:0.15rem">📍 ${h.address || '—'}</div>
       </div>
       <div style="padding:0.75rem 1rem">
         <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.75rem">
@@ -5890,7 +5938,7 @@
         .bindPopup(buildHousePopup(h, houseMax), { maxWidth: 300, minWidth: 280, className: 'house-map-popup' })
         .bindTooltip(h.name, { permanent: true, direction: 'top', offset: [0, -10],
           className: 'house-map-label house-map-label--green' });
-      marker._searchText = (h.name + ' ' + h.address + ' ' + (h.current_phase||'')).toLowerCase();
+      marker._searchText = (h.name + ' ' + (h.address || '') + ' ' + (h.current_phase||'')).toLowerCase();
       _hMapMarkers.push(marker);
     });
 
@@ -9249,7 +9297,7 @@
     // populate house dropdown
     const houseSel = document.getElementById('cHouse');
     houseSel.innerHTML = `<option value="">— No house assigned —</option>` +
-      allHouses.map(h => `<option value="${h.id}">🏠 ${h.name} — ${h.address}</option>`).join('');
+      allHouses.map(h => `<option value="${h.id}">🏠 ${h.name}${h.address ? ' — ' + h.address : ''}</option>`).join('');
 
     // populate member search list
     _memberSearchList = members;
@@ -10209,7 +10257,7 @@
         <td style="padding:0.7rem 1rem;font-size:0.82rem;font-family:ui-monospace,monospace;color:var(--text);white-space:nowrap">${h.external_id ? escapeHtml(h.external_id) : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem">${stageHtml}</td>
         <td style="padding:0.7rem 1rem">${crewsHtml}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.address}${h.location ? ` <a href="${h.location}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}${h.google_doc_url ? ` <a href="${h.google_doc_url}" target="_blank" rel="noopener" title="Google Doc" style="text-decoration:none">📄</a>` : ''}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.address || '—'}${h.location ? ` <a href="${h.location}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}${h.google_doc_url ? ` <a href="${h.google_doc_url}" target="_blank" rel="noopener" title="Google Doc" style="text-decoration:none">📄</a>` : ''}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${h.start_date ? '📅 ' + h.start_date : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap;position:relative" class="admin-only">${actionsHtml}</td>
       </tr>`;
@@ -10275,7 +10323,7 @@
       // Populate destination house dropdown
       const sel = document.getElementById('destHouse');
       sel.innerHTML = `<option value="">${t('selectDestHouse')}</option>` +
-        houses.map(h => `<option value="${h.id}">${h.name} — ${h.address}</option>`).join('');
+        houses.map(h => `<option value="${h.id}">${h.name}${h.address ? ' — ' + h.address : ''}</option>`).join('');
 
       // Populate order picker with non-cancelled orders (excluding DELIVERED)
       const orderSel = document.getElementById('routeOrderPicker');
@@ -10869,6 +10917,29 @@
     locEl.placeholder = t('phCityRegion');
   }
 
+  // House modal inputs for the client's ACTIVE_MASTER project columns (Flyway V20) → JSON field.
+  const HOUSE_MASTER_FIELDS = [
+    ['mClientName', 'client_name'], ['mDriveFolderUrl', 'drive_folder_url'],
+    ['mAlbumUrl', 'google_album_url'], ['mAlbumId', 'google_album_id'], ['mChatId', 'google_chat_id'],
+    ['mCalcSheetId', 'calculator_sheet_id'], ['mMasterSheetId', 'master_sheet_id'],
+  ];
+
+  /** Detail card with the master-sheet links; sheet and chat ids are turned into URLs here. */
+  function houseProjectLinksCard(h) {
+    const links = [];
+    const add = (url, icon, key) => { if (url) links.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="color:#4f8ef7;text-decoration:underline;text-underline-offset:3px;white-space:nowrap">${icon} ${t(key)}</a>`); };
+    add(h.drive_folder_url, '📁', 'linkDrive');
+    add(h.google_album_url, '📸', 'linkPhotos');
+    if (h.google_chat_id) add('https://chat.google.com/room/' + encodeURIComponent(h.google_chat_id.replace(/^spaces\//, '')), '💬', 'linkChat');
+    if (h.calculator_sheet_id) add('https://docs.google.com/spreadsheets/d/' + encodeURIComponent(h.calculator_sheet_id), '🧮', 'linkCalc');
+    if (h.master_sheet_id) add('https://docs.google.com/spreadsheets/d/' + encodeURIComponent(h.master_sheet_id), '📊', 'linkMaster');
+    if (!links.length) return '';
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
+              <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelLinks')}</div>
+              <div style="font-weight:600;font-size:0.9rem;display:flex;flex-wrap:wrap;gap:0.4rem 0.9rem">${links.join('')}</div>
+            </div>`;
+  }
+
   async function openHouseModal(houseId) {
     let house = houseId != null ? (dashHouses.find(h => h.id === houseId) || null) : null;
     if (houseId != null && !house) {
@@ -10888,6 +10959,7 @@
     document.getElementById('mPhase').value        = house?.current_phase ?? '';
     document.getElementById('mGoogleDocUrl').value = house?.google_doc_url ?? '';
     document.getElementById('mExternalId').value   = house?.external_id ?? '';
+    for (const [id, f] of HOUSE_MASTER_FIELDS) document.getElementById(id).value = house?.[f] ?? '';
     document.getElementById('modalErr').textContent = '';
     document.getElementById('mLocBtn').textContent   = '📍 Use my current location';
     document.getElementById('mLocBtn').style.color   = '';
@@ -10909,8 +10981,8 @@
     const lng      = document.getElementById('mLng').value;
     const errEl    = document.getElementById('modalErr');
 
-    if (!name || !address) {
-      errEl.textContent = t('nameLocationRequired');
+    if (!name) {
+      errEl.textContent = t('nameRequired');
       return;
     }
     // Warn if another house already has the same name
@@ -10930,6 +11002,8 @@
     // Sent as "" when blank: the backend reads null as untouched and "" as clear.
     const external_id = document.getElementById('mExternalId').value.trim();
     const body = { name, address, location: location || null, lat: lat || null, lng: lng || null, start_date, current_phase, google_doc_url, external_id };
+    // Sent as "" when blank, like external_id: null = untouched, "" = clear.
+    for (const [id, f] of HOUSE_MASTER_FIELDS) body[f] = document.getElementById(id).value.trim();
     const url    = _editingHouseId ? `/api/houses/${_editingHouseId}` : '/api/houses';
     const method = _editingHouseId ? 'PUT' : 'POST';
 
@@ -11815,7 +11889,7 @@
       doc.setFillColor(46, 50, 80);
       doc.rect(margin, y, colW, 6, 'F');
       doc.setTextColor(122, 133, 163); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
-      doc.text(`Address: ${h.address}   #${h.id}`, margin + 3, y + 4.3);
+      doc.text(`Address: ${h.address || '—'}   #${h.id}`, margin + 3, y + 4.3);
       y += 6;
 
       // Start date + current phase row

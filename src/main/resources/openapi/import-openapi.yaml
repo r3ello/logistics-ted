@@ -241,10 +241,12 @@ paths:
                 - name: houses
                   entityType: house
                   keyColumn: key
-                  required: [address, name]
-                  columns: { address: text, lat: decimal, lng: decimal, location: text, name: text,
-                             scaffold_end_date: date, scaffold_start_date: date,
-                             scaffold_status: enum, start_date: date }
+                  required: [name]
+                  columns: { name: text, address: text, location: text, lat: decimal, lng: decimal,
+                             start_date: date, scaffold_status: enum, scaffold_start_date: date,
+                             scaffold_end_date: date, client_name: text, drive_folder_url: text,
+                             google_chat_id: text, google_album_id: text, google_album_url: text,
+                             calculator_sheet_id: text, master_sheet_id: text }
                   dependsOn: []
                 - name: materials
                   entityType: material
@@ -694,15 +696,20 @@ components:
         Currently `materials` and `houses` are available; the remaining entities are being
         rolled out.
 
-        For `houses`: `name` and `address` are required. `address` is the address text; `location`
-        is optional and holds the Google Maps link for the site — it is stored exactly as given and
-        never resolved, so it does not populate `lat`/`lng`. Coordinates come from `lat`/`lng`,
-        validated against `-90..90` / `-180..180` and rounded to 6 decimals; `scaffold_status` is
-        one of `NONE`, `AVAILABLE`, `IN_USE`. Creating a house also provisions its internal
+        For `houses`: only `name` is required (the project name, e.g. `Project_Name`). `address` is
+        the optional address text; `location` is optional and holds the Google Maps link for the
+        site — it is stored exactly as given and never resolved, so it does not populate
+        `lat`/`lng`. Coordinates come from `lat`/`lng`, validated against `-90..90` / `-180..180`
+        and rounded to 6 decimals; `scaffold_status` is one of `NONE`, `AVAILABLE`, `IN_USE`.
+        The project columns of the master sheet are optional free text, stored as given:
+        `client_name` (Client_Name), `drive_folder_url` (Project_Link), `google_chat_id`
+        (Google_Chat_ID), `google_album_id` / `google_album_url` (Google_Album_ID / _URL),
+        `calculator_sheet_id` (Calculator_SS_Id) and `master_sheet_id` (Prj_Master_SS_Id) — the
+        last two are spreadsheet ids, not URLs. Creating a house also provisions its internal
         warehouse, stage checklist and check-in code automatically — the CSV only carries the
         fields listed in the catalogue. There is deliberately no column for the house's current
-        phase (the application derives it from stage progress) and no way to carry
-        client-personal data.
+        phase (the application derives it from stage progress), and no other client-personal data
+        (national id, phone, email, prices) is accepted.
       schema:
         type: string
         example: materials

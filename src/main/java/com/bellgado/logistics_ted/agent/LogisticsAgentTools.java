@@ -626,7 +626,7 @@ public class LogisticsAgentTools {
                 + closest.getLat() + "," + closest.getLng() + "/"
                 + dest.getLat() + "," + dest.getLng();
             return "Closest available scaffold: house '" + closest.getName() + "' [house " + closest.getId()
-                + "] — " + closest.getAddress() + ", ~" + distKm + " km from '" + dest.getName() + "'.\n"
+                + "] — " + closest.addressOrName() + ", ~" + distKm + " km from '" + dest.getName() + "'.\n"
                 + "Google Maps: " + mapsUrl;
         } catch (NumberFormatException e) {
             return "Error: destinationHouseId must be a number (got: " + destinationHouseId + ").";

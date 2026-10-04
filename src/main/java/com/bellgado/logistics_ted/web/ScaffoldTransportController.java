@@ -97,7 +97,7 @@ public class ScaffoldTransportController {
         return Map.of(
             "id", h.getId(),
             "name", h.getName(),
-            "address", h.getAddress()
+            "address", h.addressOrName()
         );
     }
 

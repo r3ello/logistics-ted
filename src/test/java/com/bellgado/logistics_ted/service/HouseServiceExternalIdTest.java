@@ -83,7 +83,7 @@ class HouseServiceExternalIdTest {
 
     private static HouseUpsertRequest edit(String externalId) {
         return new HouseUpsertRequest("Къща", "Рударци", null, null, null, null, null, null, null, null,
-            null, externalId);
+            null, externalId, null, null, null, null, null, null, null);
     }
 
     @Test
