@@ -710,6 +710,7 @@
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 440px;
       box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      max-height: 90vh; overflow-y: auto;
     }
     .modal-title {
       font-size: 1rem; font-weight: 700; margin-bottom: 1.25rem;
@@ -1648,6 +1649,20 @@
         <input id="mLng" type="number" step="any" placeholder="Longitude" onblur="houseCoordBlur()" />
       </div>
     </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1rem">
+      <button id="mLocBtn" onclick="fillModalCoords()" style="
+        padding:0.55rem;background:var(--card);border:1px solid var(--border);
+        border-radius:8px;color:var(--muted);font-size:0.82rem;cursor:pointer;
+        transition:border-color 0.2s,color 0.2s">
+        📍 Use my current location
+      </button>
+      <button id="mPickMapBtn" onclick="pickMapForHouse()" style="
+        padding:0.55rem;background:var(--card);border:1px solid var(--border);
+        border-radius:8px;color:var(--muted);font-size:0.82rem;cursor:pointer;
+        transition:border-color 0.2s,color 0.2s">
+        🗺 Pick on map
+      </button>
+    </div>
     <div class="modal-coords" style="gap:0.75rem;display:grid;grid-template-columns:1fr 1fr;margin-bottom:1rem">
       <div class="modal-field" style="margin-bottom:0">
         <label id="mStartDateLabel">Start date <span id="mStartOptional" style="font-weight:400;color:var(--muted)">(optional)</span></label>
@@ -1659,48 +1674,41 @@
       <label>Google Doc link <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
       <input id="mGoogleDocUrl" type="url" placeholder="https://docs.google.com/…" />
     </div>
-    <div id="mMasterSection" style="margin:1rem 0 0.5rem;padding-top:0.75rem;border-top:1px solid var(--border);font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Project data (client master sheet)</div>
-    <div class="modal-field">
-      <label id="mClientNameLabel" data-i18n-first="fieldClientName">Client name <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
-      <input id="mClientName" type="text" maxlength="255" placeholder="" autocomplete="off" />
-    </div>
-    <div class="modal-field">
-      <label id="mDriveFolderUrlLabel" data-i18n-first="fieldDriveFolder">Google Drive folder <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
-      <input id="mDriveFolderUrl" type="url" maxlength="512" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off" />
-    </div>
-    <div class="modal-field">
-      <label id="mAlbumUrlLabel" data-i18n-first="fieldAlbumUrl">Google Photos album URL <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
-      <input id="mAlbumUrl" type="url" maxlength="512" placeholder="https://photos.google.com/lr/album/…" autocomplete="off" />
-    </div>
-    <div class="modal-field">
-      <label id="mAlbumIdLabel" data-i18n-first="fieldAlbumId">Google Photos album ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
-      <input id="mAlbumId" type="text" maxlength="255" placeholder="" autocomplete="off" />
-    </div>
-    <div class="modal-field">
-      <label id="mChatIdLabel" data-i18n-first="fieldChatId">Google Chat space ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
-      <input id="mChatId" type="text" maxlength="120" placeholder="spaces/AAQA…" autocomplete="off" />
-    </div>
-    <div class="modal-field">
-      <label id="mCalcSheetIdLabel" data-i18n-first="fieldCalcSheet">Calculator sheet ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
-      <input id="mCalcSheetId" type="text" maxlength="120" placeholder="" autocomplete="off" />
-    </div>
-    <div class="modal-field">
-      <label id="mMasterSheetIdLabel" data-i18n-first="fieldMasterSheet">Project master sheet ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
-      <input id="mMasterSheetId" type="text" maxlength="120" placeholder="" autocomplete="off" />
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:-0.25rem">
-      <button id="mLocBtn" onclick="fillModalCoords()" style="
-        padding:0.55rem;background:var(--card);border:1px solid var(--border);
-        border-radius:8px;color:var(--muted);font-size:0.82rem;cursor:pointer;
-        transition:border-color 0.2s,color 0.2s">
-        📍 Use my location
+    <div style="margin:1rem 0 0;padding-top:0.75rem;border-top:1px solid var(--border)">
+      <button type="button" id="mMasterToggle" onclick="(function(){var b=document.getElementById('mMasterBody');var a=document.getElementById('mMasterArrow');var open=b.style.display!=='none';b.style.display=open?'none':'block';a.textContent=open?'▸':'▾';})()" style="display:flex;align-items:center;gap:0.4rem;background:none;border:none;padding:0;cursor:pointer;font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;width:100%;text-align:left">
+        <span id="mMasterArrow">▸</span>
+        <span id="mMasterSection">Project data (client master sheet)</span>
       </button>
-      <button id="mPickMapBtn" onclick="pickMapForHouse()" style="
-        padding:0.55rem;background:var(--card);border:1px solid var(--border);
-        border-radius:8px;color:var(--muted);font-size:0.82rem;cursor:pointer;
-        transition:border-color 0.2s,color 0.2s">
-        🗺 Pick on map
-      </button>
+      <div id="mMasterBody" style="display:none;margin-top:0.75rem">
+        <div class="modal-field">
+          <label id="mClientNameLabel" data-i18n-first="fieldClientName">Client name <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+          <input id="mClientName" type="text" maxlength="255" placeholder="" autocomplete="off" />
+        </div>
+        <div class="modal-field">
+          <label id="mDriveFolderUrlLabel" data-i18n-first="fieldDriveFolder">Google Drive folder <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+          <input id="mDriveFolderUrl" type="url" maxlength="512" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off" />
+        </div>
+        <div class="modal-field">
+          <label id="mAlbumUrlLabel" data-i18n-first="fieldAlbumUrl">Google Photos album URL <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+          <input id="mAlbumUrl" type="url" maxlength="512" placeholder="https://photos.google.com/lr/album/…" autocomplete="off" />
+        </div>
+        <div class="modal-field">
+          <label id="mAlbumIdLabel" data-i18n-first="fieldAlbumId">Google Photos album ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+          <input id="mAlbumId" type="text" maxlength="255" placeholder="" autocomplete="off" />
+        </div>
+        <div class="modal-field">
+          <label id="mChatIdLabel" data-i18n-first="fieldChatId">Google Chat space ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+          <input id="mChatId" type="text" maxlength="120" placeholder="spaces/AAQA…" autocomplete="off" />
+        </div>
+        <div class="modal-field">
+          <label id="mCalcSheetIdLabel" data-i18n-first="fieldCalcSheet">Calculator sheet ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+          <input id="mCalcSheetId" type="text" maxlength="120" placeholder="" autocomplete="off" />
+        </div>
+        <div class="modal-field">
+          <label id="mMasterSheetIdLabel" data-i18n-first="fieldMasterSheet">Project master sheet ID <span style="font-weight:400;color:var(--muted)" class="m-opt">(optional)</span></label>
+          <input id="mMasterSheetId" type="text" maxlength="120" placeholder="" autocomplete="off" />
+        </div>
+      </div>
     </div>
     <p class="modal-err" id="modalErr"></p>
     <div class="modal-actions">
@@ -4658,7 +4666,7 @@
               const days    = diffDays(s.startDate, s.endDate || (s.status==='IN_PROGRESS' ? today : null));
               const endLbl  = s.status === 'IN_PROGRESS' ? (currentLang==='bg'?'сега':'now') : fmtD(s.endDate);
               const tip     = `${sn}: ${fmtD(s.startDate)} → ${endLbl}${days ? ' · ' + days + 'd' : ''}`;
-              
+
               const stripeBg = i % 2 === 1 ? 'rgba(255,255,255,0.02)' : 'transparent';
               return `<tr style="height:${ROW_H}px;background:${stripeBg};border-bottom:1px solid var(--border);cursor:default" onmouseover="this.style.background='rgba(79,142,247,0.12)'" onmouseout="this.style.background='${stripeBg}'">
                 <td style="padding:0 10px;white-space:nowrap;font-size:0.78rem;font-weight:600;color:var(--text);width:190px;border-right:1px solid var(--border)">${sn}</td>
@@ -4675,50 +4683,68 @@
             }).join('');
 
             return `
-            <div style="margin-bottom:1.4rem">
-              <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.6rem">${t('hdGanttTitle')}</div>
-              <div style="border-radius:10px;border:1px solid var(--border);overflow:hidden;background:var(--card)">
-                <div style="overflow-x:auto">
-                  <table style="border-collapse:collapse;table-layout:fixed;width:100%">
-                    <thead>
-                      <tr style="background:var(--surface);border-bottom:2px solid var(--border);height:32px">
-                        <th style="padding:0 10px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase;width:190px;border-right:1px solid var(--border)">${t('chColStage')}</th>
-                        <th style="padding:0 8px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase;width:68px;border-right:1px solid var(--border)">${t('chColStarted')}</th>
-                        <th style="padding:0 8px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase;width:68px;border-right:1px solid var(--border)">${t('chColFinished')}</th>
-                        <th style="padding:0 8px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:right;text-transform:uppercase;width:44px;border-right:1px solid var(--border)">${t('chColDays')}</th>
-                        <th style="padding:0;position:relative;min-width:${months.length * 140}px">
-                          <div style="position:relative;height:32px">${headerTimeline}</div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                  </table>
+            <div style="margin-bottom:0.75rem;border-top:1px solid var(--border);padding-top:0.75rem">
+              <button type="button" onclick="(function(b){var body=document.getElementById('hdGanttBody');var arr=b.querySelector('.hd-arr');var open=body.style.display!=='none';body.style.display=open?'none':'block';arr.textContent=open?'▸':'▾';})(this)" style="display:flex;align-items:center;gap:0.4rem;background:none;border:none;padding:0;cursor:pointer;font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;width:100%;text-align:left;margin-bottom:0">
+                <span class="hd-arr">▸</span>${t('hdGanttTitle')}
+              </button>
+              <div id="hdGanttBody" style="display:none;margin-top:0.6rem">
+                <div style="border-radius:10px;border:1px solid var(--border);overflow:hidden;background:var(--card)">
+                  <div style="overflow-x:auto">
+                    <table style="border-collapse:collapse;table-layout:fixed;width:100%">
+                      <thead>
+                        <tr style="background:var(--surface);border-bottom:2px solid var(--border);height:32px">
+                          <th style="padding:0 10px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase;width:190px;border-right:1px solid var(--border)">${t('chColStage')}</th>
+                          <th style="padding:0 8px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase;width:68px;border-right:1px solid var(--border)">${t('chColStarted')}</th>
+                          <th style="padding:0 8px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:left;text-transform:uppercase;width:68px;border-right:1px solid var(--border)">${t('chColFinished')}</th>
+                          <th style="padding:0 8px;font-size:0.62rem;color:var(--muted);font-weight:700;text-align:right;text-transform:uppercase;width:44px;border-right:1px solid var(--border)">${t('chColDays')}</th>
+                          <th style="padding:0;position:relative;min-width:${months.length * 140}px">
+                            <div style="position:relative;height:32px">${headerTimeline}</div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>${rows}</tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-              <div style="display:flex;gap:1rem;margin-top:0.45rem;flex-wrap:wrap">
-                <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:12px;height:12px;background:#3ecf6e;border-radius:2px"></span>${t('chStatusDone')}</span>
-                <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:12px;height:12px;background:#f5a623;border-radius:2px"></span>${t('chStatusInProgress')}</span>
-                <span style="font-size:0.68rem;color:#f87171;display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:2px;height:12px;background:#f87171"></span>${currentLang==='bg'?'Днес':'Today'}</span>
+                <div style="display:flex;gap:1rem;margin-top:0.45rem;flex-wrap:wrap">
+                  <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:12px;height:12px;background:#3ecf6e;border-radius:2px"></span>${t('chStatusDone')}</span>
+                  <span style="font-size:0.68rem;display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:12px;height:12px;background:#f5a623;border-radius:2px"></span>${t('chStatusInProgress')}</span>
+                  <span style="font-size:0.68rem;color:#f87171;display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:2px;height:12px;background:#f87171"></span>${currentLang==='bg'?'Днес':'Today'}</span>
+                </div>
               </div>
             </div>`;
           })()}
 
           <!-- Crews & workers -->
-          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:0.5rem">${t('hdCrewsTitle')}</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.6rem;align-items:start">
-            ${crewCards || `<div style="color:var(--muted)">${currentLang==='bg'?'Няма назначени екипи.':'No crews assigned.'}</div>`}
+          <div style="border-top:1px solid var(--border);padding-top:0.75rem;margin-bottom:0.75rem">
+            <button type="button" onclick="(function(b){var body=document.getElementById('hdCrewsBody');var arr=b.querySelector('.hd-arr');var open=body.style.display!=='none';body.style.display=open?'none':'block';arr.textContent=open?'▸':'▾';})(this)" style="display:flex;align-items:center;gap:0.4rem;background:none;border:none;padding:0;cursor:pointer;font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;width:100%;text-align:left">
+              <span class="hd-arr">▸</span>${t('hdCrewsTitle')}
+            </button>
+            <div id="hdCrewsBody" style="display:none;margin-top:0.5rem">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.6rem;align-items:start">
+                ${crewCards || `<div style="color:var(--muted)">${currentLang==='bg'?'Няма назначени екипи.':'No crews assigned.'}</div>`}
+              </div>
+            </div>
           </div>
 
           <!-- QA Inspections -->
-          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:1.2rem 0 0.5rem">${currentLang==='bg'?'Качествен Контрол':'Quality Assurance'}</div>
-          <div id="houseQaSection">
-            <div class="state-msg" style="padding:0.5rem 0"><div class="spinner" style="width:18px;height:18px"></div></div>
+          <div style="border-top:1px solid var(--border);padding-top:0.75rem;margin-bottom:0.75rem">
+            <button type="button" onclick="(function(b){var body=document.getElementById('houseQaSection');var arr=b.querySelector('.hd-arr');var open=body.style.display!=='none';body.style.display=open?'none':'block';arr.textContent=open?'▸':'▾';})(this)" style="display:flex;align-items:center;gap:0.4rem;background:none;border:none;padding:0;cursor:pointer;font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;width:100%;text-align:left">
+              <span class="hd-arr">▸</span>${currentLang==='bg'?'Качествен Контрол':'Quality Assurance'}
+            </button>
+            <div id="houseQaSection" style="display:none;margin-top:0.5rem">
+              <div class="state-msg" style="padding:0.5rem 0"><div class="spinner" style="width:18px;height:18px"></div></div>
+            </div>
           </div>
 
           <!-- House documents -->
-          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:1.2rem 0 0.5rem">${currentLang==='bg'?'Документи':'Documents'}</div>
-          <div id="houseFolderSection">
-            <div class="state-msg" style="padding:0.5rem 0"><div class="spinner" style="width:18px;height:18px"></div></div>
+          <div style="border-top:1px solid var(--border);padding-top:0.75rem;margin-bottom:0.75rem">
+            <button type="button" onclick="(function(b){var body=document.getElementById('houseFolderSection');var arr=b.querySelector('.hd-arr');var open=body.style.display!=='none';body.style.display=open?'none':'block';arr.textContent=open?'▸':'▾';})(this)" style="display:flex;align-items:center;gap:0.4rem;background:none;border:none;padding:0;cursor:pointer;font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;width:100%;text-align:left">
+              <span class="hd-arr">▸</span>${currentLang==='bg'?'Документи':'Documents'}
+            </button>
+            <div id="houseFolderSection" style="display:none;margin-top:0.5rem">
+              <div class="state-msg" style="padding:0.5rem 0"><div class="spinner" style="width:18px;height:18px"></div></div>
+            </div>
           </div>
         </div>`;
       // Load house doc folder section
@@ -10960,6 +10986,9 @@
     document.getElementById('mGoogleDocUrl').value = house?.google_doc_url ?? '';
     document.getElementById('mExternalId').value   = house?.external_id ?? '';
     for (const [id, f] of HOUSE_MASTER_FIELDS) document.getElementById(id).value = house?.[f] ?? '';
+    const hasMasterData = HOUSE_MASTER_FIELDS.some(([id]) => document.getElementById(id).value !== '');
+    document.getElementById('mMasterBody').style.display = hasMasterData ? 'block' : 'none';
+    document.getElementById('mMasterArrow').textContent  = hasMasterData ? '▾' : '▸';
     document.getElementById('modalErr').textContent = '';
     document.getElementById('mLocBtn').textContent   = '📍 Use my current location';
     document.getElementById('mLocBtn').style.color   = '';
