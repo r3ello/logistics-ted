@@ -109,6 +109,17 @@ public class HouseStageImporter implements EntityImporter {
         };
     }
 
+    /** {@code stage_8_status} → {@code Stage 'Ниво замазка' (status)}: the sheet's column, not ours. */
+    @Override
+    public String describeColumn(String column) {
+        Matcher m = FIELD_KEY.matcher(column);
+        if (!m.matches()) return column;
+        int order = Integer.parseInt(m.group(1));
+        String name = stageTypes().stream().filter(t -> t.order() == order)
+            .map(StageType::name).findFirst().orElse("#" + order);
+        return "Stage '" + name + "' (" + m.group(2) + ")";
+    }
+
     @Override
     public Map<String, String> readRow(CsvRow row) {
         String key = row.requiredText(keyColumn());

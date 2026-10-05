@@ -200,6 +200,49 @@ class ImportOrchestratorTest {
         assertThat(r.conflictDetails().get(0).key()).isEqualTo("W-1");
     }
 
+    @Test
+    void anAppEditAfterBothSidesConvergedIsKeptNotAConflict() {
+        apply(TWO_ROWS);
+        importer.store.get(1L).put("price", "15");     // app moves to 15 ...
+        apply("""
+            key,name,price
+            W-1,Плочки,15
+            W-2,Боя,20
+            """);                                       // ... and the sheet catches up: converged
+
+        importer.store.get(1L).put("price", "30");     // later, only the app moves again
+        ImportReport r = apply("""
+            key,name,price
+            W-1,Плочки,15
+            W-2,Боя,20
+            """);
+
+        assertThat(r.conflicts()).isZero();
+        assertThat(r.keptApp()).isEqualTo(1);
+        assertThat(importer.store.get(1L)).containsEntry("price", "30");
+    }
+
+    @Test
+    void aSheetEditAfterBothSidesConvergedIsApplied() {
+        apply(TWO_ROWS);
+        importer.store.get(1L).put("price", "15");
+        apply("""
+            key,name,price
+            W-1,Плочки,15
+            W-2,Боя,20
+            """);
+
+        ImportReport r = apply("""
+            key,name,price
+            W-1,Плочки,40
+            W-2,Боя,20
+            """);                                       // later, only the sheet moves
+
+        assertThat(r.conflicts()).isZero();
+        assertThat(r.updated()).isEqualTo(1);
+        assertThat(importer.store.get(1L)).containsEntry("price", "40");
+    }
+
     // ── failure handling ──────────────────────────────────────────────────────
 
     @Test

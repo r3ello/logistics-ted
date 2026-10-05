@@ -47,6 +47,15 @@ public interface EntityImporter {
         return UnaryOperator.identity();
     }
 
+    /**
+     * How a merge column is named to whoever maintains the sheet, for report messages. Defaults to
+     * the column itself; an importer whose merge fields are not sheet columns (house stages:
+     * {@code stage_8_status}) names the sheet column instead.
+     */
+    default String describeColumn(String column) {
+        return column;
+    }
+
     /** The column carrying the sheet-owned external key. */
     default String keyColumn() {
         return "key";

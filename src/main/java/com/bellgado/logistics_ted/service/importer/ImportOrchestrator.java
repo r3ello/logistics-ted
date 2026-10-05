@@ -191,7 +191,12 @@ public class ImportOrchestrator {
             }
             case UNCHANGED -> {
                 c.unchanged++;
-                if (apply && !ref.hasBaseline()) keys.rebase(ref, app, sheet, batch.getId());
+                // Also re-base when both sides converged on a new value: left at the old baseline,
+                // the next one-sided change of that column reads as "both moved" — a phantom
+                // conflict that blocks the whole row.
+                if (apply && (!ref.hasBaseline() || baselineIsStale(sheet, app, appBase, sheetBase))) {
+                    keys.rebase(ref, app, sheet, batch.getId());
+                }
             }
             case CONFLICT -> {
                 c.conflicts++;
@@ -228,8 +233,26 @@ public class ImportOrchestrator {
             }
             details.add(new ImportReport.ConflictDetail(id, row.line(), key, fc.column(),
                 fc.base(), fc.app(), fc.sheet(),
-                "Changed in both the app and the sheet since the last sync. Row left untouched."));
+                describe(imp, fc.column())
+                    + " changed in both the app and the sheet since the last sync. Row left untouched."));
         }
+    }
+
+    private static String describe(EntityImporter imp, String column) {
+        String label = imp.describeColumn(column);
+        return label == null || label.equals(column) ? "'" + column + "'" : label;
+    }
+
+    /** True when an unchanged row's values have moved away from its baselines (a convergence). */
+    private static boolean baselineIsStale(Map<String, String> sheet, Map<String, String> app,
+                                           Map<String, String> appBase, Map<String, String> sheetBase) {
+        for (String column : sheet.keySet()) {
+            if (!ValueNormalizer.eq(app.get(column), appBase.get(column))
+                || !ValueNormalizer.eq(sheet.get(column), sheetBase.get(column))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Lenient first pass: rows with no key fail later, in the main loop, with a proper error. */

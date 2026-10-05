@@ -14,7 +14,202 @@ info:
 
     ---
 
-    ## The model in five points
+    ## Quick start — syncing the master sheet
+
+    The ACTIVE_MASTER sheet is uploaded **as it is** — no columns to rename, add or remove — and the
+    **same file** is sent twice: first to `houses`, then to `house-stages`. A complete run is three
+    calls:
+
+    ```bash
+    # 1. Sign in. The token is valid for 8 hours; signing in once per run is simplest.
+    TOKEN=$(curl -s -X POST https://ops.tedhouse.bg/api/login \
+      -H "Content-Type: application/json" \
+      -d '{"username":"importer","password":"<password>"}' | jq -r .token)
+
+    # 2. Houses first: creates new projects, updates project data.
+    curl -s -X POST "https://ops.tedhouse.bg/api/import/houses?mode=apply" \
+      -H "Authorization: Bearer $TOKEN" -F "file=@ACTIVE_MASTER.csv"
+
+    # 3. Then stage progress, from the same file.
+    curl -s -X POST "https://ops.tedhouse.bg/api/import/house-stages?mode=apply" \
+      -H "Authorization: Bearer $TOKEN" -F "file=@ACTIVE_MASTER.csv"
+    ```
+
+    On Windows use `curl.exe` (built into Windows 10 and later) and the same arguments.
+
+    The file is the sheet's **File → Download → Comma-separated values (.csv)** export from Google
+    Sheets, which is already UTF-8 with commas — no `delimiter` or `decimal` parameter is needed.
+
+    Each call answers `200` with a report. Look at its **`status`**:
+
+    | `status`  | Meaning                                                    | What to do                                  |
+    |-----------|------------------------------------------------------------|---------------------------------------------|
+    | `ok`      | Every row was created, updated or already up to date.      | Nothing.                                    |
+    | `partial` | Some rows failed or are in conflict; all the others were applied. | Read `errors` and `conflictDetails` — see *Reading the report*. |
+    | `failed`  | No row could be processed.                                 | Read `errors`; usually the wrong file.      |
+
+    Running the sync several times a day is expected and safe: a run over an unchanged sheet
+    reports everything as `unchanged` and writes nothing.
+
+    ---
+
+    ## Rules that keep the sync correct
+
+    These are the points where a misunderstanding costs real data. Please read them before
+    automating anything.
+
+    1. **Always `mode=apply`.** Without it the call is a *dry run* (`mode=validate` is the
+       default): the report looks exactly the same — including `created` and `updated` counts — but
+       **nothing is written**. Check that `"mode": "apply"` comes back in the report.
+    2. **`houses` before `house-stages`, every time.** Stages can only be written for a house that
+       already exists. A new project sent to `house-stages` first is rejected (`UNRESOLVED_REF`) and
+       is picked up on the next run after `houses`.
+    3. **One call at a time.** Wait for each response before sending the next request, and never
+       run two syncs in parallel (for example a scheduled job and a manual run at the same moment).
+       Two runs creating the same new project at once collide, and one of them is rolled back.
+    4. **`Project_ID` is the identity of a project — never change or reuse it.** A changed id is a
+       new project to us: a duplicate house is created and the old one stops syncing. A reused id
+       overwrites the house it belonged to.
+    5. **Do not rename the stage columns.** Stage columns are recognised by their name
+       (`7_Ниво замазка` → *Ниво замазка*; the number is ignored). A renamed or misspelt column is
+       not recognised, and that stage **silently stops syncing** — it only shows up as an
+       `UNKNOWN_COLUMN` warning in the `house-stages` report. Adding, removing or reordering
+       columns is fine.
+    6. **An empty stage cell means "not started".** Clearing a cell that used to say
+       `Петър Завършен` resets that stage. To leave a stage alone, write `Не`.
+    7. **Nothing is ever deleted.** A project that disappears from the sheet stays in the
+       application. Removals are done by hand in the application — tell us.
+
+    ---
+
+    ## The master sheet, column by column
+
+    ### What `houses` reads
+
+    | Sheet column        | Stored as             | Notes                                                    |
+    |---------------------|-----------------------|----------------------------------------------------------|
+    | `Project_ID`        | the key               | Required. Shown in the application as **External ID**.   |
+    | `Project_Name`      | name                  | Required, max 150 characters.                            |
+    | `Location`          | Google Maps link      | Optional, stored as given. It does **not** place the house on the map. |
+    | `Client_Name`       | client                | Optional.                                                |
+    | `Project_Link`      | Drive folder link     | Optional.                                                |
+    | `Google_Chat_ID`    | Google Chat space     | Optional.                                                |
+    | `Google_Album_ID`, `Google_Album_URL` | Google Photos album | Optional.                               |
+    | `Calculator_SS_Id`, `Prj_Master_SS_Id` | spreadsheet ids (not URLs) | Optional.                      |
+
+    Columns accepted under our own names too: `address`, `lat`, `lng` (decimal coordinates),
+    `start_date`, `scaffold_status`, `scaffold_start_date`, `scaffold_end_date`. The complete,
+    authoritative list is `GET /api/import/entities`.
+
+    A **new `Project_ID`** creates a house together with everything the application needs around it
+    (internal warehouse, stage checklist, QR check-in code, document folders). **The new house has
+    no map position**: the sheet carries only a Maps link, and coordinates are not derived from it.
+    We place new houses on the map; alternatively a `lat`/`lng` pair can be sent in the file.
+
+    An **existing `Project_ID`** has only the changed columns updated. A column that is not in the
+    file is not touched; an **empty cell in a present column clears that value**.
+
+    ### What `house-stages` reads
+
+    One row per project, keyed by `Project_ID`. Every column whose name is a construction stage is
+    read; the others are ignored. Each cell is read as *"&lt;who&gt; &lt;status&gt;"*:
+
+    | Cell                                                        | Result                                       |
+    |-------------------------------------------------------------|----------------------------------------------|
+    | *(empty)*                                                   | Not started; the assignee is cleared.        |
+    | `Не`                                                        | **Left untouched** — the sheet does not manage this stage for this project. |
+    | `<name> Завършен` / `изпълнил` / `изпълнен` / `Монтирана` / `Взети размери` | Done, by `<name>`.           |
+    | `<name> в Процес`                                           | In progress, by `<name>`.                    |
+    | a name alone (`Жоро`, `Слави Р`; one to three words)        | Assigned to that person, not started.        |
+    | `Завършен` / `в Процес` without a name                       | Done / in progress; the assignee is unchanged. |
+    | any other text (`Междинен`, `От клиент`, `vrati-yukka.bg`)  | Stored as the stage's **note**; status and assignee unchanged. |
+
+    The status word must be the **last** thing in the cell and is not case-sensitive.
+
+    - **Dates are never set from the sheet** — it carries none.
+    - **Foundation (`Фундамент`).** The sheet has no column for it today. Until it does, the
+      foundation is marked done as soon as any other stage is in progress or done. Once a
+      `Фундамент` column is added, it is read like any other stage.
+    - **Progress entered in the application is protected.** If a crew leader marks a stage done in
+      the application, the next sync keeps it (`keptApp`) instead of overwriting it with the older
+      sheet value. Only when the sheet cell itself changes does the sheet win — and if it changes
+      to something *different* from the application, that is a conflict (below).
+
+    ### Warnings you should expect
+
+    Because both importers read the same file, each reports the other's columns as ignored. These
+    `UNKNOWN_COLUMN` warnings are **normal**:
+
+    - in the `houses` report: every stage column (`1_конструкция` … `26_приключване`);
+    - in the `house-stages` report: `project_name`, `location`, `client_name`, `project_link`,
+      `google_chat_id`, `google_album_id`, `google_album_url`, `calculator_ss_id`, `prj_master_ss_id`.
+
+    Any **other** `UNKNOWN_COLUMN` in the `house-stages` report — especially one that looks like a
+    stage name — means a stage is not being synced (rule 5).
+
+    `ADOPTED_EXISTING` appears once for each new project in its first `house-stages` run. It is
+    expected and needs no action.
+
+    ---
+
+    ## Reading the report
+
+    Every row of the file lands in exactly one counter:
+
+    | Counter     | Meaning                                                              | Action |
+    |-------------|----------------------------------------------------------------------|--------|
+    | `created`   | New key — a record was created.                                      | None.  |
+    | `updated`   | The sheet changed and the application did not — the sheet was applied. | None. |
+    | `unchanged` | Nothing to do.                                                       | None.  |
+    | `keptApp`   | The application changed and the sheet did not — the application's value was kept. | None, unless the sheet is right: then edit the cell. |
+    | `conflicts` | The same field changed on **both** sides, to different values.       | Decide which one is right (below). |
+    | `failed`    | The row was rejected (`errors` says which line, column and why).     | Fix the cell in the sheet. |
+
+    `line` in `errors` and `conflictDetails` is the line of the CSV file: line 1 is the header, so (as long as
+    no cell contains a line break) line *N* is row *N* of the sheet.
+
+    ### Resolving a conflict
+
+    A conflict lists the field, the value both sides agreed on at the last sync (`base`), what the
+    application holds now (`app`) and what the sheet says now (`sheet`). The record is left exactly
+    as it was, and **the whole row waits**: for `house-stages` that means *no stage of that project*
+    is updated until the conflict is resolved. The same conflict is reported on every run until then.
+
+    It resolves itself as soon as both sides say the same thing again:
+
+    - **the application is right** → change the sheet cell to match it, or
+    - **the sheet is right** → ask Tedhouse to correct the value in the application.
+
+    For stages, `column` names the stage and the part that conflicts — `stage_8_status` is the
+    status of stage *Ниво замазка* (the `message` spells the name out) — and `app`/`sheet` use
+    these status values:
+
+    | Value         | Written in the sheet as      |
+    |---------------|------------------------------|
+    | `NOT_STARTED` | empty cell                   |
+    | `ASSIGNED`    | `<name>`                     |
+    | `IN_PROGRESS` | `<name> в Процес`            |
+    | `DONE`        | `<name> Завършен`            |
+
+    ### When something goes wrong
+
+    | Symptom | Cause |
+    |---|---|
+    | The report says `created`/`updated` but nothing changed in the application | The call was a dry run: `mode=apply` is missing (rule 1). |
+    | `house-stages` rejects a project with `UNRESOLVED_REF` | `houses` was not run first, or that project's row failed in the `houses` report — look there. |
+    | A stage never changes in the application | Its column name is not recognised (look for `UNKNOWN_COLUMN`), the cell says `Не`, or the row is waiting on a conflict. |
+    | A new project is not on the map | Expected — see *What `houses` reads*. |
+    | A duplicate project appeared | Its `Project_ID` was changed in the sheet (rule 4). Tell us — it has to be fixed by hand. |
+    | `401` | The token expired (8 hours) or is missing — sign in again. |
+    | `400` with `ENCODING` | The file is not UTF-8 — re-export from Google Sheets as CSV. |
+    | `500` | Retry once a few minutes later. If it persists, send us the `requestId` from the response. |
+
+    When reporting a problem, include the report's **`batchId`** (or the `requestId` of an error):
+    it lets us find the exact run.
+
+    ---
+
+    ## How the sync decides
 
     **1. Rows are matched by an external key, never by name.**
     Almost no table in this schema has a natural unique key — `material.name`, `house.name`,
@@ -48,6 +243,9 @@ info:
     | yes         | no            | `kept_app`  | no      |
     | yes         | yes           | `conflict`  | no      |
 
+    If both sides changed to the **same** value, there is nothing to decide and the field counts as
+    unchanged.
+
     Detection is per column, but **application is per row**: once any column conflicts the whole row
     is skipped, because fields here are coupled (status with start/end date, quantity with unit) and
     writing half of them would leave an inconsistent record.
@@ -57,7 +255,8 @@ info:
 
     **5. `mode=validate` is the default.** A validate run parses the file, resolves keys and performs
     the complete merge, then reports every outcome **without a single write**. The report is
-    byte-identical to what `mode=apply` would produce. Always dry-run first.
+    byte-identical to what `mode=apply` would produce. Use it to preview a run — for example after
+    restructuring the sheet — and remember that routine runs need `mode=apply`.
 
     ---
 
@@ -76,7 +275,7 @@ info:
     - **Delimiter and decimal separator are explicit request parameters**, never auto-detected —
       `1,234` is genuinely ambiguous between 1234 and 1.234. Grouping separators are not supported.
       A comma-decimal file must use `;` as its delimiter, which is what Bulgarian-locale spreadsheets
-      export anyway.
+      export anyway. (Google Sheets' CSV download is comma-separated with dot decimals: the defaults.)
     - **Dates** ISO `YYYY-MM-DD` (`DD.MM.YYYY`, `DD/MM/YYYY` and `YYYY/MM/DD` are also accepted).
     - **Booleans**: `true`/`false`, `1`/`0`, `yes`/`no`, `да`/`не`.
     - **Multi-value cells** are pipe-separated: `3|4|5|6|19`.
@@ -145,14 +344,8 @@ info:
     name: Proprietary
 
 servers:
-  - url: http://localhost:3002
-    description: Local development
-  - url: https://{host}
-    description: Deployed instance
-    variables:
-      host:
-        default: example.tedhouse.bg
-        description: Ask your Tedhouse contact for the real host
+  - url: https://ops.tedhouse.bg
+    description: Production
 
 security:
   - bearerAuth: []
@@ -308,7 +501,12 @@ paths:
         with whoever maintains the spreadsheet and *"constraint violation on row 402"* is useless to
         them. `line` is the physical line number in the uploaded file, so it matches what they see.
 
-        ### Recommended procedure for each run
+        ### Routine runs
+
+        Send the file with `mode=apply` and check `status` in the report (see *Quick start*). For
+        the master sheet that is two calls — `houses`, then `house-stages` — one after the other.
+
+        ### First run, or after restructuring the sheet
 
         1. `POST` the file with `mode=validate` (the default) and read the report.
         2. Fix whatever it reports in the source sheet — errors first, then conflicts.
@@ -389,6 +587,64 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ImportReport' }
               examples:
+                masterHouses:
+                  summary: Master sheet → houses — two new projects
+                  value:
+                    batchId: 4d1e8b20-7f3a-4c6e-9b15-2a8c0f7d3e91
+                    entity: houses
+                    mode: apply
+                    status: ok
+                    rowsRead: 58
+                    created: 2
+                    updated: 1
+                    unchanged: 55
+                    keptApp: 0
+                    conflicts: 0
+                    failed: 0
+                    warnings:
+                      - line: 0
+                        code: UNKNOWN_COLUMN
+                        column: 1_конструкция
+                        message: Column is not managed by the 'houses' importer and was ignored.
+                    conflictDetails: []
+                    errors: []
+                masterStages:
+                  summary: Master sheet → house-stages — progress updates and a conflict
+                  value:
+                    batchId: 9a3f6c71-2e48-4b0d-8c5a-61f7d2e4b308
+                    entity: house-stages
+                    mode: apply
+                    status: partial
+                    rowsRead: 58
+                    created: 0
+                    updated: 6
+                    unchanged: 49
+                    keptApp: 2
+                    conflicts: 1
+                    failed: 0
+                    warnings:
+                      - line: 0
+                        code: UNKNOWN_COLUMN
+                        column: project_name
+                        message: Column is not managed by the 'house-stages' importer and was ignored.
+                      - line: 57
+                        code: ADOPTED_EXISTING
+                        column: key
+                        message: >-
+                          Key 'TH-2026-041' matched an existing house_stages (id 114) created in the
+                          app with the same external id; it was updated, not duplicated.
+                    conflictDetails:
+                      - conflictId: 12
+                        line: 9
+                        key: TH-2025-012
+                        column: stage_8_status
+                        base: IN_PROGRESS
+                        app: DONE
+                        sheet: NOT_STARTED
+                        message: >-
+                          Stage 'Ниво замазка' (status) changed in both the app and the sheet since
+                          the last sync. Row left untouched.
+                    errors: []
                 firstRun:
                   summary: First sync, dry run — three new materials
                   value:
@@ -446,7 +702,7 @@ paths:
                         base: "26.9"
                         app: "27.5"
                         sheet: "29.9"
-                        message: Changed in both the app and the sheet since the last sync. Row left untouched.
+                        message: "'price' changed in both the app and the sheet since the last sync. Row left untouched."
                     errors: []
                 rowErrors:
                   summary: Bad input — three rejected rows and one ignored column
@@ -516,7 +772,7 @@ paths:
                 unknownEntity:
                   summary: No importer registered under that name (no `code`)
                   value:
-                    error: "Unknown import entity 'inventories'. Known: [houses, materials]."
+                    error: "Unknown import entity 'inventories'. Known: [houses, house-stages, materials]."
                 noFile:
                   summary: The `file` part is missing or empty (no `code`)
                   value:
@@ -534,8 +790,10 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
         '500':
           description: |
-            Unexpected server error. **Note:** a file larger than the 10 MB upload limit currently
-            surfaces here rather than as a `413`. Check the file size before assuming a server fault.
+            Unexpected server error. Retry once a few minutes later; if it persists, send us the
+            `requestId`. Two known causes: a file larger than the 10 MB upload limit (it surfaces
+            here rather than as a `413`), and two runs sent at the same time that create the same
+            new record — one of them is rolled back entirely. Send one request at a time.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -623,7 +881,7 @@ paths:
             Attendance datasets — only check-ins at the house with this External ID, the same key
             the house import uses. An External ID no house carries is a `400`, not an empty file.
           schema: { type: string }
-          example: CRM-1042
+          example: TH-2025-012
       responses:
         '200':
           description: The CSV file (UTF-8 with a byte-order mark).
@@ -702,37 +960,17 @@ components:
         Currently `materials`, `houses` and `house-stages` are available; the remaining entities
         are being rolled out.
 
-        The master sheet can be uploaded verbatim to both `houses` and `house-stages`: each importer
+        The master sheet is uploaded verbatim to `houses` and then to `house-stages`: each importer
         translates the sheet's own headers (`Project_ID` → `key`, `Project_Name` → `name`,
         `Project_Link` → `drive_folder_url`, `Calculator_SS_Id` → `calculator_sheet_id`,
-        `Prj_Master_SS_Id` → `master_sheet_id`) and reports the other importer's columns as
-        `UNKNOWN_COLUMN` warnings.
+        `Prj_Master_SS_Id` → `master_sheet_id`; stage columns by stage name) and reports the other
+        importer's columns as `UNKNOWN_COLUMN` warnings. See *The master sheet, column by column*
+        for what each column and each stage cell means.
 
-        For `house-stages`: one row per house, keyed by the house's external id (import `houses`
-        first — an unknown key fails with `UNRESOLVED_REF`). Every other column is a construction
-        stage, matched by its name (a leading number such as `7_` is ignored; the English stage
-        name is accepted too). A cell reads as `<worker> <status>`: `Завършен`, `изпълнил`,
-        `Монтирана`, `Взети размери` → done; `в Процес` → in progress; a name alone → assigned;
-        an empty cell → not started; `Не` → the stage is left untouched; any other text is stored
-        as the stage's note without changing its status. Dates are never set from the sheet.
-        While the file has no foundation (`Фундамент`) column, the foundation is marked done as soon
-        as any later stage is in progress or done.
-        Progress recorded in the application is kept until the sheet itself changes that cell.
-
-        For `houses`: only `name` is required (the project name, e.g. `Project_Name`). `address` is
-        the optional address text; `location` is optional and holds the Google Maps link for the
-        site — it is stored exactly as given and never resolved, so it does not populate
-        `lat`/`lng`. Coordinates come from `lat`/`lng`, validated against `-90..90` / `-180..180`
-        and rounded to 6 decimals; `scaffold_status` is one of `NONE`, `AVAILABLE`, `IN_USE`.
-        The project columns of the master sheet are optional free text, stored as given:
-        `client_name` (Client_Name), `drive_folder_url` (Project_Link), `google_chat_id`
-        (Google_Chat_ID), `google_album_id` / `google_album_url` (Google_Album_ID / _URL),
-        `calculator_sheet_id` (Calculator_SS_Id) and `master_sheet_id` (Prj_Master_SS_Id) — the
-        last two are spreadsheet ids, not URLs. Creating a house also provisions its internal
-        warehouse, stage checklist and check-in code automatically — the CSV only carries the
-        fields listed in the catalogue. There is deliberately no column for the house's current
-        phase (the application derives it from stage progress), and no other client-personal data
-        (national id, phone, email, prices) is accepted.
+        Creating a house also provisions its internal warehouse, stage checklist and check-in code
+        automatically. There is deliberately no column for the house's current phase (the
+        application derives it from stage progress), and no other client-personal data (national
+        id, phone, email, prices) is accepted.
       schema:
         type: string
         example: materials
@@ -962,7 +1200,12 @@ components:
             `mode=validate` this is `null` because a dry run leaves no trace.
         line: { type: integer, description: Physical line in the file. }
         key: { type: string, description: Your external key for the row. }
-        column: { type: string }
+        column:
+          type: string
+          description: |
+            The conflicting field. For `house-stages` it is `stage_<n>_status`, `stage_<n>_worker` or
+            `stage_<n>_note`, where `<n>` is the stage's internal number — the `message` names the
+            stage as it appears in the sheet (`Stage 'Ниво замазка' (status) changed in both …`).
         base:
           type: string
           nullable: true
@@ -1010,7 +1253,8 @@ components:
         `EMPTY_REQUIRED` a required cell is blank ·
         `DUPLICATE_KEY` the same key appears twice in one file — not silently last-wins, because the
         result would then depend on row order ·
-        `UNRESOLVED_REF` a `*_key` column points at a key no previous file created ·
+        `UNRESOLVED_REF` the row refers to a record that does not exist yet — for `house-stages`, no
+        house has this key (run `houses` first) ·
         `INVALID_NUMBER` · `INVALID_DATE` · `INVALID_ENUM` (allowed values are listed in the message) ·
         `INVALID_BOOLEAN` · `OUT_OF_RANGE` latitude/longitude outside the valid range ·
         `TOO_LONG` the column's length limit is named in the message ·

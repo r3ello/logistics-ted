@@ -102,6 +102,12 @@ class HouseStageImporterTest {
     }
 
     @Test
+    void conflictColumnsAreDescribedByTheSheetsStageName() {
+        assertThat(importer.describeColumn("stage_8_status")).isEqualTo("Stage 'Ниво замазка' (status)");
+        assertThat(importer.describeColumn("stage_99_note")).isEqualTo("Stage '#99' (note)");
+    }
+
+    @Test
     void englishNamesAreAcceptedToo() {
         assertThat(importer.headerResolver().apply("3_structure")).isEqualTo("конструкция");
     }
