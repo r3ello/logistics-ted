@@ -206,6 +206,7 @@ public class HouseStageController {
                 Map<String, Object> row = new LinkedHashMap<>();
                 row.put("houseId",   h.getId());
                 row.put("houseName", h.getName());
+                row.put("houseExternalId", h.getExternalId());
                 List<Map<String, Object>> cells = stageTypes.stream().map(st -> {
                     Integer order = (Integer) st[0];
                     HouseStage s = byOrder.get(order);

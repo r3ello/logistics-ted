@@ -2985,6 +2985,11 @@
       <div style="display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;gap:0">
         <span style="display:flex;align-items:center;padding:0 0.6rem 0 0.85rem;color:var(--muted);font-size:0.9rem;border-right:1px solid var(--border)">🔍</span>
         <div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;border-right:1px solid var(--border)">
+          <span id="stageMatrixExtIdLabel" style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">External ID</span>
+          <input id="stageMatrixExtIdSearch" type="text" placeholder="TH-…" oninput="filterMatrixRows(document.getElementById('stageMatrixSearch').value)"
+            style="background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.6rem 0;width:90px" />
+        </div>
+        <div style="display:flex;align-items:center;gap:0.35rem;padding:0 0.75rem;border-right:1px solid var(--border)">
           <span id="stageMatrixHouseLabel" style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap">House</span>
           <input id="stageMatrixSearch" type="text" placeholder="…" oninput="filterMatrixRows(this.value)"
             style="background:transparent;border:none;color:var(--text);font-size:0.85rem;outline:none;padding:0.6rem 0;width:140px" />
@@ -2998,7 +3003,7 @@
           <input id="stageMatrixHasCrew" type="checkbox" onchange="filterMatrixRows(document.getElementById('stageMatrixSearch').value)" style="accent-color:var(--accent)">
           <span id="stageMatrixHasCrewLabel">Has Crew</span>
         </label>
-        <button onclick="document.getElementById('stageMatrixSearch').value='';document.getElementById('stageMatrixCrewSearch').value='';document.getElementById('stageMatrixHasCrew').checked=false;filterMatrixRows('')"
+        <button onclick="document.getElementById('stageMatrixSearch').value='';document.getElementById('stageMatrixExtIdSearch').value='';document.getElementById('stageMatrixCrewSearch').value='';document.getElementById('stageMatrixHasCrew').checked=false;filterMatrixRows('')"
           style="border:none;background:none;color:var(--muted);font-size:0.78rem;cursor:pointer;padding:0 0.65rem">✕</button>
       </div>
     </div>
@@ -4127,6 +4132,7 @@
     document.getElementById('stageMatrixSearch').placeholder = t('matrixSearchPlaceholder');
     document.getElementById('stageMatrixCrewSearch').placeholder = t('matrixCrewSearchPlaceholder');
     facM('stageMatrixHouseLabel','matrixHouseLabel');
+    facM('stageMatrixExtIdLabel','colExternalId');
     facM('stageMatrixCrewLabel','matrixCrewLabel');
     facM('stageMatrixHasCrewLabel','matrixHasCrewLabel');
     // Generic data-i18n sweep
@@ -6940,6 +6946,13 @@
   }
 
   let _matrixCache = null;
+  // House-column sort: 'name' (server order) or 'extId'; houses without an External ID sort last.
+  let _matrixSort = { key: 'name', dir: 1 };
+
+  function sortMatrixBy(key) {
+    _matrixSort = _matrixSort.key === key ? { key, dir: -_matrixSort.dir } : { key, dir: 1 };
+    loadStageMatrix(true);
+  }
 
   async function loadStageMatrix(useCache) {
     const wrap = document.getElementById('stageMatrixWrap');
@@ -6953,8 +6966,15 @@
       catch(e) { wrap.innerHTML = `<div class="state-msg">Failed to load matrix.</div>`; return; }
     }
 
-    const { columns, rows } = data;
+    const { columns } = data;
     const isEn = currentLang === 'en';
+    const sortField = _matrixSort.key === 'extId' ? 'houseExternalId' : 'houseName';
+    const rows = [...data.rows].sort((a, b) => {
+      const va = a[sortField] || '', vb = b[sortField] || '';
+      if (!va || !vb) return (!va) - (!vb);
+      return _matrixSort.dir * va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' });
+    });
+    const sortArrow = (key) => _matrixSort.key === key ? (_matrixSort.dir > 0 ? ' ▲' : ' ▼') : '';
 
     const thCols = columns.map(c => {
       const label = isEn && c.stageNameEn ? c.stageNameEn : c.stageName;
@@ -7035,9 +7055,13 @@
       const allCrewNames = row.stages
         .map(s => { const c = (crewsByStage[s.stageOrder]||[]).find(cr => cr.crewId == s.crewId); return c ? c.crewName : ''; })
         .filter(Boolean).join(' ').toLowerCase();
-      return `<tr data-house="${row.houseName.toLowerCase()}" data-crews="${allCrewNames}" style="border-bottom:1px solid #2e3250;transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.07)'" onmouseout="this.style.background=''">
+      const extId = row.houseExternalId || '';
+      const extIdHtml = extId
+        ? `<span style="display:inline-block;min-width:4.2rem;margin-right:0.5rem;padding:0.08rem 0.4rem;border-radius:5px;background:rgba(79,142,247,0.12);color:#9fc0ff;font-family:ui-monospace,Consolas,monospace;font-size:0.75rem;font-weight:700">${esc(extId)}</span>`
+        : `<span style="display:inline-block;min-width:4.2rem;margin-right:0.5rem;color:var(--muted);font-size:0.75rem">—</span>`;
+      return `<tr data-house="${esc(row.houseName.toLowerCase())}" data-ext-id="${esc(extId.toLowerCase())}" data-crews="${allCrewNames}" style="border-bottom:1px solid #2e3250;transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.07)'" onmouseout="this.style.background=''">
         <td style="padding:0.5rem 0.75rem;font-size:0.85rem;font-weight:600;white-space:nowrap;position:sticky;left:0;background:var(--card);z-index:1;border-right:2px solid #2e3250">
-          <span onclick="openHouseDetail(${row.houseId})" style="cursor:pointer;color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">${row.houseName}</span>
+          ${extIdHtml}<span onclick="openHouseDetail(${row.houseId})" style="cursor:pointer;color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">${row.houseName}</span>
         </td>
         ${cells}
       </tr>`;
@@ -7047,12 +7071,15 @@
       <table style="border-collapse:collapse;background:var(--card)">
         <thead>
           <tr style="background:#1a1d27;border-bottom:2px solid #2e3250">
-            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase;position:sticky;left:0;background:#1a1d27;z-index:2;border-right:2px solid #2e3250">${t('matrixHeaderHouse')}</th>
+            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase;position:sticky;left:0;background:#1a1d27;z-index:2;border-right:2px solid #2e3250;white-space:nowrap">
+              <span onclick="sortMatrixBy('extId')" title="${t('colExternalId')}" style="cursor:pointer;display:inline-block;min-width:4.2rem;margin-right:0.5rem;${_matrixSort.key === 'extId' ? 'color:#e8eaf6' : ''}">${t('colExternalId')}${sortArrow('extId')}</span><span onclick="sortMatrixBy('name')" style="cursor:pointer;${_matrixSort.key === 'name' ? 'color:#e8eaf6' : ''}">${t('matrixHeaderHouse')}${sortArrow('name')}</span>
+            </th>
             ${thCols}
           </tr>
         </thead>
         <tbody>${bodyRows}</tbody>
       </table>`;
+    filterMatrixRows(document.getElementById('stageMatrixSearch')?.value || '');
   }
 
   // ── Gantt bar tooltip ────────────────────────────────────────────────────────
@@ -7082,12 +7109,14 @@
 
   function filterMatrixRows(q) {
     const houseTerm = q.trim().toLowerCase();
+    const extIdTerm = (document.getElementById('stageMatrixExtIdSearch')?.value || '').trim().toLowerCase();
     const crewTerm  = (document.getElementById('stageMatrixCrewSearch')?.value || '').trim().toLowerCase();
     const hasCrew   = document.getElementById('stageMatrixHasCrew')?.checked;
     document.querySelectorAll('#stageMatrixWrap tbody tr').forEach(tr => {
       const house = (tr.dataset.house || tr.querySelector('td')?.textContent || '').toLowerCase();
       const crews = (tr.dataset.crews || '').toLowerCase();
-      const houseOk = !houseTerm || house.includes(houseTerm);
+      const houseOk = (!houseTerm || house.includes(houseTerm))
+                   && (!extIdTerm || (tr.dataset.extId || '').includes(extIdTerm));
       const crewOk  = !crewTerm  || crews.includes(crewTerm);
       const hasCrewOk = !hasCrew || crews.length > 0;
       tr.style.display = (houseOk && crewOk && hasCrewOk) ? '' : 'none';
