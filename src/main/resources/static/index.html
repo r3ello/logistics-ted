@@ -3003,7 +3003,11 @@
           <input id="stageMatrixHasCrew" type="checkbox" onchange="filterMatrixRows(document.getElementById('stageMatrixSearch').value)" style="accent-color:var(--accent)">
           <span id="stageMatrixHasCrewLabel">Has Crew</span>
         </label>
-        <button onclick="document.getElementById('stageMatrixSearch').value='';document.getElementById('stageMatrixExtIdSearch').value='';document.getElementById('stageMatrixCrewSearch').value='';document.getElementById('stageMatrixHasCrew').checked=false;filterMatrixRows('')"
+        <label style="display:flex;align-items:center;gap:0.4rem;padding:0 0.75rem;cursor:pointer;font-size:0.72rem;font-weight:600;color:var(--muted);white-space:nowrap;border-right:1px solid var(--border)">
+          <input id="stageMatrixShowCompleted" type="checkbox" onchange="filterMatrixRows(document.getElementById('stageMatrixSearch').value)" style="accent-color:var(--accent)">
+          <span id="stageMatrixShowCompletedLabel">Show Completed</span>
+        </label>
+        <button onclick="document.getElementById('stageMatrixSearch').value='';document.getElementById('stageMatrixExtIdSearch').value='';document.getElementById('stageMatrixCrewSearch').value='';document.getElementById('stageMatrixHasCrew').checked=false;document.getElementById('stageMatrixShowCompleted').checked=false;filterMatrixRows('')"
           style="border:none;background:none;color:var(--muted);font-size:0.78rem;cursor:pointer;padding:0 0.65rem">✕</button>
       </div>
     </div>
@@ -3182,7 +3186,7 @@
       historyImmutableNote:'Historical record — read-only.',
       historyViews:'views',
       refresh:'⟳ Refresh', langBtn:'🌐 BG', pdfBtn:'⬇ PDF',
-      searchPlaceholder:'Search house...', searchClear:'Clear', matrixSearchPlaceholder:'Search house by name...', matrixCrewSearchPlaceholder:'Search crew...', stagesSearchPlaceholder:'Search stage by name...', matrixHouseLabel:'House', matrixCrewLabel:'Crew', matrixHasCrewLabel:'Has Crew',
+      searchPlaceholder:'Search house...', searchClear:'Clear', matrixSearchPlaceholder:'Search house by name...', matrixCrewSearchPlaceholder:'Search crew...', stagesSearchPlaceholder:'Search stage by name...', matrixHouseLabel:'House', matrixCrewLabel:'Crew', matrixHasCrewLabel:'Has Crew', matrixShowCompletedLabel:'Show Completed',
       sectionLabel:'Houses — warehouse detail',
       loading:'Loading...', noData:'No data.', connError:'Connection error.',
       totalInventory:'Total inventory value', totalWarehouse:'Remaining materials estimated value',
@@ -3586,7 +3590,7 @@
       historyImmutableNote:'Исторически запис — само за четене.',
       historyViews:'прегл.',
       refresh:'⟳ Опресни', langBtn:'🌐 EN', pdfBtn:'⬇ PDF',
-      searchPlaceholder:'Търси къща...', searchClear:'Изчисти', matrixSearchPlaceholder:'Търси обект по име...', matrixCrewSearchPlaceholder:'Търси екип...', stagesSearchPlaceholder:'Търси етап по име...', matrixHouseLabel:'Обект', matrixCrewLabel:'Екип', matrixHasCrewLabel:'С екип',
+      searchPlaceholder:'Търси къща...', searchClear:'Изчисти', matrixSearchPlaceholder:'Търси обект по име...', matrixCrewSearchPlaceholder:'Търси екип...', stagesSearchPlaceholder:'Търси етап по име...', matrixHouseLabel:'Обект', matrixCrewLabel:'Екип', matrixHasCrewLabel:'С екип', matrixShowCompletedLabel:'Покажи приключени',
       sectionLabel:'Къщи — детайли на склад',
       loading:'Зареждане...', noData:'Няма данни.', connError:'Грешка при свързване.',
       totalInventory:'Обща стойност на инвентара', totalWarehouse:'Прогнозна стойност на оставащи материали',
@@ -4135,6 +4139,7 @@
     facM('stageMatrixExtIdLabel','colExternalId');
     facM('stageMatrixCrewLabel','matrixCrewLabel');
     facM('stageMatrixHasCrewLabel','matrixHasCrewLabel');
+    facM('stageMatrixShowCompletedLabel','matrixShowCompletedLabel');
     // Generic data-i18n sweep
     document.querySelectorAll('[data-i18n]').forEach(el => { const v = t(el.dataset.i18n); if (v) el.textContent = v; });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const v = t(el.dataset.i18nPlaceholder); if (v) el.placeholder = v; });
@@ -7059,7 +7064,9 @@
       const extIdHtml = extId
         ? `<span style="display:inline-block;min-width:4.2rem;margin-right:0.5rem;padding:0.08rem 0.4rem;border-radius:5px;background:rgba(79,142,247,0.12);color:#9fc0ff;font-family:ui-monospace,Consolas,monospace;font-size:0.75rem;font-weight:700">${esc(extId)}</span>`
         : `<span style="display:inline-block;min-width:4.2rem;margin-right:0.5rem;color:var(--muted);font-size:0.75rem">—</span>`;
-      return `<tr data-house="${esc(row.houseName.toLowerCase())}" data-ext-id="${esc(extId.toLowerCase())}" data-crews="${allCrewNames}" style="border-bottom:1px solid #2e3250;transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.07)'" onmouseout="this.style.background=''">
+      const completionStage = row.stages.find(s => s.stageOrder === 27);
+      const isCompleted = completionStage?.status === 'DONE';
+      return `<tr data-house="${esc(row.houseName.toLowerCase())}" data-ext-id="${esc(extId.toLowerCase())}" data-crews="${allCrewNames}" data-completed="${isCompleted}" style="border-bottom:1px solid #2e3250;transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.07)'" onmouseout="this.style.background=''">
         <td style="padding:0.5rem 0.75rem;font-size:0.85rem;font-weight:600;white-space:nowrap;position:sticky;left:0;background:var(--card);z-index:1;border-right:2px solid #2e3250">
           ${extIdHtml}<span onclick="openHouseDetail(${row.houseId})" style="cursor:pointer;color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">${row.houseName}</span>
         </td>
@@ -7108,18 +7115,20 @@
   }
 
   function filterMatrixRows(q) {
-    const houseTerm = q.trim().toLowerCase();
-    const extIdTerm = (document.getElementById('stageMatrixExtIdSearch')?.value || '').trim().toLowerCase();
-    const crewTerm  = (document.getElementById('stageMatrixCrewSearch')?.value || '').trim().toLowerCase();
-    const hasCrew   = document.getElementById('stageMatrixHasCrew')?.checked;
+    const houseTerm      = q.trim().toLowerCase();
+    const extIdTerm      = (document.getElementById('stageMatrixExtIdSearch')?.value || '').trim().toLowerCase();
+    const crewTerm       = (document.getElementById('stageMatrixCrewSearch')?.value || '').trim().toLowerCase();
+    const hasCrew        = document.getElementById('stageMatrixHasCrew')?.checked;
+    const showCompleted  = document.getElementById('stageMatrixShowCompleted')?.checked;
     document.querySelectorAll('#stageMatrixWrap tbody tr').forEach(tr => {
       const house = (tr.dataset.house || tr.querySelector('td')?.textContent || '').toLowerCase();
       const crews = (tr.dataset.crews || '').toLowerCase();
-      const houseOk = (!houseTerm || house.includes(houseTerm))
-                   && (!extIdTerm || (tr.dataset.extId || '').includes(extIdTerm));
-      const crewOk  = !crewTerm  || crews.includes(crewTerm);
-      const hasCrewOk = !hasCrew || crews.length > 0;
-      tr.style.display = (houseOk && crewOk && hasCrewOk) ? '' : 'none';
+      const houseOk      = (!houseTerm || house.includes(houseTerm))
+                        && (!extIdTerm || (tr.dataset.extId || '').includes(extIdTerm));
+      const crewOk       = !crewTerm || crews.includes(crewTerm);
+      const hasCrewOk    = !hasCrew  || crews.length > 0;
+      const completedOk  = showCompleted || tr.dataset.completed !== 'true';
+      tr.style.display   = (houseOk && crewOk && hasCrewOk && completedOk) ? '' : 'none';
     });
   }
 
