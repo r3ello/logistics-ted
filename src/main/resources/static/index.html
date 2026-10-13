@@ -1493,6 +1493,31 @@
     </div>
     <div class="field"><label>Phone</label><input id="wPhone" type="tel" placeholder="+359 ..." style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;box-sizing:border-box" /></div>
     <div class="field"><label>Email</label><input id="wEmail" type="email" placeholder="email@example.com" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;box-sizing:border-box" /></div>
+    <!-- Staff-sheet fields (Flyway V21); the External ID is owned by the CSV import -->
+    <div class="field"><label data-i18n="wfExternalId">External ID</label>
+      <input id="wExtId" type="text" readonly placeholder="—" style="opacity:0.75" />
+    </div>
+    <div class="field"><label data-i18n="wfEmploymentType">Employment type</label>
+      <select id="wEmpType" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
+        <option value="">—</option>
+        <option value="INTERNAL" data-i18n="wfEmpInternal">Internal</option>
+        <option value="EXTERNAL" data-i18n="wfEmpExternal">External</option>
+        <option value="SUBCONTRACTOR" data-i18n="wfEmpSubcontractor">Subcontractor</option>
+      </select>
+    </div>
+    <div class="field"><label data-i18n="wfCompany">Company</label><input id="wCompany" type="text" /></div>
+    <div class="field"><label data-i18n="wfPhotoUrl">Photo / documents link</label>
+      <div style="display:flex;gap:0.4rem;align-items:center">
+        <input id="wPhotoUrl" type="url" placeholder="https://drive.google.com/…" style="flex:1" />
+        <a id="wPhotoOpen" href="#" target="_blank" rel="noopener" style="display:none;white-space:nowrap;font-size:0.85rem">↗</a>
+      </div>
+    </div>
+    <div class="field"><label data-i18n="wfHireDate">Hire date</label><input id="wHireDate" type="date" /></div>
+    <div class="field" style="display:flex;gap:0.6rem">
+      <div style="flex:0 0 30%"><label data-i18n="wfClothingSize">Clothing size</label><input id="wClothSize" type="text" style="width:100%" /></div>
+      <div style="flex:1"><label data-i18n="wfClothingIssued">Clothes issued</label><input id="wClothIssued" type="text" style="width:100%" /></div>
+    </div>
+    <div class="field" id="wIdCardField" style="display:none"><label data-i18n="wfIdCard">ID card number (admin only)</label><input id="wIdCard" type="text" autocomplete="off" /></div>
     <div class="field" id="wStagesField">
       <label>Stages</label>
       <div style="position:relative">
@@ -3319,6 +3344,10 @@
       orgCards:'📋 Cards', orgGraph:'🕸 Graph', orgGraphEmpty:'No crews found',
       // worker modal
       workerModalAdd:'Add Worker', workerModalEdit:'Edit Worker',
+      wfExternalId:'External ID', wfExternalIdHint:'Set by the staff sheet import',
+      wfEmploymentType:'Employment type', wfEmpInternal:'Internal', wfEmpExternal:'External', wfEmpSubcontractor:'Subcontractor',
+      wfCompany:'Company', wfPhotoUrl:'Photo / documents link', wfHireDate:'Hire date',
+      wfClothingSize:'Clothing size', wfClothingIssued:'Clothes issued', wfIdCard:'ID card number (admin only)',
       workerName:'Name', workerLocation:'Location', workerCrew:'Crew',
       workerHouse:'Assigned House', workerNoHouse:'— No house assigned —',
       workerPinMap:'🗺 Pin on map', workerGettingArea:'⏳ Getting area...',
@@ -3723,6 +3752,10 @@
       orgCards:'📋 Карти', orgGraph:'🕸 Граф', orgGraphEmpty:'Няма намерени екипи',
       // worker modal
       workerModalAdd:'Добави работник', workerModalEdit:'Редактирай работник',
+      wfExternalId:'Външен ID', wfExternalIdHint:'Задава се от импорта на листа с персонала',
+      wfEmploymentType:'Вид служител', wfEmpInternal:'Вътрешен', wfEmpExternal:'Външен', wfEmpSubcontractor:'Подизпълнител',
+      wfCompany:'Фирма', wfPhotoUrl:'Линк към снимки / документи', wfHireDate:'Дата на постъпване',
+      wfClothingSize:'Размер дрехи', wfClothingIssued:'Облекло', wfIdCard:'Лична карта (само админ)',
       workerName:'Име', workerLocation:'Локация', workerCrew:'Екип',
       workerHouse:'Назначена къща', workerNoHouse:'— Без назначена къща —',
       workerPinMap:'🗺 Маркирай на карта', workerGettingArea:'⏳ Зареждане на район...',
@@ -7358,10 +7391,11 @@
       const wName    = (w.name||'').toLowerCase();
       const wCrew    = (w.crewName||'').toLowerCase();
       const wHouse   = (w.houses||[]).map(h => h.houseName).join(' ').toLowerCase();
-      return `<tr data-role="${w.role||'CREW_MEMBER'}" data-hashouse="${hasHouse}" data-hascrew="${hasCrew}" data-name="${wName}" data-crew="${wCrew}" data-house="${wHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+      return `<tr data-role="${w.role||'CREW_MEMBER'}" data-hashouse="${hasHouse}" data-hascrew="${hasCrew}" data-extid="${escapeHtml((w.externalId||'').toLowerCase())}" data-name="${wName}" data-crew="${wCrew}" data-house="${wHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
           <span style="margin-right:0.3rem">${roleCfg.icon}</span><span onclick="openWorkerJourney(${w.id})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;color:var(--text)">${w.name}</span>
         </td>
+        <td style="padding:0.7rem 1rem;font-size:0.82rem;font-family:ui-monospace,monospace;color:var(--text);white-space:nowrap">${w.externalId ? escapeHtml(w.externalId) : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${roleCfg.color};font-weight:700">${roleCfg.icon} ${roleCfg.label}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewId ? `<span onclick="openCrewHistory(${w.crewId})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">👥 ${w.crewName}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.8rem">${(() => { const names = (currentLang==='en' ? (w.stageNamesEn||w.stageNamesBg) : w.stageNamesBg)||[]; return names.length ? names.map(n=>`<div style="color:#3ecf6e;font-weight:600;white-space:nowrap">🔧 ${n}</div>`).join('') : '<span style="color:var(--muted)">—</span>'; })()}</td>
@@ -7387,6 +7421,7 @@
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
                 <th data-i18n="colWorker" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colWorker')}</th>
+                <th data-i18n="colExternalId" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colExternalId')}</th>
                 <th data-i18n="colRole" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colRole')}</th>
                 <th data-i18n="colCrew" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
                 <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Stages</th>
@@ -8372,7 +8407,7 @@
 
   // ── Multi-field search bar ───────────────────────────────────────────────────
   const _sfConfigs = {
-    workers:    [{ key:'name', label:'sfName' }, { key:'crew', label:'sfCrew' }, { key:'house', label:'sfHouse' }],
+    workers:    [{ key:'extid', label:'sfExternalId' }, { key:'name', label:'sfName' }, { key:'crew', label:'sfCrew' }, { key:'house', label:'sfHouse' }],
     crews:      [{ key:'name', label:'sfName' }, { key:'stage', label:'sfStage' }, { key:'house', label:'sfHouse' }],
     scaffold:   [{ key:'house', label:'sfHouse' }],
     orders:     [{ key:'house', label:'sfHouse' }, { key:'material', label:'sfMaterial' }],
@@ -8572,7 +8607,11 @@
       email:    document.getElementById('wEmail').value,
       lat:      document.getElementById('wLat').value,
       lng:      document.getElementById('wLng').value,
+      ..._readWorkerStaffFields(),
+      externalId: document.getElementById('wExtId').value,
     };
+    // The ID card number is personal data: never parked in localStorage across the map round-trip.
+    delete state.idCardNumber;
     localStorage.setItem('workerModalState', JSON.stringify(state));
   }
 
@@ -8606,6 +8645,7 @@
       document.getElementById('wLat').value      = mapCoords ? mapCoords.lat : (savedState.lat || '');
       document.getElementById('wLng').value      = mapCoords ? mapCoords.lng : (savedState.lng || '');
       _workerStages = (savedState.stageOrders || []).map(Number);
+      _fillWorkerStaffFields(savedState);
     } else if (id) {
       try {
         const list = await apiFetch('/api/workers').then(r => r.json());
@@ -8619,6 +8659,7 @@
           document.getElementById('wLat').value      = w.lat      || '';
           document.getElementById('wLng').value      = w.lng      || '';
           _workerStages = (w.stageOrders || []).map(Number);
+          _fillWorkerStaffFields(w);
         }
       } catch(e) {}
     } else {
@@ -8630,7 +8671,9 @@
       document.getElementById('wLat').value = '';
       document.getElementById('wLng').value = '';
       _workerStages = [];
+      _fillWorkerStaffFields({});
     }
+    document.getElementById('wIdCardField').style.display = currentUser?.role === 'admin' ? '' : 'none';
     renderWorkerStages();
     onWorkerRoleChange();
     // update map pick button display
@@ -8660,8 +8703,42 @@
     document.getElementById('workerModal').classList.add('open');
   }
 
+  /** Staff-sheet fields (V21) in and out of the worker modal. */
+  function _fillWorkerStaffFields(w) {
+    const ext = document.getElementById('wExtId');
+    ext.value = w.externalId || '';
+    ext.title = t('wfExternalIdHint') || '';
+    document.getElementById('wEmpType').value     = w.employmentType || '';
+    document.getElementById('wCompany').value     = w.company        || '';
+    document.getElementById('wPhotoUrl').value    = w.photoUrl       || '';
+    document.getElementById('wHireDate').value    = w.hireDate       || '';
+    document.getElementById('wClothSize').value   = w.clothingSize   || '';
+    document.getElementById('wClothIssued').value = w.clothingIssued || '';
+    document.getElementById('wIdCard').value      = w.idCardNumber   || '';
+    const open = document.getElementById('wPhotoOpen');
+    const isLink = /^https?:\/\//i.test(w.photoUrl || '');
+    open.style.display = isLink ? '' : 'none';
+    open.href = isLink ? w.photoUrl : '#';
+  }
+
+  function _readWorkerStaffFields() {
+    const v = id => document.getElementById(id).value.trim() || null;
+    const out = {
+      employmentType: v('wEmpType'),
+      company:        v('wCompany'),
+      photoUrl:       v('wPhotoUrl'),
+      hireDate:       v('wHireDate'),
+      clothingSize:   v('wClothSize'),
+      clothingIssued: v('wClothIssued'),
+    };
+    // Only an admin sends it; the backend ignores it from anyone else anyway.
+    if (currentUser?.role === 'admin') out.idCardNumber = v('wIdCard');
+    return out;
+  }
+
   function closeWorkerModal() {
     document.getElementById('workerModal').classList.remove('open');
+    document.getElementById('wIdCard').value = '';
     _editingWorkerId = null;
     _workerStages = [];
   }
@@ -8744,6 +8821,7 @@
     const phone = document.getElementById('wPhone').value.trim() || null;
     const email = document.getElementById('wEmail').value.trim() || null;
     const body = { name, role, location, phone, email,
+                   ..._readWorkerStaffFields(),
                    stageOrders: _workerStages.slice(),
                    lat: lat ? parseFloat(lat) : null, lng: lng ? parseFloat(lng) : null };
     try {

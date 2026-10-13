@@ -152,6 +152,45 @@ info:
 
     ---
 
+    ## The staff sheet → `workers`
+
+    The staff sheet (Персонал_Мастър) is uploaded **as it is** to `workers`, one call:
+
+    ```sh
+    curl -s -X POST "https://ops.tedhouse.bg/api/import/workers?mode=apply"          -H "Authorization: Bearer $TOKEN" -F "file=@Персонал.csv"
+    ```
+
+    One row is one person, keyed by the `ID` column (`FR001`). Never change or reuse an `ID`.
+
+    | Sheet column      | Stored as                 | Notes |
+    |-------------------|---------------------------|-------|
+    | `ID`              | the key                   | Required. Shown in the application as the worker's External ID. |
+    | `Група`           | the crew's group          | Required. One of the stage groups (`Конструкция`, `Покрив`, `Дограма`, `Ел`, `ВиК`, `Изолация`, `Картон`, `Замазка`, `Плочки`, `Ламинат`), or two joined with `/` (`Изолация/ Картон`). Gives a new crew its stages. |
+    | `Бригада Име`     | the crew's nickname       | Required. **A crew is (`Група`, `Бригада Име`)**: `Любо` on `Покрив` and `Любо` on `Изолация/ Картон` are two crews. |
+    | `Име Служител`    | name                      | Required. A row without a real name (`1`, `2`, empty) is rejected. |
+    | `Роля`            | `Главен` = crew leader, `Служител` = member | A `Главен` row makes that person the crew's leader. |
+    | `Вид служител`    | `Вътрешен` / `Външен` / `Подизпълнител` | Internal, external (a subcontractor's member), subcontractor. |
+    | `Телефон`, `Имейл`, `снимки` | phone, email, photo link | A note instead of a value (`няма`, `чакам`, `Иска да говори с Теодор`) is read as empty, with a `CELL_IGNORED` warning. |
+    | `Локация`         | where the person/crew starts from | On a `Главен` row it is also the crew's location. `.` means empty. |
+    | `Дата Постъпване` | hire date                 | `dd.mm.yyyy` or `yyyy-mm-dd`. |
+    | `Лична Карта`     | ID card number            | **Personal data**: visible to administrators only. |
+    | `Фирма`, `Размер Дрехи`, `Облекло` | company, clothing size, clothes issued | |
+
+    `Осигурен`, `от Фирма` and `от Служител` are **not stored**; they come back as
+    `UNKNOWN_COLUMN` until the columns are removed from the sheet.
+
+    - **New people get a login** (username + PIN) like a worker created in the application.
+      An existing person's login is never changed by the import.
+    - **The first run links the people already in the application** — they were entered before the
+      sheet had an `ID` column. A person is recognised by name (and by crew when two share a name);
+      each one is reported once as `ADOPTED_EXISTING`. A name that matches two people who cannot be
+      told apart is rejected with `AMBIGUOUS_MATCH`: give one of them their ID in the application.
+      **Run `mode=validate` first** and check that the expected people are adopted, not created.
+    - **Nobody is removed.** Every worker in the application who is not in the file is listed once
+      as a `NOT_IN_FILE` warning. Removing them is done by hand in the application.
+
+    ---
+
     ## Reading the report
 
     Every row of the file lands in exactly one counter:
@@ -452,6 +491,15 @@ paths:
                   keyColumn: key
                   required: [name, unit]
                   columns: { name: text, price: decimal, unit: text }
+                  dependsOn: []
+                - name: workers
+                  entityType: worker
+                  keyColumn: key
+                  required: [name, stage_group, crew]
+                  columns: { name: text, stage_group: text, crew: text, role: enum,
+                             employment_type: enum, phone: text, email: text, photo_url: text,
+                             location: text, hire_date: date, id_card_number: text, company: text,
+                             clothing_size: text, clothing_issued: text }
                   dependsOn: []
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -772,7 +820,7 @@ paths:
                 unknownEntity:
                   summary: No importer registered under that name (no `code`)
                   value:
-                    error: "Unknown import entity 'inventories'. Known: [houses, house-stages, materials]."
+                    error: "Unknown import entity 'inventories'. Known: [houses, house-stages, materials, workers]."
                 noFile:
                   summary: The `file` part is missing or empty (no `code`)
                   value:
@@ -1259,12 +1307,19 @@ components:
         `INVALID_BOOLEAN` · `OUT_OF_RANGE` latitude/longitude outside the valid range ·
         `TOO_LONG` the column's length limit is named in the message ·
         `CONSTRAINT_VIOLATION` rejected by the database ·
-        `KEY_REUSED` a key whose identity fields changed wholesale — reserved, not yet emitted
+        `KEY_REUSED` a key whose identity fields changed wholesale — reserved, not yet emitted ·
+        `AMBIGUOUS_MATCH` a new key matches more than one existing record and nothing tells them
+        apart; the row is rejected rather than guessed
 
         **Warning** (reported in `warnings`, nothing is rejected):
         `UNKNOWN_COLUMN` a column this importer does not manage; it was ignored ·
         `ADOPTED_EXISTING` a new key matched a record created in the application with the same
-        External ID; that record was updated instead of creating a duplicate
+        External ID (for `workers`, also an unlinked worker with the same name); that record was
+        updated instead of creating a duplicate ·
+        `CELL_IGNORED` a cell held a note or placeholder (`няма`, `чакам`) instead of a value and was
+        read as empty ·
+        `NOT_IN_FILE` a record in the application that the file does not mention (`workers` only);
+        nothing was changed
       enum:
         - ENCODING
         - MALFORMED_CSV
@@ -1283,8 +1338,11 @@ components:
         - TOO_LONG
         - CONSTRAINT_VIOLATION
         - KEY_REUSED
+        - AMBIGUOUS_MATCH
         - UNKNOWN_COLUMN
         - ADOPTED_EXISTING
+        - CELL_IGNORED
+        - NOT_IN_FILE
 
     ErrorResponse:
       type: object

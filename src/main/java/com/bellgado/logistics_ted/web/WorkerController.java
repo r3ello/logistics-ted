@@ -2,14 +2,16 @@ package com.bellgado.logistics_ted.web;
 
 import com.bellgado.logistics_ted.config.WorkerCredentialSeeder;
 import com.bellgado.logistics_ted.domain.Worker;
-import com.bellgado.logistics_ted.repository.CrewRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
+import com.bellgado.logistics_ted.service.CrewMembershipService;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,19 +28,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class WorkerController {
 
     private final WorkerRepository        workers;
-    private final CrewRepository          crews;
     private final HouseStageRepository    houseStages;
     private final WorkerCredentialSeeder  credentialSeeder;
     private final JdbcTemplate            jdbc;
+    private final CrewMembershipService   membership;
 
-    public WorkerController(WorkerRepository workers, CrewRepository crews,
+    public WorkerController(WorkerRepository workers,
                             HouseStageRepository houseStages, WorkerCredentialSeeder credentialSeeder,
-                            JdbcTemplate jdbc) {
+                            JdbcTemplate jdbc, CrewMembershipService membership) {
         this.workers          = workers;
-        this.crews            = crews;
         this.houseStages      = houseStages;
         this.credentialSeeder = credentialSeeder;
         this.jdbc             = jdbc;
+        this.membership       = membership;
     }
 
     @GetMapping
@@ -86,15 +88,11 @@ public class WorkerController {
             applyBody(w, body);
             // If promoted to leader and belongs to a crew, unassign old leader and update crew.leader_id
             if (w.getRole() == com.bellgado.logistics_ted.domain.WorkerRole.CREW_LEADER && w.getCrew() != null) {
-                com.bellgado.logistics_ted.domain.Crew crew = w.getCrew();
-                com.bellgado.logistics_ted.domain.Worker oldLeader = crew.getLeader();
-                if (oldLeader != null && !oldLeader.getId().equals(w.getId())) {
-                    oldLeader.setCrew(null);
-                    workers.save(oldLeader);
+                Worker displaced = membership.replaceLeader(w.getCrew(), w);
+                if (displaced != null) {
+                    displaced.setCrew(null);
+                    workers.save(displaced);
                 }
-                crew.setLeader(w);
-                crews.save(crew);
-                houseStages.syncLeaderNameForCrew(crew.getId(), w.getName());
             }
             return ResponseEntity.ok(toDto(workers.save(w)));
         }).orElse(ResponseEntity.notFound().build());
@@ -122,7 +120,30 @@ public class WorkerController {
                 return "Invalid coordinates.";
             }
         }
+        // Checked here so a bad value is a 400, not a 500 from valueOf inside applyBody.
+        if (body.get("role") != null && !isEnumName(com.bellgado.logistics_ted.domain.WorkerRole.class, body.get("role")))
+            return "Invalid role.";
+        Object type = body.get("employmentType");
+        if (type != null && !type.toString().isBlank()
+                && !isEnumName(com.bellgado.logistics_ted.domain.EmploymentType.class, type))
+            return "Invalid employment type.";
+        if (body.get("hireDate") != null && !body.get("hireDate").toString().isBlank()) {
+            try {
+                java.time.LocalDate.parse(body.get("hireDate").toString().trim());
+            } catch (java.time.format.DateTimeParseException e) {
+                return "Invalid hire date (expected YYYY-MM-DD).";
+            }
+        }
         return null;
+    }
+
+    private static <E extends Enum<E>> boolean isEnumName(Class<E> type, Object value) {
+        try {
+            Enum.valueOf(type, value.toString());
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private Worker applyBody(Worker w, Map<String, Object> body) {
@@ -143,8 +164,35 @@ public class WorkerController {
                     .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new)));
             }
         }
+        // Staff-sheet fields (Flyway V21). external_id is owned by the import and not editable here.
+        if (body.containsKey("employmentType")) {
+            Object t = body.get("employmentType");
+            w.setEmploymentType(t == null || t.toString().isBlank() ? null
+                : com.bellgado.logistics_ted.domain.EmploymentType.valueOf(t.toString()));
+        }
+        if (body.containsKey("company"))        w.setCompany(blankToNull(body.get("company")));
+        if (body.containsKey("photoUrl"))       w.setPhotoUrl(blankToNull(body.get("photoUrl")));
+        if (body.containsKey("hireDate")) {
+            String d = blankToNull(body.get("hireDate"));
+            w.setHireDate(d == null ? null : java.time.LocalDate.parse(d));
+        }
+        if (body.containsKey("clothingSize"))   w.setClothingSize(blankToNull(body.get("clothingSize")));
+        if (body.containsKey("clothingIssued")) w.setClothingIssued(blankToNull(body.get("clothingIssued")));
+        // Personal data: only an admin may see or change it; a non-admin body carrying it is ignored.
+        if (body.containsKey("idCardNumber") && isAdmin()) w.setIdCardNumber(blankToNull(body.get("idCardNumber")));
         // House is derived from the worker's crew — never set directly on the worker.
         return w;
+    }
+
+    private static String blankToNull(Object v) {
+        if (v == null) return null;
+        String s = v.toString().trim();
+        return s.isEmpty() ? null : s;
+    }
+
+    private static boolean isAdmin() {
+        Authentication a = SecurityContextHolder.getContext().getAuthentication();
+        return a != null && a.getAuthorities().stream().anyMatch(g -> "ROLE_ADMIN".equals(g.getAuthority()));
     }
 
     private Map<String, Object> toDto(Worker w) {
@@ -164,6 +212,14 @@ public class WorkerController {
         m.put("role",     w.getRole());
         m.put("phone",    w.getPhone());
         m.put("email",    w.getEmail());
+        m.put("externalId",     w.getExternalId());
+        m.put("employmentType", w.getEmploymentType());
+        m.put("company",        w.getCompany());
+        m.put("photoUrl",       w.getPhotoUrl());
+        m.put("hireDate",       w.getHireDate() != null ? w.getHireDate().toString() : null);
+        m.put("clothingSize",   w.getClothingSize());
+        m.put("clothingIssued", w.getClothingIssued());
+        if (isAdmin()) m.put("idCardNumber", w.getIdCardNumber());
         if (w.getCrew() != null) {
             m.put("crewId",   w.getCrew().getId());
             m.put("crewName", w.getCrew().getName());
