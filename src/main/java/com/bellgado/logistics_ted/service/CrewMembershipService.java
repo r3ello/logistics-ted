@@ -1,11 +1,15 @@
 package com.bellgado.logistics_ted.service;
 
 import com.bellgado.logistics_ted.domain.Crew;
+import com.bellgado.logistics_ted.domain.House;
+import com.bellgado.logistics_ted.domain.HouseStage;
 import com.bellgado.logistics_ted.domain.Worker;
 import com.bellgado.logistics_ted.repository.CrewRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,6 +18,10 @@ import org.springframework.stereotype.Component;
  *
  * <p>The one side effect that is easy to forget lives here: a crew's {@code house_stage} rows carry
  * the leader's name as text ({@code worker_name}), so every leader change re-syncs it.
+ *
+ * <p>So does the crew's current house ({@code crew.house_id}): the house where it has a stage
+ * {@code IN_PROGRESS}. The stage matrix and the {@code house-stages} import both move it through
+ * {@link #crewStartedAt} and {@link #recomputeCrewHouse}.
  *
  * <p>Callers own their transaction (each runs inside a controller's or the import's).
  * {@code @Component}, not {@code @Service}: it takes {@link Worker} entities, which carry credentials
@@ -71,5 +79,33 @@ public class CrewMembershipService {
         w.setCrew(null);
         w.setStageOrders(new ArrayList<>());
         workers.save(w);
+    }
+
+    /** A stage of this house went {@code IN_PROGRESS} under the crew: that is now where it works. */
+    public void crewStartedAt(Integer crewId, House house) {
+        crews.findById(crewId).ifPresent(crew -> {
+            crew.setHouse(house);
+            crews.save(crew);
+            // worker.house is derived from crew.house — no direct field to sync
+        });
+    }
+
+    /**
+     * After the crew left a stage (reassigned, or no longer {@code IN_PROGRESS}): keeps its current
+     * house while it still has a stage in progress there, else moves it to another house where it
+     * does, else clears it.
+     *
+     * @param excludeStageId a stage to ignore, for a caller that has not saved its change yet; or null
+     */
+    public void recomputeCrewHouse(Integer crewId, Integer excludeStageId) {
+        crews.findById(crewId).ifPresent(crew -> {
+            List<HouseStage> working = houseStages.findByCrewIdWithHouse(crewId).stream()
+                .filter(s -> "IN_PROGRESS".equals(s.getStatus()) && !Objects.equals(s.getId(), excludeStageId))
+                .toList();
+            Integer current = crew.getHouse() == null ? null : crew.getHouse().getId();
+            boolean stillThere = working.stream().anyMatch(s -> s.getHouse().getId().equals(current));
+            crew.setHouse(stillThere ? crew.getHouse() : working.isEmpty() ? null : working.get(0).getHouse());
+            crews.save(crew);
+        });
     }
 }

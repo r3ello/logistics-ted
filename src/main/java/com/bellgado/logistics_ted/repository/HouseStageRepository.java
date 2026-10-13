@@ -20,6 +20,10 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query(value = "SELECT stage_order, stage_name, stage_name_en FROM stage_type ORDER BY sort_order, stage_order", nativeQuery = true)
     List<Object[]> findDistinctStageTypes();
 
+    /** [stage_order, main_stage_bg] of the stages crews work on — a stage's crew group. */
+    @Query(value = "SELECT stage_order, main_stage_bg FROM stage_type WHERE has_crew AND main_stage_bg IS NOT NULL", nativeQuery = true)
+    List<Object[]> findCrewStageGroups();
+
     List<HouseStage> findByStageOrder(Integer stageOrder);
 
     @Modifying

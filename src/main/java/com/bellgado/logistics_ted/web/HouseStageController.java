@@ -9,6 +9,7 @@ import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.HouseStageCrewLogRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
+import com.bellgado.logistics_ted.service.CrewMembershipService;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -41,17 +42,20 @@ public class HouseStageController {
     private final CrewRepository              crews;
     private final WorkerRepository            workers;
     private final HouseStageCrewLogRepository stageLogs;
+    private final CrewMembershipService       membership;
     private final JdbcTemplate                jdbc;
 
     public HouseStageController(HouseStageRepository stages, HouseRepository houses,
                                 CrewRepository crews, WorkerRepository workers,
                                 HouseStageCrewLogRepository stageLogs,
+                                CrewMembershipService membership,
                                 JdbcTemplate jdbc) {
         this.stages    = stages;
         this.houses    = houses;
         this.crews     = crews;
         this.workers   = workers;
         this.stageLogs = stageLogs;
+        this.membership = membership;
         this.jdbc      = jdbc;
     }
 
@@ -552,20 +556,11 @@ public class HouseStageController {
     }
 
     private void syncCrewHouse(Integer crewId, House house) {
-        crews.findById(crewId).ifPresent(crew -> {
-            crew.setHouse(house);
-            crews.save(crew);
-            // worker.house is derived from crew.house — no direct field to sync
-        });
+        membership.crewStartedAt(crewId, house);
     }
 
     private void resyncCrewHouseAfterRemoval(Integer crewId, Integer excludeStageId) {
-        // Find remaining assignments for this crew (excluding the just-removed one)
-        List<HouseStage> remaining = stages.findAll().stream()
-            .filter(hs -> crewId.equals(hs.getCrewId()) && !hs.getId().equals(excludeStageId) && "IN_PROGRESS".equals(hs.getStatus()))
-            .toList();
-        House newHouse = remaining.isEmpty() ? null : remaining.get(0).getHouse();
-        syncCrewHouse(crewId, newHouse);
+        membership.recomputeCrewHouse(crewId, excludeStageId);
     }
 
     private Map<String, Object> toDto(HouseStage s) {

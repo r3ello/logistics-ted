@@ -40,6 +40,11 @@ import java.util.Map;
  * {@code mode=validate} is the default, a human sees exactly what that first sync would change
  * before anything is written.
  *
+ * <p>The same holds for <b>one column</b> the baseline has never seen — a field an importer started
+ * managing after the row was first synced (the stage crew, added to {@code house-stages} later).
+ * Snapshots store every projected column, nulls included, so a missing key means "never synced",
+ * not "was empty".
+ *
  * <p>Pure and Spring-free: no state, no context, and staying out of the {@code @Service} bean graph
  * keeps it clear of {@code ServiceLoggingAspect}, which logs arguments at DEBUG.
  */
@@ -99,8 +104,9 @@ public final class ThreeWayMerger {
             // baselines on the current app value makes the sheet authoritative for this first run,
             // which is both the useful behaviour and the reviewable one (validate mode shows it
             // before it happens).
-            String appBase = noBaseline ? appValue : appBaseline.get(column);
-            String sheetBase = noBaseline ? appValue
+            boolean unseen = noBaseline || !appBaseline.containsKey(column);
+            String appBase = unseen ? appValue : appBaseline.get(column);
+            String sheetBase = unseen ? appValue
                              : sheetBaseline == null ? appBase : sheetBaseline.get(column);
 
             boolean appChanged = !ValueNormalizer.eq(appValue, appBase);
