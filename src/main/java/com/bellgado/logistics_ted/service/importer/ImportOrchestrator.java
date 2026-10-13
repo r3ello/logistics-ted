@@ -84,6 +84,7 @@ public class ImportOrchestrator {
 
         Map<String, ImportRef> refsByKey = keys.preload(imp.entityType(), collectKeys(imp, table));
         Set<String> seen = new LinkedHashSet<>();
+        Set<Long> idsInFile = new HashSet<>();
 
         for (CsvRow row : table.rows()) {
             c.rowsRead++;
@@ -95,17 +96,22 @@ public class ImportOrchestrator {
                     throw new CsvValueException(row.line(), imp.keyColumn(), key,
                         ImportErrorCode.DUPLICATE_KEY, "Key '" + key + "' appears more than once in this file.");
                 }
-                processRow(imp, row, key, refsByKey, batch, apply, c, warnings, conflictDetails);
+                processRow(imp, row, key, refsByKey, batch, apply, c, warnings, conflictDetails, idsInFile);
             } catch (CsvValueException e) {
                 c.failed++;
-                errors.add(new ImportReport.RowError(
-                    e.getLine(), e.getColumn(), e.getValue(), e.getCode(), e.getMessage()));
+                // Line 0: raised outside the cell parser (an importer's adoption hook) — it is this row.
+                errors.add(new ImportReport.RowError(e.getLine() > 0 ? e.getLine() : row.line(),
+                    e.getColumn(), e.getValue(), e.getCode(), e.getMessage()));
             } catch (RuntimeException e) {
                 c.failed++;
                 log.warn("[import] {} row {} failed: {}", imp.name(), row.line(), e.toString());
                 errors.add(new ImportReport.RowError(row.line(), null, null,
                     ImportErrorCode.CONSTRAINT_VIOLATION, e.getMessage()));
             }
+        }
+
+        for (String message : imp.notInFile(idsInFile)) {
+            warnings.add(new ImportReport.Warning(0, ImportErrorCode.NOT_IN_FILE, imp.keyColumn(), message));
         }
 
         String status = c.failed == 0 && c.conflicts == 0 ? ImportReport.OK
@@ -130,9 +136,10 @@ public class ImportOrchestrator {
     private void processRow(EntityImporter imp, CsvRow row, String key, Map<String, ImportRef> refsByKey,
                             ImportBatch batch, boolean apply, Counters c,
                             List<ImportReport.Warning> warnings,
-                            List<ImportReport.ConflictDetail> conflictDetails) {
+                            List<ImportReport.ConflictDetail> conflictDetails, Set<Long> idsInFile) {
 
-        Map<String, String> sheet = imp.readRow(row);
+        Map<String, String> sheet = imp.readRow(row, (column, message) ->
+            warnings.add(new ImportReport.Warning(row.line(), ImportErrorCode.CELL_IGNORED, column, message)));
         ImportRef ref = refsByKey.get(key);
         Map<String, String> app = ref == null ? null : imp.project(ref.getEntityId());
 
@@ -140,14 +147,15 @@ public class ImportOrchestrator {
         // external id typed in. Adopt it rather than create a duplicate. "No live mapping" includes a
         // dangling one — the mapped record was deleted and a new one was then typed in by hand.
         if (app == null) {
-            Long adopted = imp.findByExternalKey(key);
-            if (adopted != null) {
+            EntityImporter.Adoption adoption = imp.adopt(key, sheet, apply);
+            if (adoption != null) {
+                Long adopted = adoption.entityId();
                 ref = keys.adopt(imp.entityType(), key, adopted, ref, apply);
                 refsByKey.put(key, ref);
                 app = imp.project(adopted);
                 warnings.add(new ImportReport.Warning(row.line(), ImportErrorCode.ADOPTED_EXISTING, imp.keyColumn(),
                     "Key '" + key + "' matched an existing " + imp.entityType() + " (id " + adopted
-                        + ") created in the app with the same external id; it was updated, not duplicated."));
+                        + ") " + adoption.reason() + "; it was updated, not duplicated."));
             }
         }
 
@@ -155,6 +163,7 @@ public class ImportOrchestrator {
         // the mapping is dangling. Re-create rather than fail — "never delete" also means the import
         // will not tidy up after itself, so a failed key could never recover.
         boolean exists = app != null;
+        if (exists) idsInFile.add(ref.getEntityId());
         if (ref != null && !exists) {
             warnings.add(new ImportReport.Warning(row.line(), ImportErrorCode.UNRESOLVED_REF, imp.keyColumn(),
                 "Key '" + key + "' pointed at a deleted " + imp.entityType() + "; it was re-created."));
@@ -169,6 +178,7 @@ public class ImportOrchestrator {
                 c.created++;
                 if (apply) {
                     Long id = imp.create(key, sheet);
+                    idsInFile.add(id);
                     Map<String, String> post = imp.project(id);
                     if (ref == null) keys.record(imp.entityType(), key, id, batch.getId(), post, sheet);
                     else keys.repoint(ref, id, batch.getId(), post, sheet);

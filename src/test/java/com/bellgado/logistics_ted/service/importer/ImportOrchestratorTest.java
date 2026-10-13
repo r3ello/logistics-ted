@@ -373,6 +373,54 @@ class ImportOrchestratorTest {
         assertThat(importer.externalIds).containsValues("W-1", "W-2");
     }
 
+    // ── importer hooks: cell warnings, adoption by row values, missing records ──
+
+    @Test
+    void cellWarningsCarryTheRowLineAndDoNotFailTheRow() {
+        ImportReport r = apply("""
+            key,name,price
+            W-1,Плочки,n/a
+            """);
+
+        assertThat(r.created()).isEqualTo(1);
+        assertThat(r.failed()).isZero();
+        assertThat(r.warnings()).anySatisfy(w -> {
+            assertThat(w.code()).isEqualTo(ImportErrorCode.CELL_IGNORED);
+            assertThat(w.line()).isEqualTo(2);
+            assertThat(w.column()).isEqualTo("price");
+        });
+    }
+
+    @Test
+    void recordsTheFileDoesNotMentionAreReportedNotTouched() {
+        apply(TWO_ROWS);
+        importer.reportMissing = true;
+
+        ImportReport r = apply("""
+            key,name,price
+            W-1,Плочки,10
+            """);
+
+        assertThat(r.warnings()).singleElement().satisfies(w -> {
+            assertThat(w.code()).isEqualTo(ImportErrorCode.NOT_IN_FILE);
+            assertThat(w.message()).contains("Боя");
+        });
+        assertThat(importer.store).hasSize(2);
+    }
+
+    @Test
+    void anAdoptionHookErrorIsAttributedToItsRow() {
+        importer.ambiguousName = "Боя";
+
+        ImportReport r = apply(TWO_ROWS);
+
+        assertThat(r.failed()).isEqualTo(1);
+        assertThat(r.errors()).singleElement().satisfies(e -> {
+            assertThat(e.code()).isEqualTo(ImportErrorCode.AMBIGUOUS_MATCH);
+            assertThat(e.line()).isEqualTo(3);
+        });
+    }
+
     // ── an entity store standing in for the real ones ─────────────────────────
 
     /** Deliberately a fake rather than a mock: the assertions are about the resulting data. */
@@ -383,6 +431,10 @@ class ImportOrchestratorTest {
         final Map<Long, String> externalIds = new HashMap<>();
         final AtomicLong ids = new AtomicLong();
         int writes;
+        /** Opt in to {@link #notInFile}, like a sheet that is the complete list. */
+        boolean reportMissing;
+        /** A name whose adoption is ambiguous, to exercise a hook that throws without a line. */
+        String ambiguousName;
 
         @Override public String name()       { return "widgets"; }
         @Override public String entityType() { return "widget"; }
@@ -403,6 +455,31 @@ class ImportOrchestratorTest {
                 v.put("price", ValueNormalizer.normalize(row.decimal("price"), ColumnType.DECIMAL));
             }
             return v;
+        }
+
+        @Override public Map<String, String> readRow(CsvRow row, RowWarnings warnings) {
+            if ("n/a".equals(row.text("price"))) {
+                warnings.warn("price", "'n/a' is not a price; read as empty.");
+                Map<String, String> v = new LinkedHashMap<>();
+                v.put("name", ValueNormalizer.normalize(row.requiredText("name"), ColumnType.TEXT));
+                v.put("price", null);
+                return v;
+            }
+            return readRow(row);
+        }
+
+        @Override public Adoption adopt(String externalKey, Map<String, String> sheet, boolean apply) {
+            if (sheet.get("name").equals(ambiguousName)) {
+                throw new com.bellgado.logistics_ted.web.importer.csv.CsvValueException(
+                    0, "name", ambiguousName, ImportErrorCode.AMBIGUOUS_MATCH, "Two candidates.");
+            }
+            return EntityImporter.super.adopt(externalKey, sheet, apply);
+        }
+
+        @Override public List<String> notInFile(Set<Long> idsInFile) {
+            if (!reportMissing) return List.of();
+            return store.entrySet().stream().filter(e -> !idsInFile.contains(e.getKey()))
+                .map(e -> "'" + e.getValue().get("name") + "' is not in the file.").toList();
         }
 
         @Override public Map<String, String> project(Long entityId) {

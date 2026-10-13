@@ -2,6 +2,7 @@ package com.bellgado.logistics_ted.domain;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -60,4 +61,36 @@ public class Worker {
 
     @Column(name = "password_plain", length = 100)
     private String passwordPlain;
+
+    // ── staff master sheet (Flyway V21) ─────────────────────────────────────
+
+    /** The client's own id for this person ({@code FR001}); also the import key. */
+    @Column(name = "external_id", length = 40)
+    private String externalId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "employment_type", length = 20)
+    private EmploymentType employmentType;
+
+    /** The subcontractor's firm, for SUBCONTRACTOR rows. */
+    @Column(length = 150)
+    private String company;
+
+    /** Link to the person's photo/documents on Google Drive — stored verbatim, never fetched. */
+    @Column(name = "photo_url", length = 512)
+    private String photoUrl;
+
+    @Column(name = "hire_date")
+    private LocalDate hireDate;
+
+    /** Personal data: admin-only in the API, never logged, never exported. */
+    @Column(name = "id_card_number", length = 40)
+    private String idCardNumber;
+
+    @Column(name = "clothing_size", length = 20)
+    private String clothingSize;
+
+    /** Work clothes handed out, free text ({@code 5 Тениски; 2 Елека}). */
+    @Column(name = "clothing_issued", length = 255)
+    private String clothingIssued;
 }

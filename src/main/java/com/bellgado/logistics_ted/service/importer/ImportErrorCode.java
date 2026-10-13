@@ -31,6 +31,11 @@ public enum ImportErrorCode {
     CONSTRAINT_VIOLATION,
     /** A key whose identity fields changed wholesale — likely reused for a different entity. */
     KEY_REUSED,
+    /**
+     * A new key could be adopting more than one existing record (two unkeyed workers with the same
+     * name); the row is rejected rather than guess or duplicate.
+     */
+    AMBIGUOUS_MATCH,
 
     // ── warnings ──────────────────────────────────────────────────────────────
     UNKNOWN_COLUMN,
@@ -38,5 +43,9 @@ public enum ImportErrorCode {
      * A new key matched a record created in the app with the same external id; the row updated
      * that record instead of creating a duplicate.
      */
-    ADOPTED_EXISTING
+    ADOPTED_EXISTING,
+    /** A cell held a note or placeholder ({@code няма}, {@code чакам}) rather than a value; it was read as empty. */
+    CELL_IGNORED,
+    /** An existing record the file does not mention. Reported only; nothing is deleted. */
+    NOT_IN_FILE
 }

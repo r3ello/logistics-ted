@@ -73,6 +73,21 @@ public interface EntityImporter {
     Map<String, String> readRow(CsvRow row);
 
     /**
+     * {@link #readRow(CsvRow)} for importers that clean cells rather than reject them — a
+     * placeholder like {@code няма} in an email column becomes an empty value plus a
+     * {@code CELL_IGNORED} warning, so one note typed into a contact cell does not fail the person.
+     */
+    default Map<String, String> readRow(CsvRow row, RowWarnings warnings) {
+        return readRow(row);
+    }
+
+    /** Receives a row's cell-level warnings; the orchestrator attaches the line number. */
+    @FunctionalInterface
+    interface RowWarnings {
+        void warn(String column, String message);
+    }
+
+    /**
      * The entity's current values in canonical form, or {@code null} if the id no longer resolves —
      * which is how a mapping left dangling by a UI delete is detected and repaired.
      */
@@ -97,6 +112,30 @@ public interface EntityImporter {
      */
     default Long findByExternalKey(String externalKey) {
         return null;
+    }
+
+    /** An existing entity a new key was bound to, and how it was recognised (for the report). */
+    record Adoption(Long entityId, String reason) {}
+
+    /**
+     * Binds a key that has no live mapping to an entity that already exists, instead of creating a
+     * duplicate. The default is {@link #findByExternalKey}; an importer whose records predate their
+     * external ids (workers seeded before the sheet had an ID column) may also recognise them from
+     * the row's values. On {@code apply} the importer may persist the key on the entity; on
+     * {@code validate} it must not write.
+     */
+    default Adoption adopt(String externalKey, Map<String, String> sheet, boolean apply) {
+        Long id = findByExternalKey(externalKey);
+        return id == null ? null : new Adoption(id, "created in the app with the same external id");
+    }
+
+    /**
+     * Messages about existing entities the file did not mention, reported as {@code NOT_IN_FILE}
+     * warnings. Only for importers whose file is the complete list (the staff sheet); nothing is
+     * ever deleted or changed because of them. Default: none.
+     */
+    default List<String> notInFile(Set<Long> entityIdsInFile) {
+        return List.of();
     }
 
     /** Applies just the given columns to an existing entity. */

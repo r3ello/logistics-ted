@@ -14,6 +14,12 @@ public interface WorkerRepository extends JpaRepository<Worker, Integer> {
 
     java.util.Optional<Worker> findByUsername(String username);
 
+    /** The staff sheet's id for a person (Flyway V21). */
+    java.util.Optional<Worker> findByExternalId(String externalId);
+
+    /** Candidates for the import's first-run adoption by name: people the sheet has never keyed. */
+    List<Worker> findByExternalIdIsNull();
+
     /** All workers with their crew + crew's house/manager/leader eagerly fetched. */
     @Query("""
         SELECT DISTINCT w FROM Worker w

@@ -52,4 +52,15 @@ public class Crew {
 
     @Column(precision = 9, scale = 6)
     private BigDecimal lng;
+
+    /**
+     * The staff sheet's group ({@code Конструкция}) and the leader's nickname ({@code Влади}) —
+     * together the crew's natural key in the client's sheets (Flyway V21). Null for crews made by
+     * hand that the sheet has never named.
+     */
+    @Column(name = "stage_group", length = 100)
+    private String stageGroup;
+
+    @Column(length = 100)
+    private String nickname;
 }

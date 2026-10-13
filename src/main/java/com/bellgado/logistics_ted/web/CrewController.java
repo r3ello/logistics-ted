@@ -7,6 +7,7 @@ import com.bellgado.logistics_ted.repository.CrewRepository;
 import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
+import com.bellgado.logistics_ted.service.CrewMembershipService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -26,14 +27,17 @@ public class CrewController {
     private final HouseRepository       houses;
     private final HouseStageRepository  houseStages;
     private final JdbcTemplate          jdbc;
+    private final CrewMembershipService membership;
 
     public CrewController(CrewRepository crews, WorkerRepository workers, HouseRepository houses,
-                          HouseStageRepository houseStages, JdbcTemplate jdbc) {
+                          HouseStageRepository houseStages, JdbcTemplate jdbc,
+                          CrewMembershipService membership) {
         this.crews       = crews;
         this.workers     = workers;
         this.houses      = houses;
         this.houseStages = houseStages;
         this.jdbc        = jdbc;
+        this.membership  = membership;
     }
 
     @GetMapping
@@ -90,9 +94,7 @@ public class CrewController {
         if (err != null) return ResponseEntity.badRequest().body(Map.of("error", err));
 
         Crew crew = crews.save(applyBody(new Crew(), bodyMut));
-        crew.setLeader(leader);
-        crews.save(crew);
-        houseStages.syncLeaderNameForCrew(crew.getId(), leader.getName());
+        membership.replaceLeader(crew, leader);
         leader.setCrew(crew);
         workers.save(leader);
 
@@ -146,19 +148,10 @@ public class CrewController {
         if (w.getRole() == WorkerRole.CREW_MANAGER)
             return ResponseEntity.badRequest().body(Map.of("error", "Managers cannot be crew members."));
         if (w.getRole() == WorkerRole.CREW_LEADER) {
-            Worker existing = crew.getLeader();
-            if (existing != null && !existing.getId().equals(workerId)) {
-                existing.setCrew(null);
-                existing.setStageOrders(new ArrayList<>());
-                workers.save(existing);
-            }
-            crew.setLeader(w);
-            crews.save(crew);
-            houseStages.syncLeaderNameForCrew(id, w.getName());
+            Worker displaced = membership.replaceLeader(crew, w);
+            if (displaced != null) membership.leave(displaced);
         }
-        w.setCrew(crew);
-        w.setStageOrders(new ArrayList<>(crew.getStageOrders()));
-        workers.save(w);
+        membership.join(w, crew);
         return ResponseEntity.ok(toDto(crew, null));
     }
 
@@ -171,13 +164,9 @@ public class CrewController {
             return ResponseEntity.notFound().build();
         if (w.getRole() == WorkerRole.CREW_LEADER && crew != null &&
                 crew.getLeader() != null && crew.getLeader().getId().equals(workerId)) {
-            crew.setLeader(null);
-            crews.save(crew);
-            houseStages.syncLeaderNameForCrew(id, null);
+            membership.clearLeader(crew);
         }
-        w.setCrew(null);
-        w.setStageOrders(new ArrayList<>());
-        workers.save(w);
+        membership.leave(w);
         return ResponseEntity.noContent().build();
     }
 
@@ -268,6 +257,8 @@ public class CrewController {
         m.put("houseId",   c.getHouse() != null ? c.getHouse().getId()   : null);
         m.put("houseName", c.getHouse() != null ? c.getHouse().getName() : null);
         m.put("location",  c.getLocation() != null ? c.getLocation() : "");
+        m.put("stageGroup", c.getStageGroup());
+        m.put("nickname",   c.getNickname());
         m.put("lat",       c.getLat());
         m.put("lng",       c.getLng());
         return m;
