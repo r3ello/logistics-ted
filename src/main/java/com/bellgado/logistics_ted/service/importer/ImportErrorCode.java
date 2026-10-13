@@ -47,5 +47,10 @@ public enum ImportErrorCode {
     /** A cell held a note or placeholder ({@code няма}, {@code чакам}) rather than a value; it was read as empty. */
     CELL_IGNORED,
     /** An existing record the file does not mention. Reported only; nothing is deleted. */
-    NOT_IN_FILE
+    NOT_IN_FILE,
+    /**
+     * A stage cell names someone who is not one crew of that stage's group (unknown nickname, or two
+     * crews answer to it). The name is kept as text and the stage is left without a crew.
+     */
+    CREW_NOT_FOUND
 }

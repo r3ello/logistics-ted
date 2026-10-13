@@ -103,7 +103,7 @@ class WorkerImporterTest {
     }
 
     private Map<String, String> read(String data) {
-        return importer.readRow(row(data), (c, m) -> { });
+        return importer.readRow(row(data), (code, c, m) -> { });
     }
 
     private Worker seeded(String name, WorkerRole role, Crew crew) {
@@ -154,7 +154,7 @@ class WorkerImporterTest {
         assertThat(t.unknownColumns(new java.util.HashSet<>(importer.columns().keySet()) {{ add("key"); }}))
             .containsExactlyInAnyOrder("осигурен", "от фирма", "от служител");
 
-        Map<String, String> v = importer.readRow(t.rows().get(0), (c, m) -> { });
+        Map<String, String> v = importer.readRow(t.rows().get(0), (code, c, m) -> { });
         assertThat(v).containsEntry("name", "Владимир Борисов")
             .containsEntry("stage_group", "Конструкция")
             .containsEntry("crew", "Влади")
@@ -183,7 +183,7 @@ class WorkerImporterTest {
         List<String> warned = new ArrayList<>();
         Map<String, String> v = importer.readRow(
             row("RO017,Покрив,Борко,Боян Славчев,Служител,Вътрешен,няма,Иска да говори с Теодор,Трябва да ги сложа,.,,,,,,,,"),
-            (c, m) -> warned.add(c));
+            (code, c, m) -> warned.add(c));
 
         assertThat(v.get("phone")).isNull();
         assertThat(v.get("email")).isNull();

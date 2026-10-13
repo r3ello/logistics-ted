@@ -192,7 +192,7 @@ public class WorkerImporter implements EntityImporter {
 
     @Override
     public Map<String, String> readRow(CsvRow row) {
-        return readRow(row, (column, message) -> { });
+        return readRow(row, (code, column, message) -> { });
     }
 
     @Override

@@ -283,3 +283,50 @@ después del `apply`.
 | segundo `apply` | 86 `unchanged`, 0 creados, 0 actualizados |
 
 Tipos tras el import: 69 `INTERNAL`, 10 `EXTERNAL`, 7 `SUBCONTRACTOR` (+3 de Огнян sin tipo).
+
+## 11. Fase 2 — enlazar las etapas de las casas con las brigadas (rama `stage-crew-link`)
+
+`house-stages` lee el nombre de cada celda como **brigada**: lo busca entre las brigadas del grupo de
+esa etapa (`stage_type.main_stage_bg`), primero por apodo (`Бригада Име`) y si no por el nombre
+completo del jefe (`Иво Димитров`).
+
+- **Una coincidencia** → `house_stage.crew_id` se rellena y `worker_name` pasa a ser el nombre del
+  jefe, como al elegir la brigada en la matriz.
+- **Ninguna o dos** → el texto se guarda como antes, la etapa queda sin brigada y sale un aviso
+  `CREW_NOT_FOUND` con el apodo y la columna.
+- **Etapas sin grupo** (Ниво замазка, Мълниезащита, Първази, Врати…) → solo texto, sin aviso.
+
+Efectos, los mismos que en la matriz:
+- **Casa actual de la brigada**: se mueve con `IN_PROGRESS` (`CrewMembershipService.crewStartedAt` /
+  `recomputeCrewHouse`, compartido ahora con `HouseStageController`).
+- **Historial (`house_stage_crew_log`)**: se abre con fecha del import cuando la etapa está
+  `IN_PROGRESS` y se cierra cuando pasa a `DONE`. Las etapas que ya estaban `DONE` al enlazarse no
+  reciben historial: la hoja no trae fechas (decisión del usuario, 2026-10-13).
+
+Fusión: el campo nuevo `stage_<n>_crew` vale `Конструкция · Влади` (o `#id` si la brigada no tiene
+apodo). Las casas ya sincronizadas no lo tienen en su baseline; `ThreeWayMerger` trata una columna
+que el baseline no ha visto nunca como en una primera pasada (manda la hoja) en vez de marcar
+conflicto. Las snapshots guardan las nulas (`SnapshotJsonNullsTest`), así que "ausente" significa
+"nunca sincronizada".
+
+**Orden de importación**: `houses` → `workers` → `house-stages` (`dependsOn`).
+
+**Estimación offline** (ACTIVE_MASTER + hoja de personal, 2026-10-13): **586 celdas enlazadas**,
+32 `CREW_NOT_FOUND` (Митко 8, Етиком 10, Коце 6, Огнян 4, Лазар Саламандър 3, Михаил 1) y 32 en etapas
+sin brigada (Мълниезащита/Кристиян 17, Ниво замазка/Паскалев 13, Първази/Вальо 2).
+
+**Runbook por entorno**: desplegar → `house-stages?mode=validate` con el ACTIVE_MASTER actual →
+esperar `updated` en las casas con brigadas, ~32 `CREW_NOT_FOUND` y 0 conflictos → `apply` → repetir
+`apply` y ver todo `unchanged`.
+
+### Ejecutado en dev (2026-10-13)
+
+| Paso | Resultado |
+|---|---|
+| Antes | 1 etapa con brigada (casa de prueba `Misho House 11 test`) |
+| `validate` | 56 filas: 54 actualizadas, 2 sin cambios, 0 conflictos, 0 errores; 32 `CREW_NOT_FOUND` (los previstos), 9 `UNKNOWN_COLUMN` (columnas de casa) |
+| `apply` | igual; **586 etapas con brigada**, 0 cambios de estado, `worker_name` = jefe en todas; 15 brigadas con casa actual; historial solo para `IN_PROGRESS` (fecha de hoy) |
+| segundo `apply` | 56 `unchanged`, 17 s |
+
+El primer `apply` tardó unos 2–3 min (586 escrituras contra la BD remota). Optimizado después: ya no se
+consulta el historial de las etapas enlazadas que ya estaban `DONE`.

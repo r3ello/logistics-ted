@@ -159,6 +159,36 @@ class ThreeWayMergerTest {
         assertThat(r.noBaseline()).isTrue();
     }
 
+    @Test
+    void aColumnTheBaselineHasNeverSeen_isTakenFromTheSheet() {
+        // house-stages gained stage_<n>_crew after houses were already synced: the app has a crew
+        // someone picked by hand, the baseline has no such key. Like a first run, the sheet decides
+        // for that column — instead of a "both changed" conflict that would block the whole house.
+        MergeResult r = ThreeWayMerger.merge(
+            map("stage_2_status", "DONE", "stage_2_crew", "Конструкция · Влади"),
+            map("stage_2_status", "DONE", "stage_2_crew", "Конструкция · Евгени"),
+            map("stage_2_status", "DONE"),
+            true);
+
+        assertThat(r.outcome()).isEqualTo(RowOutcome.UPDATED);
+        assertThat(r.toApply()).containsExactly(Map.entry("stage_2_crew", "Конструкция · Влади"));
+        assertThat(r.noBaseline()).isFalse();
+    }
+
+    @Test
+    void aSeenColumnWhoseBaselineWasEmpty_stillProtectsTheApp() {
+        // The key is present with a null value: synced while empty, then set in the app. Not unseen.
+        Map<String, String> base = map("stage_2_crew", null);
+        MergeResult r = ThreeWayMerger.merge(
+            map("stage_2_crew", null),
+            map("stage_2_crew", "Конструкция · Евгени"),
+            base,
+            true);
+
+        assertThat(r.outcome()).isEqualTo(RowOutcome.KEPT_APP);
+        assertThat(r.toApply()).isEmpty();
+    }
+
     // ── divergent baselines, the state a KEPT_APP leaves behind ───────────────
 
     @Test

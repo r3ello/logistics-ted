@@ -138,8 +138,8 @@ public class ImportOrchestrator {
                             List<ImportReport.Warning> warnings,
                             List<ImportReport.ConflictDetail> conflictDetails, Set<Long> idsInFile) {
 
-        Map<String, String> sheet = imp.readRow(row, (column, message) ->
-            warnings.add(new ImportReport.Warning(row.line(), ImportErrorCode.CELL_IGNORED, column, message)));
+        Map<String, String> sheet = imp.readRow(row, (code, column, message) ->
+            warnings.add(new ImportReport.Warning(row.line(), code, column, message)));
         ImportRef ref = refsByKey.get(key);
         Map<String, String> app = ref == null ? null : imp.project(ref.getEntityId());
 

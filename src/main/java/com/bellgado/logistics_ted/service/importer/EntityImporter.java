@@ -84,7 +84,12 @@ public interface EntityImporter {
     /** Receives a row's cell-level warnings; the orchestrator attaches the line number. */
     @FunctionalInterface
     interface RowWarnings {
-        void warn(String column, String message);
+        void warn(ImportErrorCode code, String column, String message);
+
+        /** The common case: a note or placeholder read as empty. */
+        default void warn(String column, String message) {
+            warn(ImportErrorCode.CELL_IGNORED, column, message);
+        }
     }
 
     /**
