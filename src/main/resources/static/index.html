@@ -41,6 +41,7 @@
     body.theme-light {
       --bg:      #f0f2f7;
       --surface: #ffffff;
+      --surface2: #f1f5f9;
       --card:    #f7f8fc;
       --border:  #d4daf0;
       --accent:  #2563eb;
@@ -56,11 +57,12 @@
       --shadow-lg: 0 18px 48px rgba(15,23,42,0.16);
       --edge:      inset 0 1px 0 rgba(255,255,255,0.65);
     }
-    body.theme-light #mainNav { background: #1e293b; border-right-color: #334155; }
-    body.theme-light .nav-brand h1 { color: #f1f5f9; }
-    body.theme-light .nav-brand p  { color: #94a3b8; }
-    body.theme-light .nav-item     { color: #cbd5e1; }
-    body.theme-light .nav-item.active, body.theme-light .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    body.theme-light #mainNav { background: #ffffff; border-right-color: var(--border); }
+    body.theme-light .nav-brand h1 { color: var(--accent); }
+    body.theme-light .nav-brand p  { color: var(--muted); }
+    body.theme-light .nav-item     { color: #334155; }
+    body.theme-light .nav-item.active { background: rgba(37,99,235,0.1); color: var(--accent); }
+    body.theme-light .nav-item:hover  { background: rgba(37,99,235,0.06); color: var(--accent); }
     body.theme-light .header { background: #ffffff; border-bottom: 1px solid var(--border); }
     body.theme-light .house-map-popup .leaflet-popup-content-wrapper { background: #fff; color: #1a1d27; }
     .doc-card { background: var(--surface); }
@@ -949,6 +951,49 @@
     /* ── DASHBOARD TAB BAR ── */
     body.theme-light #dashTabBar { background: #fff !important; border-color: #d4daf0 !important; }
 
+    /* ── LIGHT THEME: override all hardcoded dark inline styles ── */
+    /* Dashboard tab bar buttons */
+    body.theme-light #dashTabBar button { color: var(--muted) !important; }
+    body.theme-light #dashTabBar button[style*="background:#4f8ef7"],
+    body.theme-light #dashTabBar button[style*="background:#2563eb"] { color: #fff !important; }
+
+    /* Stage matrix table headers */
+    body.theme-light #stageMatrixWrap th { color: var(--muted) !important; border-color: var(--border) !important; background: #f8fafc !important; }
+    body.theme-light #stageMatrixWrap thead tr { background: #f8fafc !important; border-bottom-color: var(--border) !important; }
+    body.theme-light #stageMatrixWrap table { border-color: var(--border) !important; }
+
+    /* House detail / modal table headers generated in JS */
+    body.theme-light .view table thead tr { background: #f8fafc !important; }
+    body.theme-light .view table thead th,
+    body.theme-light .view table thead td { color: var(--muted) !important; border-color: var(--border) !important; }
+    body.theme-light .view table { background: var(--surface) !important; border-color: var(--border) !important; }
+
+    /* Map overlay panels */
+    body.theme-light #mapToggleBar        { background: #fff !important; border-color: var(--border) !important; box-shadow: 0 2px 8px rgba(15,23,42,0.1) !important; }
+    body.theme-light #mapCrewSelector     { background: #fff !important; color: var(--text) !important; }
+    body.theme-light #mapCrewSelector select { background: #fff !important; color: var(--text) !important; border-color: var(--border) !important; }
+    body.theme-light #mapCrewHouseSelector { background: #fff !important; color: var(--text) !important; }
+    body.theme-light #mapCrewHouseSelector select { background: #fff !important; color: var(--text) !important; border-color: var(--border) !important; }
+    body.theme-light #mapTravelPayPanel   { background: #fff !important; color: var(--text) !important; }
+    body.theme-light #mapTravelPayPanel select,
+    body.theme-light #mapTravelPayPanel input { background: #fff !important; color: var(--text) !important; border-color: var(--border) !important; }
+    body.theme-light #mapSearchBar        { background: #fff !important; border-color: var(--border) !important; }
+    body.theme-light #mapSearchBar input  { background: transparent !important; color: var(--text) !important; }
+    body.theme-light #mapScaffoldLegend   { background: #fff !important; border-color: var(--border) !important; color: var(--text) !important; }
+    body.theme-light #mapChMembersToggle  { border-top-color: var(--border) !important; color: var(--muted) !important; }
+
+    /* Org chart / org view */
+    body.theme-light #orgGraphView { background: #f0f4f8 !important; border-color: var(--border) !important; }
+
+    /* Inline dark table borders used across views */
+    body.theme-light [style*="border:1px solid #2e3250"],
+    body.theme-light [style*="border-bottom:1px solid #2e3250"],
+    body.theme-light [style*="border-right:1px solid #2e3250"],
+    body.theme-light [style*="border-top:1px solid #2e3250"] { border-color: var(--border) !important; }
+
+    /* Leaflet map controls */
+    body.theme-light .leaflet-bar a { background: #fff !important; color: var(--text) !important; border-bottom-color: var(--border) !important; }
+    body.theme-light .leaflet-bar a:hover { background: #f0f2f7 !important; }
 
     /* ── TOTALS GRID ── */
     /* keep 2-col grid even on small phones — cards are wide enough */
@@ -1446,7 +1491,7 @@
     }
   </style>
 </head>
-<body>
+<body><script>(function(){if(localStorage.getItem('theme')!=='dark'){document.body.classList.add('theme-light');}})()</script>
 
 <div class="nav-overlay" id="navOverlay" onclick="closeNav()"></div>
 
@@ -2872,7 +2917,7 @@
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;min-width:500px">
-        <thead style="background:var(--surface2,#21252f)">
+        <thead style="background:var(--surface)">
           <tr>
             <th style="border-bottom:1px solid var(--border);width:28px"></th>
             <th style="padding:.6rem 1rem;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)">Folder</th>
@@ -3962,7 +4007,8 @@
   }
 
   function applyStoredTheme() {
-    if (localStorage.getItem('theme') === 'light') {
+    const stored = localStorage.getItem('theme');
+    if (stored !== 'dark') {
       document.body.classList.add('theme-light');
       const btn = document.getElementById('themeBtn');
       if (btn) btn.textContent = '☀️';
@@ -4558,7 +4604,7 @@
       const foundationDone = (stages.find(s => s.stageOrder === 1)?.status === 'DONE');
       const isEn = currentLang === 'en';
       const thCells = columns.map(col =>
-        `<th style="min-width:120px;padding:0.4rem 0.5rem;text-align:center;font-size:0.62rem;color:#9aa3be;text-transform:uppercase;white-space:nowrap;border-right:1px solid #2e3250">${isEn && col.stageNameEn ? col.stageNameEn : col.stageName}</th>`
+        `<th style="min-width:120px;padding:0.4rem 0.5rem;text-align:center;font-size:0.62rem;color:var(--muted);text-transform:uppercase;white-space:nowrap;border-right:1px solid var(--border)">${isEn && col.stageNameEn ? col.stageNameEn : col.stageName}</th>`
       ).join('');
       const hdStatusLabel = (v) => {
         if (v === 'IN_PROGRESS') return ' ' + (currentLang === 'bg' ? 'В процес' : 'In Progress');
@@ -6867,10 +6913,10 @@
           <button class="btn btn-primary" onclick="addStageType()">${t('stagesAddBtn')}</button>
         </div>
         <table style="width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;border:1px solid #2e3250">
-          <thead><tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+          <thead><tr style="background:var(--surface);border-bottom:1px solid var(--border)">
             <th class="admin-only"></th>
-            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase;width:40px">#</th>
-            <th data-i18n="stagesColStage" style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase">${t('stagesColStage')}</th>
+            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:var(--muted);text-transform:uppercase;width:40px">#</th>
+            <th data-i18n="stagesColStage" style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:var(--muted);text-transform:uppercase">${t('stagesColStage')}</th>
             <th class="admin-only"></th>
           </tr></thead>
           <tbody id="stageTypeBody">${rows || `<tr><td colspan="4" style="padding:1rem;color:#9aa3be;text-align:center">${t('stagesNoResults')}</td></tr>`}</tbody>
@@ -7016,7 +7062,7 @@
 
     const thCols = columns.map(c => {
       const label = isEn && c.stageNameEn ? c.stageNameEn : c.stageName;
-      return `<th title="${label}" style="min-width:130px;padding:0.5rem 0.6rem;text-align:center;font-size:0.65rem;color:#9aa3be;text-transform:uppercase;white-space:nowrap;border-right:1px solid #2e3250">${label}</th>`;
+      return `<th title="${label}" style="min-width:130px;padding:0.5rem 0.6rem;text-align:center;font-size:0.65rem;color:var(--muted);text-transform:uppercase;white-space:nowrap;border-right:1px solid var(--border)">${label}</th>`;
     }).join('');
 
     // build a map: stageOrder → crews array
@@ -7110,9 +7156,9 @@
     wrap.innerHTML = `
       <table style="border-collapse:collapse;background:var(--card)">
         <thead>
-          <tr style="background:#1a1d27;border-bottom:2px solid #2e3250">
-            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:#9aa3be;text-transform:uppercase;position:sticky;left:0;background:#1a1d27;z-index:2;border-right:2px solid #2e3250;white-space:nowrap">
-              <span onclick="sortMatrixBy('extId')" title="${t('colExternalId')}" style="cursor:pointer;display:inline-block;min-width:4.2rem;margin-right:0.5rem;${_matrixSort.key === 'extId' ? 'color:#e8eaf6' : ''}">${t('colExternalId')}${sortArrow('extId')}</span><span onclick="sortMatrixBy('name')" style="cursor:pointer;${_matrixSort.key === 'name' ? 'color:#e8eaf6' : ''}">${t('matrixHeaderHouse')}${sortArrow('name')}</span>
+          <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
+            <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:var(--muted);text-transform:uppercase;position:sticky;left:0;background:var(--surface);z-index:2;border-right:2px solid var(--border);white-space:nowrap">
+              <span onclick="sortMatrixBy('extId')" title="${t('colExternalId')}" style="cursor:pointer;display:inline-block;min-width:4.2rem;margin-right:0.5rem;${_matrixSort.key === 'extId' ? 'color:var(--text)' : ''}">${t('colExternalId')}${sortArrow('extId')}</span><span onclick="sortMatrixBy('name')" style="cursor:pointer;${_matrixSort.key === 'name' ? 'color:var(--text)' : ''}">${t('matrixHeaderHouse')}${sortArrow('name')}</span>
             </th>
             ${thCols}
           </tr>
