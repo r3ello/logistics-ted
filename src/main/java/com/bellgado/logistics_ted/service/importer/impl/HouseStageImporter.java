@@ -75,9 +75,11 @@ import org.springframework.stereotype.Component;
  * without a crew and warns {@code CREW_NOT_FOUND}. Stages with no crew group (Ниво замазка,
  * Мълниезащита, ...) keep the name as text only, as before.
  *
- * <p>The crew field's value is the crew's sheet identity, {@code Конструкция · Влади} (or
- * {@code #id} for a crew the staff sheet never named), so the report reads like the sheet and a
- * leader change does not look like an edit. Crew side effects follow the matrix: the crew's current
+ * A cell may also name the crew by its CrewID ({@code CRIS006 Завършен}), which is matched first.
+ *
+ * <p>The crew field's value is the crew's CrewID when it has one (V22), else its sheet identity
+ * {@code Конструкция · Влади}, else {@code #id} for a crew the staff sheet never named — so a
+ * leader or nickname change does not look like an edit. Crew side effects follow the matrix: the crew's current
  * house moves with {@code IN_PROGRESS}, and its history ({@code house_stage_crew_log}) gets an entry
  * when it starts a stage, closed when the stage is done. Stages already done when first linked get
  * no history — the sheet has no dates, and "finished today" would falsify the durations.
@@ -230,8 +232,16 @@ public class HouseStageImporter implements EntityImporter {
                 + "); kept as text, no crew assigned.");
     }
 
-    /** The crews of this stage's group answering to the name: by nickname, else by the leader's full name. */
+    /**
+     * The crews of this stage's group answering to the name: by CrewID ({@code CRIS006}), else by
+     * nickname, else by the leader's full name.
+     */
     private static List<Crew> crewsNamed(String who, int order, String group, List<Crew> allCrews) {
+        List<Crew> byId = allCrews.stream()
+            .filter(c -> c.getExternalId() != null && c.getExternalId().equalsIgnoreCase(who.trim())
+                      && canWork(c, order, group))
+            .toList();
+        if (!byId.isEmpty()) return byId;
         String k = WorkerImporter.matchKey(who);
         List<Crew> able = allCrews.stream().filter(c -> canWork(c, order, group)).toList();
         List<Crew> byNickname = able.stream()
@@ -258,8 +268,12 @@ public class HouseStageImporter implements EntityImporter {
         return c.getStageOrders() != null && c.getStageOrders().contains(order);
     }
 
-    /** {@code Конструкция · Влади}, or {@code #113} for a crew with no sheet identity. */
+    /**
+     * The crew's CrewID ({@code CRIS006}) — stable across nickname and leader changes; else
+     * {@code Конструкция · Влади}; else {@code #113} for a crew with no sheet identity.
+     */
     static String crewKey(Crew c) {
+        if (c.getExternalId() != null) return c.getExternalId();
         return c.getStageGroup() != null && c.getNickname() != null
             ? c.getStageGroup() + CREW_SEPARATOR + c.getNickname()
             : "#" + c.getId();
@@ -269,7 +283,7 @@ public class HouseStageImporter implements EntityImporter {
         if (key == null) return null;
         if (key.startsWith("#")) return crews.findById(Integer.valueOf(key.substring(1))).orElse(null);
         int at = key.lastIndexOf(CREW_SEPARATOR);
-        if (at < 0) return null;
+        if (at < 0) return crews.findByExternalId(key).orElse(null);
         return crews.findByStageGroupAndNickname(key.substring(0, at), key.substring(at + CREW_SEPARATOR.length()))
             .orElse(null);
     }

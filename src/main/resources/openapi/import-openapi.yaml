@@ -126,6 +126,7 @@ info:
     | `<name> в Процес`                                           | In progress, by `<name>`.                    |
     | a name alone (`Жоро`, `Слави Р`; one to three words)        | Assigned to that person, not started.        |
     | `Завършен` / `в Процес` without a name                       | Done / in progress; the assignee is unchanged. |
+    | `Приключено` (in the `Приключване` column)                   | The project is finished: the completion stage is done. |
     | any other text (`Междинен`, `От клиент`, `vrati-yukka.bg`)  | Stored as the stage's **note**; status and assignee unchanged. |
 
     The status word must be the **last** thing in the cell and is not case-sensitive.
@@ -133,11 +134,13 @@ info:
     **The name is a crew.** `<name>` is the crew's nickname from the staff sheet's `Бригада Име`
     (`Влади`, `Слави Р`), looked up among the crews of that stage's group: `Любо` on `Ламперия` is the
     roof crew, `Любо` on `Изолация` the insulation one. The leader's full name (`Иво Димитров`) works
-    too. When exactly one crew answers, the stage is **assigned to that crew** in the application —
+    too, and so does the crew's `CrewID` from the staff sheet (`CRIS006`, `CRIS006 Завършен`). When
+    exactly one crew answers, the stage is **assigned to that crew** in the application —
     as if picked in the stage matrix — and shows its leader's name. Otherwise the name is kept as
     text, the stage has no crew, and the report carries a `CREW_NOT_FOUND` warning: add the crew to
-    the staff sheet (or fix the spelling) and sync again. Stages that no crew works on (`Ниво
-    замазка`, `Мълниезащита`, `Врати`, `Първази`, …) keep the name as text, without a warning.
+    the staff sheet (or fix the spelling) and sync again. `Мълниезащита` is worked by the `Ел` crews
+    and `Първази` by the `Ламинат` ones; `Ниво замазка` has its own group. Stages that no crew works
+    on (`Врати поръчка`, `Врати`, `Приключване`) keep the name as text, without a warning.
 
     - **Dates are never set from the sheet** — it carries none.
     - **Foundation (`Фундамент`).** The sheet has no column for it today. Until it does, the
@@ -177,14 +180,15 @@ info:
 
     | Sheet column      | Stored as                 | Notes |
     |-------------------|---------------------------|-------|
+    | `CrewID`          | the crew's id             | Optional; filled on the `Главен` row (`CRIS006`), empty on members' rows. **When given it is the crew's identity**: change `Бригада Име` (or `Група`) on every row of the crew and keep the `CrewID`, and the same crew is renamed instead of a new one being made. Never change or reuse a `CrewID`. One `CrewID` on two crews in a file is `DUPLICATE_KEY`; one that would merge two existing crews, or a second `CrewID` for a crew that already has one, is `KEY_REUSED`. |
     | `ID`              | the key                   | Required. Shown in the application as the worker's External ID. |
-    | `Група`           | the crew's group          | Required. One of the stage groups (`Конструкция`, `Покрив`, `Дограма`, `Ел`, `ВиК`, `Изолация`, `Картон`, `Замазка`, `Плочки`, `Ламинат`), or two joined with `/` (`Изолация/ Картон`). Gives a new crew its stages. |
-    | `Бригада Име`     | the crew's nickname       | Required. **A crew is (`Група`, `Бригада Име`)**: `Любо` on `Покрив` and `Любо` on `Изолация/ Картон` are two crews. |
+    | `Група`           | the crew's group          | Required. One of the stage groups (`Конструкция`, `Покрив`, `Дограма`, `Ниво замазка`, `Ел`, `ВиК`, `Изолация`, `Картон`, `Замазка`, `Плочки`, `Ламинат`), or two joined with `/` (`Изолация/ Картон`). Gives a new crew its stages. |
+    | `Бригада Име`     | the crew's nickname       | Required. **Without a `CrewID`, a crew is (`Група`, `Бригада Име`)**: `Любо` on `Покрив` and `Любо` on `Изолация/ Картон` are two crews. Members' rows are always placed this way. |
     | `Име Служител`    | name                      | Required. A row without a real name (`1`, `2`, empty) is rejected. |
     | `Роля`            | `Главен` = crew leader, `Служител` = member | A `Главен` row makes that person the crew's leader. |
     | `Вид служител`    | `Вътрешен` / `Външен` / `Подизпълнител` | Internal, external (a subcontractor's member), subcontractor. |
     | `Телефон`, `Имейл`, `снимки` | phone, email, photo link | A note instead of a value (`няма`, `чакам`, `Иска да говори с Теодор`) is read as empty, with a `CELL_IGNORED` warning. |
-    | `Локация`         | where the person/crew starts from | On a `Главен` row it is also the crew's location. `.` means empty. |
+    | `Локация`         | where the person/crew starts from | A town, or a **Google Maps link**: a full link (`https://www.google.com/maps/place/…`) stores the place's name as the location and its pin as the person's coordinates; a short `maps.app.goo.gl` link has no coordinates in it and is kept as text with a `CELL_IGNORED` warning. On a `Главен` row it is also the crew's location (and map pin). `.` / `---` mean empty. |
     | `Дата Постъпване` | hire date                 | `dd.mm.yyyy` or `yyyy-mm-dd`. |
     | `Лична Карта`     | ID card number            | **Personal data**: visible to administrators only. |
     | `Фирма`, `Размер Дрехи`, `Облекло` | company, clothing size, clothes issued | |
@@ -1270,8 +1274,9 @@ components:
             The conflicting field. For `house-stages` it is `stage_<n>_status`, `stage_<n>_crew`,
             `stage_<n>_worker` or `stage_<n>_note`, where `<n>` is the stage's internal number — the
             `message` names the stage as it appears in the sheet (`Stage 'Ниво замазка' (status)
-            changed in both …`). A crew value reads `<group> · <nickname>` (`Конструкция · Влади`), or
-            `#<id>` for a crew the staff sheet does not name.
+            changed in both …`). A crew value reads as its `CrewID` (`CRIS006`); for a crew without one,
+            `<group> · <nickname>` (`Конструкция · Влади`), or `#<id>` for a crew the staff sheet does
+            not name.
         base:
           type: string
           nullable: true

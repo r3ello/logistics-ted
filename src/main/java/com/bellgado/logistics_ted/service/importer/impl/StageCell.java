@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
  *   <li>empty → {@code NOT_STARTED}, no worker</li>
  *   <li>{@code Не} ("not applicable") → <b>untouched</b>: nothing is managed for this stage</li>
  *   <li>"&lt;name&gt; Завършен / изпълнил / Монтирана / Взети размери" → {@code DONE}</li>
+ *   <li>{@code Приключено} (the Приключване column: the project is finished) → {@code DONE}, no
+ *       worker (client, 2026-10-15)</li>
  *   <li>"&lt;name&gt; в Процес" → {@code IN_PROGRESS}</li>
  *   <li>just a name ("Жоро", "Слави Р") → {@code ASSIGNED} to that worker</li>
  *   <li>anything else ("Междинен", "Стандарт", "От клиент", "vrati-yukka.bg") → a note; status and
@@ -35,11 +37,14 @@ public record StageCell(String status, String worker, String note) {
     static final StageCell UNTOUCHED = new StageCell(null, null, null);
 
     private static final Pattern WITH_STATUS = Pattern.compile(
-        "^(.*?)\\s*(завършен[аио]?|в процес|взети размери|монтиран[аио]?|изпълнил[аио]?|изпълнен[аио]?)$",
+        "^(.*?)\\s*(завършен[аио]?|приключен[аио]?|в процес|взети размери|монтиран[аио]?|изпълнил[аио]?|изпълнен[аио]?)$",
         Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     /** One to three words of letters ("Жоро", "Слави Р", "Лазар Саламандър"), a trailing dot allowed. */
     private static final Pattern NAME = Pattern.compile("^\\p{L}+\\.?(\\s+\\p{L}+\\.?){0,2}$");
+
+    /** A staff-sheet CrewID on its own ("CRIS006"): names a crew like a nickname does. */
+    private static final Pattern CREW_ID = Pattern.compile("^[A-Za-z]{2,}\\d+$");
 
     /** Values that look like a name but are a level/type or a source, not a worker. */
     private static final Set<String> NOT_NAMES = Set.of("междинен", "стандарт", "от клиент");
@@ -59,7 +64,7 @@ public record StageCell(String status, String worker, String note) {
             // "Завършен" with no name says nothing about who — leave the worker alone.
             return new StageCell(status, worker.isEmpty() ? null : worker, null);
         }
-        if (!NOT_NAMES.contains(lower) && NAME.matcher(cell).matches()) {
+        if (!NOT_NAMES.contains(lower) && (NAME.matcher(cell).matches() || CREW_ID.matcher(cell).matches())) {
             return new StageCell("ASSIGNED", cell, null);
         }
         return new StageCell(null, null, cell);

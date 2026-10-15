@@ -122,18 +122,20 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     List<HouseStage> findAllWithHouse();
 
     /** Batch: all crews per stage type with leader and assigned houses.
-     *  Returns [stage_order, crew_id, crew_name, leader_id, leader_name, assigned_houses, assigned_houses_json]. */
+     *  Returns [stage_order, crew_id, crew_name, leader_id, leader_name, assigned_houses, assigned_houses_json,
+     *  nickname, external_id]. */
     @Query(value = """
         SELECT cst.stage_order, c.id, c.name,
                w.id AS leader_id, w.name AS leader_name,
                string_agg(DISTINCT h2.name, ', ' ORDER BY h2.name) AS assigned_houses,
-               COALESCE(json_agg(DISTINCT jsonb_build_object('id', h2.id, 'name', h2.name)) FILTER (WHERE h2.id IS NOT NULL), '[]') AS assigned_houses_json
+               COALESCE(json_agg(DISTINCT jsonb_build_object('id', h2.id, 'name', h2.name)) FILTER (WHERE h2.id IS NOT NULL), '[]') AS assigned_houses_json,
+               c.nickname, c.external_id
         FROM crew_stage_type cst
         JOIN crew c ON c.id = cst.crew_id
         LEFT JOIN worker w ON w.id = c.leader_id
         LEFT JOIN house_stage hs2 ON hs2.crew_id = c.id AND hs2.status IN ('ASSIGNED', 'IN_PROGRESS')
         LEFT JOIN house h2 ON h2.id = hs2.house_id
-        GROUP BY cst.stage_order, c.id, c.name, w.id, w.name
+        GROUP BY cst.stage_order, c.id, c.name, w.id, w.name, c.nickname, c.external_id
         ORDER BY cst.stage_order, c.name
         """, nativeQuery = true)
     List<Object[]> findAllCrewsPerStage();

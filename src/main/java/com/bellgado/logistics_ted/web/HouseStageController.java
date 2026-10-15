@@ -182,6 +182,8 @@ public class HouseStageController {
             c.put("leaderName",         cr[4]);
             c.put("assignedHouses",     cr[5]);
             c.put("assignedHousesJson", cr[6]);
+            c.put("nickname",           cr[7]);
+            c.put("externalId",         cr[8]);
             crewsByStage.computeIfAbsent(stageOrder, k -> new ArrayList<>()).add(c);
         }
 

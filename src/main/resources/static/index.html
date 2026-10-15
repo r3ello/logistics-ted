@@ -7061,7 +7061,11 @@
         const currentLeader = s.workerName || currentCrew?.leaderName || '';
         const pc = s.status && s.status !== 'NOT_STARTED' ? PILL_COLOR[s.status] : null;
         const hasCrew = !!s.crewId;
-        const pillLabel = pc ? `${currentLeader || currentCrew?.crewName || ''}${statusLabel(s.status)}` : '—';
+        // The client's sheets call a crew by its leader's nickname ("Виктор"); the full name and the
+        // CrewID go to the tooltip. workerName still carries the full name, so only the label changes.
+        const shownName = currentCrew?.nickname || currentLeader || currentCrew?.crewName || '';
+        const pillLabel = pc ? `${shownName}${statusLabel(s.status)}` : '—';
+        const pillTitle = pc ? crewTitle(currentCrew, currentLeader) + statusLabel(s.status) : '—';
         const pillStyle = isLocked
           ? hasCrew
             ? `background:rgba(79,142,247,0.08);color:#5a6080;border:1px dashed #4060a0;cursor:not-allowed`
@@ -7069,7 +7073,7 @@
           : pc
             ? `background:${pc.bg};color:${pc.text};border:none;cursor:pointer`
             : `background:transparent;color:var(--muted);border:1px dashed var(--border);cursor:pointer`;
-        const pillsData = JSON.stringify(crews.map(c => ({ crewId: c.crewId, leader: c.leaderName || c.crewName, crewName: c.crewName, assignedHouses: c.assignedHouses || null }))).replace(/"/g,'&quot;');
+        const pillsData = JSON.stringify(crews.map(c => ({ crewId: c.crewId, leader: c.leaderName || c.crewName, crewName: c.crewName, nickname: c.nickname || null, externalId: c.externalId || null, assignedHouses: c.assignedHouses || null }))).replace(/"/g,'&quot;');
         const currentCrewName = (currentCrew?.crewName || '').replace(/"/g,'&quot;');
         const currentLeaderName = (currentCrew?.leaderName || s.workerName || '').replace(/"/g,'&quot;');
         const clickHandler = isLocked
@@ -7085,13 +7089,13 @@
               data-current-crew-name="${currentCrewName}"
               data-current-leader="${currentLeaderName}"
               style="${pillStyle};flex:1;padding:0.28rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
-              title="${isLocked ? t('stageFoundationRequired') : pillLabel}">${isLocked ? '🔒' : pillLabel}</button>
+              title="${isLocked ? t('stageFoundationRequired') : esc(pillTitle)}">${isLocked ? '🔒' : esc(pillLabel)}</button>
             ${eyeHtml}
           </div>
         </td>`;
       }).join('');
       const allCrewNames = row.stages
-        .map(s => { const c = (crewsByStage[s.stageOrder]||[]).find(cr => cr.crewId == s.crewId); return c ? c.crewName : ''; })
+        .map(s => { const c = (crewsByStage[s.stageOrder]||[]).find(cr => cr.crewId == s.crewId); return c ? [c.crewName, c.nickname, c.externalId].filter(Boolean).join(' ') : ''; })
         .filter(Boolean).join(' ').toLowerCase();
       const extId = row.houseExternalId || '';
       const extIdHtml = extId
@@ -7172,6 +7176,12 @@
     DONE:        { bg:'#bbf7d0', text:'#14532d' },
   };
 
+  /** "Виктор Петков · CRIS006" — the crew's full name and CrewID, for tooltips. */
+  function crewTitle(crew, leader) {
+    const name = leader || crew?.leaderName || crew?.leader || crew?.crewName || '';
+    return crew?.externalId ? `${name} · ${crew.externalId}` : name;
+  }
+
   function stagePillLabel(leader, status) {
     if (status === 'IN_PROGRESS') return leader + (currentLang === 'bg' ? ' в Процес'  : ' In Progress');
     if (status === 'DONE')        return leader + (currentLang === 'bg' ? ' Завършен'   : ' Done');
@@ -7248,12 +7258,12 @@
 
       ['IN_PROGRESS','DONE'].forEach(v => {
         const pc = PILL_COLORS[v];
-        const label = stagePillLabel(currentCrew.leader, v);
+        const label = stagePillLabel(currentCrew.nickname || currentCrew.leader, v);
         const active = currentStatus === v;
         const b = document.createElement('button');
         b.textContent = label;
         b.style.cssText = `background:${pc.bg};color:${pc.text};border:none;border-radius:20px;padding:0.28rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;text-align:center;outline:${active ? '2px solid #fff' : 'none'};white-space:nowrap`;
-        b.onclick = () => { pickStageCell(id, currentCrew.crewId, v, currentCrew.leader, btn, houseId, stageOrder); picker.remove(); };
+        b.onclick = () => { pickStageCell(id, currentCrew.crewId, v, currentCrew.leader, btn, houseId, stageOrder, currentCrew.nickname); picker.remove(); };
         picker.appendChild(b);
       });
     } else {
@@ -7273,10 +7283,13 @@
         const alreadyAssigned = !!c.assignedHouses;
         const isBest = houseCount(c) === minHouses;
         const bestIcon = isBest ? ' ✅' : '';
-        b.textContent = (c.leader || c.crewName || '—') + (alreadyAssigned ? ' ⚠️' : '') + bestIcon;
-        b.title = alreadyAssigned
+        const full = c.leader || c.crewName || '—';
+        const shown = c.nickname && c.nickname !== full ? `${c.nickname} (${full})` : full;
+        b.textContent = shown + (alreadyAssigned ? ' ⚠️' : '') + bestIcon;
+        const hint = alreadyAssigned
           ? (currentLang === 'bg' ? `Вече назначен на: ${c.assignedHouses}` : `Already assigned to: ${c.assignedHouses}`)
           : isBest ? (currentLang === 'bg' ? 'Най-добър избор – най-малко обекти' : 'Best choice – fewest houses') : '';
+        b.title = [c.externalId, hint].filter(Boolean).join(' — ');
         b.style.cssText = 'flex:1;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:20px;padding:0.28rem 0.75rem;font-size:0.78rem;font-weight:600;cursor:pointer;text-align:center;white-space:nowrap';
         // eye icon for leader info
         const eye = document.createElement('span');
@@ -7314,7 +7327,7 @@
             const okBtn = document.createElement('button');
             okBtn.textContent = currentLang === 'bg' ? 'Продължи' : 'Continue';
             okBtn.style.cssText = 'flex:1;padding:0.55rem 1rem;border-radius:8px;border:none;background:#f97316;color:#fff;font-size:0.88rem;font-weight:700;cursor:pointer';
-            okBtn.onclick = () => { overlay.remove(); pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn, houseId, stageOrder); };
+            okBtn.onclick = () => { overlay.remove(); pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn, houseId, stageOrder, c.nickname); };
             row.appendChild(cancelBtn);
             row.appendChild(okBtn);
             box.appendChild(icon);
@@ -7325,7 +7338,7 @@
             document.body.appendChild(overlay);
             return;
           }
-          pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn, houseId, stageOrder);
+          pickStageCell(id, c.crewId, 'ASSIGNED', c.leader, btn, houseId, stageOrder, c.nickname);
           picker.remove();
         };
         row.appendChild(b);
@@ -7346,9 +7359,10 @@
     setTimeout(() => document.addEventListener('click', close, true), 10);
   }
 
-  async function pickStageCell(id, crewId, status, leader, btn, houseId, stageOrder) {
+  // leader is stored as the stage's workerName; shown (the nickname) only labels the pill.
+  async function pickStageCell(id, crewId, status, leader, btn, houseId, stageOrder, shown) {
     const pc = PILL_COLORS[status];
-    const label = pc && leader ? stagePillLabel(leader, status) : '—';
+    const label = pc && leader ? stagePillLabel(shown || leader, status) : '—';
     if (pc) {
       btn.style.background = pc.bg;
       btn.style.color      = pc.text;

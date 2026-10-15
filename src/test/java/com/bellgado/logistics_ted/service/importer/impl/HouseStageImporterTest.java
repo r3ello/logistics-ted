@@ -102,6 +102,8 @@ class HouseStageImporterTest {
         when(crews.findByStageGroupAndNickname(any(), any())).thenAnswer(inv -> crewList.stream()
             .filter(c -> inv.getArgument(0).equals(c.getStageGroup()) && inv.getArgument(1).equals(c.getNickname()))
             .findFirst());
+        when(crews.findByExternalId(any())).thenAnswer(inv -> crewList.stream()
+            .filter(c -> inv.getArgument(0).equals(c.getExternalId())).findFirst());
         stageLogs = mock(HouseStageCrewLogRepository.class);
         membership = mock(CrewMembershipService.class);
 
@@ -389,6 +391,38 @@ class HouseStageImporterTest {
                      .containsEntry("stage_11_crew", "#113");
         assertThat(p).containsKey("stage_27_crew");
         assertThat(p.get("stage_27_crew")).isNull();
+    }
+
+    @Test
+    void aCrewWithACrewIdIsKeyedByItAndTheCellMayNameIt() {
+        withCrews();
+        crewList.get(0).setExternalId("CRFR001");
+
+        Map<String, String> byNickname = read("TH-2025-012,,Х,Влади Завършен,,,Не,,", new ArrayList<>());
+        Map<String, String> byId = read("TH-2025-012,,Х,CRFR001 Завършен,,,Не,,", new ArrayList<>());
+        assertThat(byNickname).containsEntry("stage_2_crew", "CRFR001");
+        assertThat(byId).containsEntry("stage_2_crew", "CRFR001").containsEntry("stage_2_status", "DONE");
+
+        rows.get(2).setCrewId(102);
+        assertThat(importer.project(56L)).containsEntry("stage_2_crew", "CRFR001");
+
+        Map<String, String> apply = new HashMap<>();
+        apply.put("stage_2_crew", "CRFR001");
+        rows.get(2).setCrewId(null);
+        importer.update(56L, apply);
+        assertThat(rows.get(2).getCrewId()).isEqualTo(102);
+    }
+
+    @Test
+    void aCrewIdOfAnotherGroupDoesNotLink() {
+        withCrews();
+        crewList.get(2).setExternalId("CREL002");   // Ради, an electrician
+        List<String> warned = new ArrayList<>();
+
+        Map<String, String> v = read("TH-2025-012,,Х,CREL002,,,Не,,", warned);
+
+        assertThat(v.get("stage_2_crew")).isNull();
+        assertThat(warned).singleElement().asString().startsWith("CREW_NOT_FOUND");
     }
 
     @Test

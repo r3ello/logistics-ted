@@ -259,6 +259,7 @@ public class CrewController {
         m.put("location",  c.getLocation() != null ? c.getLocation() : "");
         m.put("stageGroup", c.getStageGroup());
         m.put("nickname",   c.getNickname());
+        m.put("externalId", c.getExternalId());
         m.put("lat",       c.getLat());
         m.put("lng",       c.getLng());
         return m;

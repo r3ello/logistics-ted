@@ -77,6 +77,8 @@ class WorkerImporterTest {
         when(crews.findByStageGroupAndNickname(any(), any())).thenAnswer(inv -> crewStore.values().stream()
             .filter(c -> inv.getArgument(0).equals(c.getStageGroup()) && inv.getArgument(1).equals(c.getNickname()))
             .findFirst());
+        when(crews.findByExternalId(any())).thenAnswer(inv -> crewStore.values().stream()
+            .filter(c -> inv.getArgument(0).equals(c.getExternalId())).findFirst());
 
         HouseStageRepository houseStages = mock(HouseStageRepository.class);
         doAnswer(inv -> { leaderNameSyncs.add(inv.getArgument(0) + ":" + inv.getArgument(1)); return null; })
@@ -132,6 +134,23 @@ class WorkerImporterTest {
     private Worker import_(String data) {
         Map<String, String> v = read(data);
         String key = data.substring(0, data.indexOf(','));
+        EntityImporter.Adoption a = importer.adopt(key, v, true);
+        if (a == null) return workerStore.get(importer.create(key, v).intValue());
+        Map<String, String> app = importer.project(a.entityId());
+        Map<String, String> changed = new LinkedHashMap<>();
+        v.forEach((k, val) -> { if (!Objects.equals(val, app.get(k))) changed.put(k, val); });
+        importer.update(a.entityId(), changed);
+        return workerStore.get(a.entityId().intValue());
+    }
+
+    /** The new version of the sheet: a CrewID column first, filled on leaders' rows only. */
+    private static final String CREW_ID_HEADER = "CrewID," + SHEET_HEADER;
+
+    private Worker importWithCrewId(String data) {
+        CsvRow r = CsvReader.parse(CREW_ID_HEADER + "\n" + data + "\n", CsvFormat.defaults())
+            .renameHeaders(importer.headerResolver()).rows().get(0);
+        Map<String, String> v = importer.readRow(r, (code, c, m) -> { });
+        String key = data.split(",", -1)[1];
         EntityImporter.Adoption a = importer.adopt(key, v, true);
         if (a == null) return workerStore.get(importer.create(key, v).intValue());
         Map<String, String> app = importer.project(a.entityId());
@@ -205,7 +224,7 @@ class WorkerImporterTest {
     void combinedGroupsAreCanonicalAndUnknownGroupsFail() {
         assertThat(read("IS001,Изолация/ Картон,Слави Р,Слави Ризов,Главен,Вътрешен,,,,,,,,,,,,"))
             .containsEntry("stage_group", "Изолация/Картон");
-        assertThatThrownBy(() -> read("X001,Ниво замазка,Паскалев,Иван Паскалев,Главен,Вътрешен,,,,,,,,,,,,"))
+        assertThatThrownBy(() -> read("X001,Фасада,Паскалев,Иван Паскалев,Главен,Вътрешен,,,,,,,,,,,,"))
             .isInstanceOf(CsvValueException.class)
             .extracting(e -> ((CsvValueException) e).getCode()).isEqualTo(ImportErrorCode.INVALID_ENUM);
     }
@@ -324,6 +343,132 @@ class WorkerImporterTest {
         assertThat(old.getLeader()).isNull();
         assertThat(w.getCrew().getNickname()).isEqualTo("Ники");
         assertThat(w.getRole()).isEqualTo(WorkerRole.CREW_MEMBER);
+    }
+
+    // ── CrewID ────────────────────────────────────────────────────────────────
+
+    @Test
+    void theLeadersCrewIdIsStampedOnTheCrewAndMembersStillJoinByNickname() {
+        Worker leader = importWithCrewId("CRIS006,IS022,Изолация/ Картон,Виктор,Виктор Петков,Главен,Вътрешен,,,,,,,,,,,,");
+        Worker member = importWithCrewId(",IS023,Изолация/ Картон,Виктор,Радослав Димитров,Служител,Вътрешен,,,,,,,,,,,,");
+
+        Crew crew = leader.getCrew();
+        assertThat(crew.getExternalId()).isEqualTo("CRIS006");
+        assertThat(crew.getNickname()).isEqualTo("Виктор");
+        assertThat(member.getCrew()).isSameAs(crew);
+        assertThat(importer.project(Long.valueOf(member.getId()))).containsEntry("crew_ref", "CRIS006");
+    }
+
+    @Test
+    void anEmptyCrewIdCellIsNotAField() {
+        CsvRow r = CsvReader.parse(CREW_ID_HEADER + "\n"
+                + ",IS023,Изолация/ Картон,Виктор,Радослав Димитров,Служител,Вътрешен,,,,,,,,,,,,\n", CsvFormat.defaults())
+            .renameHeaders(importer.headerResolver()).rows().get(0);
+        assertThat(importer.readRow(r, (code, c, m) -> { })).doesNotContainKey("crew_ref");
+    }
+
+    @Test
+    void anExistingCrewFoundByNicknameGetsTheCrewId() {
+        import_("IS022,Изолация/Картон,Виктор,Виктор Петков,Главен,Вътрешен,,,,,,,,,,,,");
+        Crew crew = crewStore.values().iterator().next();
+        assertThat(crew.getExternalId()).isNull();
+
+        importWithCrewId("CRIS006,IS022,Изолация/ Картон,Виктор,Виктор Петков,Главен,Вътрешен,,,,,,,,,,,,");
+
+        assertThat(crewStore).hasSize(1);
+        assertThat(crew.getExternalId()).isEqualTo("CRIS006");
+    }
+
+    @Test
+    void aRenamedNicknameRenamesTheCrewInsteadOfMakingANewOne() {
+        Worker leader = importWithCrewId("CRIS001,IS001,Изолация/ Картон,Слави Р,Слави Ризов,Главен,Вътрешен,,,,,,,,,,,,");
+        Worker member = importWithCrewId(",IS002,Изолация/ Картон,Слави Р,Митко Янев,Служител,Вътрешен,,,,,,,,,,,,");
+        Crew crew = leader.getCrew();
+
+        // The client renames the nickname on every row; the CrewID on the leader's row is unchanged.
+        importWithCrewId("CRIS001,IS001,Изолация/ Картон,Слави,Слави Ризов,Главен,Вътрешен,,,,,,,,,,,,");
+        importWithCrewId(",IS002,Изолация/ Картон,Слави,Митко Янев,Служител,Вътрешен,,,,,,,,,,,,");
+
+        assertThat(crewStore).hasSize(1);
+        assertThat(crew.getNickname()).isEqualTo("Слави");
+        assertThat(crew.getExternalId()).isEqualTo("CRIS001");
+        assertThat(crew.getLeader()).isSameAs(leader);
+        assertThat(member.getCrew()).isSameAs(crew);
+    }
+
+    @Test
+    void aCrewIdThatWouldMergeTwoCrewsIsRejected() {
+        importWithCrewId("CRIS006,IS022,Изолация/ Картон,Виктор,Виктор Петков,Главен,Вътрешен,,,,,,,,,,,,");
+        import_("IS014,Изолация/Картон,Иво,Иво Димитров,Главен,Вътрешен,,,,,,,,,,,,");
+
+        // CRIS006 is Виктор's; giving it to Иво's row would fold one crew into the other.
+        assertThatThrownBy(() -> importWithCrewId("CRIS006,IS014,Изолация/ Картон,Иво,Иво Димитров,Главен,Вътрешен,,,,,,,,,,,,"))
+            .isInstanceOf(CsvValueException.class)
+            .extracting(e -> ((CsvValueException) e).getCode()).isEqualTo(ImportErrorCode.KEY_REUSED);
+        // ... and a crew that has one CrewID does not silently take another.
+        assertThatThrownBy(() -> importWithCrewId("CRIS999,IS022,Изолация/ Картон,Виктор,Виктор Петков,Главен,Вътрешен,,,,,,,,,,,,"))
+            .isInstanceOf(CsvValueException.class)
+            .extracting(e -> ((CsvValueException) e).getCode()).isEqualTo(ImportErrorCode.KEY_REUSED);
+    }
+
+    @Test
+    void oneCrewIdOnTwoCrewsInAFileIsADuplicate() {
+        CsvTable t = CsvReader.parse(CREW_ID_HEADER + "\n"
+                + "CRIS006,IS022,Изолация/ Картон,Виктор,Виктор Петков,Главен,Вътрешен,,,,,,,,,,,,\n"
+                + "CRIS006,IS014,Изолация/ Картон,Иво,Иво Димитров,Главен,Вътрешен,,,,,,,,,,,,\n", CsvFormat.defaults())
+            .renameHeaders(importer.headerResolver());
+        importer.readRow(t.rows().get(0), (code, c, m) -> { });
+
+        assertThatThrownBy(() -> importer.readRow(t.rows().get(1), (code, c, m) -> { }))
+            .isInstanceOf(CsvValueException.class)
+            .extracting(e -> ((CsvValueException) e).getCode()).isEqualTo(ImportErrorCode.DUPLICATE_KEY);
+    }
+
+    // ── Локация as a Google Maps link ─────────────────────────────────────────
+
+    @Test
+    void aMapsLinkOnALeadersRowPlacesThePersonAndTheCrewOnTheMap() {
+        String link = "https://www.google.com/maps/place/Samokov/@42.328275,23.561096,1053m/data=!3m1!1e3!4m6!3m5"
+            + "!1s0x14ab03a2b6cd0e1b:0x400a01269bf5b10!8m2!3d42.3374395!4d23.5527956!16zL20vMDVfaGNo";
+        Worker leader = importWithCrewId("CRWS003,WS007,ВиК,Киро,Кирил Пендов,Главен,Вътрешен,,,,\"" + link + "\",,,,,,,,");
+
+        assertThat(leader.getLocation()).isEqualTo("Samokov");
+        assertThat(leader.getLat()).isEqualByComparingTo("42.337440");
+        assertThat(leader.getLng()).isEqualByComparingTo("23.552796");
+        Crew crew = leader.getCrew();
+        assertThat(crew.getLocation()).isEqualTo("Samokov");
+        assertThat(crew.getLat()).isEqualByComparingTo("42.337440");
+
+        // Same link again: nothing reads as changed (6-decimal rounding matches the column).
+        Map<String, String> again = importer.readRow(CsvReader.parse(CREW_ID_HEADER + "\n"
+                + "CRWS003,WS007,ВиК,Киро,Кирил Пендов,Главен,Вътрешен,,,,\"" + link + "\",,,,,,,,\n", CsvFormat.defaults())
+            .renameHeaders(importer.headerResolver()).rows().get(0), (code, c, m) -> { });
+        Map<String, String> app = importer.project(Long.valueOf(leader.getId()));
+        again.forEach((k, v) -> assertThat(com.bellgado.logistics_ted.service.importer.ValueNormalizer.eq(v, app.get(k)))
+            .as(k).isTrue());
+    }
+
+    @Test
+    void aShortMapsLinkIsKeptAsTextWithAWarningAndDashesAreEmpty() {
+        List<String> warned = new ArrayList<>();
+        CsvTable t = CsvReader.parse(CREW_ID_HEADER + "\n"
+                + "CRIS006,IS022,Изолация/ Картон,Виктор,Виктор Петков,Главен,Вътрешен,,,,https://maps.app.goo.gl/oaBpZLZwu4dvmw4x6?g_st=av,,,,,,,,\n"
+                + "CRWS001,WS001,ВиК,Стоян,Стоян Храдалиев,Главен,Вътрешен,,,,---,,,,,,,,\n", CsvFormat.defaults())
+            .renameHeaders(importer.headerResolver());
+
+        Map<String, String> shortLink = importer.readRow(t.rows().get(0), (code, c, m) -> warned.add(code + " " + c));
+        Map<String, String> dashes = importer.readRow(t.rows().get(1), (code, c, m) -> warned.add(code + " " + c));
+
+        assertThat(shortLink).containsEntry("location", "https://maps.app.goo.gl/oaBpZLZwu4dvmw4x6?g_st=av")
+                             .doesNotContainKeys("lat", "lng");
+        assertThat(dashes).containsEntry("location", null);
+        assertThat(warned).containsExactly("CELL_IGNORED location");
+    }
+
+    @Test
+    void aPlainTownLeavesCoordinatesSetInTheAppAlone() {
+        assertThat(read("FR001,Конструкция,Влади,Владимир Борисов,Главен,Подизпълнител,,,,София,,,,,,,,"))
+            .containsEntry("location", "София").doesNotContainKeys("lat", "lng");
     }
 
     @Test

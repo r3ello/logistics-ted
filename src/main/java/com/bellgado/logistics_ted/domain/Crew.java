@@ -63,4 +63,11 @@ public class Crew {
 
     @Column(length = 100)
     private String nickname;
+
+    /**
+     * The staff sheet's CrewID ({@code CRIS006}), given on the leader's row (Flyway V22). When set
+     * it is the crew's identity: the (group, nickname) pair may then change without making a new crew.
+     */
+    @Column(name = "external_id", length = 40)
+    private String externalId;
 }
