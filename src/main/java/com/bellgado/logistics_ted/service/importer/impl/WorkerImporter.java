@@ -14,6 +14,7 @@ import com.bellgado.logistics_ted.service.importer.ImportErrorCode;
 import com.bellgado.logistics_ted.service.importer.ValueNormalizer;
 import com.bellgado.logistics_ted.web.importer.csv.CsvRow;
 import com.bellgado.logistics_ted.web.importer.csv.CsvValueException;
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
@@ -50,11 +52,25 @@ import org.springframework.stereotype.Component;
  * the same way: the first person placed from an un-nicknamed crew whose stages fit the group stamps
  * the sheet's group + nickname on it.
  *
+ * <p><b>CrewID.</b> The sheet's optional {@code CrewID} column ({@code CRIS006}, so far on leaders'
+ * rows only) is stored as {@code crew.external_id} (V22) and, when present, wins over the pair: the
+ * crew with that id is used and its group/nickname follow the row, so renaming a nickname in the
+ * sheet renames the crew instead of making a new one. Rows without it (the members) are still placed
+ * by the pair, which the leader's row has already brought up to date. The first run stamps the id on
+ * the crew found by the pair. A CrewID that would merge two crews is rejected ({@code KEY_REUSED}),
+ * one given to two crews in the file is a {@code DUPLICATE_KEY}, both already at validate time.
+ *
  * <p><b>The sheet is dirty, and contact cells are cleaned rather than rejected</b>: notes typed into
  * email/phone/photo cells ({@code няма}, {@code чакам}, {@code Иска да говори с Теодор}) are read as
  * empty with a {@code CELL_IGNORED} warning; Latin look-alike letters inside Cyrillic words
  * ({@code Eвгени}) and decomposed {@code й} are normalised so one crew does not become two. A row
  * with no real name ({@code 1}, {@code 2}, blank) fails.
+ *
+ * <p><b>Локация may be a Google Maps link</b> ({@link MapsLink}): a full link sets the person's
+ * {@code lat}/{@code lng} (and the crew's, on a leader's row) and stores the place's name as the
+ * location text; a short {@code maps.app.goo.gl} link has no coordinates in it and is kept as text
+ * with a warning. {@code lat}/{@code lng} are fields only when a link gave them, so coordinates set
+ * in the app are never cleared by a plain town name.
  *
  * <p><b>Never touched:</b> {@code username}, PIN, {@code crew.house_id}, {@code manager_id}. New
  * people get credentials like an admin-created worker does. Nobody is deleted: people missing from
@@ -77,6 +93,7 @@ public class WorkerImporter implements EntityImporter {
         c.put("name",            ColumnType.TEXT);
         c.put("stage_group",     ColumnType.TEXT);
         c.put("crew",            ColumnType.TEXT);
+        c.put("crew_ref",        ColumnType.TEXT);
         c.put("role",            ColumnType.ENUM);
         c.put("employment_type", ColumnType.ENUM);
         c.put("phone",           ColumnType.TEXT);
@@ -96,6 +113,8 @@ public class WorkerImporter implements EntityImporter {
         Map.entry("id",              "key"),
         Map.entry("група",           "stage_group"),
         Map.entry("бригада име",     "crew"),
+        Map.entry("crewid",          "crew_ref"),
+        Map.entry("crew id",         "crew_ref"),
         Map.entry("име служител",    "name"),
         Map.entry("роля",            "role"),
         Map.entry("вид служител",    "employment_type"),
@@ -149,6 +168,10 @@ public class WorkerImporter implements EntityImporter {
     /** Group label (lower-case) → its stages, from {@code stage_type.main_stage_bg}; reloaded per file. */
     private volatile Map<String, List<Integer>> stageGroups;
 
+    /** CrewID → the (group, nickname) the file gave it, and back; reset per file. */
+    private final Map<String, String> fileCrewRefs = new ConcurrentHashMap<>();
+    private final Map<String, String> fileCrewPairs = new ConcurrentHashMap<>();
+
     @Autowired
     public WorkerImporter(WorkerRepository workers, CrewRepository crews, CrewMembershipService membership,
                           WorkerCredentialSeeder credentials, JdbcTemplate jdbc) {
@@ -187,6 +210,8 @@ public class WorkerImporter implements EntityImporter {
     @Override
     public UnaryOperator<String> headerResolver() {
         stageGroups = stageGroupLoader.get();
+        fileCrewRefs.clear();
+        fileCrewPairs.clear();
         return h -> SHEET_HEADERS.getOrDefault(h, h);
     }
 
@@ -222,6 +247,15 @@ public class WorkerImporter implements EntityImporter {
             row.requiredText("crew");
             v.put("crew", text(cyrillic(row.text("crew", 100))));
         }
+        if (row.has("crew_ref")) {
+            // Only a filled cell is a field: members' rows leave it empty, which must not read as
+            // "clear the crew's id".
+            String ref = row.text("crew_ref", 40);
+            if (ref != null && !SILENT_BLANKS.contains(ref)) {
+                checkCrewRef(row, ref, v.get("stage_group"), v.get("crew"));
+                v.put("crew_ref", text(ref));
+            }
+        }
         if (row.has("role")) {
             v.put("role", mapped(row, "role", ROLES));
         }
@@ -243,8 +277,7 @@ public class WorkerImporter implements EntityImporter {
                 s -> URL.matcher(s).matches() ? s : null, "not a link"));
         }
         if (row.has("location")) {
-            String loc = row.text("location", 255);
-            v.put("location", loc == null || SILENT_BLANKS.contains(loc) ? null : text(cyrillic(loc)));
+            readLocation(row, v, warnings);
         }
         if (row.has("hire_date")) {
             v.put("hire_date", ValueNormalizer.normalize(row.date("hire_date"), ColumnType.DATE));
@@ -254,6 +287,28 @@ public class WorkerImporter implements EntityImporter {
         if (row.has("clothing_size"))   v.put("clothing_size",   plain(row, "clothing_size", 20));
         if (row.has("clothing_issued")) v.put("clothing_issued", plain(row, "clothing_issued", 255));
         return v;
+    }
+
+    /** Локация: a town, a Google Maps link (→ name + coordinates), or a placeholder. */
+    private static void readLocation(CsvRow row, Map<String, String> v, RowWarnings warnings) {
+        String loc = row.text("location");
+        if (loc == null || SILENT_BLANKS.contains(loc) || loc.matches("[-—–.]+")) {
+            v.put("location", null);
+            return;
+        }
+        MapsLink link = MapsLink.parse(loc);
+        if (link != null && link.hasCoordinates()) {
+            String name = link.name();
+            v.put("location", text(name == null ? null : cyrillic(name.length() > 255 ? name.substring(0, 255) : name)));
+            v.put("lat", ValueNormalizer.normalize(link.lat(), ColumnType.DECIMAL));
+            v.put("lng", ValueNormalizer.normalize(link.lng(), ColumnType.DECIMAL));
+            return;
+        }
+        if (link != null) {
+            warnings.warn("location", "'" + loc + "' is a short Google Maps link, which has no coordinates in it; "
+                + "kept as text. Paste the full link (https://www.google.com/maps/place/...) to set the location on the map.");
+        }
+        v.put("location", text(cyrillic(row.text("location", 255))));
     }
 
     @Override
@@ -267,12 +322,15 @@ public class WorkerImporter implements EntityImporter {
         v.put("name",            text(w.getName()));
         v.put("stage_group",     text(c == null ? null : c.getStageGroup()));
         v.put("crew",            text(c == null ? null : c.getNickname()));
+        v.put("crew_ref",        text(c == null ? null : c.getExternalId()));
         v.put("role",            ValueNormalizer.normalize(w.getRole(), ColumnType.ENUM));
         v.put("employment_type", ValueNormalizer.normalize(w.getEmploymentType(), ColumnType.ENUM));
         v.put("phone",           text(w.getPhone()));
         v.put("email",           text(w.getEmail()));
         v.put("photo_url",       text(w.getPhotoUrl()));
         v.put("location",        text(w.getLocation()));
+        v.put("lat",             ValueNormalizer.normalize(w.getLat(), ColumnType.DECIMAL));
+        v.put("lng",             ValueNormalizer.normalize(w.getLng(), ColumnType.DECIMAL));
         v.put("hire_date",       ValueNormalizer.normalize(w.getHireDate(), ColumnType.DATE));
         v.put("id_card_number",  text(w.getIdCardNumber()));
         v.put("company",         text(w.getCompany()));
@@ -294,7 +352,7 @@ public class WorkerImporter implements EntityImporter {
         w.setExternalId(externalKey);
         credentials.assignCredentials(w);
         w = workers.save(w);
-        place(w, values.get("stage_group"), values.get("crew"), w.getRole(), values);
+        place(w, values.get("stage_group"), values.get("crew"), values.get("crew_ref"), w.getRole());
         return Long.valueOf(w.getId());
     }
 
@@ -342,7 +400,8 @@ public class WorkerImporter implements EntityImporter {
             if (w.getRole() == WorkerRole.CREW_MANAGER || entityIdsInFile.contains(Long.valueOf(w.getId()))) continue;
             Crew c = w.getCrew();
             String crew = c == null ? "no crew" : "crew " + (c.getNickname() != null
-                ? c.getStageGroup() + " / " + c.getNickname() : c.getName());
+                ? c.getStageGroup() + " / " + c.getNickname() : c.getName())
+                + (c != null && c.getExternalId() != null ? " (" + c.getExternalId() + ")" : "");
             out.add("Worker '" + w.getName() + "' (id " + w.getId() + ", " + crew
                 + ") is not in the file; left unchanged.");
         }
@@ -368,20 +427,71 @@ public class WorkerImporter implements EntityImporter {
         }
 
         if (values.containsKey("stage_group") || values.containsKey("crew") || values.containsKey("role")
-                || values.containsKey("location")) {
+                || values.containsKey("location") || values.containsKey("lat") || values.containsKey("lng")
+                || values.containsKey("crew_ref")) {
             Map<String, String> now = projectOf(w);
             String group = values.containsKey("stage_group") ? values.get("stage_group") : now.get("stage_group");
             String nick  = values.containsKey("crew")        ? values.get("crew")        : now.get("crew");
-            if (group != null && nick != null) place(w, group, nick, w.getRole(), values);
+            String ref   = values.containsKey("crew_ref")    ? values.get("crew_ref")    : impliedCrewRef(w, values);
+            if (group != null && nick != null) place(w, group, nick, ref, w.getRole());
+        }
+    }
+
+    /**
+     * The merge only hands over changed columns, so a leader whose nickname changed arrives without
+     * their (unchanged) CrewID. Their row's CrewID is their crew's: infer it, so the crew is renamed
+     * rather than a new one made. Only for a leader staying leader in the same group; anyone else
+     * moving is placed by the pair, never by renaming the crew they leave.
+     */
+    private static String impliedCrewRef(Worker w, Map<String, String> values) {
+        Crew c = w.getCrew();
+        if (c == null || c.getExternalId() == null || w.getRole() != WorkerRole.CREW_LEADER) return null;
+        if (c.getLeader() == null || !c.getLeader().getId().equals(w.getId())) return null;
+        if (values.containsKey("stage_group") && !Objects.equals(values.get("stage_group"), c.getStageGroup())) return null;
+        return c.getExternalId();
+    }
+
+    /**
+     * Fails a row whose CrewID cannot be applied without merging two crews: the file gives the id
+     * (or the pair) to two crews, or the id belongs to one crew and the pair to another that keeps
+     * its own id. Checked when reading, so a validate run shows it before anything is written.
+     */
+    private void checkCrewRef(CsvRow row, String ref, String group, String nickname) {
+        if (group == null || nickname == null) return;
+        String pair = group + " / " + nickname;
+        String earlierPair = fileCrewRefs.putIfAbsent(ref, pair);
+        if (earlierPair != null && !earlierPair.equals(pair)) {
+            throw new CsvValueException(row.line(), "crew_ref", ref, ImportErrorCode.DUPLICATE_KEY,
+                "CrewID '" + ref + "' is given to two crews in this file: " + earlierPair + " and " + pair + ".");
+        }
+        String earlierRef = fileCrewPairs.putIfAbsent(pair, ref);
+        if (earlierRef != null && !earlierRef.equals(ref)) {
+            throw new CsvValueException(row.line(), "crew_ref", ref, ImportErrorCode.DUPLICATE_KEY,
+                "Crew " + pair + " has two CrewIDs in this file: " + earlierRef + " and " + ref + ".");
+        }
+        Crew byRef = crews.findByExternalId(ref).orElse(null);
+        Crew byPair = crews.findByStageGroupAndNickname(group, nickname).orElse(null);
+        if (byPair == null || (byRef != null && byRef.getId().equals(byPair.getId()))) return;
+        if (byRef != null) {
+            throw new CsvValueException(row.line(), "crew_ref", ref, ImportErrorCode.KEY_REUSED,
+                "CrewID '" + ref + "' belongs to crew '" + byRef.getName() + "' (id " + byRef.getId()
+                    + "), but " + pair + " is another crew (id " + byPair.getId() + "); merge them in the app first.");
+        }
+        if (byPair.getExternalId() != null) {
+            throw new CsvValueException(row.line(), "crew_ref", ref, ImportErrorCode.KEY_REUSED,
+                "Crew " + pair + " already has CrewID '" + byPair.getExternalId() + "'; a CrewID must not change.");
         }
     }
 
     // ── placement ─────────────────────────────────────────────────────────────
 
-    /** Puts the worker in the (group, nickname) crew and makes them its leader if their role says so. */
-    private void place(Worker w, String group, String nickname, WorkerRole role, Map<String, String> values) {
+    /**
+     * Puts the worker in their crew (the one with this CrewID if given, else the (group, nickname)
+     * one) and makes them its leader if their role says so.
+     */
+    private void place(Worker w, String group, String nickname, String crewRef, WorkerRole role) {
         if (group == null || nickname == null) return;
-        Crew target = resolveCrew(w, group, nickname);
+        Crew target = resolveCrew(w, group, nickname, crewRef);
         Crew old = w.getCrew();
 
         if (old == null || !old.getId().equals(target.getId())) {
@@ -410,26 +520,56 @@ public class WorkerImporter implements EntityImporter {
         // worker and only the crew lacks it.
         if (role == WorkerRole.CREW_LEADER) {
             String loc = w.getLocation() == null ? "" : w.getLocation();
+            boolean changed = false;
             if (!loc.equals(target.getLocation())) {
                 target.setLocation(loc);
-                crews.save(target);
+                changed = true;
             }
+            // Coordinates only when the leader has some: a crew placed by hand on the map keeps its pin.
+            if (w.getLat() != null && w.getLng() != null
+                    && (!sameNumber(w.getLat(), target.getLat()) || !sameNumber(w.getLng(), target.getLng()))) {
+                target.setLat(w.getLat());
+                target.setLng(w.getLng());
+                changed = true;
+            }
+            if (changed) crews.save(target);
         }
     }
 
     /**
-     * The crew with this sheet identity; else the worker's own seeded crew if the sheet has never
-     * named it and its stages fit the group (adopting it); else a new crew with the group's stages.
+     * The crew with this CrewID, its group/nickname brought in line with the row; else the crew with
+     * this sheet identity; else the worker's own seeded crew if the sheet has never named it and its
+     * stages fit the group (adopting it); else a new crew with the group's stages. A CrewID given is
+     * stamped on whichever crew is found or made.
      */
-    private Crew resolveCrew(Worker w, String group, String nickname) {
+    private Crew resolveCrew(Worker w, String group, String nickname, String crewRef) {
+        if (crewRef != null) {
+            Crew byRef = crews.findByExternalId(crewRef).orElse(null);
+            if (byRef != null) {
+                if (!Objects.equals(byRef.getStageGroup(), group) || !Objects.equals(byRef.getNickname(), nickname)) {
+                    byRef.setStageGroup(group);
+                    byRef.setNickname(nickname);
+                    return crews.save(byRef);
+                }
+                return byRef;
+            }
+        }
+
         Crew byKey = crews.findByStageGroupAndNickname(group, nickname).orElse(null);
-        if (byKey != null) return byKey;
+        if (byKey != null) {
+            if (crewRef != null && byKey.getExternalId() == null) {
+                byKey.setExternalId(crewRef);
+                return crews.save(byKey);
+            }
+            return byKey;
+        }
 
         List<Integer> stages = stagesOf(group);
         Crew current = w.getCrew();
         if (current != null && current.getNickname() == null && overlaps(current.getStageOrders(), stages)) {
             current.setStageGroup(group);
             current.setNickname(nickname);
+            if (crewRef != null && current.getExternalId() == null) current.setExternalId(crewRef);
             return crews.save(current);
         }
 
@@ -437,6 +577,7 @@ public class WorkerImporter implements EntityImporter {
         c.setName(nickname);
         c.setStageGroup(group);
         c.setNickname(nickname);
+        c.setExternalId(crewRef);
         c.setStageOrders(new ArrayList<>(stages));
         c.setLocation("");
         return crews.save(c);
@@ -449,6 +590,10 @@ public class WorkerImporter implements EntityImporter {
         return overlaps(c.getStageOrders(), stages);
     }
 
+    private static boolean sameNumber(BigDecimal a, BigDecimal b) {
+        return a == null ? b == null : b != null && a.compareTo(b) == 0;
+    }
+
     private static boolean overlaps(List<Integer> a, List<Integer> b) {
         if (a == null || b == null) return false;
         for (Integer x : a) if (b.contains(x)) return true;
@@ -458,7 +603,7 @@ public class WorkerImporter implements EntityImporter {
     // ── stage groups ──────────────────────────────────────────────────────────
 
     /** {@code Изолация/ Картон} → {@code Изолация/Картон}: parts trimmed, case kept. */
-    static String canonicalGroup(String raw) {
+    public static String canonicalGroup(String raw) {
         if (raw == null) return null;
         List<String> parts = new ArrayList<>();
         for (String p : raw.split("/")) {
@@ -511,6 +656,8 @@ public class WorkerImporter implements EntityImporter {
         if (values.containsKey("email"))           w.setEmail(values.get("email"));
         if (values.containsKey("photo_url"))       w.setPhotoUrl(values.get("photo_url"));
         if (values.containsKey("location"))        w.setLocation(values.get("location") == null ? "" : values.get("location"));
+        if (values.containsKey("lat"))             w.setLat(values.get("lat") == null ? null : new BigDecimal(values.get("lat")));
+        if (values.containsKey("lng"))             w.setLng(values.get("lng") == null ? null : new BigDecimal(values.get("lng")));
         if (values.containsKey("hire_date")) {
             String d = values.get("hire_date");
             w.setHireDate(d == null ? null : LocalDate.parse(d));
@@ -562,7 +709,7 @@ public class WorkerImporter implements EntityImporter {
      * NFC, then Latin look-alikes replaced inside any word that has a Cyrillic letter (and a lone
      * look-alike letter in a Cyrillic value, as in {@code Слави P}). Emails and links never come here.
      */
-    static String cyrillic(String s) {
+    public static String cyrillic(String s) {
         if (s == null) return null;
         String n = nfc(s);
         if (!CYRILLIC.matcher(n).find()) return n;
