@@ -603,7 +603,7 @@ public class WorkerImporter implements EntityImporter {
     // ── stage groups ──────────────────────────────────────────────────────────
 
     /** {@code Изолация/ Картон} → {@code Изолация/Картон}: parts trimmed, case kept. */
-    static String canonicalGroup(String raw) {
+    public static String canonicalGroup(String raw) {
         if (raw == null) return null;
         List<String> parts = new ArrayList<>();
         for (String p : raw.split("/")) {
@@ -709,7 +709,7 @@ public class WorkerImporter implements EntityImporter {
      * NFC, then Latin look-alikes replaced inside any word that has a Cyrillic letter (and a lone
      * look-alike letter in a Cyrillic value, as in {@code Слави P}). Emails and links never come here.
      */
-    static String cyrillic(String s) {
+    public static String cyrillic(String s) {
         if (s == null) return null;
         String n = nfc(s);
         if (!CYRILLIC.matcher(n).find()) return n;

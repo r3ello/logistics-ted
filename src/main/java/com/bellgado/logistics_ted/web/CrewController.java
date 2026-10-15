@@ -8,12 +8,17 @@ import com.bellgado.logistics_ted.repository.HouseRepository;
 import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import com.bellgado.logistics_ted.service.CrewMembershipService;
+import com.bellgado.logistics_ted.service.importer.impl.WorkerImporter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -91,6 +96,7 @@ public class CrewController {
             bodyMut.put("name", leader.getName());
 
         String err = validate(bodyMut);
+        if (err == null) err = validateSheetIdentity(null, bodyMut);
         if (err != null) return ResponseEntity.badRequest().body(Map.of("error", err));
 
         Crew crew = crews.save(applyBody(new Crew(), bodyMut));
@@ -115,6 +121,7 @@ public class CrewController {
     @Transactional
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         String err = validate(body);
+        if (err == null) err = validateSheetIdentity(id, body);
         if (err != null) return ResponseEntity.badRequest().body(Map.of("error", err));
         return crews.findById(id).map(c -> {
             applyBody(c, body);
@@ -183,6 +190,91 @@ public class CrewController {
         return null;
     }
 
+    /**
+     * The staff sheet's identity of a crew: group + nickname (together or not at all) and CrewID —
+     * what the `workers` and `house-stages` imports match the sheet on. Admin-only, like a worker's
+     * ID card: anyone else's values are ignored (see {@link #applySheetIdentity}). The pair and the
+     * CrewID are unique (V21/V22 indexes); checked here so a clash is a 400, not a 500.
+     */
+    private String validateSheetIdentity(Integer selfId, Map<String, Object> body) {
+        if (!isAdmin()) return null;
+        boolean hasGroup = body.containsKey("stageGroup"), hasNick = body.containsKey("nickname");
+        if (hasGroup || hasNick) {
+            String group = sheetGroup(body.get("stageGroup"));
+            String nick  = sheetText(body.get("nickname"));
+            if ((group == null) != (nick == null))
+                return "Group and nickname go together: fill both, or neither.";
+            if (group != null) {
+                if (group.length() > 100 || nick.length() > 100) return "Group and nickname are limited to 100 characters.";
+                Map<String, String> known = knownStageGroups();
+                for (String part : group.split("/")) {
+                    if (!known.containsKey(part.toLowerCase(Locale.ROOT)))
+                        return "Unknown group '" + part + "'. Known: " + String.join(", ", known.values()) + ".";
+                }
+                Crew current = selfId == null ? null : crews.findById(selfId).orElse(null);
+                String effectiveGroup = keepCase(group, current == null ? null : current.getStageGroup());
+                Crew other = crews.findByStageGroupAndNickname(effectiveGroup, nick).orElse(null);
+                if (other != null && !other.getId().equals(selfId))
+                    return "Crew '" + other.getName() + "' (#" + other.getId() + ") already is " + effectiveGroup + " · " + nick + ".";
+            }
+        }
+        if (body.containsKey("externalId")) {
+            String ext = sheetText(body.get("externalId"));
+            if (ext != null) {
+                if (ext.length() > 40) return "CrewID is limited to 40 characters.";
+                Crew other = crews.findByExternalId(ext).orElse(null);
+                if (other != null && !other.getId().equals(selfId))
+                    return "CrewID '" + ext + "' is already used by crew '" + other.getName() + "' (#" + other.getId() + ").";
+            }
+        }
+        return null;
+    }
+
+    private void applySheetIdentity(Crew c, Map<String, Object> body) {
+        if (!isAdmin()) return;
+        if (body.containsKey("stageGroup") || body.containsKey("nickname")) {
+            String group = sheetGroup(body.get("stageGroup"));
+            c.setStageGroup(group == null ? null : keepCase(group, c.getStageGroup()));
+            c.setNickname(group == null ? null : sheetText(body.get("nickname")));
+        }
+        if (body.containsKey("externalId")) c.setExternalId(sheetText(body.get("externalId")));
+    }
+
+    /** The stored spelling wins over a case-only edit, so the pair keeps matching the sheet's. */
+    private static String keepCase(String typed, String stored) {
+        return stored != null && stored.equalsIgnoreCase(typed) ? stored : typed;
+    }
+
+    /** Trimmed, blank as null, Latin look-alikes fixed as the import does ({@code Eвгени}). */
+    private static String sheetText(Object v) {
+        if (v == null) return null;
+        String s = WorkerImporter.cyrillic(v.toString().trim().replaceAll("\\s+", " "));
+        return s.isEmpty() ? null : s;
+    }
+
+    /** {@code Изолация/ Картон} → {@code Изолация/Картон}, as the import stores it. */
+    private static String sheetGroup(Object v) {
+        String s = sheetText(v);
+        if (s == null) return null;
+        String g = WorkerImporter.canonicalGroup(s);
+        return g.isEmpty() ? null : g;
+    }
+
+    /** Lower-cased group label → as spelt in stage_type.main_stage_bg. */
+    private Map<String, String> knownStageGroups() {
+        Map<String, String> out = new TreeMap<>();
+        for (Object[] r : houseStages.findCrewStageGroups()) {
+            String g = ((String) r[1]).trim();
+            out.putIfAbsent(g.toLowerCase(Locale.ROOT), g);
+        }
+        return out;
+    }
+
+    private static boolean isAdmin() {
+        Authentication a = SecurityContextHolder.getContext().getAuthentication();
+        return a != null && a.getAuthorities().stream().anyMatch(g -> "ROLE_ADMIN".equals(g.getAuthority()));
+    }
+
     @SuppressWarnings("unchecked")
     private Crew applyBody(Crew c, Map<String, Object> body) {
         if (body.get("name") != null) c.setName(body.get("name").toString());
@@ -211,6 +303,7 @@ public class CrewController {
             c.setLat(body.get("lat") == null ? null : new java.math.BigDecimal(body.get("lat").toString()));
         if (body.containsKey("lng"))
             c.setLng(body.get("lng") == null ? null : new java.math.BigDecimal(body.get("lng").toString()));
+        applySheetIdentity(c, body);
         return c;
     }
 
