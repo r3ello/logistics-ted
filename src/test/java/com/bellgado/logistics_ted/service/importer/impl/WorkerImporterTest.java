@@ -397,6 +397,21 @@ class WorkerImporterTest {
     }
 
     @Test
+    void aGroupRespeltInTheSheetKeepsTheSameCrew() {
+        // 2026-10-16 regression: only the group's case changed, so the unchanged CrewID was not among
+        // the changed columns — the crew must still be found by it, not duplicated by the new pair.
+        Worker leader = importWithCrewId("CRWS003,WS007,ВиК,Киро,Кирил Пендов,Главен,Вътрешен,,,,,,,,,,,,");
+        Crew crew = leader.getCrew();
+
+        importWithCrewId("CRWS003,WS007,вик,Киро,Кирил Пендов,Главен,Вътрешен,,,,,,,,,,,,");
+
+        assertThat(crewStore).hasSize(1);
+        assertThat(leader.getCrew()).isSameAs(crew);
+        assertThat(crew.getStageGroup()).isEqualTo("вик");
+        assertThat(crew.getLeader()).isSameAs(leader);
+    }
+
+    @Test
     void aCrewIdThatWouldMergeTwoCrewsIsRejected() {
         importWithCrewId("CRIS006,IS022,Изолация/ Картон,Виктор,Виктор Петков,Главен,Вътрешен,,,,,,,,,,,,");
         import_("IS014,Изолация/Картон,Иво,Иво Димитров,Главен,Вътрешен,,,,,,,,,,,,");

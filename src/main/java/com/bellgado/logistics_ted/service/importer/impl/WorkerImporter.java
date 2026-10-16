@@ -171,6 +171,13 @@ public class WorkerImporter implements EntityImporter {
     /** CrewID → the (group, nickname) the file gave it, and back; reset per file. */
     private final Map<String, String> fileCrewRefs = new ConcurrentHashMap<>();
     private final Map<String, String> fileCrewPairs = new ConcurrentHashMap<>();
+    /**
+     * Person key → the CrewID on their row in this file. The merge hands {@link #update} only the
+     * columns that changed, so an unchanged CrewID would not reach it — yet the row's CrewID is
+     * exactly what must pick the crew when the group or nickname changed (a renamed nickname, or a
+     * group respelt {@code Ниво Замазка} → {@code Ниво замазка}). Reset per file.
+     */
+    private final Map<String, String> fileRowCrewRefs = new ConcurrentHashMap<>();
 
     @Autowired
     public WorkerImporter(WorkerRepository workers, CrewRepository crews, CrewMembershipService membership,
@@ -212,6 +219,7 @@ public class WorkerImporter implements EntityImporter {
         stageGroups = stageGroupLoader.get();
         fileCrewRefs.clear();
         fileCrewPairs.clear();
+        fileRowCrewRefs.clear();
         return h -> SHEET_HEADERS.getOrDefault(h, h);
     }
 
@@ -254,6 +262,8 @@ public class WorkerImporter implements EntityImporter {
             if (ref != null && !SILENT_BLANKS.contains(ref)) {
                 checkCrewRef(row, ref, v.get("stage_group"), v.get("crew"));
                 v.put("crew_ref", text(ref));
+                String key = row.text(keyColumn());
+                if (key != null) fileRowCrewRefs.put(key, text(ref));
             }
         }
         if (row.has("role")) {
@@ -432,23 +442,10 @@ public class WorkerImporter implements EntityImporter {
             Map<String, String> now = projectOf(w);
             String group = values.containsKey("stage_group") ? values.get("stage_group") : now.get("stage_group");
             String nick  = values.containsKey("crew")        ? values.get("crew")        : now.get("crew");
-            String ref   = values.containsKey("crew_ref")    ? values.get("crew_ref")    : impliedCrewRef(w, values);
+            String ref   = values.containsKey("crew_ref")    ? values.get("crew_ref")
+                         : w.getExternalId() == null ? null : fileRowCrewRefs.get(w.getExternalId());
             if (group != null && nick != null) place(w, group, nick, ref, w.getRole());
         }
-    }
-
-    /**
-     * The merge only hands over changed columns, so a leader whose nickname changed arrives without
-     * their (unchanged) CrewID. Their row's CrewID is their crew's: infer it, so the crew is renamed
-     * rather than a new one made. Only for a leader staying leader in the same group; anyone else
-     * moving is placed by the pair, never by renaming the crew they leave.
-     */
-    private static String impliedCrewRef(Worker w, Map<String, String> values) {
-        Crew c = w.getCrew();
-        if (c == null || c.getExternalId() == null || w.getRole() != WorkerRole.CREW_LEADER) return null;
-        if (c.getLeader() == null || !c.getLeader().getId().equals(w.getId())) return null;
-        if (values.containsKey("stage_group") && !Objects.equals(values.get("stage_group"), c.getStageGroup())) return null;
-        return c.getExternalId();
     }
 
     /**
