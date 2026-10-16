@@ -2330,10 +2330,11 @@
         <label data-i18n="crewSheetIdentity">Staff sheet identity</label>
         <div style="display:grid;grid-template-columns:1fr 1fr 0.8fr;gap:0.5rem">
           <input id="cNickname" type="text" maxlength="100" placeholder="Nickname (Бригада Име)" data-i18n-placeholder="phCrewNickname" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem" />
-          <input id="cStageGroup" type="text" maxlength="100" list="cStageGroupList" placeholder="Group (Група)" data-i18n-placeholder="phCrewStageGroup" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem" />
+          <input id="cStageGroup" type="text" maxlength="100" list="cStageGroupList" placeholder="Group (Група)" data-i18n-placeholder="phCrewStageGroup" onchange="onCrewGroupChange()" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem" />
           <input id="cExtId" type="text" maxlength="40" placeholder="CrewID" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;font-family:ui-monospace,Consolas,monospace" />
         </div>
         <datalist id="cStageGroupList"></datalist>
+        <div data-i18n="crewGroupHelp" style="margin-top:0.35rem;font-size:0.76rem;color:var(--muted);line-height:1.4">Група in the staff sheet: the family of stages the crew works (Покрив, Ел, Изолация/Картон…). With the nickname it tells two crews apart (Любо on Покрив ≠ Любо on Изолация/Картон). Picking one fills the stages below if the crew has none yet.</div>
         <div data-i18n="crewSheetHint" style="margin-top:0.4rem;padding:0.5rem 0.7rem;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.35);border-radius:7px;font-size:0.78rem;color:#f5a623;line-height:1.45">The staff sheet import matches crews by CrewID, else by group + nickname, and the sheet wins: a value changed here that the sheet still has differently is overwritten by the next import. Change it in the client's sheet too.</div>
       </div>
       <div class="field"><label>Manager</label>
@@ -3434,6 +3435,7 @@
       crewSheetIdentity:'Staff sheet identity', phCrewNickname:'Nickname (Бригада Име)', phCrewStageGroup:'Group (Група)',
       crewSheetHint:'The staff sheet import matches crews by CrewID, else by group + nickname, and the sheet wins: a value changed here that the sheet still has differently is overwritten by the next import. Change it in the client\'s sheet too.',
       colNickname:'Nickname', colCrewId:'CrewID', sfNickname:'Nickname', sfCrewId:'CrewID',
+      crewGroupHelp:'Група in the staff sheet: the family of stages the crew works (Покрив, Ел, Изолация/Картон…). With the nickname it tells two crews apart (Любо on Покрив ≠ Любо on Изолация/Картон). Picking one fills the stages below if the crew has none yet.',
       crewManager:'Manager', crewLeader:'Leader', crewMembers:'Members',
       crewNoManager:'— No manager —', crewNoLeader:'— No leader —', crewAddMember:'— Add member —',
       crewDeleteConfirm:'Delete this crew?', crewSaveFail:'Save failed',
@@ -3845,6 +3847,7 @@
       crewSheetIdentity:'Идентичност в таблицата с персонал', phCrewNickname:'Прякор (Бригада Име)', phCrewStageGroup:'Група',
       crewSheetHint:'Импортът на персонала разпознава екипите по CrewID, иначе по група + прякор, и таблицата е водеща: стойност, променена тук, която в таблицата е различна, ще бъде презаписана при следващия импорт. Променете я и в таблицата на клиента.',
       colNickname:'Прякор', colCrewId:'CrewID', sfNickname:'Прякор', sfCrewId:'CrewID',
+      crewGroupHelp:'Група от таблицата с персонал: групата етапи, които екипът изпълнява (Покрив, Ел, Изолация/Картон…). Заедно с прякора различава два екипа (Любо на Покрив ≠ Любо на Изолация/Картон). При избор попълва етапите по-долу, ако екипът още няма.',
       crewManager:'Мениджър', crewLeader:'Лидер', crewMembers:'Членове',
       crewNoManager:'— Без мениджър —', crewNoLeader:'— Без лидер —', crewAddMember:'— Добави член —',
       crewDeleteConfirm:'Изтрий екипа?', crewSaveFail:'Грешка при запис',
@@ -7638,11 +7641,9 @@
         : `<span style="color:var(--muted);font-size:0.8rem">—</span>`;
       const crewHasHouse = c.assignedHouses && c.assignedHouses.length ? '1' : '0';
       const crewHasMembers = members.length ? '1' : '0';
-      const cName  = [c.name, c.nickname].filter(Boolean).join(' ').toLowerCase();
+      const cName  = (c.name||'').toLowerCase();
       const cExtId = (c.externalId || '').toLowerCase();
-      const sheetIdHtml = (c.nickname || c.externalId)
-        ? `<div style="margin-top:0.2rem;font-size:0.72rem;font-weight:600;color:var(--muted)">${c.nickname ? '“' + escapeHtml(c.nickname) + '”' + (c.stageGroup ? ' · ' + escapeHtml(c.stageGroup) : '') : ''}${c.externalId ? `<span style="margin-left:0.4rem;padding:0.05rem 0.35rem;border-radius:5px;background:rgba(79,142,247,0.12);color:#9fc0ff;font-family:ui-monospace,Consolas,monospace">${escapeHtml(c.externalId)}</span>` : ''}</div>`
-        : '';
+      const cNick  = (c.nickname || '').toLowerCase();
       const isEn = currentLang === 'en';
       const stageNamesList = (isEn ? (c.stageNamesEn || c.stageNamesBg) : c.stageNamesBg) || [];
       const stagesHtml = stageNamesList.length
@@ -7650,12 +7651,12 @@
         : `<span style="color:var(--muted);font-size:0.8rem">—</span>`;
       const cStage = stageNamesList.join(' ').toLowerCase();
       const cHouse = (c.assignedHouses||[]).map(h => h.name).join(' ').toLowerCase();
-      return `<tr data-hashouse="${crewHasHouse}" data-hasmembers="${crewHasMembers}" data-name="${escapeHtml(cName)}" data-extid="${escapeHtml(cExtId)}" data-stage="${cStage}" data-house="${cHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+      return `<tr data-hashouse="${crewHasHouse}" data-hasmembers="${crewHasMembers}" data-name="${escapeHtml(cName)}" data-extid="${escapeHtml(cExtId)}" data-nick="${escapeHtml(cNick)}" data-stage="${cStage}" data-house="${cHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+        <td style="padding:0.7rem 1rem;font-size:0.82rem;font-family:ui-monospace,Consolas,monospace;color:var(--text);white-space:nowrap">${c.externalId ? escapeHtml(c.externalId) : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
           <span style="color:#a78bfa;margin-right:0.3rem">👥</span><span onclick="openCrewHistory(${c.id})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">${c.name}</span>
-          <span style="font-size:0.7rem;color:var(--muted);margin-left:0.3rem">#${c.id}</span>
-          ${sheetIdHtml}
         </td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;font-weight:600;color:var(--text);white-space:nowrap">${c.nickname ? escapeHtml(c.nickname) : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;color:#a78bfa;font-weight:600;font-size:0.85rem">${c.managerName ? '👔 ' + c.managerName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;color:#f5a623;font-weight:600;font-size:0.85rem">${c.leaderName ? '🦺 ' + c.leaderName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem">${stagesHtml}</td>
@@ -7679,7 +7680,9 @@
           <table style="width:100%;border-collapse:collapse;background:var(--card)">
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
+                <th data-i18n="colExternalId" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colExternalId')}</th>
                 <th data-i18n="colCrew" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
+                <th data-i18n="colNickname" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colNickname')}</th>
                 <th data-i18n="colManager" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colManager')}</th>
                 <th data-i18n="colLeader" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLeader')}</th>
                 <th data-i18n="colStage" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
@@ -8493,7 +8496,7 @@
   // ── Multi-field search bar ───────────────────────────────────────────────────
   const _sfConfigs = {
     workers:    [{ key:'extid', label:'sfExternalId' }, { key:'name', label:'sfName' }, { key:'crew', label:'sfCrew' }, { key:'house', label:'sfHouse' }],
-    crews:      [{ key:'name', label:'sfName' }, { key:'extid', label:'sfCrewId' }, { key:'stage', label:'sfStage' }, { key:'house', label:'sfHouse' }],
+    crews:      [{ key:'extid', label:'sfExternalId' }, { key:'name', label:'sfName' }, { key:'nick', label:'sfNickname' }, { key:'stage', label:'sfStage' }, { key:'house', label:'sfHouse' }],
     scaffold:   [{ key:'house', label:'sfHouse' }],
     orders:     [{ key:'house', label:'sfHouse' }, { key:'material', label:'sfMaterial' }],
     deliveries: [{ key:'house', label:'sfHouse' }],
@@ -9120,7 +9123,6 @@
       <div class="org-crew-header">
         <span class="org-crew-title">👥 <span onclick="openCrewHistory(${c.id})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">${c.name}</span></span>
         <div style="display:flex;align-items:center;gap:0.4rem">
-          <span class="house-id">#${c.id}</span>
           <div class="card-actions admin-only" onclick="event.stopPropagation()">
             <button class="card-btn card-btn-edit" title="Edit" onclick="openCrewModal(${c.id})">✎</button>
             <button class="card-btn card-btn-del"  title="Delete" onclick="deleteCrew(${c.id})">🗑</button>
@@ -9616,6 +9618,31 @@
     if (/покривно|улуци|водостоци|комин/.test(n))   return 'Roofing';
     if (/конструкция|дограма|фундамент/.test(n))    return 'Framing';
     return 'Finishing';
+  }
+
+  /** A group's stages ("Изолация/Картон" = both parts), as the import gives a new crew. */
+  function stagesOfCrewGroup(group) {
+    const parts = (group || '').split('/').map(p => p.trim().toLowerCase()).filter(Boolean);
+    if (!parts.length) return [];
+    const out = [];
+    for (const part of parts) {
+      const orders = (_stageTypeList || [])
+        .filter(st => st.hasCrew && (st.mainStageBg || '').trim().toLowerCase() === part)
+        .map(st => st.stageOrder);
+      if (!orders.length) return [];          // an unknown part: the server will say so on save
+      orders.forEach(o => { if (!out.includes(o)) out.push(o); });
+    }
+    return out;
+  }
+
+  // Only fills an empty stage list: stages already chosen by hand are never replaced.
+  function onCrewGroupChange() {
+    if (_crewStages.length) return;
+    const orders = stagesOfCrewGroup(document.getElementById('cStageGroup').value);
+    if (!orders.length) return;
+    _crewStages = orders;
+    renderCrewStages();
+    renderStageDropdown(document.getElementById('cStageSearch').value);
   }
 
   function renderCrewStages() {
