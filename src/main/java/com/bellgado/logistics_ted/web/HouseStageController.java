@@ -260,6 +260,9 @@ public class HouseStageController {
             result.put("crewName",   w.getCrew() != null ? w.getCrew().getName() : null);
             result.put("stageOrders", w.getStageOrders());
             result.put("location",   w.getLocation());
+            result.put("lat",        w.getLat());
+            result.put("lng",        w.getLng());
+            result.put("photoUrl",   w.getPhotoUrl());
             result.put("phone",      w.getPhone());
             result.put("email",      w.getEmail());
 
@@ -503,7 +506,10 @@ public class HouseStageController {
                 s.setStartDate(today());
             if ("DONE".equals(newStatus) && !"DONE".equals(oldStatus) && s.getEndDate() == null)
                 s.setEndDate(today());
-            if ("DONE".equals(newStatus) && s.getStageOrder() == 1 && s.getHouse().getStartDate() == null)
+            // The house starts with its first started stage. This used to wait for Фундамент (stage 1)
+            // to be DONE, but the matrix no longer shows the foundation (it gets its own view), so
+            // nothing would ever set the date.
+            if (("IN_PROGRESS".equals(newStatus) || "DONE".equals(newStatus)) && s.getHouse().getStartDate() == null)
                 s.getHouse().setStartDate(s.getStartDate() != null ? s.getStartDate() : today());
             if ("NOT_STARTED".equals(newStatus)) { s.setStartDate(null); s.setEndDate(null); }
             if ("IN_PROGRESS".equals(newStatus) && !"IN_PROGRESS".equals(oldStatus) && s.getCrewId() != null)
