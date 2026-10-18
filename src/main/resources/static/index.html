@@ -3380,7 +3380,7 @@
       chStageHistory:'Stage History by House', chNoHistory:'No stage history recorded yet.',
       chColHouse:'House', chColStage:'Stage', chColStatus:'Status', chColStarted:'Started', chColFinished:'Finished', chColDays:'Days', chColScore:'Score',
       chStatusDone:'Done', chStatusInProgress:'In Progress', chStatusNotStarted:'Not Started', chLeader:'Leader',
-      wjBack:'← Back', wjFrom:'From', wjTo:'To', wjExportPdf:'⬇ Export PDF',
+      wjBack:'← Back', wjPhoto:'Photo', wjOpenPhoto:'Open photo in Drive', wjOpenMap:'Open in Google Maps', wjFrom:'From', wjTo:'To', wjExportPdf:'⬇ Export PDF',
       wjStageHistory:'Stage History by House', wjNoHistory:'No stage history recorded yet.',
       wjColHouse:'House', wjColStage:'Stage', wjColStatus:'Status', wjColStarted:'Started', wjColFinished:'Finished', wjColDays:'Days', wjColScore:'Score',
       wjStatusDone:'Done', wjStatusInProgress:'In Progress', wjStatusNotStarted:'Not Started',
@@ -3445,8 +3445,6 @@
       // stage matrix
       matrixHeaderHouse:'House',
       stageStatusInProgress:'In Progress', stageStatusDone:'Done',
-      stageFoundationFirst:'Foundation must be completed first',
-      stageFoundationRequired:'Foundation required',
       matrixLoading:'Loading…',
       // search field labels
       sfName:'Name', sfExternalId:'External ID', sfCrew:'Crew', sfHouse:'House', sfStage:'Stage', sfMaterial:'Material', sfLocation:'Location', sfAddress:'Address',
@@ -3792,7 +3790,7 @@
       chStageHistory:'История на етапите по обект', chNoHistory:'Няма записана история на етапи.',
       chColHouse:'Обект', chColStage:'Етап', chColStatus:'Статус', chColStarted:'Начало', chColFinished:'Край', chColDays:'Дни', chColScore:'Оценка',
       chStatusDone:'Завършен', chStatusInProgress:'В процес', chStatusNotStarted:'Не започнат', chLeader:'Лидер',
-      wjBack:'← Назад', wjFrom:'От', wjTo:'До', wjExportPdf:'⬇ Експорт PDF',
+      wjBack:'← Назад', wjPhoto:'Снимка', wjOpenPhoto:'Отвори снимката в Drive', wjOpenMap:'Отвори в Google Maps', wjFrom:'От', wjTo:'До', wjExportPdf:'⬇ Експорт PDF',
       wjStageHistory:'История на етапите по обект', wjNoHistory:'Няма записана история на етапи.',
       wjColHouse:'Обект', wjColStage:'Етап', wjColStatus:'Статус', wjColStarted:'Начало', wjColFinished:'Край', wjColDays:'Дни', wjColScore:'Оценка',
       wjStatusDone:'Завършен', wjStatusInProgress:'В процес', wjStatusNotStarted:'Не започнат',
@@ -3857,8 +3855,6 @@
       // stage matrix
       matrixHeaderHouse:'Обект',
       stageStatusInProgress:'В процес', stageStatusDone:'Завършен',
-      stageFoundationFirst:'Фундаментът трябва да е завършен първо',
-      stageFoundationRequired:'Необходим фундамент',
       matrixLoading:'Зареждане…',
       // search field labels
       sfName:'Наименование', sfExternalId:'Външен ID', sfCrew:'Екип', sfHouse:'Обект', sfStage:'Етап', sfMaterial:'Материал', sfLocation:'Локация', sfAddress:'Адрес',
@@ -4576,9 +4572,9 @@
         IN_PROGRESS: { bg:'#fca5a5', text:'#7f1d1d' },
         DONE:        { bg:'#bbf7d0', text:'#14532d' },
       };
-      const foundationDone = (stages.find(s => s.stageOrder === 1)?.status === 'DONE');
       const isEn = currentLang === 'en';
-      const thCells = columns.map(col =>
+      const shownColumns = columns.filter(col => !MATRIX_HIDDEN_STAGES.has(col.stageOrder));
+      const thCells = shownColumns.map(col =>
         `<th style="min-width:120px;padding:0.4rem 0.5rem;text-align:center;font-size:0.62rem;color:#9aa3be;text-transform:uppercase;white-space:nowrap;border-right:1px solid #2e3250">${isEn && col.stageNameEn ? col.stageNameEn : col.stageName}</th>`
       ).join('');
       const hdStatusLabel = (v) => {
@@ -4586,23 +4582,20 @@
         if (v === 'DONE')        return ' ' + (currentLang === 'bg' ? 'Завършен' : 'Done');
         return '';
       };
-      const tdCells = columns.map(col => {
+      const tdCells = shownColumns.map(col => {
         const s = stages.find(x => x.stageOrder === col.stageOrder);
         const status = s?.status || 'NOT_STARTED';
-        const isLocked = col.stageOrder > 1 && !foundationDone;
         const hasCrew = !!s?.crewId;
         const pc = HD_PILL[status];
         const leader = s?.leaderName || '';
         const shown = s?.nickname || leader;
         const label = pc ? `${shown}${hdStatusLabel(status)}` : hasCrew ? (s?.nickname || s?.crewName || leader || '—') : '—';
         const fullTitle = pc ? crewTitle(s && { externalId: s.externalId }, leader) + hdStatusLabel(status) : label;
-        const pillStyle = isLocked
-          ? (hasCrew ? 'background:rgba(79,142,247,0.08);color:#5a6080;border:1px dashed #4060a0' : 'background:transparent;color:#3a4060;border:1px dashed #2a2f4a')
-          : pc ? `background:${pc.bg};color:${pc.text};border:none`
-               : 'background:transparent;color:var(--muted);border:1px dashed var(--border)';
+        const pillStyle = pc ? `background:${pc.bg};color:${pc.text};border:none`
+                             : 'background:transparent;color:var(--muted);border:1px dashed var(--border)';
         return `<td style="padding:0.2rem 0.3rem;border-right:1px solid #1a1d27;min-width:120px">
-          <div title="${isLocked ? '' : escapeHtml(fullTitle)}" style="${pillStyle};border-radius:20px;padding:0.28rem 0.6rem;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-            ${isLocked ? '🔒' : label}
+          <div title="${escapeHtml(fullTitle)}" style="${pillStyle};border-radius:20px;padding:0.28rem 0.6rem;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            ${label}
           </div>
         </td>`;
       }).join('');
@@ -6999,6 +6992,10 @@
 
   const STAGE_STATUS_OPTS = ['NOT_STARTED','ASSIGNED','IN_PROGRESS','DONE'];
 
+  // Stages kept in the DB but not shown in the stage matrix or the house detail. Фундамент (1) is a
+  // meta-stage that will get its own view with sub-stages; it no longer gates the other stages.
+  const MATRIX_HIDDEN_STAGES = new Set([1]);
+
   function stageStatusLabel(s) {
     if (s === 'ASSIGNED')    return currentLang === 'bg' ? 'Назначен'  : 'Assigned';
     if (s === 'IN_PROGRESS') return currentLang === 'bg' ? 'В процес'  : 'In Progress';
@@ -7027,7 +7024,7 @@
       catch(e) { wrap.innerHTML = `<div class="state-msg">Failed to load matrix.</div>`; return; }
     }
 
-    const { columns } = data;
+    const columns = data.columns.filter(c => !MATRIX_HIDDEN_STAGES.has(c.stageOrder));
     const isEn = currentLang === 'en';
     const sortField = _matrixSort.key === 'extId' ? 'houseExternalId' : 'houseName';
     const rows = [...data.rows].sort((a, b) => {
@@ -7059,14 +7056,9 @@
     };
 
     const bodyRows = rows.map(row => {
-      const foundationCell = row.stages.find(s => s.stageOrder === 1);
-      const foundationDone = foundationCell?.status === 'DONE';
-
-      const cells = row.stages.map(s => {
-        const isFoundation = s.stageOrder === 1 || s.stageOrder === 27;
-        const isLocked = !isFoundation && !foundationDone;
-
-        if (isFoundation) {
+      const cells = row.stages.filter(s => !MATRIX_HIDDEN_STAGES.has(s.stageOrder)).map(s => {
+        // Приключване (27) has no crew: a plain done / not-done toggle.
+        if (s.stageOrder === 27) {
           const done = s.status === 'DONE';
           const pillStyle = done
             ? `background:${PILL_COLOR.DONE.bg};color:${PILL_COLOR.DONE.text};border:none;cursor:pointer`
@@ -7083,26 +7075,19 @@
         const currentCrew = crews.find(c => c.crewId == s.crewId);
         const currentLeader = s.workerName || currentCrew?.leaderName || '';
         const pc = s.status && s.status !== 'NOT_STARTED' ? PILL_COLOR[s.status] : null;
-        const hasCrew = !!s.crewId;
         // The client's sheets call a crew by its leader's nickname ("Виктор"); the full name and the
         // CrewID go to the tooltip. workerName still carries the full name, so only the label changes.
         const shownName = currentCrew?.nickname || currentLeader || currentCrew?.crewName || '';
         const pillLabel = pc ? `${shownName}${statusLabel(s.status)}` : '—';
         const pillTitle = pc ? crewTitle(currentCrew, currentLeader) + statusLabel(s.status) : '—';
-        const pillStyle = isLocked
-          ? hasCrew
-            ? `background:rgba(79,142,247,0.08);color:#5a6080;border:1px dashed #4060a0;cursor:not-allowed`
-            : `background:transparent;color:#3a4060;border:1px dashed #2a2f4a;cursor:not-allowed`
-          : pc
-            ? `background:${pc.bg};color:${pc.text};border:none;cursor:pointer`
-            : `background:transparent;color:var(--muted);border:1px dashed var(--border);cursor:pointer`;
+        const pillStyle = pc
+          ? `background:${pc.bg};color:${pc.text};border:none;cursor:pointer`
+          : `background:transparent;color:var(--muted);border:1px dashed var(--border);cursor:pointer`;
         const pillsData = JSON.stringify(crews.map(c => ({ crewId: c.crewId, leader: c.leaderName || c.crewName, crewName: c.crewName, nickname: c.nickname || null, externalId: c.externalId || null, assignedHouses: c.assignedHouses || null }))).replace(/"/g,'&quot;');
         const currentCrewName = (currentCrew?.crewName || '').replace(/"/g,'&quot;');
         const currentLeaderName = (currentCrew?.leaderName || s.workerName || '').replace(/"/g,'&quot;');
-        const clickHandler = isLocked
-          ? `onclick="showToast('${t('stageFoundationFirst').replace(/'/g,"\\'")}')"`
-          : `onclick="openStagePicker(${s.id||'null'},this,'${s.status||'NOT_STARTED'}',${s.crewId||'null'},this.dataset.crews,this.dataset.currentCrewName,this.dataset.currentLeader,${row.houseId},${s.stageOrder})"`;
-        const eyeHtml = (pc && !isLocked && s.crewId)
+        const clickHandler = `onclick="openStagePicker(${s.id||'null'},this,'${s.status||'NOT_STARTED'}',${s.crewId||'null'},this.dataset.crews,this.dataset.currentCrewName,this.dataset.currentLeader,${row.houseId},${s.stageOrder})"`;
+        const eyeHtml = (pc && s.crewId)
           ? `<span onclick="event.stopPropagation();showCrewLeaderInfo(this,${s.crewId},${s.stageOrder})" title="View leader info" style="cursor:pointer;font-size:0.8rem;padding:0.15rem 0.3rem;border-radius:5px;color:var(--muted);flex-shrink:0;user-select:none" onmouseover="this.style.background='rgba(79,142,247,0.15)'" onmouseout="this.style.background=''">👁</span>`
           : '';
         return `<td style="padding:0.2rem 0.3rem;border-right:1px solid #1a1d27;min-width:130px">
@@ -7112,7 +7097,7 @@
               data-current-crew-name="${currentCrewName}"
               data-current-leader="${currentLeaderName}"
               style="${pillStyle};flex:1;padding:0.28rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
-              title="${isLocked ? t('stageFoundationRequired') : esc(pillTitle)}">${isLocked ? '🔒' : esc(pillLabel)}</button>
+              title="${esc(pillTitle)}">${esc(pillLabel)}</button>
             ${eyeHtml}
           </div>
         </td>`;
@@ -9749,6 +9734,25 @@
     const stageName = s => (lang === 'bg' ? s.stageName : (s.stageNameEn || s.stageName));
     const roleLabel = { CREW_MEMBER: t('roleCrewMember'), CREW_LEADER: t('roleCrewLeader'), CREW_MANAGER: t('roleCrewManager') }[data.role] || data.role;
     const roleIcon  = { CREW_MEMBER: '👷', CREW_LEADER: '🦺', CREW_MANAGER: '👔' }[data.role] || '👷';
+    // Location → Google Maps: exact pin when the worker has coordinates, else a search for the text.
+    const mapsHref = (data.lat != null && data.lng != null)
+      ? `https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}`
+      : /^https?:\/\//i.test(data.location || '') ? data.location
+      : data.location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.location)}` : null;
+    // A short maps.app.goo.gl link can't be resolved to a place, so it is stored as-is: show a label, not the URL.
+    const locationLabel = data.location && !/^https?:\/\//i.test(data.location) ? data.location : t('wjOpenMap');
+    const locationHtml = mapsHref
+      ? ` · <a href="${escapeHtml(mapsHref)}" target="_blank" rel="noopener" title="${t('wjOpenMap')}" style="color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">📍 ${escapeHtml(locationLabel)}</a>`
+      : '';
+    // снимки is a Drive share link (…/file/d/<id>/view). Drive serves a thumbnail for a file id when
+    // the file is shared by link; a folder or any other link only gets the open-in-new-tab link.
+    const photoUrl = /^https?:\/\//i.test(data.photoUrl || '') ? data.photoUrl : null;
+    const driveId = photoUrl && (photoUrl.match(/drive\.google\.com\/file\/d\/([\w-]+)/) || photoUrl.match(/drive\.google\.com\/.*[?&]id=([\w-]+)/) || [])[1];
+    const photoHtml = photoUrl
+      ? `<a href="${escapeHtml(photoUrl)}" target="_blank" rel="noopener" title="${t('wjOpenPhoto')}" style="flex-shrink:0;width:72px;height:72px;border-radius:12px;overflow:hidden;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:1.8rem">
+          ${driveId ? `<img src="https://drive.google.com/thumbnail?id=${encodeURIComponent(driveId)}&sz=w200" alt="${t('wjPhoto')}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover" onerror="this.replaceWith(document.createTextNode('🖼'))">` : '🖼'}
+        </a>`
+      : '';
 
     const statusBadge = (s, dk, ik, nk) => {
       const label = { DONE: t(dk), IN_PROGRESS: t(ik), NOT_STARTED: t(nk) }[s] || s;
@@ -9812,14 +9816,16 @@
     el.innerHTML = `
       <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
         <button onclick="showView('${_wjPrevView}')" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.35rem 0.75rem;cursor:pointer;color:var(--text);font-size:0.85rem">${t('wjBack')}</button>
+        ${photoHtml}
         <div style="flex:1;min-width:200px">
           <div style="font-size:1.2rem;font-weight:700;color:var(--text)">${roleIcon} ${data.workerName}</div>
           <div style="font-size:0.82rem;color:var(--muted);margin-top:0.2rem">
-            ${roleLabel}${data.crewName ? ' · 👥 ' + data.crewName : ''}${data.trade ? ' · 🔧 ' + data.trade : ''}${data.location ? ' · 📍 ' + data.location : ''}
+            ${roleLabel}${data.crewName ? ' · 👥 ' + data.crewName : ''}${data.trade ? ' · 🔧 ' + data.trade : ''}${locationHtml}
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:0.4rem">
             ${data.phone ? `<a href="tel:${data.phone}" style="font-size:0.82rem;color:#4f8ef7;text-decoration:none">📞 ${data.phone}</a>` : ''}
             ${data.email ? `<a href="mailto:${data.email}" style="font-size:0.82rem;color:#3ecf6e;text-decoration:none">✉ ${data.email}</a>` : ''}
+            ${photoUrl ? `<a href="${escapeHtml(photoUrl)}" target="_blank" rel="noopener" style="font-size:0.82rem;color:#a78bfa;text-decoration:none">🖼 ${t('wjOpenPhoto')}</a>` : ''}
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
