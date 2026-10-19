@@ -6903,7 +6903,7 @@
     try { list = await apiFetch('/api/stage-types').then(r => r.json()); } catch(e) { grid.innerHTML = `<div class="state-msg">${t('stagesErrDelete')}</div>`; return; }
 
     const q = (document.getElementById('altSearchInput')?.value || '').toLowerCase();
-    const filtered = q ? list.filter(s => s.stageName.toLowerCase().includes(q)) : list;
+    const filtered = q ? list.filter(s => s.stageName.toLowerCase().includes(q) || (s.stageNameEn || '').toLowerCase().includes(q)) : list;
 
     const isEn = currentLang === 'en';
     // Reordering needs the full list on screen: dropping inside a filtered subset is ambiguous.
@@ -8623,6 +8623,7 @@
   function onAltSearch() {
     const sfFields = [...document.querySelectorAll('.sf-field')];
     const singleInput = document.getElementById('altSearchInput');
+    if (_dashMode === 'stages') { renderStagesDash(); return; }
     const tableModes = ['orders', 'deliveries', 'crews', 'workers', 'scaffold', 'houses'];
     if (tableModes.includes(_dashMode)) {
       document.querySelectorAll('#grid table tbody tr').forEach(row => {
