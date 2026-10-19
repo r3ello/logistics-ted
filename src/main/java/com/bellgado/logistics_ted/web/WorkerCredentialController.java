@@ -198,16 +198,7 @@ public class WorkerCredentialController {
                 auditLoginFailure(username, "invalid_checkin_token", 403);
                 return ResponseEntity.status(403).body(Map.of("error", "Invalid check-in point."));
             }
-            if (w.getCrew() != null) {
-                List<Object[]> assigned = houseStages.findAssignedHousesForCrew(w.getCrew().getId());
-                boolean assignedToHouse = assigned.stream()
-                    .anyMatch(row -> house.getId().equals(((Number) row[0]).intValue()));
-                if (!assignedToHouse) {
-                    auditLoginFailure(username, "house_mismatch", 403);
-                    return ResponseEntity.status(403).body(Map.of("error",
-                        "Не сте назначен на тази обект. / You are not assigned to this house."));
-                }
-            }
+            // no crew-assignment check — any worker can log in to any house
         }
 
         auditLoginSuccess(w);
