@@ -10607,7 +10607,7 @@
         </td>
         <td style="padding:0.7rem 1rem">${stageHtml}</td>
         <td style="padding:0.7rem 1rem">${crewsHtml}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.address || '—'}${h.location ? ` <a href="${h.location}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}${h.google_doc_url ? ` <a href="${h.google_doc_url}" target="_blank" rel="noopener" title="Google Doc" style="text-decoration:none">📄</a>` : ''}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">${(() => { const mapUrl = h.location || (h.lat && h.lng ? `https://www.google.com/maps/@${h.lat},${h.lng},17z` : null); return `📍 ${h.address || '—'}${mapUrl ? ` <a href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}`; })()}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${h.start_date ? '📅 ' + h.start_date : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap;position:relative" class="admin-only">${actionsHtml}</td>
       </tr>`;
