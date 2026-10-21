@@ -61,6 +61,16 @@ public interface HouseStageRepository extends JpaRepository<HouseStage, Integer>
     @Query("SELECT s FROM HouseStage s JOIN FETCH s.house LEFT JOIN StageType st ON st.stageOrder = s.stageOrder WHERE s.house.id = :houseId AND s.crewId = :crewId AND s.status = 'ASSIGNED' ORDER BY st.sortOrder, s.stageOrder")
     List<HouseStage> findAssignedStagesForCrewOnHouse(Integer houseId, Integer crewId);
 
+    /** All ASSIGNED and IN_PROGRESS stages across all crews — used as a fallback stage lookup for exports. Returns [crew_id, house_id, stage_order, stage_name, stage_name_en]. */
+    @Query(value = """
+        SELECT hs.crew_id, hs.house_id, hs.stage_order, hs.stage_name, hs.stage_name_en
+        FROM house_stage hs
+        WHERE hs.crew_id IS NOT NULL
+          AND hs.status IN ('ASSIGNED', 'IN_PROGRESS')
+        ORDER BY hs.crew_id, hs.house_id, hs.stage_order
+        """, nativeQuery = true)
+    List<Object[]> findActiveStagesForAllCrews();
+
     @Query(value = """
         SELECT string_agg(DISTINCT st.stage_name, ', ' ORDER BY st.stage_name)
         FROM crew_stage_type cst

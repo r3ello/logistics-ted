@@ -9,6 +9,8 @@ import com.bellgado.logistics_ted.domain.House;
 import com.bellgado.logistics_ted.domain.WorkSession;
 import com.bellgado.logistics_ted.domain.Worker;
 import com.bellgado.logistics_ted.domain.WorkerRole;
+import com.bellgado.logistics_ted.repository.HouseStageCrewLogRepository;
+import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkSessionRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import com.bellgado.logistics_ted.service.AttendanceQueryService.SessionView;
@@ -40,6 +42,8 @@ class AttendanceQueryServiceTest {
 
     @Mock WorkSessionRepository sessions;
     @Mock WorkerRepository workers;
+    @Mock HouseStageCrewLogRepository stageLogs;
+    @Mock HouseStageRepository houseStages;
 
     AttendanceQueryService service;
 
@@ -52,7 +56,7 @@ class AttendanceQueryServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new AttendanceQueryService(sessions, workers, SOFIA, Clock.fixed(NOW, SOFIA));
+        service = new AttendanceQueryService(sessions, workers, stageLogs, houseStages, SOFIA, Clock.fixed(NOW, SOFIA));
         crewA = crew(1, "Crew A");
         Crew crewB = crew(2, "Crew B");
         ivan = worker(10, "Ivan", crewA);
@@ -65,7 +69,7 @@ class AttendanceQueryServiceTest {
     @Test
     void todayIsTheSofiaWorkDay() {
         // 22:30 UTC on the 23rd is already 01:30 on the 24th in Sofia.
-        AttendanceQueryService lateNight = new AttendanceQueryService(sessions, workers, SOFIA,
+        AttendanceQueryService lateNight = new AttendanceQueryService(sessions, workers, stageLogs, houseStages, SOFIA,
                 Clock.fixed(Instant.parse("2026-09-23T22:30:00Z"), ZoneId.of("UTC")));
         assertThat(lateNight.today()).isEqualTo(TODAY);
     }

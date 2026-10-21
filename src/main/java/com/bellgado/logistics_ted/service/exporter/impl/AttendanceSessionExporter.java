@@ -54,6 +54,8 @@ public class AttendanceSessionExporter implements EntityExporter<SessionView> {
         ExportColumn.of("house_external_id", TEXT, "The house's External ID — the key used by the CSV import.",
             SessionView::houseExternalId),
         ExportColumn.of("house_name", TEXT, "House name.", SessionView::houseName),
+        ExportColumn.optional("house_label", TEXT, "External ID and house name combined, e.g. TH-2026-034 Марково Златко.",
+            SessionView::houseLabel),
         ExportColumn.of("checked_in_at", TIMESTAMP, "Check-in time.", SessionView::checkedInAt),
         ExportColumn.of("checked_out_at", TIMESTAMP, "Check-out time; empty while the session is open.",
             SessionView::checkedOutAt),
@@ -62,7 +64,11 @@ public class AttendanceSessionExporter implements EntityExporter<SessionView> {
         ExportColumn.of("counted_minutes", INTEGER, "Minutes counted. MISSING_CHECKOUT counts 0.",
             SessionView::countedMinutes),
         ExportColumn.of("counted_hours", DECIMAL, "counted_minutes / 60, two decimals.",
-            s -> AttendanceDailyExporter.hours(s.countedMinutes())));
+            s -> AttendanceDailyExporter.hours(s.countedMinutes())),
+        ExportColumn.optional("stage_name", TEXT, "Name of the stage the crew was working on at check-in.",
+            SessionView::stageName),
+        ExportColumn.optional("stage_name_en", TEXT, "English name of the stage the crew was working on at check-in.",
+            SessionView::stageNameEn));
 
     private final AttendanceQueryService attendance;
     private final HouseRepository houses;
