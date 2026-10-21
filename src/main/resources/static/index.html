@@ -1528,6 +1528,13 @@
       </select>
     </div>
     <div class="field">
+      <label>Google Maps link</label>
+      <div style="display:flex;gap:0.4rem;align-items:center">
+        <input id="wMapsLink" type="url" placeholder="https://maps.app.goo.gl/…" style="flex:1;min-width:0" onchange="_resolveMapsLink()" onblur="_resolveMapsLink()" />
+        <button type="button" title="Resolve link → fill coordinates" onclick="_resolveMapsLink()" style="flex-shrink:0;padding:0.35rem 0.5rem;background:var(--card);border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:0.85rem;color:var(--muted);transition:color .2s,border-color .2s">↻</button>
+      </div>
+    </div>
+    <div class="field">
       <label>Location</label>
       <a id="wMapPickBtn" href="/map-picker.html" onclick="saveWorkerModalState();localStorage.setItem('mapPinSource','worker');localStorage.setItem('returnToView','dashboard')" style="display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%">
         🗺 Pin on map
@@ -1538,9 +1545,8 @@
     </div>
     <div class="field"><label>Phone</label><input id="wPhone" type="tel" placeholder="+359 ..." style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;box-sizing:border-box" /></div>
     <div class="field"><label>Email</label><input id="wEmail" type="email" placeholder="email@example.com" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem;box-sizing:border-box" /></div>
-    <!-- Staff-sheet fields (Flyway V21); the External ID is owned by the CSV import -->
     <div class="field"><label data-i18n="wfExternalId">External ID</label>
-      <input id="wExtId" type="text" readonly placeholder="—" style="opacity:0.75" />
+      <input id="wExtId" type="text" placeholder="—" />
     </div>
     <div class="field"><label data-i18n="wfEmploymentType">Employment type</label>
       <select id="wEmpType" style="width:100%;padding:0.65rem 0.9rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.92rem">
@@ -1690,7 +1696,7 @@
   </div>
 
 <!-- HOUSE MODAL -->
-<div class="modal-backdrop" id="houseModal" onclick="if(event.target===this) closeHouseModal()">
+<div class="modal-backdrop" id="houseModal">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-title">
       <span id="modalTitle">Add house</span>
@@ -1710,13 +1716,17 @@
     </div>
     <div class="modal-field">
       <label id="mLocationLabel">Google Maps link <span id="mLocationOptional" style="font-weight:400;color:var(--muted)">(optional)</span></label>
-      <input id="mLocation" type="url" placeholder="https://maps.app.goo.gl/…" />
+      <div style="display:flex;gap:0.4rem;align-items:center">
+        <input id="mLocation" type="url" placeholder="https://maps.app.goo.gl/…" onchange="houseLocationBlur()" onblur="houseLocationBlur()" style="flex:1;min-width:0" />
+        <button id="mLocationRefreshBtn" type="button" title="Resolve link → fill coordinates &amp; address" onclick="houseLocationBlur(true)" style="flex-shrink:0;padding:0.35rem 0.5rem;background:var(--card);border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:0.85rem;color:var(--muted);transition:color .2s,border-color .2s">↻</button>
+      </div>
     </div>
     <div class="modal-field">
       <label id="mCoordLabel">Coordinates <span id="mCoordOptional" style="font-weight:400;color:var(--muted)">(optional)</span></label>
-      <div class="modal-coords">
-        <input id="mLat" type="number" step="any" placeholder="Latitude" onblur="houseCoordBlur()" />
-        <input id="mLng" type="number" step="any" placeholder="Longitude" onblur="houseCoordBlur()" />
+      <div style="display:flex;gap:0.4rem;align-items:center">
+        <input id="mLat" type="number" step="any" placeholder="Latitude" onblur="houseCoordBlur()" style="flex:1;min-width:0" />
+        <input id="mLng" type="number" step="any" placeholder="Longitude" onblur="houseCoordBlur()" style="flex:1;min-width:0" />
+        <button id="mCoordRefreshBtn" type="button" title="Reverse-geocode coordinates → fill address" onclick="houseCoordBlur()" style="flex-shrink:0;padding:0.35rem 0.5rem;background:var(--card);border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:0.85rem;color:var(--muted);transition:color .2s,border-color .2s">↻</button>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1rem">
@@ -3170,7 +3180,7 @@
 
   <!-- WORKER JOURNEY -->
   <div class="view" id="view-workerjourney">
-    <div id="workerJourneyContent" style="max-width:100%;padding:1.5rem 2rem">
+    <div id="workerJourneyContent" style="max-width:100%;padding:0.75rem 2rem">
       <div class="state-msg"><div class="spinner"></div><br>Loading…</div>
     </div>
   </div>
@@ -4694,7 +4704,17 @@
             </div>
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
               <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelLocation')}</div>
-              <div style="font-weight:600;font-size:0.9rem">📍 ${h.address || '—'}</div>
+              <div id="hdLocationCell" style="font-weight:600;font-size:0.9rem">
+                ${(() => {
+                  const mapUrl = h.location || (h.lat != null && h.lng != null ? `https://www.google.com/maps/@${h.lat},${h.lng},17z` : null);
+                  const label  = h.address || t('wjOpenMap');
+                  return mapUrl
+                    ? `<a href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener" style="color:#4f8ef7;text-decoration:none">📍 ${escapeHtml(label)}</a>`
+                    : h.address
+                      ? `📍 ${escapeHtml(h.address)}`
+                      : `<span style="color:var(--muted)">—</span>`;
+                })()}
+              </div>
             </div>
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem">
               <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.3rem">${t('hdLabelStartDate')}</div>
@@ -4853,6 +4873,40 @@
             </div>
           </div>
         </div>`;
+      // Reverse-geocode when address is missing — use stored coords or resolve from the Maps link
+      if (!h.address && (h.location || (h.lat != null && h.lng != null))) {
+        const locCell = document.getElementById('hdLocationCell');
+        if (locCell) {
+          (async () => {
+            try {
+              let lat = h.lat, lng = h.lng;
+              if ((lat == null || lng == null) && h.location) {
+                // Fast path: extract coords directly if URL already contains @lat,lng
+                let m = h.location.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if (!m) {
+                  // Slow path: short link — resolve server-side
+                  const res = await apiFetch('/api/resolve-url?url=' + encodeURIComponent(h.location));
+                  if (res.ok) {
+                    const resolved = await res.json();
+                    m = (resolved.url || '').match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                  }
+                }
+                if (m) { lat = parseFloat(m[1]); lng = parseFloat(m[2]); }
+              }
+              if (lat == null || lng == null) return;
+              const mapUrl = h.location || `https://www.google.com/maps/@${lat},${lng},17z`;
+              const rg = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: { 'Accept-Language': currentLang === 'bg' ? 'bg,en' : 'en' } });
+              const rd = await rg.json();
+              const a = rd.address || {};
+              const parts = [a.city || a.town || a.village || a.hamlet || a.suburb || a.municipality, a.state || a.county].filter(Boolean);
+              if (parts.length) {
+                const label = escapeHtml(parts.join(', '));
+                locCell.innerHTML = `<a href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener" style="color:#4f8ef7;text-decoration:none">📍 ${label}</a>`;
+              }
+            } catch(_) {}
+          })();
+        }
+      }
       // Load house doc folder section
       try {
         [_docTree, _docFlat] = await Promise.all([
@@ -7153,13 +7207,13 @@
         .filter(Boolean).join(' ').toLowerCase();
       const extId = row.houseExternalId || '';
       const extIdHtml = extId
-        ? `<span style="display:inline-block;min-width:4.2rem;margin-right:0.5rem;padding:0.08rem 0.4rem;border-radius:5px;background:rgba(79,142,247,0.12);color:#9fc0ff;font-family:ui-monospace,Consolas,monospace;font-size:0.75rem;font-weight:700">${esc(extId)}</span>`
-        : `<span style="display:inline-block;min-width:4.2rem;margin-right:0.5rem;color:var(--muted);font-size:0.75rem">—</span>`;
+        ? `<span style="display:inline-block;vertical-align:middle;width:6.5rem;flex-shrink:0;margin-right:0.5rem;padding:0.08rem 0.4rem;border-radius:5px;background:rgba(79,142,247,0.18);color:var(--text);font-family:ui-monospace,Consolas,monospace;font-size:0.75rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(extId)}</span>`
+        : `<span style="display:inline-block;vertical-align:middle;width:6.5rem;flex-shrink:0;margin-right:0.5rem;color:var(--muted);font-size:0.75rem">—</span>`;
       const completionStage = row.stages.find(s => s.stageOrder === 27);
       const isCompleted = completionStage?.status === 'DONE';
       return `<tr data-house="${esc(row.houseName.toLowerCase())}" data-ext-id="${esc(extId.toLowerCase())}" data-crews="${allCrewNames}" data-completed="${isCompleted}" style="border-bottom:1px solid #2e3250;transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.07)'" onmouseout="this.style.background=''">
         <td style="padding:0.5rem 0.75rem;font-size:0.85rem;font-weight:600;white-space:nowrap;position:sticky;left:0;background:var(--card);z-index:1;border-right:2px solid #2e3250">
-          ${extIdHtml}<span onclick="openHouseDetail(${row.houseId})" style="cursor:pointer;color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">${row.houseName}</span>
+          ${extIdHtml}<span onclick="openHouseDetail(${row.houseId})" style="cursor:pointer;color:var(--text);vertical-align:middle">${row.houseName}</span>
         </td>
         ${cells}
       </tr>`;
@@ -7170,7 +7224,7 @@
         <thead>
           <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
             <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.7rem;color:var(--muted);text-transform:uppercase;position:sticky;left:0;background:var(--surface);z-index:2;border-right:2px solid var(--border);white-space:nowrap">
-              <span onclick="sortMatrixBy('extId')" title="${t('colExternalId')}" style="cursor:pointer;display:inline-block;min-width:4.2rem;margin-right:0.5rem;${_matrixSort.key === 'extId' ? 'color:var(--text)' : ''}">${t('colExternalId')}${sortArrow('extId')}</span><span onclick="sortMatrixBy('name')" style="cursor:pointer;${_matrixSort.key === 'name' ? 'color:var(--text)' : ''}">${t('matrixHeaderHouse')}${sortArrow('name')}</span>
+              <span onclick="sortMatrixBy('extId')" title="${t('colExternalId')}" style="cursor:pointer;display:inline-block;width:6.5rem;flex-shrink:0;margin-right:0.5rem;font-size:0.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${_matrixSort.key === 'extId' ? 'color:var(--text)' : ''}">${t('colExternalId')}${sortArrow('extId')}</span><span onclick="sortMatrixBy('name')" style="cursor:pointer;${_matrixSort.key === 'name' ? 'color:var(--text)' : ''}">${t('matrixHeaderHouse')}${sortArrow('name')}</span>
             </th>
             ${thCols}
           </tr>
@@ -7460,17 +7514,22 @@
       const wCrew    = (w.crewName||'').toLowerCase();
       const wHouse   = (w.houses||[]).map(h => h.houseName).join(' ').toLowerCase();
       return `<tr data-role="${w.role||'CREW_MEMBER'}" data-hashouse="${hasHouse}" data-hascrew="${hasCrew}" data-extid="${escapeHtml((w.externalId||'').toLowerCase())}" data-name="${wName}" data-crew="${wCrew}" data-house="${wHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+        <td style="padding:0.7rem 1rem;white-space:nowrap">${w.externalId ? `<span style="display:inline-block;padding:0.08rem 0.4rem;border-radius:5px;background:rgba(79,142,247,0.18);color:var(--text);font-family:ui-monospace,Consolas,monospace;font-size:0.75rem;font-weight:600">${escapeHtml(w.externalId)}</span>` : '<span style="color:var(--muted);font-size:0.75rem">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
-          <span style="margin-right:0.3rem">${roleCfg.icon}</span><span onclick="openWorkerJourney(${w.id})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;color:var(--text)">${w.name}</span>
+          <span style="margin-right:0.3rem">${roleCfg.icon}</span><span onclick="openWorkerJourney(${w.id})" style="cursor:pointer;color:var(--text)">${w.name}</span>
         </td>
-        <td style="padding:0.7rem 1rem;font-size:0.82rem;font-family:ui-monospace,monospace;color:var(--text);white-space:nowrap">${w.externalId ? escapeHtml(w.externalId) : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:${roleCfg.color};font-weight:700">${roleCfg.icon} ${roleCfg.label}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewId ? `<span onclick="openCrewHistory(${w.crewId})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">👥 ${w.crewName}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#3ecf6e;font-weight:600">${w.crewId ? `<span onclick="openCrewHistory(${w.crewId})" style="cursor:pointer">👥 ${w.crewName}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.8rem">${(() => { const names = (currentLang==='en' ? (w.stageNamesEn||w.stageNamesBg) : w.stageNamesBg)||[]; return names.length ? names.map(n=>`<div style="color:#3ecf6e;font-weight:600;white-space:nowrap">🔧 ${n}</div>`).join('') : '<span style="color:var(--muted)">—</span>'; })()}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.houses && w.houses.length > 0 ? w.houses.map(h => `<span onclick="openHouseDetail(${h.houseId})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">🏠 ${h.houseName}</span>`).join('<br>') : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:#4f8ef7;font-weight:600">${w.houses && w.houses.length > 0 ? w.houses.map(h => `<span onclick="openHouseDetail(${h.houseId})" style="cursor:pointer">🏠 ${h.houseName}</span>`).join('<br>') : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.82rem">${w.phone ? `<a href="tel:${w.phone}" style="color:#4f8ef7;text-decoration:none">📞 ${w.phone}</a>` : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.82rem">${w.email ? `<a href="mailto:${w.email}" style="color:#3ecf6e;text-decoration:none">✉ ${w.email}</a>` : '<span style="color:var(--muted)">—</span>'}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.82rem;color:var(--muted)">${w.location || (w.lat && w.lng ? `${parseFloat(w.lat).toFixed(4)}, ${parseFloat(w.lng).toFixed(4)}` : '—')}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.82rem;color:var(--muted)">${(() => {
+          const isUrl = /^https?:\/\//i.test(w.location || '');
+          if (isUrl) return `<a href="${escapeHtml(w.location)}" target="_blank" rel="noopener" style="color:#4f8ef7;text-decoration:none">📍 Map</a>`;
+          if (w.lat && w.lng) return `<a href="https://www.google.com/maps/@${w.lat},${w.lng},17z" target="_blank" rel="noopener" style="color:#4f8ef7;text-decoration:none">📍 Map</a>`;
+          return w.location || '—';
+        })()}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap" class="admin-only">
           <div style="display:flex;gap:0.4rem">
             <button class="card-btn card-btn-edit" title="Edit" onclick="openWorkerModal(${w.id})">✎</button>
@@ -7488,8 +7547,8 @@
           <table style="width:100%;border-collapse:collapse;background:var(--card)">
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
-                <th data-i18n="colWorker" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colWorker')}</th>
                 <th data-i18n="colExternalId" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colExternalId')}</th>
+                <th data-i18n="colWorker" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colWorker')}</th>
                 <th data-i18n="colRole" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colRole')}</th>
                 <th data-i18n="colCrew" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
                 <th style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Stages</th>
@@ -7637,12 +7696,11 @@
       const cStage = stageNamesList.join(' ').toLowerCase();
       const cHouse = (c.assignedHouses||[]).map(h => h.name).join(' ').toLowerCase();
       return `<tr data-hashouse="${crewHasHouse}" data-hasmembers="${crewHasMembers}" data-name="${escapeHtml(cName)}" data-extid="${escapeHtml(cExtId)}" data-nick="${escapeHtml(cNick)}" data-stage="${cStage}" data-house="${cHouse}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
-        <td style="padding:0.7rem 1rem;font-size:0.82rem;font-family:ui-monospace,Consolas,monospace;color:var(--text);white-space:nowrap">${c.externalId ? escapeHtml(c.externalId) : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="padding:0.7rem 1rem;white-space:nowrap">${c.externalId ? `<span style="display:inline-block;padding:0.08rem 0.4rem;border-radius:5px;background:rgba(79,142,247,0.18);color:var(--text);font-family:ui-monospace,Consolas,monospace;font-size:0.75rem;font-weight:600">${escapeHtml(c.externalId)}</span>` : '<span style="color:var(--muted);font-size:0.75rem">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
-          <span style="color:#a78bfa;margin-right:0.3rem">👥</span><span onclick="openCrewHistory(${c.id})" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">${c.name}</span>
+          <span style="color:#a78bfa;margin-right:0.3rem">👥</span><span onclick="openCrewHistory(${c.id})" style="cursor:pointer">${c.name}</span>
         </td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;font-weight:600;color:var(--text);white-space:nowrap">${c.nickname ? escapeHtml(c.nickname) : '<span style="color:var(--muted)">—</span>'}</td>
-        <td style="padding:0.7rem 1rem;color:#a78bfa;font-weight:600;font-size:0.85rem">${c.managerName ? '👔 ' + c.managerName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;color:#f5a623;font-weight:600;font-size:0.85rem">${c.leaderName ? '🦺 ' + c.leaderName : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem">${stagesHtml}</td>
         <td style="padding:0.7rem 1rem">${housesHtml}</td>
@@ -7668,7 +7726,7 @@
                 <th data-i18n="colExternalId" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colExternalId')}</th>
                 <th data-i18n="colCrew" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrew')}</th>
                 <th data-i18n="colNickname" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colNickname')}</th>
-                <th data-i18n="colManager" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colManager')}</th>
+
                 <th data-i18n="colLeader" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLeader')}</th>
                 <th data-i18n="colStage" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
                 <th data-i18n="colHouses" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouses')}</th>
@@ -8732,6 +8790,8 @@
           document.getElementById('wEmail').value    = w.email    || '';
           document.getElementById('wLat').value      = w.lat      || '';
           document.getElementById('wLng').value      = w.lng      || '';
+          const isUrl = /^https?:\/\//i.test(w.location || '');
+          document.getElementById('wMapsLink').value = isUrl ? (w.location || '') : '';
           _workerStages = (w.stageOrders || []).map(Number);
           _fillWorkerStaffFields(w);
         }
@@ -8744,6 +8804,7 @@
       document.getElementById('wEmail').value = '';
       document.getElementById('wLat').value = '';
       document.getElementById('wLng').value = '';
+      document.getElementById('wMapsLink').value = '';
       _workerStages = [];
       _fillWorkerStaffFields({});
     }
@@ -8757,16 +8818,19 @@
     const status = document.getElementById('wLocStatus');
     const areaDiv = document.getElementById('wLocArea');
     if (!isNaN(lat) && !isNaN(lng)) {
-      document.getElementById('wLocation').value = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+      const locVal = document.getElementById('wLocation').value;
+      const locIsUrl = /^https?:\/\//i.test(locVal);
+      if (!locIsUrl) document.getElementById('wLocation').value = `${lat.toFixed(6)},${lng.toFixed(6)}`;
       btn.style.background = 'rgba(62,207,110,0.08)'; btn.style.borderColor = '#3ecf6e'; btn.style.color = '#3ecf6e';
       btn.textContent = `🗺 ✓ ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-      if (status) { status.style.display = 'block'; status.textContent = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`; }
+      if (status) status.style.display = 'none';
       if (areaDiv) {
-        areaDiv.style.display = 'block';
-        areaDiv.textContent = t('workerGettingArea');
-        const area = await reverseGeocode(lat, lng);
-        areaDiv.textContent = area ? `📍 ${area}` : `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        document.getElementById('wLocation').value = area || `${lat.toFixed(6)},${lng.toFixed(6)}`;
+        areaDiv.style.display = 'none';
+        areaDiv.textContent = '';
+        reverseGeocode(lat, lng).then(area => {
+          if (area) { areaDiv.textContent = `📍 ${area}`; areaDiv.style.display = 'block'; }
+          if (!locIsUrl) document.getElementById('wLocation').value = area || `${lat.toFixed(6)},${lng.toFixed(6)}`;
+        }).catch(() => {});
       }
     } else {
       btn.style.cssText = 'display:flex;align-items:center;justify-content:center;padding:0.65rem 0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;width:100%';
@@ -8888,13 +8952,15 @@
   async function saveWorker() {
     const name     = document.getElementById('wName').value.trim();
     const role     = document.getElementById('wRole').value;
-    const location = document.getElementById('wLocation').value.trim();
+    const mapsLink = document.getElementById('wMapsLink').value.trim();
+    const location = document.getElementById('wLocation').value.trim() || mapsLink;
     const lat      = document.getElementById('wLat').value  || null;
     const lng      = document.getElementById('wLng').value  || null;
     if (!name) { document.getElementById('workerModalErr').textContent = 'Name is required.'; return; }
     const phone = document.getElementById('wPhone').value.trim() || null;
     const email = document.getElementById('wEmail').value.trim() || null;
-    const body = { name, role, location, phone, email,
+    const externalId = document.getElementById('wExtId').value.trim() || null;
+    const body = { name, role, location, phone, email, externalId,
                    ..._readWorkerStaffFields(),
                    stageOrders: _workerStages.slice(),
                    lat: lat ? parseFloat(lat) : null, lng: lng ? parseFloat(lng) : null };
@@ -9861,8 +9927,10 @@
       </div>` : `<div style="color:var(--muted);font-size:0.85rem;padding:1rem 0">${t('wjNoHistory')}</div>`;
 
     el.innerHTML = `
-      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
+      <div style="margin-bottom:0.5rem">
         <button onclick="showView('${_wjPrevView}')" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.35rem 0.75rem;cursor:pointer;color:var(--text);font-size:0.85rem">${t('wjBack')}</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
         ${photoHtml}
         <div style="flex:1;min-width:200px">
           <div style="font-size:1.2rem;font-weight:700;color:var(--text)">${roleIcon} ${data.workerName}</div>
@@ -10533,14 +10601,13 @@
         ? h.crews.map(c => `<div style="font-size:0.78rem;color:#a78bfa;font-weight:600">👥 ${c.name}</div>`).join('')
         : '<span style="color:var(--muted)">—</span>';
       return `<tr data-name="${(h.name||'').toLowerCase()}" data-extid="${escapeHtml((h.external_id||'').toLowerCase())}" data-location="${(h.address||'').toLowerCase()}" data-scaffold="${h.scaffold_status||'NONE'}" data-hascrew="${h.crews&&h.crews.length?'1':'0'}" data-hasphase="${h.current_phase?'1':'0'}" style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='rgba(79,142,247,.05)'" onmouseout="this.style.background=''">
+        <td style="padding:0.7rem 1rem;white-space:nowrap">${h.external_id ? `<span style="display:inline-block;padding:0.08rem 0.4rem;border-radius:5px;background:rgba(79,142,247,0.18);color:var(--text);font-family:ui-monospace,Consolas,monospace;font-size:0.75rem;font-weight:600">${escapeHtml(h.external_id)}</span>` : '<span style="color:var(--muted);font-size:0.75rem">—</span>'}</td>
         <td style="padding:0.7rem 1rem;font-weight:700;color:var(--text);white-space:nowrap">
-          <span onclick="openHouseDetail(${h.id})" style="cursor:pointer;color:#4f8ef7;text-decoration:underline;text-underline-offset:3px">🏠 ${h.name}</span>
-          <span style="font-size:0.7rem;color:var(--muted);margin-left:0.3rem">#${h.id}</span>
+          <span onclick="openHouseDetail(${h.id})" style="cursor:pointer;color:var(--text)">🏠 ${h.name}</span>
         </td>
-        <td style="padding:0.7rem 1rem;font-size:0.82rem;font-family:ui-monospace,monospace;color:var(--text);white-space:nowrap">${h.external_id ? escapeHtml(h.external_id) : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem">${stageHtml}</td>
         <td style="padding:0.7rem 1rem">${crewsHtml}</td>
-        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">📍 ${h.address || '—'}${h.location ? ` <a href="${h.location}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}${h.google_doc_url ? ` <a href="${h.google_doc_url}" target="_blank" rel="noopener" title="Google Doc" style="text-decoration:none">📄</a>` : ''}</td>
+        <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--muted)">${(() => { const mapUrl = h.location || (h.lat && h.lng ? `https://www.google.com/maps/@${h.lat},${h.lng},17z` : null); return `📍 ${h.address || '—'}${mapUrl ? ` <a href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener" title="${t('openInMaps')}" style="text-decoration:none">🗺</a>` : ''}`; })()}</td>
         <td style="padding:0.7rem 1rem;font-size:0.85rem;color:var(--text)">${h.start_date ? '📅 ' + h.start_date : '<span style="color:var(--muted)">—</span>'}</td>
         <td style="padding:0.7rem 1rem;white-space:nowrap;position:relative" class="admin-only">${actionsHtml}</td>
       </tr>`;
@@ -10551,8 +10618,8 @@
           <table style="width:100%;border-collapse:collapse;background:var(--card);min-width:600px">
             <thead>
               <tr style="background:var(--surface);border-bottom:2px solid var(--border)">
-                <th data-i18n="colHouse" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
                 <th data-i18n="colExternalId" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colExternalId')}</th>
+                <th data-i18n="colHouse" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colHouse')}</th>
                 <th data-i18n="colStage" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colStage')}</th>
                 <th data-i18n="colCrews" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colCrews')}</th>
                 <th data-i18n="colLocation" style="padding:0.6rem 1rem;text-align:left;font-size:0.7rem;color:#9aa3be;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">${t('colLocation')}</th>
@@ -11183,10 +11250,86 @@
   // ── HOUSE CRUD ───────────────────────────────────────────────────────────────
   let _editingHouseId = null;
 
-  async function houseCoordBlur() {
+  function _setRefreshActive(activeId) {
+    const ids = ['mLocationRefreshBtn', 'mCoordRefreshBtn'];
+    ids.forEach(id => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      const active = id === activeId;
+      btn.style.color = active ? '#22c55e' : '';
+      btn.style.borderColor = active ? '#22c55e' : '';
+    });
+  }
+
+  function _extractLatLng(url) {
+    return url.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/) ||
+           url.match(/\/search\/(-?\d+\.\d+),\s*[+]?(-?\d+\.\d+)/) ||
+           url.match(/[?&]q=(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+  }
+  async function _resolveMapsLink() {
+    const url = document.getElementById('wMapsLink').value.trim();
+    if (!url) return;
+    try {
+      let m = _extractLatLng(url);
+      if (!m) {
+        const res = await apiFetch('/api/resolve-url?url=' + encodeURIComponent(url));
+        if (!res.ok) return;
+        const resolved = await res.json();
+        m = _extractLatLng(resolved.url || '');
+      }
+      if (!m) return;
+      const lat = parseFloat(m[1]).toFixed(6);
+      const lng = parseFloat(m[2]).toFixed(6);
+      document.getElementById('wLat').value = lat;
+      document.getElementById('wLng').value = lng;
+      document.getElementById('wLocation').value = url;
+      const btn = document.getElementById('wMapPickBtn');
+      if (btn) { btn.style.background = 'rgba(62,207,110,0.08)'; btn.style.borderColor = '#3ecf6e'; btn.style.color = '#3ecf6e'; btn.textContent = `🗺 ✓ ${parseFloat(lat).toFixed(5)}, ${parseFloat(lng).toFixed(5)}`; }
+      const locArea = document.getElementById('wLocArea');
+      try {
+        const rg = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: { 'Accept-Language': 'en' } });
+        const rd = await rg.json();
+        const a = rd.address || {};
+        const parts = [a.city || a.town || a.village || a.hamlet || a.suburb || a.municipality, a.state || a.county].filter(Boolean);
+        if (locArea) { if (parts.length) { locArea.textContent = '📍 ' + parts.join(', '); locArea.style.display = ''; } else { locArea.style.display = 'none'; } }
+      } catch(_) { if (locArea) locArea.style.display = 'none'; }
+    } catch(e) { console.error('_resolveMapsLink error:', e); }
+  }
+
+  let _houseLocationResolving = false;
+  async function houseLocationBlur(force = false) {
+    const url = document.getElementById('mLocation').value.trim();
+    if (!url || (!force && _houseLocationResolving)) return;
+    _houseLocationResolving = true;
+    _setRefreshActive('mLocationRefreshBtn');
+    const latEl = document.getElementById('mLat');
+    const lngEl = document.getElementById('mLng');
+    const addrEl = document.getElementById('mAddress');
+    if (addrEl) addrEl.placeholder = '…';
+    try {
+      let m = _extractLatLng(url);
+      if (!m) {
+        const res = await apiFetch('/api/resolve-url?url=' + encodeURIComponent(url));
+        if (!res.ok) return;
+        const resolved = await res.json();
+        m = _extractLatLng(resolved.url || '');
+      }
+      if (!m) return;
+      latEl.value = parseFloat(m[1]).toFixed(6);
+      lngEl.value = parseFloat(m[2]).toFixed(6);
+      await houseCoordBlur(false);
+    } catch(e) { console.error('houseLocationBlur error:', e); }
+    finally {
+      _houseLocationResolving = false;
+      if (addrEl) addrEl.placeholder = t('phCityRegion');
+    }
+  }
+
+  async function houseCoordBlur(markActive = true) {
     const lat = parseFloat(document.getElementById('mLat').value);
     const lng = parseFloat(document.getElementById('mLng').value);
     if (isNaN(lat) || isNaN(lng)) return;
+    if (markActive) _setRefreshActive('mCoordRefreshBtn');
     // Reverse geocoding yields an address, so it fills mAddress — mLocation is the Maps link now.
     const locEl = document.getElementById('mAddress');
     locEl.placeholder = '…';
@@ -11194,7 +11337,7 @@
       const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: { 'Accept-Language': currentLang === 'bg' ? 'bg,en' : 'en' } });
       const data = await res.json();
       const a    = data.address || {};
-      const parts = [a.city || a.town || a.village || a.municipality, a.state || a.county, a.country].filter(Boolean);
+      const parts = [a.city || a.town || a.village || a.hamlet || a.suburb || a.municipality, a.state || a.county, a.country].filter(Boolean);
       if (parts.length) locEl.value = parts.join(', ');
     } catch(_) {}
     locEl.placeholder = t('phCityRegion');
@@ -11257,6 +11400,7 @@
   function closeHouseModal() {
     document.getElementById('houseModal').classList.remove('open');
     _editingHouseId = null;
+    _setRefreshActive(null);
   }
 
   async function saveHouse() {
@@ -11287,7 +11431,7 @@
     const google_doc_url = document.getElementById('mGoogleDocUrl').value.trim() || null;
     // Sent as "" when blank: the backend reads null as untouched and "" as clear.
     const external_id = document.getElementById('mExternalId').value.trim();
-    const body = { name, address, location: location || null, lat: lat || null, lng: lng || null, start_date, current_phase, google_doc_url, external_id };
+    const body = { name, address, location, lat: lat || null, lng: lng || null, start_date, current_phase, google_doc_url, external_id };
     // Sent as "" when blank, like external_id: null = untouched, "" = clear.
     for (const [id, f] of HOUSE_MASTER_FIELDS) body[f] = document.getElementById(id).value.trim();
     const url    = _editingHouseId ? `/api/houses/${_editingHouseId}` : '/api/houses';

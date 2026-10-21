@@ -164,7 +164,8 @@ public class WorkerController {
                     .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new)));
             }
         }
-        // Staff-sheet fields (Flyway V21). external_id is owned by the import and not editable here.
+        // Staff-sheet fields (Flyway V21).
+        if (body.containsKey("externalId")) { String eid = blankToNull(body.get("externalId")); if (eid != null) w.setExternalId(eid); }
         if (body.containsKey("employmentType")) {
             Object t = body.get("employmentType");
             w.setEmploymentType(t == null || t.toString().isBlank() ? null
