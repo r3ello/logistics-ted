@@ -37,7 +37,7 @@ class AttendanceExportersTest {
 
     private static SessionView sv(int id, int workerId, String worker, int houseId, String house, String extId,
                                   LocalDate date, String in, String out, State state, long minutes) {
-        return new SessionView(id, workerId, worker, 1, "Crew A", houseId, house, extId,
+        return new SessionView(id, workerId, worker, null, 1, "Crew A", null, houseId, house, extId,
             extId != null && !extId.isBlank() ? extId + " " + house : house, date,
             ZonedDateTime.of(date, LocalTime.parse(in), SOFIA),
             out != null ? ZonedDateTime.of(date, LocalTime.parse(out), SOFIA) : null,

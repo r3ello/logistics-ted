@@ -49,8 +49,8 @@ public class AttendanceQueryService {
     public enum State { CLOSED, IN_PROGRESS, MISSING_CHECKOUT }
 
     public record SessionView(int sessionId,
-                              int workerId, String workerName,
-                              Integer crewId, String crewName,
+                              int workerId, String workerName, String workerExternalId,
+                              Integer crewId, String crewName, String crewExternalId,
                               int houseId, String houseName, String houseExternalId, String houseLabel,
                               LocalDate date,
                               ZonedDateTime checkedInAt,
@@ -207,8 +207,10 @@ public class AttendanceQueryService {
         String extId = s.getHouse().getExternalId();
         String hName = s.getHouse().getName();
         String houseLabel = (extId != null && !extId.isBlank()) ? extId + " " + hName : hName;
+        Crew crew = w.getCrew();
         return new SessionView(s.getId(),
-                w.getId(), w.getName(), crewId, crewNameOf(w),
+                w.getId(), w.getName(), w.getExternalId(),
+                crewId, crewNameOf(w), crew != null ? crew.getExternalId() : null,
                 s.getHouse().getId(), hName, extId, houseLabel,
                 s.getSessionDate(), in, out, state, minutes,
                 stageOrder, stageName, stageNameEn);

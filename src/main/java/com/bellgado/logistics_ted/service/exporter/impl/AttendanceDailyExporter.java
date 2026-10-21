@@ -42,8 +42,8 @@ public class AttendanceDailyExporter implements EntityExporter<AttendanceDailyEx
 
     /** One worker on one day. */
     public record DailyRow(LocalDate date,
-                           int workerId, String workerName,
-                           Integer crewId, String crewName,
+                           int workerId, String workerName, String workerExternalId,
+                           Integer crewId, String crewName, String crewExternalId,
                            int sessions,
                            List<String> houseNames, List<String> houseExternalIds, List<String> houseLabels,
                            ZonedDateTime firstCheckIn,
@@ -57,8 +57,10 @@ public class AttendanceDailyExporter implements EntityExporter<AttendanceDailyEx
         ExportColumn.of("date", DATE, "Work day (Europe/Sofia).", DailyRow::date),
         ExportColumn.of("worker_id", INTEGER, "Internal worker id.", DailyRow::workerId),
         ExportColumn.of("worker_name", TEXT, "Worker's name.", DailyRow::workerName),
+        ExportColumn.optional("worker_external_id", TEXT, "Worker's External ID.", DailyRow::workerExternalId),
         ExportColumn.optional("crew_id", INTEGER, "Internal id of the worker's current crew.", DailyRow::crewId),
         ExportColumn.of("crew_name", TEXT, "Worker's current crew.", DailyRow::crewName),
+        ExportColumn.optional("crew_external_id", TEXT, "Crew's External ID.", DailyRow::crewExternalId),
         ExportColumn.of("sessions", INTEGER, "Number of check-ins that day.", DailyRow::sessions),
         ExportColumn.of("houses", PIPE_SET, "Houses worked at, in check-in order, pipe-separated.",
             DailyRow::houseNames),
@@ -153,8 +155,8 @@ public class AttendanceDailyExporter implements EntityExporter<AttendanceDailyEx
                 inProgress |= s.state() == State.IN_PROGRESS;
             }
 
-            rows.add(new DailyRow(first.date(), first.workerId(), first.workerName(),
-                first.crewId(), first.crewName(), day.size(),
+            rows.add(new DailyRow(first.date(), first.workerId(), first.workerName(), first.workerExternalId(),
+                first.crewId(), first.crewName(), first.crewExternalId(), day.size(),
                 List.copyOf(houses), List.copyOf(externalIds), List.copyOf(labels),
                 first.checkedInAt(), anyOpen ? null : lastOut,
                 minutes, missing, inProgress,

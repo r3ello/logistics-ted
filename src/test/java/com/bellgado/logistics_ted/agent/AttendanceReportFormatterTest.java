@@ -21,7 +21,7 @@ class AttendanceReportFormatterTest {
 
     private static SessionView sv(int id, int workerId, String worker, String crew, int houseId, String house,
                                   LocalDate date, String in, String out, State state, long minutes) {
-        return new SessionView(id, workerId, worker, crew != null ? 1 : null, crew, houseId, house, null, house, date,
+        return new SessionView(id, workerId, worker, null, crew != null ? 1 : null, crew, null, houseId, house, null, house, date,
                 ZonedDateTime.of(date, java.time.LocalTime.parse(in), SOFIA),
                 out != null ? ZonedDateTime.of(date, java.time.LocalTime.parse(out), SOFIA) : null,
                 state, minutes, null, null, null);
