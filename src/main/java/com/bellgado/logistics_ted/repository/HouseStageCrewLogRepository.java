@@ -69,6 +69,19 @@ public interface HouseStageCrewLogRepository extends JpaRepository<HouseStageCre
         """, nativeQuery = true)
     List<Object[]> avgDaysPerStage();
 
+    /**
+     * All IN_PROGRESS log entries whose start_date is on or before {@code toDate} — used to
+     * resolve which stage a crew was working on at a given session date.
+     */
+    @Query(value = """
+        SELECT l.* FROM house_stage_crew_log l
+        WHERE l.status = 'IN_PROGRESS'
+          AND l.start_date IS NOT NULL
+          AND l.start_date <= CAST(:toDate AS date)
+        ORDER BY l.crew_id, l.house_id, l.start_date ASC
+        """, nativeQuery = true)
+    List<HouseStageCrewLog> findInProgressUpTo(@Param("toDate") String toDate);
+
     /** Latest log entry for a given house stage and crew — used to detect duplicate writes. */
     @Query(value = """
         SELECT l.* FROM house_stage_crew_log l

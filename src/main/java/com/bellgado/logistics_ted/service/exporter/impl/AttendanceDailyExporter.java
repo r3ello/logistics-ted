@@ -42,28 +42,34 @@ public class AttendanceDailyExporter implements EntityExporter<AttendanceDailyEx
 
     /** One worker on one day. */
     public record DailyRow(LocalDate date,
-                           int workerId, String workerName,
-                           Integer crewId, String crewName,
+                           int workerId, String workerName, String workerExternalId,
+                           Integer crewId, String crewName, String crewExternalId,
                            int sessions,
-                           List<String> houseNames, List<String> houseExternalIds,
+                           List<String> houseNames, List<String> houseExternalIds, List<String> houseLabels,
                            ZonedDateTime firstCheckIn,
                            ZonedDateTime lastCheckOut,
                            long countedMinutes,
                            boolean missingCheckout,
-                           boolean inProgress) {}
+                           boolean inProgress,
+                           Integer stageOrder, String stageName, String stageNameEn) {}
 
     private static final List<ExportColumn<DailyRow>> COLUMNS = List.of(
         ExportColumn.of("date", DATE, "Work day (Europe/Sofia).", DailyRow::date),
         ExportColumn.of("worker_id", INTEGER, "Internal worker id.", DailyRow::workerId),
         ExportColumn.of("worker_name", TEXT, "Worker's name.", DailyRow::workerName),
+        ExportColumn.optional("worker_external_id", TEXT, "Worker's External ID.", DailyRow::workerExternalId),
         ExportColumn.optional("crew_id", INTEGER, "Internal id of the worker's current crew.", DailyRow::crewId),
         ExportColumn.of("crew_name", TEXT, "Worker's current crew.", DailyRow::crewName),
+        ExportColumn.optional("crew_external_id", TEXT, "Crew's External ID.", DailyRow::crewExternalId),
         ExportColumn.of("sessions", INTEGER, "Number of check-ins that day.", DailyRow::sessions),
         ExportColumn.of("houses", PIPE_SET, "Houses worked at, in check-in order, pipe-separated.",
             DailyRow::houseNames),
         ExportColumn.optional("house_external_ids", PIPE_SET,
             "External IDs of those houses, pipe-separated (houses without one are skipped).",
             DailyRow::houseExternalIds),
+        ExportColumn.optional("house_labels", PIPE_SET,
+            "External ID and house name combined, pipe-separated, e.g. TH-2026-034 Марково Златко.",
+            DailyRow::houseLabels),
         ExportColumn.of("first_check_in", TIMESTAMP, "Earliest check-in.", DailyRow::firstCheckIn),
         ExportColumn.of("last_check_out", TIMESTAMP,
             "Latest check-out; empty if any session that day is still open.", DailyRow::lastCheckOut),
@@ -75,7 +81,11 @@ public class AttendanceDailyExporter implements EntityExporter<AttendanceDailyEx
             "True if a session that day was never checked out (it counts 0 minutes).",
             DailyRow::missingCheckout),
         ExportColumn.optional("in_progress", BOOLEAN, "True if the worker is checked in right now.",
-            DailyRow::inProgress));
+            DailyRow::inProgress),
+        ExportColumn.optional("stage_name", TEXT, "Name of the stage the crew was working on (from first check-in).",
+            DailyRow::stageName),
+        ExportColumn.optional("stage_name_en", TEXT, "English name of the stage the crew was working on (from first check-in).",
+            DailyRow::stageNameEn));
 
     private final AttendanceQueryService attendance;
     private final HouseRepository houses;
@@ -130,12 +140,14 @@ public class AttendanceDailyExporter implements EntityExporter<AttendanceDailyEx
 
             Set<String> houses = new LinkedHashSet<>();
             Set<String> externalIds = new LinkedHashSet<>();
+            Set<String> labels = new LinkedHashSet<>();
             long minutes = 0;
             boolean anyOpen = false, missing = false, inProgress = false;
             ZonedDateTime lastOut = null;
             for (SessionView s : day) {
                 if (s.houseName() != null) houses.add(s.houseName());
                 if (s.houseExternalId() != null && !s.houseExternalId().isBlank()) externalIds.add(s.houseExternalId());
+                if (s.houseLabel() != null) labels.add(s.houseLabel());
                 minutes += s.countedMinutes();
                 if (s.checkedOutAt() == null) anyOpen = true;
                 else if (lastOut == null || s.checkedOutAt().isAfter(lastOut)) lastOut = s.checkedOutAt();
@@ -143,11 +155,12 @@ public class AttendanceDailyExporter implements EntityExporter<AttendanceDailyEx
                 inProgress |= s.state() == State.IN_PROGRESS;
             }
 
-            rows.add(new DailyRow(first.date(), first.workerId(), first.workerName(),
-                first.crewId(), first.crewName(), day.size(),
-                List.copyOf(houses), List.copyOf(externalIds),
+            rows.add(new DailyRow(first.date(), first.workerId(), first.workerName(), first.workerExternalId(),
+                first.crewId(), first.crewName(), first.crewExternalId(), day.size(),
+                List.copyOf(houses), List.copyOf(externalIds), List.copyOf(labels),
                 first.checkedInAt(), anyOpen ? null : lastOut,
-                minutes, missing, inProgress));
+                minutes, missing, inProgress,
+                first.stageOrder(), first.stageName(), first.stageNameEn()));
         }
         rows.sort(Comparator.comparing(DailyRow::date)
             .thenComparing(DailyRow::workerName, Comparator.nullsLast(String::compareTo))

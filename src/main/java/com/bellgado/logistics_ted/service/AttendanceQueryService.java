@@ -1,8 +1,11 @@
 package com.bellgado.logistics_ted.service;
 
 import com.bellgado.logistics_ted.domain.Crew;
+import com.bellgado.logistics_ted.domain.HouseStageCrewLog;
 import com.bellgado.logistics_ted.domain.WorkSession;
 import com.bellgado.logistics_ted.domain.Worker;
+import com.bellgado.logistics_ted.repository.HouseStageCrewLogRepository;
+import com.bellgado.logistics_ted.repository.HouseStageRepository;
 import com.bellgado.logistics_ted.repository.WorkSessionRepository;
 import com.bellgado.logistics_ted.repository.WorkerRepository;
 import java.time.Clock;
@@ -12,8 +15,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,35 +49,43 @@ public class AttendanceQueryService {
     public enum State { CLOSED, IN_PROGRESS, MISSING_CHECKOUT }
 
     public record SessionView(int sessionId,
-                              int workerId, String workerName,
-                              Integer crewId, String crewName,
-                              int houseId, String houseName, String houseExternalId,
+                              int workerId, String workerName, String workerExternalId,
+                              Integer crewId, String crewName, String crewExternalId,
+                              int houseId, String houseName, String houseExternalId, String houseLabel,
                               LocalDate date,
                               ZonedDateTime checkedInAt,
                               ZonedDateTime checkedOutAt,
                               State state,
-                              long countedMinutes) {}
+                              long countedMinutes,
+                              Integer stageOrder, String stageName, String stageNameEn) {}
 
     public record WorkerRef(int id, String name, String role, Integer crewId, String crewName) {}
 
     private final WorkSessionRepository sessions;
     private final WorkerRepository workers;
+    private final HouseStageCrewLogRepository stageLogs;
+    private final HouseStageRepository houseStages;
     private final ZoneId zone;
     private final Clock clock;
 
     @Autowired
     public AttendanceQueryService(WorkSessionRepository sessions,
                                   WorkerRepository workers,
+                                  HouseStageCrewLogRepository stageLogs,
+                                  HouseStageRepository houseStages,
                                   @Value("${app.timezone:Europe/Sofia}") String timezone) {
-        this(sessions, workers, ZoneId.of(timezone), Clock.systemUTC());
+        this(sessions, workers, stageLogs, houseStages, ZoneId.of(timezone), Clock.systemUTC());
     }
 
     AttendanceQueryService(WorkSessionRepository sessions, WorkerRepository workers,
+                           HouseStageCrewLogRepository stageLogs, HouseStageRepository houseStages,
                            ZoneId zone, Clock clock) {
-        this.sessions = sessions;
-        this.workers = workers;
-        this.zone = zone;
-        this.clock = clock;
+        this.sessions    = sessions;
+        this.workers     = workers;
+        this.stageLogs   = stageLogs;
+        this.houseStages = houseStages;
+        this.zone        = zone;
+        this.clock       = clock;
     }
 
     public ZoneId zone() {
@@ -93,11 +106,24 @@ public class AttendanceQueryService {
                                              Integer workerId, Integer houseId, Integer crewId) {
         validateRange(from, to);
         ZonedDateTime now = ZonedDateTime.now(clock.withZone(zone));
+        // Pre-load IN_PROGRESS log entries for historical stage lookup (key: crewId|houseId → list sorted by start_date ASC).
+        Map<String, List<HouseStageCrewLog>> stageMap = new HashMap<>();
+        for (HouseStageCrewLog l : stageLogs.findInProgressUpTo(to.toString())) {
+            stageMap.computeIfAbsent(l.getCrewId() + "|" + l.getHouseId(), k -> new java.util.ArrayList<>()).add(l);
+        }
+        // Fallback: current ASSIGNED/IN_PROGRESS stages from house_stage for crews with no log entry.
+        // Key: crewId|houseId → [stageOrder, stageName, stageNameEn]
+        Map<String, Object[]> stageFallback = new HashMap<>();
+        for (Object[] row : houseStages.findActiveStagesForAllCrews()) {
+            if (row[0] == null || row[1] == null) continue;
+            String key = ((Number) row[0]).intValue() + "|" + ((Number) row[1]).intValue();
+            stageFallback.putIfAbsent(key, row); // first row wins (lowest stage_order)
+        }
         return sessions.findAllInRange(from, to).stream()
                 .filter(s -> workerId == null || Objects.equals(s.getWorker().getId(), workerId))
                 .filter(s -> houseId == null || Objects.equals(s.getHouse().getId(), houseId))
                 .filter(s -> crewId == null || Objects.equals(crewIdOf(s.getWorker()), crewId))
-                .map(s -> toView(s, now))
+                .map(s -> toView(s, now, stageMap, stageFallback))
                 .toList();
     }
 
@@ -105,7 +131,7 @@ public class AttendanceQueryService {
     @Transactional(readOnly = true)
     public List<SessionView> openSessions() {
         ZonedDateTime now = ZonedDateTime.now(clock.withZone(zone));
-        return sessions.findAllOpen().stream().map(s -> toView(s, now)).toList();
+        return sessions.findAllOpen().stream().map(s -> toView(s, now, Map.of(), Map.of())).toList();
     }
 
     /**
@@ -131,7 +157,8 @@ public class AttendanceQueryService {
                 .toList();
     }
 
-    SessionView toView(WorkSession s, ZonedDateTime now) {
+    SessionView toView(WorkSession s, ZonedDateTime now, Map<String, List<HouseStageCrewLog>> stageMap,
+                       Map<String, Object[]> stageFallback) {
         ZonedDateTime in = s.getCheckedInAt().atZoneSameInstant(zone);
         ZonedDateTime out = s.getCheckedOutAt() != null ? s.getCheckedOutAt().atZoneSameInstant(zone) : null;
         State state;
@@ -147,10 +174,46 @@ public class AttendanceQueryService {
             minutes = 0;
         }
         Worker w = s.getWorker();
+        Integer crewId = crewIdOf(w);
+
+        // Find the stage for this crew+house: prefer the most recent IN_PROGRESS log entry on or before
+        // the session date; fall back to the current ASSIGNED/IN_PROGRESS stage from house_stage.
+        Integer stageOrder = null; String stageName = null; String stageNameEn = null;
+        if (crewId != null) {
+            String key = crewId + "|" + s.getHouse().getId();
+            List<HouseStageCrewLog> entries = stageMap.get(key);
+            if (entries != null) {
+                HouseStageCrewLog match = null;
+                for (HouseStageCrewLog l : entries) {
+                    if (!l.getStartDate().isAfter(s.getSessionDate())) match = l;
+                    else break;
+                }
+                if (match != null) {
+                    stageOrder  = match.getStageOrder();
+                    stageName   = match.getStageName();
+                    stageNameEn = match.getStageNameEn();
+                }
+            }
+            if (stageName == null) {
+                Object[] row = stageFallback.get(key);
+                if (row != null) {
+                    stageOrder  = row[2] != null ? ((Number) row[2]).intValue() : null;
+                    stageName   = row[3] != null ? row[3].toString() : null;
+                    stageNameEn = row[4] != null ? row[4].toString() : null;
+                }
+            }
+        }
+
+        String extId = s.getHouse().getExternalId();
+        String hName = s.getHouse().getName();
+        String houseLabel = (extId != null && !extId.isBlank()) ? extId + " " + hName : hName;
+        Crew crew = w.getCrew();
         return new SessionView(s.getId(),
-                w.getId(), w.getName(), crewIdOf(w), crewNameOf(w),
-                s.getHouse().getId(), s.getHouse().getName(), s.getHouse().getExternalId(),
-                s.getSessionDate(), in, out, state, minutes);
+                w.getId(), w.getName(), w.getExternalId(),
+                crewId, crewNameOf(w), crew != null ? crew.getExternalId() : null,
+                s.getHouse().getId(), hName, extId, houseLabel,
+                s.getSessionDate(), in, out, state, minutes,
+                stageOrder, stageName, stageNameEn);
     }
 
     private static void validateRange(LocalDate from, LocalDate to) {
