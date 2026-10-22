@@ -4498,6 +4498,7 @@
     document.getElementById('pageTitle').textContent = t(`pageTitle_${name}`);
     document.getElementById('pageSub').textContent   = t(`pageSub_${name}`);
     if (!location.hash.startsWith('#' + name)) location.hash = name;
+    try { localStorage.setItem('lastView', name); } catch(_) {}
     closeNav();
 
     if (name === 'dashboard')   loadDashboard();
@@ -6222,6 +6223,7 @@
 
   function setDashMode(mode) {
     _dashMode = mode;
+    try { localStorage.setItem('lastDashMode', mode); } catch(_) {}
     buildChipBar([]); // clear chip bar; render functions rebuild it if their mode uses chips
     const modeColors = { houses:'#4f8ef7', workers:'#f5a623', scaffold:'#3ecf6e', crews:'#a78bfa', travelpay:'#a78bfa', orders:'#00c9b1', deliveries:'#f97316', dashWarehouses:'#38bdf8', dashSuppliers:'#fb7185', stages:'#e879f9', docs:'#f59e0b' };
     const darkText   = new Set(['scaffold']);
@@ -12910,8 +12912,14 @@
       _mcfgData = data;
       applyMenuConfig();
     }).catch(() => {});
-    showView('stagematrix');
-    setNavActive('navStageMatrix');
+    const _hashView = location.hash.replace('#', '');
+    const _lastView = localStorage.getItem('lastView');
+    const _startView = (VALID_VIEWS.includes(_hashView) ? _hashView : null) || (VALID_VIEWS.includes(_lastView) ? _lastView : null) || 'stagematrix';
+    if (_startView === 'dashboard') {
+      const savedMode = localStorage.getItem('lastDashMode');
+      if (savedMode) _dashMode = savedMode;
+    }
+    showView(_startView);
     loadMaterialFields().then(applyPendingMapPin);
 
     document.addEventListener('visibilitychange', () => {
