@@ -145,7 +145,7 @@ async function doLogin() {
     currentWorkerId = data.workerId;
     if (data.token) _qaToken = data.token;
     document.getElementById('workerName').textContent = (data.role === 'qa_inspector' ? '🔍 ' : '👷 ') + data.workerName;
-    document.getElementById('workerRole').textContent = data.houseName ? '📍 ' + data.houseName : '';
+    document.getElementById('workerRole').textContent = '';
     document.getElementById('loginUser').value = '';
     document.getElementById('loginPass').value = '';
     msgEl.style.display = 'none';
